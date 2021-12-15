@@ -6,10 +6,25 @@
     height="200px"
     tile
     >
-      <v-toolbar dense>
-        <v-app-bar-nav-icon></v-app-bar-nav-icon>
-        <v-toolbar-title>Title</v-toolbar-title>
-        <v-icon>mdi-domain</v-icon>
+      <v-toolbar dense color="#5C6BC0">
+        <v-app-bar-nav-icon id="toolbar"></v-app-bar-nav-icon>
+        <v-toolbar-title id="toolbar">{{ Name }}</v-toolbar-title>
+        <v-btn
+          icon
+          id="toolbar"
+          @click="Direct('/')">
+          <v-icon>mdi-home</v-icon>
+        </v-btn>
+        <v-spacer/>
+        <v-toolbar-items>
+          <v-btn
+            id="toolbar"
+            depressed
+            color="#5C6BC0"
+            @click="Direct('login')">
+            login
+          </v-btn>
+        </v-toolbar-items>
       </v-toolbar>
     </v-card>
     <router-view/>
@@ -19,9 +34,19 @@
 <script>
 import Login from './components/Login'
 export default {
+  data () {
+    return {
+      Name: 'Fanfiction'
+    }
+  },
   name: 'App',
   components: {
     Login
+  },
+  methods: {
+    Direct: function (name) {
+      this.$router.push(name)
+    }
   }
 }
 </script>
@@ -33,5 +58,9 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+}
+
+#toolbar {
+  color: white
 }
 </style>
