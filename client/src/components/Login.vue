@@ -1,5 +1,6 @@
 <template>
-  <p>login</p>
+  <v-form>
+  </v-form>
 </template>
 
 <script>

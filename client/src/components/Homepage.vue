@@ -1,13 +1,5 @@
 <template>
   <div>
-    <p5>
-      this is the homepage
-    </p5>
-    <v-btn>
-      <v-icon>mdi-plus</v-icon>
-    </v-btn>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/login">Login</router-link>
   </div>
 </template>
 
