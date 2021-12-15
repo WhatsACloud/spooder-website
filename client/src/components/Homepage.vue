@@ -1,5 +1,5 @@
 <template>
-  <div class="hello">
+  <div>
     <p5>
       this is the homepage
     </p5>
