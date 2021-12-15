@@ -9,7 +9,7 @@
       <v-toolbar dense>
         <v-app-bar-nav-icon></v-app-bar-nav-icon>
         <v-toolbar-title>Title</v-toolbar-title>
-        <v-icon>mdi-home</v-icon>
+        <v-icon>mdi-domain</v-icon>
       </v-toolbar>
     </v-card>
     <router-view/>

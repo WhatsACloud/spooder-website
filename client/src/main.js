@@ -3,8 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import '@mdi/font/css/materialdesignicons.css'
-import 'material-design-icons-iconfont/dist/material-design-icons.css'
+import vuetify from '@/plugins/vuetify' // path to vuetify export
 
 Vue.config.productionTip = false
 
@@ -12,9 +11,7 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
+  vuetify,
   components: { App },
-  template: '<App/>',
-  icons: {
-    iconfont: 'mdi'
-  }
+  template: '<App/>'
 })
