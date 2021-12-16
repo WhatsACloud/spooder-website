@@ -11,6 +11,9 @@ const password_schema = Joi.object({
   Password: Joi.string()
     .pattern(new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$')),
   Repeat_password: Joi.ref('Password')
+    .messages({
+      
+    })
 })
 
 module.exports = async (user) => {
