@@ -3,14 +3,15 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const morgan = require('morgan')
 
-const loginService = require('../services/loginService')
+const routes = require('../routes/route')
 
 const app = express()
 app.use(morgan('combined'))
 app.use(bodyParser.json())
 app.use(cors())
 
-loginService(app)
-  .catch(console.error)
+for (const [key, value] of Object.entries(routes)) {
+  value(app)
+}
 
 app.listen(process.env.PORT || 8081)

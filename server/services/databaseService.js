@@ -1,6 +1,5 @@
 const { Sequelize, Model, DataTypes } = require("sequelize")
 const config = require('../config/config')
-console.log(config)
 const sequelize = new Sequelize(
   config.db.database,
   config.db.user,
@@ -9,18 +8,17 @@ const sequelize = new Sequelize(
 )
 const queryInterface = sequelize.getQueryInterface()
 
-const User = sequelize.define("User", userTable) // pls fix this
-
-queryInterface.createTable('User', userTable)
+const User = require('../models/user')(sequelize, DataTypes)
 
 //sequelize.sync({ force: true })
+sequelize.sync(config.db.options)
 
 module.exports = {
-  register (req) {
-    User.create({
+  async register (req) {
+    await User.create({
       username: req.body.Username,
       email: req.body.Email,
       password: req.body.Password
-    }).catch(console.error)
+    })
   }
 }
