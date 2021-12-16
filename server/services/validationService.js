@@ -1,3 +1,4 @@
+const { string } = require('joi')
 const Joi = require('joi')
 
 const password_schema = Joi.object({
@@ -5,14 +6,37 @@ const password_schema = Joi.object({
     .alphanum()
     .min(3)
     .max(30)
-    .required(),
-  Email: Joi.string()
-    .email(),
-  Password: Joi.string()
-    .pattern(new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$')),
-  Repeat_password: Joi.ref('Password')
+    .required()
     .messages({
-      
+      'string.alphanum': `Username should only contain letters and numbers'`,
+      'string.min': `Username should have a minimum of 3 characters`,
+      'string.max': `Username should have a maximum of 3 characters`,
+      'any.required': `Username is a required field`,
+      'string.empty': `Username is a required field`
+    }),
+  Email: Joi.string()
+    .email()
+    .required()
+    .messages({
+      'string.email': `Email is invalid`,
+      'any.required': `Email is a required field`,
+      'string.empty': `Email is a required field`
+    }),
+  Password: Joi.string()
+    .pattern(new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$'))
+    .required()
+    .messages({
+      'string.pattern.base': `A password should be at least 8 characters long and contain the following: 1 uppercase letter, 1 lowercase letter, 1 number ranging from 0-9, and a special character`,
+      'any.required': `Password is a required field`,
+      'string.empty': `Password is a required field`
+    }),
+  RepeatPassword: Joi.string()
+    .required()
+    .valid(Joi.ref('Password'))
+    .messages({
+      'any.only': `Repeat Password is incorrect`,
+      'any.required': `Repeat Password is a required field`,
+      'string.empty': `Repeat Password is a required field`
     })
 })
 
@@ -21,7 +45,9 @@ module.exports = async (user) => {
     const value = await password_schema.validateAsync(user)
     return true
   } catch (err) {
-    console.log(err)
-    return false
+    console.log(err.details[0])
+    if (!(err.details[0].message.contains('"'))) {
+      return err.details[0].message
+    }
   }
 }

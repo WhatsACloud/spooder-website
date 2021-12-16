@@ -10,7 +10,7 @@ const queryInterface = sequelize.getQueryInterface()
 
 const User = require('../models/user')(sequelize, DataTypes)
 
-//sequelize.sync({ force: true })
+sequelize.sync({ force: true })
 sequelize.sync(config.db.options)
 
 module.exports = {
