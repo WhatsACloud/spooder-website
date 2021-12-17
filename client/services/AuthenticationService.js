@@ -1,7 +1,12 @@
-import Api from '@/services/Api.js'
+import Api from './Api.js'
 
 export default {
   register (credentials) {
-    return Api().post('/login', credentials)
+    try {
+      return Api().post('/register', credentials)
+    } catch (err) {
+      console.log(err)
+      return err
+    }
   }
 }

@@ -32,7 +32,8 @@ module.exports = {
             res.status(400).send("An error has occured registering")
           }
         } else {
-          res.status(400).send(valid)
+          console.log(valid)
+          res.send(valid)
         }
       } catch (err) {
         res.status(400).send(err)

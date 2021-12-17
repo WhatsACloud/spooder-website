@@ -21,8 +21,8 @@
             id="toolbar"
             depressed
             color="#5C6BC0"
-            @click="Direct('login')">
-            login
+            @click="Direct('register')">
+            register
           </v-btn>
         </v-toolbar-items>
       </v-toolbar>
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import Login from './components/Login'
+import Register from './components/Register'
 export default {
   data () {
     return {
@@ -41,7 +41,7 @@ export default {
   },
   name: 'App',
   components: {
-    Login
+    Register
   },
   methods: {
     Direct: function (name) {
@@ -63,4 +63,5 @@ export default {
 #toolbar {
   color: white
 }
+
 </style>
