@@ -20,5 +20,11 @@ module.exports = {
       email: req.body.Email,
       password: req.body.Password
     })
+  },
+  async login (req) {
+    const user = await User.findOne({
+      where: {username: req.body.Username}
+    })
+    return user
   }
 }

@@ -63,10 +63,11 @@ export default {
         'Password': this.Password,
         'RepeatPassword': this.RepeatPassword
       })
-      if (result.data === true) {
+      if (result.data.result === true) {
+        this.error = ''
         // insert login thingy
       } else {
-        this.error = result.data
+        this.error = result.data.error
       }
     }
   }

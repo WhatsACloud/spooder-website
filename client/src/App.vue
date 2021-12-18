@@ -21,6 +21,13 @@
             id="toolbar"
             depressed
             color="#5C6BC0"
+            @click="Direct('login')">
+            login
+          </v-btn>
+          <v-btn
+            id="toolbar"
+            depressed
+            color="#5C6BC0"
             @click="Direct('register')">
             register
           </v-btn>

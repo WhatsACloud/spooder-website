@@ -15,7 +15,7 @@ module.exports = {
   async compare (password, hash) {
     try {
       const comparison = await bcrypt.compare(password, hash)
-      console.log(comparison)
+      // console.log(comparison)
       return comparison
     } catch (err) {
       console.log(err)
