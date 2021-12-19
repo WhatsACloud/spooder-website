@@ -21,6 +21,7 @@
             id="toolbar"
             depressed
             color="#5C6BC0"
+            v-if="!this.$store.state.isAuth"
             @click="Direct('login')">
             login
           </v-btn>
@@ -28,8 +29,17 @@
             id="toolbar"
             depressed
             color="#5C6BC0"
+            v-if="!this.$store.state.isAuth"
             @click="Direct('register')">
             register
+          </v-btn>
+          <v-btn
+            id="toolbar"
+            depressed
+            color="#5C6BC0"
+            v-if="this.$store.state.isAuth"
+            @click="logout()">
+            logout
           </v-btn>
         </v-toolbar-items>
       </v-toolbar>
@@ -53,6 +63,10 @@ export default {
   methods: {
     Direct: function (name) {
       this.$router.push(name)
+    },
+    logout: function () {
+      this.$store.commit('authenticate', {token: false})
+      document.cookie = 'token=; Expires=Thu, 01 Jan 1970 00:00:01 GMT'
     }
   }
 }

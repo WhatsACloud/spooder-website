@@ -22,7 +22,10 @@
       <v-col>
         <v-text-field
           label="Password"
-          v-model="Password">
+          v-model="Password"
+          :append-icon="value ? 'visibility' : 'visibility_off'"
+          @click:append="() => {value = !value}"
+          :type="value ? 'password' : 'text'">
         </v-text-field>
       </v-col>
       <p class="error">{{ error }}</p>
@@ -45,7 +48,8 @@ export default {
       Username: '',
       Email: '',
       Password: '',
-      error: ''
+      error: '',
+      value: Boolean
     }
   },
   methods: {
@@ -57,6 +61,7 @@ export default {
       })
       if (typeof result.data.result === 'string') {
         document.cookie = `token=${result.data.result}`
+        this.$store.commit('authenticate', {token: result.data.result})
       } else {
         this.error = result.data
       }

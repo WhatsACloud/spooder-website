@@ -22,13 +22,19 @@
       <v-col>
         <v-text-field
           label="Password"
-          v-model="Password">
+          v-model="Password"
+          :append-icon="passwordVisible ? 'visibility' : 'visibility_off'"
+          @click:append="() => {passwordVisible = !passwordVisible}"
+          :type="passwordVisible ? 'password' : 'text'">
         </v-text-field>
       </v-col>
       <v-col>
         <v-text-field
           label="Confirm Password"
-          v-model="RepeatPassword">
+          v-model="RepeatPassword"
+          :append-icon="confirmPasswordVisible ? 'visibility' : 'visibility_off'"
+          @click:append="() => {confirmPasswordVisible = !confirmPasswordVisible}"
+          :type="confirmPasswordVisible ? 'password' : 'text'">
         </v-text-field>
       </v-col>
       <p class="error">{{ error }}</p>
@@ -52,7 +58,9 @@ export default {
       Email: '',
       Password: '',
       RepeatPassword: '',
-      error: ''
+      error: '',
+      passwordVisible: Boolean,
+      confirmPasswordVisible: Boolean
     }
   },
   methods: {
