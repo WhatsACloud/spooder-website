@@ -21,7 +21,7 @@
             id="toolbar"
             depressed
             color="#5C6BC0"
-            v-if="!this.$store.state.isAuth"
+            v-if="!this.$store.getters.isLoggedIn"
             @click="Direct('login')">
             login
           </v-btn>
@@ -29,7 +29,7 @@
             id="toolbar"
             depressed
             color="#5C6BC0"
-            v-if="!this.$store.state.isAuth"
+            v-if="!this.$store.getters.isLoggedIn"
             @click="Direct('register')">
             register
           </v-btn>
@@ -37,7 +37,15 @@
             id="toolbar"
             depressed
             color="#5C6BC0"
-            v-if="this.$store.state.isAuth"
+            class="no-capital"
+            v-if="this.$store.getters.isLoggedIn">
+            {{ this.$store.getters.getUsername }}
+          </v-btn>
+          <v-btn
+            id="toolbar"
+            depressed
+            color="#5C6BC0"
+            v-if="this.$store.getters.isLoggedIn"
             @click="logout()">
             logout
           </v-btn>
@@ -53,7 +61,7 @@ import Register from './components/Register'
 export default {
   data () {
     return {
-      Name: 'Fanfiction'
+      Name: 'NewsThingy'
     }
   },
   name: 'App',
@@ -67,6 +75,7 @@ export default {
     logout: function () {
       this.$store.commit('authenticate', {token: false})
       document.cookie = 'token=; Expires=Thu, 01 Jan 1970 00:00:01 GMT'
+      document.cookie = 'username=; Expires=Thu, 01 Jan 1970 00:00:01 GMT'
     }
   }
 }
@@ -83,6 +92,10 @@ export default {
 
 #toolbar {
   color: white
+}
+
+.no-capital {
+  text-transform: unset !important;
 }
 
 </style>

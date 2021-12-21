@@ -1,9 +1,9 @@
 module.exports = (cookieName) => {
-  console.log('cookies', document.cookie)
+  if (!document.cookie) return false
   const cookies = document.cookie.split(';')
-  for (var i = 0; cookies.length; i++) {
-    if (cookies[i].split('=')[0] === cookieName) {
-      console.log(cookies[i].split('=')[1])
+  console.log(cookies)
+  for (var i = 0; i < cookies.length; i++) {
+    if (cookies[i].split('=')[0].replace(/\s/g, '') === cookieName) {
       return cookies[i].split('=')[1]
     }
   }

@@ -1,5 +1,10 @@
 <template>
   <div>
+    <v-card>
+      <v-btn>
+        I AM A BUTTON
+      </v-btn>
+    </v-card>
   </div>
 </template>
 

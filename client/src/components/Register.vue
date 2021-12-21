@@ -9,8 +9,7 @@
       <v-col>
         <v-text-field
           label="Username"
-          v-model="Username"
-          color="#F44336">
+          v-model="Username">
         </v-text-field>
       </v-col>
       <v-col>
@@ -73,7 +72,9 @@ export default {
       })
       if (result.data.result === true) {
         this.error = ''
-        // insert login thingy
+        document.cookie = `token=${result.data.result}`
+        this.$store.commit('authenticate', {token: result.data.result})
+        this.$router.push('/')
       } else {
         this.error = result.data.error
       }

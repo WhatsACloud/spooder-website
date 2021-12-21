@@ -9,6 +9,7 @@ const sequelize = new Sequelize(
 const queryInterface = sequelize.getQueryInterface()
 
 const User = require('../models/user')(sequelize, DataTypes)
+const Article = require('../models/article')(sequelize, DataTypes)
 
 //sequelize.sync({ force: true })
 sequelize.sync(config.db.options)
@@ -26,5 +27,12 @@ module.exports = {
       where: {username: req.body.Username}
     })
     return user
+  },
+  async createArticle (req) {
+    await Article.create({
+      title: req.body.title,
+      description: req.body.description,
+      text: req.body.text
+    })
   }
 }
