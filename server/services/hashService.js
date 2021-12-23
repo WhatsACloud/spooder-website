@@ -13,6 +13,8 @@ module.exports = {
     }
   },
   async compare (password, hash) {
+    if (!(typeof password === 'string') && !(typeof hash === 'string')) return false
+    console.log(typeof password, typeof hash)
     try {
       const comparison = await bcrypt.compare(password, hash)
       return comparison

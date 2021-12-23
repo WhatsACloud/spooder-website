@@ -4,6 +4,15 @@ module.exports = (sequelize, DataTypes) => {
   const Article = sequelize.define(
     'Article',
     {
+      userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        foreignKey: true,
+        references: {
+          model: 'User',
+          key: 'id'
+        }
+      },
       title: {
         type: DataTypes.STRING,
         allowNull: false
@@ -19,9 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   )
   Article.associate = (models) => {
-    // associations can be defined here
-    console.log(models)
-    this.belongsTo(User, {as: 'user'})
+    Article.belongsTo(models.User)
   }
   return Article
 }

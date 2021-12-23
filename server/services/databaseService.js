@@ -29,10 +29,11 @@ module.exports = {
     return user
   },
   async createArticle (req) {
-    await Article.create({
+    const article = await Article.create({
       title: req.body.title,
       description: req.body.description,
       text: req.body.text
     })
+    return article
   }
 }

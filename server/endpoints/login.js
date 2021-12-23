@@ -15,6 +15,7 @@ module.exports = (app) => {
     }
     try {
       const matches = await hashService.compare(req.body.Password, dbPassword)
+      console.log(matches, req.body.Password, dbPassword)
       switch (matches) {
         case true:
           const token = tokenService.generateAccessToken(req.body.Username)
