@@ -6,20 +6,20 @@ dotenv.config({
 })
 
 module.exports = {
-  generateAccessToken (Username) {
-    return jwt.sign({username: Username}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
+  generateAccessToken (id) {
+    return jwt.sign({userId: id}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
   },
-  authenticateToken (req, res) {
-    const authHeader = req.headers['authorization']
-    const token = authHeader && authHeader.split(' ')[1]
+  authenticateToken (req) {
+    const token = req.header('Authorization')
+    console.log(token)
 
-    if (token == null) return res.sendStatus(401)
-    jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
+    if (token === undefined) return false
+    console.log(process.env.TOKEN_SECRET)
+    const result = jwt.verify(token, process.env.TOKEN_SECRET, (err, data) => {
       console.log(err)
-  
-      if (err) return res.sendStatus(403)
-  
-      req.user = user
+      if (err) return false
+      return data
     })
+    return result
   }
 }

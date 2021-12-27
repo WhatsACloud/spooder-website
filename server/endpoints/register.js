@@ -1,6 +1,7 @@
 const validate = require('../services/validationService')
 const hashService = require('../services/hashService')
 const databaseService = require('../services/databaseService')
+const tokenService = require('../services/tokenService')
 
 module.exports = (app) => {
   app.post('/register', async (req, res) => {
@@ -13,8 +14,10 @@ module.exports = (app) => {
           if (typeof hash === 'string' || hash instanceof String) {
             req.body.Password = hash
             databaseService.register(req)
-              .then(() => {
-                const token = tokenService.generateAccessToken(req.body.Username)
+              .then(async () => {
+                const user = await databaseService.findUser(req.body.Username)
+                console.log(user)
+                const token = tokenService.generateAccessToken(user.dataValues.id)
                 res.send({result: true, token: token})
               })
               .catch((err) => {
@@ -23,13 +26,14 @@ module.exports = (app) => {
                   case "unique violation":
                     error = `${err.errors[0].value} already exists, please use a different one`
                 }
+                res.status(500).send(error)
               })
           } else {
             throw new Error(hash)
           }
         } catch (err) {
           console.log(err)
-          res.status(400).send("An error has occured registering")
+          res.status(500).send("An error has occured registering")
         }
       } else {
         console.log(valid)

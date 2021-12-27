@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         foreignKey: true,
         references: {
-          model: 'User',
+          model: 'Users',
           key: 'id'
         }
       },
@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   )
   Article.associate = (models) => {
-    Article.belongsTo(models.User)
+    Article.belongsTo(models.Users)
   }
   return Article
 }

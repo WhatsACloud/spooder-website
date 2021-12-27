@@ -34,7 +34,8 @@ const password_schema = Joi.object({
     .required()
     .valid(Joi.ref('Password'))
     .messages({
-      'any.only': `Please confirm password again`
+      'any.only': `Please confirm password again`,
+      'any.required': `Confirm password is a required field`
     })
 })
 
@@ -43,7 +44,6 @@ module.exports = async (user) => {
     const value = await password_schema.validateAsync(user)
     return true
   } catch (err) {
-    //console.log(err.details[0])
     if (!(err.details[0].message.includes('"'))) {
       return err.details[0].message
     } else {
