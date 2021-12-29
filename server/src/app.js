@@ -9,5 +9,6 @@ app.use(bodyParser.json())
 app.use(cors())
 
 require('../routes/route')(app)
+require('../database')
 
 app.listen(process.env.PORT || 8081)

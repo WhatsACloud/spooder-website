@@ -39,15 +39,21 @@ const password_schema = Joi.object({
     })
 })
 
-module.exports = async (user) => {
-  try {
-    const value = await password_schema.validateAsync(user)
-    return true
-  } catch (err) {
-    if (!(err.details[0].message.includes('"'))) {
-      return err.details[0].message
-    } else {
-      return "An error has occured registering"
+module.exports = {
+  validatePassword: async (req, res, next) => {
+    let user = req.body
+    try {
+      const value = await password_schema.validateAsync(req.body)
+      next()
+    } catch (err) {
+      if (err.name === 'ValidationError') {
+        if (err.details[0].message.includes('"')) {
+          err.details[0].message = "An error has occured registering"
+        } else {
+          err.type = 'validation'
+        }
+      }
+      next(err)
     }
   }
 }

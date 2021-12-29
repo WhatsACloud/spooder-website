@@ -2,14 +2,17 @@ const bcrypt = require('bcrypt')
 const saltRounds = 10
 
 module.exports = {
-  async hashNSalt (password) {
+  async hashNSalt (req, res, next) {
     try {
+      let password = req.body.Password
       const hash = await bcrypt.hash(password, saltRounds)
-      console.log(hash)
-      return hash
+      req.body.Password = hash
+      console.log(req.body.Password)
+      next()
     } catch (err) {
-      console.log(err)
-      return err
+      err.type = 'hash'
+      err.message = 'An error has occured with password hashing'
+      next(err)
     }
   },
   async compare (password, hash) {

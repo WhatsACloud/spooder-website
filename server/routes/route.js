@@ -1,7 +1,7 @@
 const required = [
-  require('../endpoints/login'),
-  require('../endpoints/register'),
-  require('../endpoints/createArticle')
+  require('../controllers/login'),
+  require('../controllers/register'),
+  require('../controllers/createArticle')
 ]
 
 module.exports = (app) => {

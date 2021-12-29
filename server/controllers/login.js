@@ -1,14 +1,10 @@
-const hashService = require('../services/hashService')
-const databaseService = require('../services/databaseService')
-const tokenService = require('../services/tokenService')
-
 module.exports = (app) => {
   app.post('/login', async (req, res) => {
     if (!(req.body.Password && (req.body.Email || req.body.Username))) res.send({error: 'Please fill in all required fields'})
     let dbObject = null
     let dbPassword = null
     try {
-      dbObject = await databaseService.findUser(req.body.Username)
+      //dbObject = await databaseService.findUser(req.body.Username)
       dbPassword = dbObject.dataValues.password
     } catch (err) {
       console.log(err)

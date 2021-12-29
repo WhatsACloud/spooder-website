@@ -6,8 +6,15 @@ dotenv.config({
 })
 
 module.exports = {
-  generateAccessToken (id) {
-    return jwt.sign({userId: id}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
+  generateAccessToken (req, res, next) {
+    const id = req.body.id
+    try {
+      const token = jwt.sign({userId: id}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
+      req.body.token = token
+      next()
+    } catch (err) {
+      next(err)
+    }
   },
   authenticateToken (req) {
     const token = req.header('Authorization')
