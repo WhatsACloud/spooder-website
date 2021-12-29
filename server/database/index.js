@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
 
 const queryInterface = sequelize.getQueryInterface()
 
-// sequelize.sync({ force: true })
+sequelize.sync({ force: true })
 sequelize.sync(config.db.options)
 
 module.exports = {sequelize: sequelize, DataTypes: DataTypes}

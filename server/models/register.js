@@ -1,6 +1,6 @@
 module.exports = {
   end (req, res, next) {
-    res.send({token: req.body.token})
+    res.send({token: req.body.token, username: req.body.Username})
   },
   errorHandler (error, req, res, next) {
     console.log(error)

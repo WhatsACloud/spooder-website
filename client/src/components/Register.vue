@@ -64,19 +64,22 @@ export default {
   },
   methods: {
     async register () {
-      const result = await AuthenticationService.register({
-        'Username': this.Username,
-        'Email': this.Email,
-        'Password': this.Password,
-        'RepeatPassword': this.RepeatPassword
-      })
-      if (result.data.result === true) {
+      try {
+        const result = await AuthenticationService.register({
+          'Username': this.Username,
+          'Email': this.Email,
+          'Password': this.Password,
+          'RepeatPassword': this.RepeatPassword
+        })
+        console.log(result)
         this.error = ''
-        document.cookie = `token=${result.data.result}`
-        this.$store.commit('authenticate', {token: result.data.result})
+        document.cookie = `token=${result.data.token}`
+        this.$store.commit('authenticate', {token: result.data.token})
+        this.$store.commit({type: 'setUsername', username: result.data.username})
         this.$router.push('/')
-      } else {
-        this.error = result.data.error
+      } catch (err) {
+        console.log(err.response)
+        this.error = err.response.data.message
       }
     }
   }
