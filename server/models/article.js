@@ -29,7 +29,7 @@ module.exports = {
         description: req.body.description,
         text: req.body.text
       })
-      console.log(article)
+      // console.log(article)
       req.body.articleId = article.dataValues.id
       next()
     } catch (err) {
@@ -37,7 +37,7 @@ module.exports = {
     }
   },
   end (req, res, next) {
-    res.send({data: {result: true, message: 'Article successfully created'}})
+    res.send({data: {articleId: req.body.articleId, result: true, message: 'Article successfully created'}})
   },
   errorHandler (error, req, res, next) {
     console.log(error)

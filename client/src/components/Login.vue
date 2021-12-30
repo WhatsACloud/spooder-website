@@ -61,17 +61,19 @@ export default {
         })
         console.log(result)
         if (typeof result.data.error === 'undefined') {
-          document.cookie = `token=${result.data.result.token}`
-          document.cookie = `username=${result.data.result.username}`
+          document.cookie = `token=${result.data.data.token}`
+          document.cookie = `username=${result.data.data.username}`
           this.error = ''
-          this.$store.commit('authenticate', {token: result.data.result.token})
-          this.$store.commit('setUsername', {username: result.data.result.username})
+          console.log(result.data)
+          this.$store.commit('authenticate', {token: result.data.data.token})
+          this.$store.commit('setUsername', {username: result.data.data.username})
           this.$router.push('/')
         } else {
           this.error = result.data.error
         }
       } catch (err) {
         this.error = 'An error occured logging in, please try again later'
+        if (err.response.data.error) this.error = err.response.data.error.message
       }
     }
   }

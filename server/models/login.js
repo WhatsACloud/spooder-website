@@ -39,11 +39,13 @@ module.exports = {
     }
   },
   end (req, res, next) {
-    res.send({data: {token: req.body.token}})
+    res.send({data: {token: req.body.token, username: req.body.Username}})
   },
   errorHandler (error, req, res, next) {
     console.log(error)
-    let response = {error: {message: 'An error has occured in the server, please try again later'}}
+    let message = 'An error has occured in the server, please try again later'
+    if (error.type) message = error.message
+    let response = {error: {message: message}}
     try {
       if (error.message && error.type) response.error.message = error.message
     } catch (err) {} // just in case

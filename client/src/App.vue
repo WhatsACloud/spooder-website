@@ -1,5 +1,10 @@
 <template>
   <div id="app">
+    <v-navigation-drawer
+      v-model="drawer"
+      absolute
+      temporary>
+    </v-navigation-drawer>
     <v-card
     color="grey lighten-4"
     flat
@@ -7,7 +12,9 @@
     tile
     >
       <v-toolbar dense color="#5C6BC0">
-        <v-app-bar-nav-icon id="toolbar"></v-app-bar-nav-icon>
+        <v-app-bar-nav-icon
+          id="toolbar"
+          @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <v-toolbar-title id="toolbar">{{ Name }}</v-toolbar-title>
         <v-btn
           icon
@@ -58,10 +65,13 @@
 
 <script>
 import Register from './components/Register'
+// import { createSimpleTransition } from 'vuetify/lib/components/transitions/createTransition'
+
 export default {
   data () {
     return {
-      Name: 'NewsThingy'
+      Name: 'NewsThingy',
+      drawer: false
     }
   },
   name: 'App',
@@ -96,6 +106,10 @@ export default {
 
 .no-capital {
   text-transform: unset !important;
+}
+
+.expand {
+  height: 100%;
 }
 
 </style>
