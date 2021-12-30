@@ -23,5 +23,20 @@ module.exports = {
       }
       next(err)
     }
+  },
+  async find (req, res, next) {
+    try {
+      const user = await User.findOne({
+        where: {username: req.body.Username}
+      })
+      if (!user) {
+        req.body.error = true
+        next()
+      }
+      req.body.dbUser = user
+      next()
+    } catch (err) {
+      next(err)
+    }
   }
 }

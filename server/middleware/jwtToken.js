@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const errorCreate = require('../helperFunctions/errorCreator')
 const dotenv = require('dotenv')
 
 dotenv.config({
@@ -16,17 +17,16 @@ module.exports = {
       next(err)
     }
   },
-  authenticateToken (req) {
+  authenticateToken (req, res, next) {
     const token = req.header('Authorization')
-    console.log(token)
-
-    if (token === undefined) return false
-    console.log(process.env.TOKEN_SECRET)
+    // console.log(token)
+    if (token === undefined) next( errorCreate( 'No authorization header provided', {type: true} ) )
+    // console.log(process.env.TOKEN_SECRET)
     const result = jwt.verify(token, process.env.TOKEN_SECRET, (err, data) => {
-      console.log(err)
-      if (err) return false
-      return data
+      if (err) next(err)
+      console.log(data)
+      req.body.jwtTokenData = data
+      next()
     })
-    return result
   }
 }

@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   const Article = sequelize.define(
     'Article',
     {
-      userId: {
+      fk_user_id: {
         type: DataTypes.UUID,
         allowNull: false,
         foreignKey: true,

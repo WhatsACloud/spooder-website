@@ -5,12 +5,6 @@ const User = require('../database_models/user')(sequelize, DataTypes)
 const Article = require('../database_models/article')(sequelize, DataTypes)
 
 module.exports = {
-  async findUser (Username) {
-    const user = await User.findOne({
-      where: {username: Username}
-    })
-    return user
-  },
   async createArticle (req) {
     const tokenService = require('../services/tokenService')
     const token = req.header('authorization')

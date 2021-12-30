@@ -1,14 +1,6 @@
-// const databaseService = require('../services/databaseService')
+const article = require('../models/article')
+const jwtToken = require('../middleware/jwtToken')
 
 module.exports = (app) => {
-  app.post('/articles/create', async (req, res) => {
-    try {
-      // let test = await databaseService.createArticle(req)
-      console.log(test)
-      res.send('success')
-    } catch (err) {
-      console.log(err)
-      res.status(400).send()
-    }
-  })
+  app.post('/articles/create', article.validate, jwtToken.authenticateToken, article.create, article.end, article.errorHandler)
 }
