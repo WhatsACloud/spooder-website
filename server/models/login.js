@@ -1,7 +1,7 @@
 const { sequelize, DataTypes } = require('../database')
 const bcrypt = require('bcrypt')
 const User = require('../database_models/user')(sequelize, DataTypes)
-const errorCreate = require('../helperFunctions/errorCreator')
+const errorCreate = require('../middleware/errorCreator')
 
 module.exports = {
   allFieldsFilled (req, res, next) {
