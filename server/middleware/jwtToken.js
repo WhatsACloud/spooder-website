@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const errorCreate = require('./errorCreator')
+const errorCreate = require('../helperFunctions/errorCreator')
 const dotenv = require('dotenv')
 
 dotenv.config({
