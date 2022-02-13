@@ -1,5 +1,5 @@
 const { sequelize, DataTypes } = require('../../database')
-const User = require('../../database_models/user')(sequelize, DataTypes)
+const User = require('../../databaseModels/user')(sequelize, DataTypes)
 
 module.exports = {
   create: async (req, res, next) => {
@@ -10,6 +10,7 @@ module.exports = {
         email: Email,
         password: Password
       })
+      req.body.id = user.dataValues.id
       next()
     } catch (err) {
       err.type = 'database'

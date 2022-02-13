@@ -8,7 +8,7 @@ app.use(morgan('combined'))
 app.use(bodyParser.json())
 app.use(cors())
 
-require('../routes/route')(app)
+require('../controllers')(app)
 require('../database')
 
 app.listen(process.env.PORT || 8081)

@@ -4,6 +4,17 @@ const hash = require('../middleware/hash')
 const user = require('../middleware/databaseModelCreator').user
 const token = require('../middleware/jwtToken')
 
-module.exports = (app) => {
-  app.post('/register', validate.validatePassword, hash.hashNSalt, user.create, token.generateAccessToken, register.end, register.errorHandler)
-}
+const { Router } = require('express')
+const router = Router()
+
+router.post(
+  '/',
+  validate.validatePassword, 
+  hash.hashNSalt, 
+  user.create, 
+  token.generateAccessToken, 
+  register.end, 
+  register.errorHandler
+)
+
+module.exports = router
