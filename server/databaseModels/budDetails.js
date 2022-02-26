@@ -18,12 +18,6 @@ module.exports = (sequelize, DataTypes) => {
         pronounciation: {
           type: DataTypes.STRING,
           allowNull: true
-        },
-        examples: {
-          
-        },
-        context: {
-      
         }
       }
     )

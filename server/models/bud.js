@@ -1,5 +1,6 @@
 const { sequelize, DataTypes } = require('../database')
 const bud = require('../databaseModels/bud')(sequelize, DataTypes)
+const budDetails = require('../databaseModels/budDetails')(sequelize, DataTypes)
 
 module.exports = {
   async edit (req, res, next) {
@@ -7,13 +8,21 @@ module.exports = {
     console.log(userId)
     try {
       let data = req.body.spoodawebData
-      for (budName in data) {
+      for (const budName in data) {
         const Bud = data[budName]
         const _bud = await bud.create({
           fk_spoodaweb_id: req.body.spooderwebId,
           word: budName
         })
-        console.log(_bud)
+        const budId = _bud.dataValues.id
+        for (const definitionName in Bud) {
+          const definition = Bud[definitionName]
+          const _budDetails = budDetails.create({
+            fk_bud_id: budId,
+            definition: definitionName,
+            pronounciation: definition.pronounciation
+          })
+        } 
       }
       next()
     } catch (err) {

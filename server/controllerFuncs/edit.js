@@ -4,7 +4,7 @@ const errMsg = 'The data received is invalid. This is probably a client side err
 
 const required_att = [
   "definition",
-  "pronunciation",
+  "pronounciation",
   "contexts",
   "examples",
   "links"

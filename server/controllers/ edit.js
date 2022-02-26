@@ -17,7 +17,7 @@ example format below
         "test": {
             "data": {
                 "definition": "a test",
-                "pronunciation": "pronunciation test",
+                "pronounciation": "pronounciation test",
                 "contexts": [
                     "this is a context for testing",
                     "this is the second context"
