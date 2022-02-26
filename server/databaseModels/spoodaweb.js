@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const Spoodaweb = sequelize.define(
-    'Spoodaweb',
+    'Spoodawebs',
     {
       fk_user_id: {
         type: DataTypes.UUID,
@@ -17,8 +17,9 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
   )
-  Spoodaweb.associate = (models) => {
+  Spoodaweb.associate = function (models) {
     Spoodaweb.belongsTo(models.Users)
+    Spoodaweb.hasMany(models.Bud, {foreignKey: DataTypes.UUID, onDelete: 'cascade'})
   }
   return Spoodaweb
 }

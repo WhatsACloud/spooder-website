@@ -1,5 +1,5 @@
-const login = require('../models/login')
-const userDatabase = require('../middleware/databaseModelCreator').user
+const login = require('../controllerFuncs/login')
+const userModel = require('../models/user')
 const jwtToken =  require('../middleware/jwtToken')
 
 const { Router } = require('express')
@@ -7,9 +7,9 @@ const { Router } = require('express')
 const router = Router()
 
 router.post(
-  '/create',
+  '/',
   login.allFieldsFilled, 
-  userDatabase.find, 
+  userModel.find, 
   login.databaseHandler, 
   login.comparePasswords, 
   jwtToken.generateAccessToken, 

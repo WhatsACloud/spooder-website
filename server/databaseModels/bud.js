@@ -7,31 +7,19 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         foreignKey: true,
         references: {
-          model: 'Spoodaweb',
+          model: 'Spoodawebs',
           key: 'id'
         }
       },
       word: {
         type: DataTypes.STRING,
-        allowNull: false
-      },
-      definition: {
-
-      },
-      pronounciation: {
-
-      },
-      audioPronounciation: {
-
-      },
-      examples: {
-
-      },
-
+        allowNull: true
+      }
     }
   )
   Bud.associate = (models) => {
-    Bud.belongsTo(models.Spoodaweb)
+    Bud.belongsTo(models.Spoodawebs)
+    Bud.hasMany(models.BudDetails, {foreignKey: DataTypes.UUID, onDelete: 'cascade'})
   }
   return Bud
 }

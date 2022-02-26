@@ -1,7 +1,7 @@
-const register = require('../models/register')
+const register = require('../controllerFuncs/register')
 const validate = require('../middleware/validation')
 const hash = require('../middleware/hash')
-const user = require('../middleware/databaseModelCreator').user
+const userModel = require('../models/user')
 const token = require('../middleware/jwtToken')
 
 const { Router } = require('express')
@@ -11,7 +11,7 @@ router.post(
   '/',
   validate.validatePassword, 
   hash.hashNSalt, 
-  user.create, 
+  userModel.create,
   token.generateAccessToken, 
   register.end, 
   register.errorHandler

@@ -1,5 +1,5 @@
-const { sequelize, DataTypes } = require('../../database')
-const User = require('../../databaseModels/user')(sequelize, DataTypes)
+const { sequelize, DataTypes } = require('../database')
+const User = require('../databaseModels/user')(sequelize, DataTypes)
 
 module.exports = {
   create: async (req, res, next) => {

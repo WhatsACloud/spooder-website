@@ -1,12 +1,12 @@
 const { sequelize, DataTypes } = require('../database')
 const bcrypt = require('bcrypt')
 const User = require('../databaseModels/user')(sequelize, DataTypes)
-const errorCreate = require('../middleware/errorCreator')
+const error = require('../middleware/error')
 
 module.exports = {
   allFieldsFilled (req, res, next) {
     if (!(req.body.Password && (req.body.Email || req.body.Username))) {
-      next( errorCreate( 'Please fill in all required fields', { type: true } ) )
+      next( error.create( 'Please fill in all required fields', { type: true } ) )
     }
     next()
   },
@@ -19,7 +19,7 @@ module.exports = {
       next()
       return
     }
-    next( errorCreate( 'User does not exist', { type: true } ) )
+    next( error.create( 'User does not exist', { type: true } ) )
   },
   async comparePasswords (req, res, next) {
     // console.log(req.body)
@@ -27,11 +27,11 @@ module.exports = {
       let password = req.body.Password
       let hash = req.body.dbPassword
       if (!(typeof password === 'string') || !(typeof hash === 'string')) {
-        next( errorCreate( 'An error occured verifying the password', { type: true } ) )
+        next( error.create( 'An error occured verifying the password', { type: true } ) )
       }
       const comparison = await bcrypt.compare(password, hash)
       if (!comparison) {
-        next( errorCreate( 'Password is incorrect', { type: true } ) )
+        next( error.create( 'Password is incorrect', { type: true } ) )
       }
       next()
     } catch (err) {
@@ -39,7 +39,7 @@ module.exports = {
     }
   },
   end (req, res, next) {
-    res.send({data: {token: req.body.token, username: req.body.Username}})
+    res.send({data: {token: req.body.token, username: req.body.Username}, type: true})
   },
   errorHandler (error, req, res, next) {
     console.log(error)
