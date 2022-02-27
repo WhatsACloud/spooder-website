@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     )
     BudDetails.associate = (models) => {
       BudDetails.belongsTo(models.Bud)
+      BudDetails.hasMany(models.Contexts, {foreignKey: DataTypes.UUID, onDelete: 'cascade'})
     }
     return BudDetails
   }

@@ -23,7 +23,7 @@ module.exports = {
     if (token === undefined) next( error.create( 'No authorization header provided', {type: true} ) )
     // console.log(process.env.TOKEN_SECRET)
     const result = jwt.verify(token, process.env.TOKEN_SECRET, (err, data) => {
-      if (err) return next(error.create('please relogin!', {type: "token"}))
+      if (err) return next(error.create('please relogin!', {type: "tokenErr"}))
       console.log(data)
       req.body.jwtTokenData = data
       next()
