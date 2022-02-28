@@ -17,24 +17,24 @@ module.exports = {
       const spoodaweb = await Spoodaweb.findOne({
         where: {id: req.body.spoodawebId}
       })
-      if (spoodaweb === null) return next(error.create('The spoodaweb you are editing does not exist within the database, or there is a client side error.'))
+      if (spoodaweb === null) return next(error.create('The spoodaweb you are editing does not exist within the database, or there is a client side error.'), {statusNo: 400})
       let data = req.body.spoodawebData
-      if (data === undefined) return next(error.create(errMsg))
+      if (data === undefined) return next(error.create(errMsg, {statusNo: 400}))
       for (const budName in data) {
         const bud = data[budName]
         switch (bud.type) {
           case undefined:
             return next(error.create(errMsg))
           case 'add':
-            if (bud.data === undefined) return next(error.create(errMsg))
+            if (bud.data === undefined) return next(error.create(errMsg, {statusNo: 400}))
             for (const definitionName in bud.data) {
               required_att.forEach(att => {
-                if (bud.data[definitionName][att] === undefined) return next(error.create(errMsg, {debug: att}))
+                if (bud.data[definitionName][att] === undefined) return next(error.create(errMsg, {debug: att, statusNo: 400}))
               })
             }
             break
           case 'sub':
-            if (bud.data.id === undefined) return next(error.create(errMsg))
+            if (bud.data.id === undefined) return next(error.create(errMsg, {statusNo: 400}))
             break
         }
         next()

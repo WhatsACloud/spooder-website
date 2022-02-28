@@ -6,7 +6,7 @@ const error = require('../middleware/error')
 module.exports = {
   allFieldsFilled (req, res, next) {
     if (!(req.body.Password && (req.body.Email || req.body.Username))) {
-      next( error.create( 'Please fill in all required fields', { type: true } ) )
+      next(error.create('Please fill in all required fields', {statusNo: 400}))
     }
     next()
   },
@@ -19,7 +19,7 @@ module.exports = {
       next()
       return
     }
-    next( error.create( 'User does not exist', { type: true } ) )
+    next(error.create('User does not exist', {statusNo: 400}))
   },
   async comparePasswords (req, res, next) {
     // console.log(req.body)
@@ -27,11 +27,11 @@ module.exports = {
       let password = req.body.Password
       let hash = req.body.dbPassword
       if (!(typeof password === 'string') || !(typeof hash === 'string')) {
-        next( error.create( 'An error occured verifying the password', { type: true } ) )
+        next(error.create('An error occured verifying the password'))
       }
       const comparison = await bcrypt.compare(password, hash)
       if (!comparison) {
-        next( error.create( 'Password is incorrect', { type: true } ) )
+        next(error.create('Password is incorrect'))
       }
       next()
     } catch (err) {
@@ -40,15 +40,5 @@ module.exports = {
   },
   end (req, res, next) {
     res.send({data: {token: req.body.token, username: req.body.Username}, type: true})
-  },
-  errorHandler (error, req, res, next) {
-    console.log(error)
-    let message = 'An error has occured in the server, please try again later'
-    if (error.type) message = error.message
-    let response = {error: {message: message}}
-    try {
-      if (error.message && error.type) response.error.message = error.message
-    } catch (err) {} // just in case
-    res.status(500).send(response)
   }
 }

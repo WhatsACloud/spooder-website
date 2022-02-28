@@ -1,6 +1,7 @@
 const login = require('../controllerFuncs/login')
 const userModel = require('../models/user')
 const jwtToken =  require('../middleware/jwtToken')
+const error = require('../middleware/error')
 
 const { Router } = require('express')
 
@@ -14,7 +15,7 @@ router.post(
   login.comparePasswords, 
   jwtToken.generateAccessToken, 
   login.end, 
-  login.errorHandler
+  error.errorHandler
 )
 
 module.exports = router

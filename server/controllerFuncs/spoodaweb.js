@@ -6,7 +6,7 @@ const spoodaweb = require('../databaseModels/spoodaweb')(sequelize, DataTypes)
 module.exports = {
   validate (req, res, next) {
     try {
-      if (!req.body['title']) res.status(400).send('Please provide title')
+      if (!req.body['title']) return next(error.create('Please provide title', {type: 'clientErr'}))
       next()
     } catch (err) {
       next(err)

@@ -1,5 +1,11 @@
 const defaultMsg = 'An error has occured in the server, please try again later'
 
+/*
+instead of server side msgs try error codes e.g. err42069,
+and the client interprets that
+and sends the displays the message accordingly e.g. you are not authorized
+*/
+
 module.exports = {
   create (message, attributes) {
     if (message === undefined) {
@@ -9,7 +15,7 @@ module.exports = {
       console.log(`debugging: ${attributes.debug}`)
       delete attributes.debug
     }
-    let error = {message: message}
+    let error = {message: message, type: true}
     if (attributes !== undefined) {
       const keys = Object.keys(attributes)
       keys.forEach((key) => {
@@ -27,7 +33,13 @@ module.exports = {
     if (error.type) response.error.type = error.type
     response.type = false
     console.log(response)
-    res.status(500).send(response)
+    try {
+      if (typeof error.statusNo === "number") {
+        return res.status(error.statusNo).send(response) 
+      }
+    } finally {
+      res.status(500).send(response)
+    }
   }
 }
 
