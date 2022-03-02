@@ -77,7 +77,7 @@ module.exports = {
       const userId = req.body.jwtTokenData.userId
       const data = req.body.spoodawebData
       transaction = await sequelize.transaction()
-      for (const budName in data) { // note that this only applies to add operation. To add for sub
+      for (const budName in data) {
         const bud = data[budName]
         if (bud.type === "add") {
           const _budId = await createBud(req.body.spoodawebId, budName, transaction)
@@ -93,7 +93,6 @@ module.exports = {
               const contextId = _contextId.dataValues.id
               for (const exampleNo in definition.examples[i]) {
                 const example = definition.examples[i][exampleNo]
-                console.log("a", example)
                 await createExample(contextId, example, transaction)
               }
             }
@@ -110,33 +109,3 @@ module.exports = {
     }
   }
 }
-
-/*
-
-for (const budName in data) { // note that this only applies to add operation. To add for sub
-  const bud = data[budName]
-  if (bud.type === "add") {
-    const _budId = await createBud(req.body.spoodawebId, budName, transaction)
-    const budId = _budId.dataValues.id
-    for (const definitionName in bud.data) {
-      const definition = bud.data[definitionName]
-      const _budDetailsId = await createBudDetails(budId, definitionName, definition.pronounciation, transaction)
-      const budDetailsId = _budDetailsId.dataValues.id
-      console.log(definition)
-      for (let i = 0; i < definition.contexts.length; i++) {
-        const context = definition.contexts[i]
-        const _contextId = await createContext(budDetailsId, context, transaction)
-        const contextId = _contextId.dataValues.id
-        for (const exampleNo in definition.examples[i]) {
-          const example = definition.examples[i][exampleNo]
-          await createExample(contextId, example, transaction)
-        }
-      }
-    }
-  } else if (bud.type === "sub") {
-    deleteBud(bud.data.id)
-  }
-}
-)
-
-*/
