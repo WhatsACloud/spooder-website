@@ -5,7 +5,13 @@ const Context = require('../databaseModels/BudDetails/contexts')(sequelize, Data
 const Example = require('../databaseModels/BudDetails/examples')(sequelize, DataTypes)
 
 async function markBudForDeletion(budId, transaction) {
-
+  const bud = await Bud.findOne({
+    where: {id: budId}
+  }, {transaction: transaction})
+  console.log('adklfdklasf')
+  if (bud === null) throw new Error
+  await bud.update({"deleted_at": Date.now()}, {transaction: transaction})
+  await bud.save({transaction: transaction})
 }
 
 async function createBud(spoodawebId, word, transaction) {
@@ -69,7 +75,7 @@ module.exports = {
             }
           }
         } else if (bud.type === "sub") {
-          deleteBud(bud.data.id)
+          await markBudForDeletion(bud.data.id, transaction)
         }
       }
       await transaction.commit()

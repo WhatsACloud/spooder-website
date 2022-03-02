@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
       example: {
         type: DataTypes.TEXT,
         allowNull: true
+      },
+      deleted_at: {
+        type: DataTypes.DATE,
+        allowNull: true
       }
     }
   )

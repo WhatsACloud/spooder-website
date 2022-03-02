@@ -18,7 +18,6 @@ module.exports = {
     }
   },
   authenticateToken (req, res, next) {
-    console.log("what")
     const token = req.header('Authorization')
     // console.log(token)
     if (token === undefined) next(error.create('No authorization header provided'))
