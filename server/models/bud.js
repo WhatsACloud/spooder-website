@@ -3,15 +3,39 @@ const Bud = require('../databaseModels/bud')(sequelize, DataTypes)
 const BudDetails = require('../databaseModels/BudDetails/budDetails')(sequelize, DataTypes)
 const Context = require('../databaseModels/BudDetails/contexts')(sequelize, DataTypes)
 const Example = require('../databaseModels/BudDetails/examples')(sequelize, DataTypes)
+const error = require('../middleware/error')
+
+async function markForDeletion(objs, t) { // TO DO: add links thingy
+  if (objs === null) throw error.create(`obj either does not exist or has been deleted`, {statusNo: 400})
+  if (Array.isArray(objs)) {
+    let idList = []
+    for (objNo in objs) {
+      const obj = objs[objNo]
+      await obj.update({"deletedAt": Date.now()}, {transaction: t})
+      idList.push(obj.dataValues.id)
+    }
+    return idList
+  }
+}
 
 async function markBudForDeletion(budId, transaction) {
-  const bud = await Bud.findOne({
-    where: {id: budId}
-  }, {transaction: transaction})
-  console.log('adklfdklasf')
-  if (bud === null) throw new Error
-  await bud.update({"deleted_at": Date.now()}, {transaction: transaction})
-  await bud.save({transaction: transaction})
+  const bud = await Bud.findOne({where: {id: budId}}, {transaction, transaction})
+  if (bud === null) throw error.create(`bud either does not exist or has been deleted`, {statusNo: 400})
+  if (bud.dataValues.deletedAt !== null) throw error.create(`bud either does not exist or has been deleted`, {statusNo: 400})
+  await bud.update({"deletedAt": Date.now()}, {transaction: transaction})
+  const budDetails = await BudDetails.findAll({where: {fk_bud_id: budId}}, {transaction: transaction})
+  const budDetailsIdList = await markForDeletion(budDetails, transaction)
+  for (const budDetailsNo in budDetailsIdList) {
+    const budDetailsId = budDetailsIdList[budDetailsNo]
+    const context = await Context.findAll({where: {fk_bud_details_id: budDetailsId}}, {transaction: transaction})
+    console.log(context)
+    const contextIdList = await markForDeletion(context, transaction)
+    for (const contextIdNo in contextIdList) {
+      const contextId = contextIdList[contextIdNo]
+      const example = await Example.findAll({where: {fk_context_id: contextId}}, {transaction: transaction})
+      await markForDeletion(example, transaction)
+    }
+  }
 }
 
 async function createBud(spoodawebId, word, transaction) {
