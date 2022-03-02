@@ -13,7 +13,7 @@ router.post(
   userModel.find, 
   login.databaseHandler, 
   login.comparePasswords, 
-  jwtToken.generateAccessToken, 
+  jwtToken.generateAccessToken,
   login.end, 
   error.errorHandler
 )

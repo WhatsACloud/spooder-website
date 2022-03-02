@@ -33,11 +33,13 @@ module.exports = {
     if (error.type) response.error.type = error.type
     response.type = false
     console.log(response)
+    const statusNo = error.statusNo
     try {
-      if (typeof error.statusNo === "number") {
-        return res.status(error.statusNo).send(response) 
-      }
-    } finally {
+      if (typeof statusNo === "number") {
+        delete error.statusNo
+        return res.status(statusNo).send(response) 
+      } else throw new Error
+    } catch (err) {
       res.status(500).send(response)
     }
   }

@@ -6,7 +6,7 @@ const error = require('../middleware/error')
 module.exports = {
   allFieldsFilled (req, res, next) {
     if (!(req.body.Password && (req.body.Email || req.body.Username))) {
-      next(error.create('Please fill in all required fields', {statusNo: 400}))
+      return next(error.create('Please fill in all required fields', {statusNo: 400}))
     }
     next()
   },

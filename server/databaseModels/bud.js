@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
   )
   Bud.associate = (models) => {
     Bud.belongsTo(models.Spoodawebs)
-    Bud.hasMany(models.BudDetails, {foreignKey: DataTypes.UUID, onDelete: 'cascade'})
+    Bud.hasMany(models.BudDetails, {foreignKey: DataTypes.UUID})
   }
   return Bud
 }

@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
   )
   Contexts.associate = (models) => {
     Contexts.belongsTo(models.BudDetails)
-    Contexts.hasMany(models.Examples, {foreignKey: DataTypes.UUID, onDelete: 'cascade'})
+    Contexts.hasMany(models.Examples, {foreignKey: DataTypes.UUID})
   }
   return Contexts
 }

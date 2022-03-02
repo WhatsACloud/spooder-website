@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
   )
   Spoodaweb.associate = function (models) {
     Spoodaweb.belongsTo(models.Users)
-    Spoodaweb.hasMany(models.Bud, {foreignKey: DataTypes.UUID, onDelete: 'cascade'})
+    Spoodaweb.hasMany(models.Bud, {foreignKey: DataTypes.UUID})
   }
   return Spoodaweb
 }
