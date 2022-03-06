@@ -1,22 +1,24 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { Routes, BrowserRouter as Router, Route } from 'react-router-dom';
 
 import Home from './Home';
-import DynamicPage from './DynamicPage';
-import NoMatch from './NoMatch';
+import NavBar from './navBar'
 
-const App = () => {
-  return (
-    <Router>
-      <div>
-        <Switch>
-          <Route exact path="/" component={Home} />
-          <Route exact path="/dynamic" component={DynamicPage} />
-          <Route component={NoMatch} />
-        </Switch>
-      </div>
-    </Router>
-  );
-};
+class App extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <Router>
+        <NavBar />
+        <Routes>
+          <Route exact path='/' element={<Home/>} />
+        </Routes>
+      </Router>
+    );
+  }
+}
 
 export default App;
