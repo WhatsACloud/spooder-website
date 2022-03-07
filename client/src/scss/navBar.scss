@@ -1,8 +1,13 @@
 .nav {
-  background: #63D471;
-  height: 85px;
+  background: #32b1d1;
+  height: 50px;
   display: flex;
   justify-content: space-between;
   padding: 0.2rem calc((100vw - 1000px) / 2);
   z-index: 12;
+}
+
+.nav-item {
+  font-size: large;
+  display: inline-block;
 }

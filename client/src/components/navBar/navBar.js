@@ -5,9 +5,13 @@ import styles from '../../scss/navBar';
 const navBar = () => {
   return (
     <nav className={styles.nav}>
-      <li>
-        <Link to='/'>Home</Link>
-      </li>
+      <ul>
+        <li className="nav-item">
+          <a href="/about">test</a>
+        </li>
+      </ul>
     </nav>
   )
 }
+
+export default navBar;

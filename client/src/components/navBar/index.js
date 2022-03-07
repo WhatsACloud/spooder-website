@@ -1,10 +1,9 @@
 import React from 'react';
+import NavBar from './navBar';
 
 const navBar = () => {
   return (
-    <p>
-      bruh
-    </p>
+    <NavBar></NavBar>
   )
 }
 
