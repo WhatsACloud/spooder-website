@@ -1,0 +1,41 @@
+$background: #32b1d1;
+$darker-background: #188ba8;
+$text: ghostwhite;
+
+@mixin nav-text {
+  font-size: 30px;
+  padding: 15px 15px;
+  text-decoration: none;
+  color: $text;
+}
+
+@mixin nav-text-hover {
+  &:hover {
+    background-color: $darker-background;
+    a {
+      color: $text;
+    }
+  }
+}
+
+.nav {
+  background: $background;
+  display: flex;
+  height: 50px;
+  align-items: center;
+  ul {
+    display: flex;
+    li {
+      display: flex;
+      &.normal {
+        @include nav-text-hover;
+      }
+      a {
+        @include nav-text;
+        &.logo {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
