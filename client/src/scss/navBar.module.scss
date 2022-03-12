@@ -20,7 +20,7 @@ $text: ghostwhite;
 
 .nav {
   background: $background;
-  display: flex;
+  margin-top: -15px;
   height: 50px;
   align-items: center;
   ul {
@@ -35,6 +35,9 @@ $text: ghostwhite;
         &.logo {
           width: 100%;
         }
+      }
+      &.space {
+        width: 100%;
       }
     }
   }

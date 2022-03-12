@@ -8,14 +8,9 @@ const navBar = () => {
       <nav className={styles.nav}>
         <ul>
           <li><a className={styles.logo} href="/">testing</a></li>
+          <li className={styles.space}><a></a></li>
           <li className={styles.normal}><a href="/about">about</a></li>
-          <li className={styles.normal}><a href="/">test</a></li>
-          <li className={styles.normal}><a href="/about">test</a></li>
-          <li className={styles.normal}><a href="/about">test</a></li>
-          <li className={styles.normal}><a href="/about">test</a></li>
-          <li className={styles.normal}><a href="/about">test</a></li>
-          <li className={styles.normal}><a href="/about">test</a></li>
-          <li className={styles.normal}><a href="/about">test</a></li>
+          <li className={styles.normal}><a href="/user">login</a></li>
         </ul>
       </nav>
     </div>
