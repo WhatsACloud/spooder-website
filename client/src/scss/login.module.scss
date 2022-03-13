@@ -1,36 +1,68 @@
+@import './colors.scss';
+@import '../../assets/fontawesome-free-6.0.0-web/scss/fontawesome.scss';
+
 div {
   .div {
     display: block;
-    background-color: rgb(55, 55, 136);
-    height: 500px;
+    background-color: $light1;
     margin-top: 100px;
     margin-left: 10px;
     margin-right: 10px;
-    width: fit-content;
+    height: 500px;
     max-width: 700px;
     border: 2px solid black;
     box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-radius: 10px;
     font-size: 25px;
-    color: ghostwhite;
+    color: $textcolor;
     .header {
       text-align: center;
       padding-top: 50px;
       font-size: 25px;
       font-family: 'Courier New', Courier, monospace;
     }
-    form {
+    form div.inputContainer {
       margin-left: 20px;
-    }
-    input {
-      border-top-style: hidden;
-      border-right-style: hidden;
-      border-left-style: hidden;
-      border-bottom-style: groove;
-      border-color: black;
-      border-width: 1px;
-      background-color: #eee;
-      outline: none;
+      label {
+        display: block;
+        text-align: left;
+        font-size: 15px;
+      }
+      button.password_icon {
+        $length: 40px;
+        background-color: rgba(255, 255, 255, 0);
+        height: $length;
+        width: $length;
+        border-radius: 50%;
+        position: absolute;
+        text-align: center;
+        left: 525px;
+        border-style: none;
+        margin-top: 9px;
+        transition: background-color 0.2s;
+        cursor: pointer;
+        &:hover {
+          background-color: rgba(168, 168, 168, 0.664);
+        }
+      }
+      input {
+        margin: 10px;
+        display: inline-block;
+        box-sizing: border-box;
+        padding: 12px 40px;
+        margin: 8px 0; 
+        border-top-style: hidden;
+        border-right-style: hidden;
+        border-left-style: hidden;
+        border-bottom-style: groove;
+        border-color: black;
+        border-width: 1px;
+        width: 80%;
+        font-size: 15px;
+        font-family: 'Courier New', Courier, monospace;
+        background-color: #eee;
+        outline: none;
+      }
     }
   }
 }

@@ -1,9 +1,9 @@
-$background: #32b1d1;
-$darker-background: #188ba8;
+@import './colors.scss';
 $text: ghostwhite;
+$text-size: 25px;
 
 @mixin nav-text {
-  font-size: 30px;
+  font-size: $text-size;
   padding: 15px 15px;
   text-decoration: none;
   color: $text;
@@ -11,15 +11,14 @@ $text: ghostwhite;
 
 @mixin nav-text-hover {
   &:hover {
-    background-color: $darker-background;
     a {
-      color: $text;
+      font-size: $text-size+10;
     }
   }
 }
 
 .nav {
-  background: $background;
+  background: $sky;
   margin-top: -15px;
   height: 50px;
   align-items: center;
@@ -31,6 +30,7 @@ $text: ghostwhite;
         @include nav-text-hover;
       }
       a {
+        transition: font-size 0.5s;
         @include nav-text;
         &.logo {
           width: 100%;

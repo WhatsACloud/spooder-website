@@ -5,6 +5,7 @@ import Home from './Home';
 import NavBar from './navBar'
 import Login from './login'
 import app from '../scss/app.module'
+import styles from '../scss/main'
 
 function App() {
   return (
