@@ -1,5 +1,6 @@
 @import './colors.scss';
 @import '../../assets/fontawesome-free-6.0.0-web/scss/fontawesome.scss';
+@import './standard.scss';
 
 div {
   .div {
@@ -29,8 +30,9 @@ div {
         font-size: 15px;
       }
       button.password_icon {
+        @include std-button(1);
         $length: 40px;
-        background-color: rgba(255, 255, 255, 0);
+        background-color: rgba(0, 0, 0, 0);
         height: $length;
         width: $length;
         border-radius: 50%;
@@ -63,6 +65,13 @@ div {
         background-color: #eee;
         outline: none;
       }
+    }
+    form button.sign_up {
+      @include std-button;
+      position: relative;
+      top: 100px;
+      left: 40%;
+      padding: 10px;
     }
   }
 }

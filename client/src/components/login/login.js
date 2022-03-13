@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../../scss/login.module';
+import axios from 'axios';
 
 function EyeIcon(props) {
   if (props.eye) {
-    return <i class="fa fa-eye"></i>;
+    return <i className="fa fa-eye"></i>;
   } else {
-    return <i class="fa fa-eye-slash"></i>
+    return <i className="fa fa-eye-slash"></i>
   }
+}
+
+function signUp(props) {
+
 }
 
 const login = () => {
@@ -51,6 +56,12 @@ const login = () => {
             autoCapitalize='none'
             />
         </div>
+        <button
+          type="button"
+          className={styles.sign_up}
+          onClick={() => signUp}>
+            Sign Up
+        </button>
       </form>
     </div>
   )
