@@ -11,9 +11,7 @@ $text-size: 25px;
 
 @mixin nav-text-hover {
   &:hover {
-    a {
-      font-size: $text-size+10;
-    }
+    background-color: $sky2;
   }
 }
 
@@ -28,9 +26,9 @@ $text-size: 25px;
       display: flex;
       &.normal {
         @include nav-text-hover;
+        transition: background-color 0.1s;
       }
       a {
-        transition: font-size 0.5s;
         @include nav-text;
         &.logo {
           width: 100%;

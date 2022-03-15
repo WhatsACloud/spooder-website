@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import styles from '../../scss/login.module'
 import api from '../../services/api'
+import { ErrorBox } from '../errorMsg'
 
 const registerEndpoint = "/register"
 
@@ -81,6 +82,9 @@ const login = () => {
         <InputBox name="email" display="Email"></InputBox>
         <PasswordBox name="password" display="Password"></PasswordBox>
         <PasswordBox name="repeatPassword" display="Repeat Password" noenter={true}></PasswordBox>
+        <ErrorBox>
+          Error 42069: Your mother
+        </ErrorBox>
         <button
           type="button"
           className={styles.signUp}
