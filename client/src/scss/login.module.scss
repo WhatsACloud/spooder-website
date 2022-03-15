@@ -29,7 +29,7 @@ div {
         text-align: left;
         font-size: 15px;
       }
-      button.password_icon {
+      button.passwordIcon {
         @include std-button(1);
         $length: 40px;
         background-color: rgba(0, 0, 0, 0);
@@ -45,6 +45,10 @@ div {
         cursor: pointer;
         &:hover {
           background-color: rgba(168, 168, 168, 0.664);
+        }
+        .eye {
+          font-size: 80%;
+          padding-bottom: 5px;
         }
       }
       input {
@@ -66,10 +70,10 @@ div {
         outline: none;
       }
     }
-    form button.sign_up {
+    form button.signUp {
       @include std-button;
       position: relative;
-      top: 100px;
+      top: 20%;
       left: 40%;
       padding: 10px;
     }

@@ -29,13 +29,6 @@ const password_schema = Joi.object({
       'string.pattern.base': `A password should be at least 8 characters long and contain the following: 1 uppercase letter, 1 lowercase letter, 1 number ranging from 0-9, and a special character`,
       'any.required': `Password is a required field`,
       'string.empty': `Password is a required field`
-    }),
-  RepeatPassword: Joi.string()
-    .required()
-    .valid(Joi.ref('Password'))
-    .messages({
-      'any.only': `Please confirm password again`,
-      'any.required': `Confirm password is a required field`
     })
 })
 

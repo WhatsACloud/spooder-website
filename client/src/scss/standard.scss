@@ -1,5 +1,6 @@
 @mixin std-button($brightness: 0.8) {
-  border-style: none;
+  border-width: 1px;
+  border-color: black;
   transition: filter 0.2s;
   border-radius: 10px;
   &:hover {
