@@ -59,13 +59,13 @@ div {
         border-top-style: hidden;
         border-right-style: hidden;
         border-left-style: hidden;
-        border-bottom-style: groove;
-        border-color: red;
+        border-bottom-style: solid;
+        border-color: black;
         border-width: 1px;
         width: 80%;
         font-size: 15px;
         font-family: 'Courier New', Courier, monospace;
-        background-color: rgb(245, 245, 245);
+        // background-color: rgb(245, 245, 245);
         outline: none;
       }
     }
@@ -76,6 +76,7 @@ div {
       left: 40%;
       padding: 10px;
       margin-bottom: 10px;
+      margin-top: 10px;
     }
   }
 }

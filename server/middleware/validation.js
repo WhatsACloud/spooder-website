@@ -1,4 +1,3 @@
-const { string } = require('joi')
 const Joi = require('joi')
 
 const password_schema = Joi.object({
@@ -13,7 +12,8 @@ const password_schema = Joi.object({
       'string.max': `Username should have a maximum of 3 characters`,
       'any.required': `Username is a required field`,
       'string.empty': `Username is a required field`
-    }),
+    })
+    .error(new Error('username')),
   Email: Joi.string()
     .email()
     .required()
@@ -21,7 +21,8 @@ const password_schema = Joi.object({
       'string.email': `Email is invalid`,
       'any.required': `Email is a required field`,
       'string.empty': `Email is a required field`
-    }),
+    })
+    .error(new Error('email')),
   Password: Joi.string()
     .pattern(new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$'))
     .required()
@@ -30,6 +31,7 @@ const password_schema = Joi.object({
       'any.required': `Password is a required field`,
       'string.empty': `Password is a required field`
     })
+    .error(new Error('password'))
 })
 
 module.exports = {
@@ -39,12 +41,12 @@ module.exports = {
       const value = await password_schema.validateAsync(req.body)
       next()
     } catch (err) {
-      if (err.name === 'ValidationError') {
-        if (err.details[0].message.includes('"')) {
-          err.details[0].message = "An error has occured registering"
-        } else {
-          err.type = 'validation'
-        }
+      if (err.details) {
+        // if (err.details[0].message.includes('"')) {
+        //  err.details[0].message = "An error has occured registering"
+        //}
+      } else {
+        err.type = 'validation'
       }
       next(err)
     }

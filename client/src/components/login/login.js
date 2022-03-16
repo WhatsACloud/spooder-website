@@ -21,14 +21,19 @@ const login = () => {
     }
   }
   
-  function signUp(username, email, password, repeatPassword) {
+  async function signUp(username, email, password, repeatPassword) {
     // console.log(canSend)
     if (password === repeatPassword && username && email && password) {
-      api.post(registerEndpoint, {
-        "Username": username,
-        "Email": email,
-        "Password": password
-      })
+      try {
+        const res = await api.post(registerEndpoint, {
+          "Username": username,
+          "Email": email,
+          "Password": password
+        })
+        console.log(res)
+      } catch({ response }) {
+        console.log(response)
+      }
     }
   }
   
@@ -82,9 +87,6 @@ const login = () => {
         <InputBox name="email" display="Email"></InputBox>
         <PasswordBox name="password" display="Password"></PasswordBox>
         <PasswordBox name="repeatPassword" display="Repeat Password" noenter={true}></PasswordBox>
-        <ErrorBox>
-          Error 42069: Your mother
-        </ErrorBox>
         <button
           type="button"
           className={styles.signUp}
