@@ -7,6 +7,16 @@ and sends the displays the message accordingly e.g. you are not authorized
 */
 
 module.exports = {
+  customError (message, attributes) {
+    let error = new Error(message)
+    if (attributes !== undefined) {
+      const keys = Object.keys(attributes)
+      keys.forEach((key) => {
+        error[key] = attributes[key]
+      })
+    }
+    return error
+  },
   create (message, attributes) {
     if (message === undefined) {
       message = defaultMsg
