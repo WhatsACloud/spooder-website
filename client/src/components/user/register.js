@@ -27,7 +27,7 @@ const Register = () => {
     for (const state in newObj) {
       newObj[state] = false
     }
-    newObj[type] = message
+    if (message !== null) newObj[type] = message
     changeErrorState(newObj)
     console.log(errorStates)
   }
@@ -46,9 +46,11 @@ const Register = () => {
         delete toSend.RepeatPassword
         console.log(result)
         console.log('success!')
+        assignError(null)
       } catch(err) {
+        console.log(err)
         const data = err.inner[0]
-        console.log(username)
+        console.log(data)
         assignError(data.message, data.path)
       }
       // const res = await api.post(registerEndpoint, toSend)

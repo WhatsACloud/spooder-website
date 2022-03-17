@@ -3,11 +3,10 @@
 @import './standard.scss';
 
 @mixin input-box {
-  margin: 10px;
   display: inline-block;
   box-sizing: border-box;
   padding: 12px 40px;
-  margin: 8px 0; 
+  margin: 8px;
   border-top-style: hidden;
   border-right-style: hidden;
   border-left-style: hidden;
@@ -23,33 +22,34 @@
 
 @mixin input-container {
   margin-left: 20px;
+  padding-right: 20px;
+  width: 100%;
   label {
     display: block;
     text-align: left;
     font-size: 15px;
   }
   button.passwordIcon {
-    @include std-button(1);
-    $length: 40px;
-    background-color: rgba(0, 0, 0, 0);
-    height: $length;
-    width: $length;
-    border-radius: 50%;
-    position: absolute;
-    text-align: center;
-    left: 525px;
-    border-style: none;
-    margin-top: 9px;
-    transition: background-color 0.2s;
-    cursor: pointer;
-    &:hover {
-      background-color: rgba(168, 168, 168, 0.664);
+      @include std-button(1);
+      $length: 40px;
+      background-color: rgba(0, 0, 0, 0);
+      height: $length;
+      width: $length;
+      border-radius: 50%;
+      position: absolute;
+      margin-left: 27%;
+      border-style: none;
+      margin-top: 9px;
+      transition: background-color 0.2s;
+      cursor: pointer;
+      &:hover {
+        background-color: rgba(168, 168, 168, 0.664);
+      }
+      .eye {
+        font-size: 80%;
+        padding-bottom: 5px;
+      }
     }
-    .eye {
-      font-size: 80%;
-      padding-bottom: 5px;
-    }
-  }
   input {
     @include input-box;
     &::selection {
@@ -66,7 +66,7 @@ div {
     margin-left: 10px;
     margin-right: 10px;
     margin-bottom: 10px;
-    max-width: 700px;
+    width: 37%;
     box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-radius: 10px;
     font-size: 25px;
