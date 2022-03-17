@@ -11,9 +11,9 @@ const router = Router()
 router.post(
   '/',
   validate.validatePassword, 
-  hash.hashNSalt, 
+  hash.hashNSalt,
+  token.generateAccessToken,
   userModel.create,
-  token.generateAccessToken, 
   register.end, 
   error.errorHandler
 )

@@ -67,4 +67,6 @@ different error types:
 serverErr
 tokenErr
 
+use next( INSERT FUNCTION NAME ) to invoke default error
+
 */

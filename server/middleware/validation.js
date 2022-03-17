@@ -23,10 +23,12 @@ const password_schema = Joi.object({
       'string.empty': `email|Email is a required field`
     }),
   Password: Joi.string()
-    .pattern(new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$'))
+    .min(8)
+    .max(40)
     .required()
     .messages({
-      'string.pattern.base': `password|A password should be at least 8 characters long and contain the following: 1 uppercase letter, 1 lowercase letter, 1 number ranging from 0-9, and a special character`,
+      'string.min': 'password|Password should have at least 8 characters',
+      'string.max': 'password|Password should have at most 40 characters',
       'any.required': `password|Password is a required field`,
       'string.empty': `password|Password is a required field`
     })

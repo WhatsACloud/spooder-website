@@ -1,7 +1,11 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import styles from '../../scss/user.module'
+
 import api from '../../services/api'
+import { registerSchema } from './userSchema'
+import { object } from 'yup'
+
+import styles from '../../scss/user.module'
 import { ErrorBox } from '../errorMsg'
 import { InputBox, PasswordBox } from './shared'
 
@@ -9,24 +13,48 @@ const registerEndpoint = "/register"
 
 const Register = () => {
   let [ canSend, changeStatusSend ] = useState(false); // pls add more reliability
-  let [ password, changePassword ] = useState({
-    password: "",
-    repeatPassword: ""
+  let [ errorStates, changeErrorState ] = useState({
+    "Username": false,
+    "Email": false,
+    "Password": false,
+    "RepeatPassword": false
   })
+  let [state, changeState ] = useState(false)
+
+  function assignError(message, type) {
+    console.log(message, type)
+    let newObj = {...errorStates}
+    for (const state in newObj) {
+      newObj[state] = false
+    }
+    newObj[type] = message
+    changeErrorState(newObj)
+    console.log(errorStates)
+  }
   
   async function signUp(username, email, password, repeatPassword) {
     // console.log(canSend)
-    if (password === repeatPassword && username && email && password) {
-      try {
-        const res = await api.post(registerEndpoint, {
-          "Username": username,
-          "Email": email,
-          "Password": password
-        })
-        console.log(res)
-      } catch({ response }) {
-        console.log(response)
+    try {
+      const toSend = {
+        "Username": username,
+        "Email": email,
+        "Password": password,
+        "RepeatPassword": repeatPassword
       }
+      try {
+        const result = await registerSchema.validate(toSend, {abortEarly: false})
+        delete toSend.RepeatPassword
+        console.log(result)
+        console.log('success!')
+      } catch(err) {
+        const data = err.inner[0]
+        console.log(username)
+        assignError(data.message, data.path)
+      }
+      // const res = await api.post(registerEndpoint, toSend)
+      // console.log(res)
+    } catch(err) {
+      console.log(err)
     }
   }
 
@@ -37,10 +65,10 @@ const Register = () => {
           Sign up
         </p>
         <form>
-          <InputBox name="username" display="Username"></InputBox>
-          <InputBox name="email" display="Email"></InputBox>
-          <PasswordBox name="password" display="Password"></PasswordBox>
-          <PasswordBox name="repeatPassword" display="Repeat Password" noenter={true}></PasswordBox>
+          <InputBox name="username" display="Username" errorMsg={errorStates.Username}></InputBox>
+          <InputBox name="email" display="Email" errorMsg={errorStates.Email}></InputBox>
+          <PasswordBox name="password" display="Password" errorMsg={errorStates.Password}></PasswordBox>
+          <PasswordBox name="repeatPassword" display="Repeat Password" errorMsg={errorStates.RepeatPassword} noenter={true}></PasswordBox>
           <button
             type="button"
             className={styles.signUp}
@@ -52,6 +80,7 @@ const Register = () => {
               )}>
               Sign Up
           </button>
+          <p>{state}</p>
         </form>
       </div>
     </div>

@@ -1,5 +1,6 @@
 const { sequelize, DataTypes } = require('../database')
 const User = require('../databaseModels/user')(sequelize, DataTypes)
+const error = require('../middleware/error')
 
 module.exports = {
   create: async (req, res, next) => {
@@ -13,16 +14,17 @@ module.exports = {
       req.body.id = user.dataValues.id
       next()
     } catch (err) {
-      err.type = 'database'
+      const newError = error.create()
+      newError.type = 'database'
       switch (err.name) {
         case 'SequelizeUniqueConstraintError':
-          err.errors[0].message = 'Email or username already exists'
+          newError.message = 'Email or username already exists'
           break
         default:
-          err.errors[0].message = 'An error has occured within the database'
+          newError.message = 'An error has occured within the database'
           break
       }
-      next(err)
+      next(newError)
     }
   },
   async find (req, res, next) {

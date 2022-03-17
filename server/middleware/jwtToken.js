@@ -14,7 +14,7 @@ module.exports = {
       req.body.token = token
       next()
     } catch (err) {
-      next(err)
+      next('jwtToken')
     }
   },
   authenticateToken (req, res, next) {

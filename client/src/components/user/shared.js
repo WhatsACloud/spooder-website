@@ -15,7 +15,7 @@ function detectPasswordChange(event) { // pls add next time too lazy now
 
 function InputBox(props) {
   return (
-    <div className={styles.inputContainer}>
+    <div className={!!props.errorMsg ? styles.errorInputContainer: styles.normalInputContainer}>
       <label>{props.display}: </label>
       {props.children}
       <input
@@ -25,6 +25,7 @@ function InputBox(props) {
         autoCapitalize='none'
         onChange={props.name === "password" || props.name === "repeatPassword" ? detectPasswordChange : null}>
       </input>
+      <p className={styles.errorMsg}>{props.errorMsg}</p>
     </div>
   )
 }
@@ -38,7 +39,7 @@ function PasswordBox(props) {
     inputType = "password";
   }
   return (
-    <InputBox name={props.name} display={props.display} inputType={inputType} noenter={props.noenter}>
+    <InputBox name={props.name} display={props.display} inputType={inputType} noenter={props.noenter} errorMsg={props.errorMsg}>
       <button
         className={styles.passwordIcon}
         onClick={() => toggleVisible(!visible)}
