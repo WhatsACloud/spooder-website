@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import api from '../../services/api'
 import { registerSchema } from './userSchema'
@@ -7,58 +7,58 @@ import { object } from 'yup'
 
 import styles from '../../scss/user.module'
 import { ErrorBox } from '../errorMsg'
-import { InputBox, PasswordBox } from './shared'
+import { InputBox, PasswordBox, assignError } from './shared'
 
 const registerEndpoint = "/register"
 
+async function signUp(errorStates, changeErrorState, changeServerErrorState, navigate, username, email, password, repeatPassword) {
+  // console.log(canSend)
+  try {
+    const toSend = {
+      "Username": username,
+      "Email": email,
+      "Password": password,
+      "RepeatPassword": repeatPassword
+    }
+    try {
+      const result = await registerSchema.validate(toSend, {abortEarly: false})
+      delete toSend.RepeatPassword
+      assignError(null, null, errorStates, changeErrorState)
+      try {
+        const res = await api.post(registerEndpoint, toSend)
+        console.log(res)
+        console.log('success!')
+        changeServerErrorState('')
+        navigate('/')
+
+      } catch(err) {
+        console.log(err)
+        const res = err.response
+        console.log(res)
+        if (res) {
+          changeServerErrorState(`Error ${res.status}: ${res.data.message}`)
+        }
+      }
+    } catch(err) {
+      console.log(err)
+      const data = err.inner[0]
+      console.log(data)
+      assignError(data.message, data.path, errorStates, changeErrorState)
+    }
+  } catch(err) {
+    console.log(err)
+  }
+}
+
 const Register = () => {
-  let [ canSend, changeStatusSend ] = useState(false); // pls add more reliability
+  let navigate = useNavigate()
   let [ errorStates, changeErrorState ] = useState({
     "Username": false,
     "Email": false,
     "Password": false,
     "RepeatPassword": false
   })
-  let [state, changeState ] = useState(false)
-
-  function assignError(message, type) {
-    console.log(message, type)
-    let newObj = {...errorStates}
-    for (const state in newObj) {
-      newObj[state] = false
-    }
-    if (message !== null) newObj[type] = message
-    changeErrorState(newObj)
-    console.log(errorStates)
-  }
-  
-  async function signUp(username, email, password, repeatPassword) {
-    // console.log(canSend)
-    try {
-      const toSend = {
-        "Username": username,
-        "Email": email,
-        "Password": password,
-        "RepeatPassword": repeatPassword
-      }
-      try {
-        const result = await registerSchema.validate(toSend, {abortEarly: false})
-        delete toSend.RepeatPassword
-        console.log(result)
-        console.log('success!')
-        assignError(null)
-      } catch(err) {
-        console.log(err)
-        const data = err.inner[0]
-        console.log(data)
-        assignError(data.message, data.path)
-      }
-      // const res = await api.post(registerEndpoint, toSend)
-      // console.log(res)
-    } catch(err) {
-      console.log(err)
-    }
-  }
+  let [ serverErrorState, changeServerErrorState ] = useState('')
 
   return (
     <>
@@ -71,10 +71,19 @@ const Register = () => {
           <InputBox name="email" display="Email" errorMsg={errorStates.Email}></InputBox>
           <PasswordBox name="password" display="Password" errorMsg={errorStates.Password}></PasswordBox>
           <PasswordBox name="repeatPassword" display="Repeat Password" errorMsg={errorStates.RepeatPassword} noenter={true}></PasswordBox>
+          <div className={serverErrorState ? styles.errorMsg : styles.noMsg}>
+            <p>
+              {serverErrorState}
+            </p>
+          </div>
           <button
             type="button"
             className={styles.signUp}
             onClick={() => signUp(
+              errorStates,
+              changeErrorState,
+              changeServerErrorState,
+              navigate,
               document.getElementById("username").value,
               document.getElementById("email").value, 
               document.getElementById("password").value,
@@ -82,7 +91,6 @@ const Register = () => {
               )}>
               Sign Up
           </button>
-          <p>{state}</p>
         </form>
       </div>
     </>

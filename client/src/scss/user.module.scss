@@ -54,13 +54,13 @@
 .div {
   display: flex;
   flex-direction: column;
+  justify-self: flex-end;
+  margin: auto;
   background-color: $light1;
-  margin-top: 100px;
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-bottom: 10px;
-  justify-content: center;
+  margin-top: 8vh;
+  padding: 5rem 2.5rem 0;
   width: 37%;
+  max-width: 500px;
   box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   border-radius: 10px;
   font-size: 25px;
@@ -71,34 +71,51 @@
     font-size: 25px;
     font-family: 'Courier New', Courier, monospace;
   }
-  form div.normalInputWrapper {
-    @include input-container;
-  }
-  form div.errorInputWrapper {
-    @include input-container;
-    label {
-      color: red;
-    }
-
-    input {
-      border-color: red;
-      color: red;
-      &::placeholder {
+  form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    div {
+      &.normalInputWrapper {
+        @include input-container;
+      }
+      &.errorInputWrapper {
+        @include input-container;
+        label {
+          color: red;
+        }
+        input {
+          border-color: red;
+          color: red;
+          &::placeholder {
+            color: red;
+          }
+        }
+        p.errorMsg {
+          font-size: 15px;
+          color: red;
+        }
+      }
+      &.errorMsg {
+        border-width: 1px;
+        border-style: solid;
+        border-radius: 5px;
+        padding: 5px;
+        background-color: rgb(255, 210, 210);
+        border-color: rgb(255, 100, 100);
         color: red;
+        margin: 5px;
+        font-size: 15px;
+      }
+      &.noMsg {
+        display: none;
       }
     }
-    p.errorMsg {
-      font-size: 15px;
-      color: red;
+    button.signUp {
+      @include std-button;
+      padding: 1.7rem 2.8rem;
+      overflow: hidden;
+      background-color: ghostwhite;
     }
-  }
-  form button.signUp {
-    @include std-button;
-    position: relative;
-    top: 20%;
-    left: 40%;
-    padding: 10px;
-    margin-bottom: 10px;
-    margin-top: 10px;
   }
 }

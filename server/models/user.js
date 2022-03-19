@@ -18,10 +18,10 @@ module.exports = {
       newError.type = 'database'
       switch (err.name) {
         case 'SequelizeUniqueConstraintError':
-          newError.message = 'Email or username already exists'
+          newError.message = 'The email or username entered in already exists within the database, please enter in a different username or email.'
           break
         default:
-          newError.message = 'An error has occured within the database'
+          newError.message = 'An error has occured within the database, please try again later.'
           break
       }
       next(newError)

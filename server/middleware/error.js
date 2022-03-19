@@ -38,10 +38,9 @@ module.exports = {
   },
   async errorHandler (error, req, res, next) {
     console.log(error)
-    let response = {error: {message: defaultMsg, type: 'serverErr'}}
-    if (error.message && error.type) response.error = error // requires message and type to override default error
-    if (error.type) response.error.type = error.type
-    response.type = false
+    let response = {message: defaultMsg, type: 'serverErr'}
+    if (error.message && error.type) response = error // requires message and type to override default error
+    if (error.type) response.type = error.type
     console.log(response)
     const statusNo = error.statusNo
     try {
@@ -57,6 +56,8 @@ module.exports = {
 
 /*
 Standard for errors
+
+I just realised this is completely redundant lol
 
 if error, type is false. If no error, type is true
 if error, then there is an object inside called error, which is used to store data. All attributes referenced are now from this error object.

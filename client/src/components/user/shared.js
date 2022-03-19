@@ -9,10 +9,6 @@ function EyeIcon(props) {
   }
 }
 
-function detectPasswordChange(event) { // pls add next time too lazy now
-
-}
-
 function InputBox(props) {
   return (
     <div className={!!props.errorMsg ? styles.errorInputWrapper: styles.normalInputWrapper}>
@@ -22,14 +18,24 @@ function InputBox(props) {
           type={props.inputType || props.name}
           id={props.name}
           placeholder={props.noenter ? props.display: `Enter ${props.display}`}
-          autoCapitalize='none'
-          onChange={props.name === "password" || props.name === "repeatPassword" ? detectPasswordChange : null}>
+          autoCapitalize='none'>
         </input>
         {props.children}
       </div>
       <p className={styles.errorMsg}>{props.errorMsg}</p>
     </div>
   )
+}
+
+function assignError(message, type, errorStates, changeErrorState) {
+  console.log(message, type)
+  let newObj = {...errorStates}
+  for (const state in newObj) {
+    newObj[state] = false
+  }
+  if (message !== null) newObj[type] = message
+  changeErrorState(newObj)
+  console.log(errorStates)
 }
 
 function PasswordBox(props) {
@@ -54,5 +60,6 @@ function PasswordBox(props) {
 
 export {
   InputBox,
-  PasswordBox
+  PasswordBox,
+  assignError
 }

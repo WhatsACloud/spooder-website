@@ -6,7 +6,6 @@ const USERNAME = string('Username should only contain letters and numbers')
                 .required('Username is a required field')
 
 const EMAIL = string()
-              .email('Email is invalid')
               .required('Email is a required field')
 
 const PASSWORD = string()
@@ -21,11 +20,18 @@ const REPEATPASSWORD = string()
 
 const registerSchema = object({
   Username: USERNAME,
-  Email: EMAIL,
+  Email: EMAIL.email('Email is invalid'),
   Password: PASSWORD,
   RepeatPassword: REPEATPASSWORD
 })
 
+const loginSchema = object({
+  Email: EMAIL,
+  Password: string()
+           .required()
+})
+
 export {
-  registerSchema
+  registerSchema,
+  loginSchema
 }

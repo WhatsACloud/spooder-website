@@ -1,8 +1,9 @@
 @mixin std-button($brightness: 0.8) {
-  border-width: 1px;
-  border-color: black;
+  border-style: none;
   transition: filter 0.2s;
-  border-radius: 10px;
+  border-radius: 7px;
+  margin: 20px;
+  padding: 10px;
   &:hover {
     filter: brightness($brightness);
   }
