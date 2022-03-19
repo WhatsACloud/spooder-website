@@ -61,7 +61,7 @@ const Register = () => {
   }
 
   return (
-    <div>
+    <>
       <div className={styles.div}>
         <p className={styles.header}>
           Sign up
@@ -85,7 +85,7 @@ const Register = () => {
           <p>{state}</p>
         </form>
       </div>
-    </div>
+    </>
   )
 }
 

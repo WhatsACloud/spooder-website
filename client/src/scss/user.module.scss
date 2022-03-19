@@ -2,24 +2,6 @@
 @import '../../assets/fontawesome-free-6.0.0-web/scss/fontawesome.scss';
 @import './standard.scss';
 
-@mixin input-box {
-  display: inline-block;
-  box-sizing: border-box;
-  padding: 12px 40px;
-  margin: 8px;
-  border-top-style: hidden;
-  border-right-style: hidden;
-  border-left-style: hidden;
-  border-bottom-style: solid;
-  border-color: black;
-  border-width: 1px;
-  width: 80%;
-  font-size: 15px;
-  font-family: 'Courier New', Courier, monospace;
-  // background-color: rgb(245, 245, 245);
-  outline: none;
-}
-
 @mixin input-container {
   margin-left: 20px;
   padding-right: 20px;
@@ -29,17 +11,17 @@
     text-align: left;
     font-size: 15px;
   }
-  button.passwordIcon {
-      @include std-button(1);
+  div.inputContainer {
+    button.passwordIcon {
       $length: 40px;
       background-color: rgba(0, 0, 0, 0);
       height: $length;
       width: $length;
       border-radius: 50%;
-      position: absolute;
-      margin-left: 27%;
+      position: relative;
+      vertical-align: -5px;
+      margin-left: -50px;
       border-style: none;
-      margin-top: 9px;
       transition: background-color 0.2s;
       cursor: pointer;
       &:hover {
@@ -47,64 +29,76 @@
       }
       .eye {
         font-size: 80%;
-        padding-bottom: 5px;
       }
     }
-  input {
-    @include input-box;
-    &::selection {
-      border-color: black;
+    input {
+      display: inline-block;
+      box-sizing: border-box;
+      padding: 12px 40px;
+      margin: 8px;
+      border-style: solid;
+      border-radius: 5px;
+      border-color: rgb(88, 88, 88);
+      border-width: 1px;
+      width: 80%;
+      font-size: 15px;
+      font-family: 'Courier New', Courier, monospace;
+      outline: none;
+      &::selection {
+        border-color: black;
+      }
     }
   }
 }
 
-div {
-  .div {
-    display: block;
-    background-color: $light1;
-    margin-top: 100px;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    width: 37%;
-    box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    border-radius: 10px;
+.div {
+  display: flex;
+  flex-direction: column;
+  background-color: $light1;
+  margin-top: 100px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  justify-content: center;
+  width: 37%;
+  box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 10px;
+  font-size: 25px;
+  color: $textcolor;
+  .header {
+    text-align: center;
+    padding-top: 50px;
     font-size: 25px;
-    color: $textcolor;
-    .header {
-      text-align: center;
-      padding-top: 50px;
-      font-size: 25px;
-      font-family: 'Courier New', Courier, monospace;
+    font-family: 'Courier New', Courier, monospace;
+  }
+  form div.normalInputWrapper {
+    @include input-container;
+  }
+  form div.errorInputWrapper {
+    @include input-container;
+    label {
+      color: red;
     }
-    form div.normalInputContainer {
-      @include input-container;
-    }
-    form div.errorInputContainer {
-      @include input-container;
-      label {
-        color: red;
-      }
-      input {
-        border-color: red;
-        color: red;
-        &::placeholder {
-          color: red;
-        }
-      }
-      p.errorMsg {
-        font-size: 15px;
+
+    input {
+      border-color: red;
+      color: red;
+      &::placeholder {
         color: red;
       }
     }
-    form button.signUp {
-      @include std-button;
-      position: relative;
-      top: 20%;
-      left: 40%;
-      padding: 10px;
-      margin-bottom: 10px;
-      margin-top: 10px;
+    p.errorMsg {
+      font-size: 15px;
+      color: red;
     }
+  }
+  form button.signUp {
+    @include std-button;
+    position: relative;
+    top: 20%;
+    left: 40%;
+    padding: 10px;
+    margin-bottom: 10px;
+    margin-top: 10px;
   }
 }

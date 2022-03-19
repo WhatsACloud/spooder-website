@@ -15,16 +15,18 @@ function detectPasswordChange(event) { // pls add next time too lazy now
 
 function InputBox(props) {
   return (
-    <div className={!!props.errorMsg ? styles.errorInputContainer: styles.normalInputContainer}>
+    <div className={!!props.errorMsg ? styles.errorInputWrapper: styles.normalInputWrapper}>
       <label>{props.display}: </label>
-      {props.children}
-      <input
-        type={props.inputType || props.name}
-        id={props.name}
-        placeholder={props.noenter ? props.display: `Enter ${props.display}`}
-        autoCapitalize='none'
-        onChange={props.name === "password" || props.name === "repeatPassword" ? detectPasswordChange : null}>
-      </input>
+      <div className={styles.inputContainer}>
+        <input
+          type={props.inputType || props.name}
+          id={props.name}
+          placeholder={props.noenter ? props.display: `Enter ${props.display}`}
+          autoCapitalize='none'
+          onChange={props.name === "password" || props.name === "repeatPassword" ? detectPasswordChange : null}>
+        </input>
+        {props.children}
+      </div>
       <p className={styles.errorMsg}>{props.errorMsg}</p>
     </div>
   )
