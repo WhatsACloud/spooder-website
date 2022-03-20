@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
-import api from '../../services/api'
 import { registerSchema } from './userSchema'
 import { object } from 'yup'
 
 import styles from '../../scss/user.module'
 import { ErrorBox } from '../errorMsg'
-import { InputBox, PasswordBox, assignError } from './shared'
+import { InputBox, PasswordBox, assignError, userLoginHandler } from './shared'
 
 const registerEndpoint = "/register"
 
@@ -24,21 +23,7 @@ async function signUp(errorStates, changeErrorState, changeServerErrorState, nav
       const result = await registerSchema.validate(toSend, {abortEarly: false})
       delete toSend.RepeatPassword
       assignError(null, null, errorStates, changeErrorState)
-      try {
-        const res = await api.post(registerEndpoint, toSend)
-        console.log(res)
-        console.log('success!')
-        changeServerErrorState('')
-        navigate('/')
-
-      } catch(err) {
-        console.log(err)
-        const res = err.response
-        console.log(res)
-        if (res) {
-          changeServerErrorState(`Error ${res.status}: ${res.data.message}`)
-        }
-      }
+      await userLoginHandler(registerEndpoint, toSend, changeServerErrorState, navigate)
     } catch(err) {
       console.log(err)
       const data = err.inner[0]

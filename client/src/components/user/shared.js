@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import styles from '../../scss/user.module'
+import api from '../../services/api'
 
 function EyeIcon(props) {
   if (props.eye) {
@@ -38,6 +39,24 @@ function assignError(message, type, errorStates, changeErrorState) {
   console.log(errorStates)
 }
 
+async function userLoginHandler(endpoint, toSend, changeServerErrorState, navigate) {
+  try {
+    const res = await api.post(endpoint, toSend)
+    console.log(res)
+    console.log('success!')
+    changeServerErrorState('')
+    navigate('/home')
+
+  } catch(err) {
+    console.log(err)
+    const res = err.response
+    console.log(res)
+    if (res) {
+      changeServerErrorState(`Error ${res.status}: ${res.data.message}`)
+    }
+  }
+}
+
 function PasswordBox(props) {
   const [ visible, toggleVisible ] = useState(false);
   let inputType = "password";
@@ -61,5 +80,6 @@ function PasswordBox(props) {
 export {
   InputBox,
   PasswordBox,
-  assignError
+  assignError,
+  userLoginHandler
 }

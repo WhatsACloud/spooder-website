@@ -9,10 +9,10 @@ const router = Router()
 
 router.post(
   '/',
-  login.allFieldsFilled, 
-  userModel.find, 
-  login.databaseHandler, 
-  login.comparePasswords, 
+  login.validateLogin, 
+  userModel.find,
+  login.databaseHandler,
+  login.comparePasswords,
   jwtToken.generateAccessToken,
   login.end, 
   error.errorHandler

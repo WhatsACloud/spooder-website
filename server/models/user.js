@@ -30,7 +30,7 @@ module.exports = {
   async find (req, res, next) {
     try {
       const user = await User.findOne({
-        where: {username: req.body.Username}
+        where: {email: req.body.Email}
       })
       if (!user) {
         req.body.error = true
@@ -39,6 +39,7 @@ module.exports = {
       req.body.dbUser = user
       next()
     } catch (err) {
+      console.log(err)
       next(err)
     }
   }

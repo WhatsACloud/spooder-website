@@ -2,13 +2,46 @@ const { sequelize, DataTypes } = require('../database')
 const bcrypt = require('bcrypt')
 const User = require('../databaseModels/user')(sequelize, DataTypes)
 const error = require('../middleware/error')
+const Joi = require('joi')
+
+const password_schema = Joi.object({
+  Email: Joi.string()
+    .required()
+    .messages({
+      'any.required': `email|Email is a required field`,
+      'string.empty': `email|Email is a required field`
+    }),
+  Password: Joi.string()
+    .required()
+    .messages({
+      'any.required': `password|Password is a required field`,
+      'string.empty': `password|Password is a required field`
+    })
+})
 
 module.exports = {
-  allFieldsFilled (req, res, next) {
-    if (!(req.body.Password && (req.body.Email || req.body.Username))) {
-      return next(error.create('Please fill in all required fields', {statusNo: 400}))
+  validateLogin: async (req, res, next) => {
+    let user = req.body
+    try {
+      const value = await password_schema.validateAsync(req.body)
+      next()
+    } catch (err) {
+      const data = err.details[0]
+      if (err.details) {
+        if (data.message.includes('"')) {
+          data.message = "An error has occured registering"
+        } else {
+          const errData = data.message.split("|")
+          console.log(errData)
+          data.type = errData[0]
+          data.message = errData[1]
+        }
+        const newError = error.create(data.message, {type: data.type})
+        next(newError)
+      } else {
+        next(error.create())
+      }
     }
-    next()
   },
   async databaseHandler (req, res, next) {
     console.log(!(req.body.error))

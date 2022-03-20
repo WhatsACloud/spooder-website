@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { Routes, BrowserRouter as Router, Route } from 'react-router-dom';
 
-import Home from './Home';
+import Front from './Front'
 import NavBar from './navBar'
+import Home from './Home'
 import { Register, Login } from './user'
 import app from '../scss/app.module'
 
@@ -11,7 +12,8 @@ function App() {
     <Router>
       <NavBar />
       <Routes>
-        <Route exact path='/' element={<Home/>} />
+        <Route exact path='/' element={<Front/>} />
+        <Route exact path='/home' element={<Home/>} />
         <Route exact path='/register' element={<Register/>} />
         <Route exact path='/login' element={<Login/>} />
       </Routes>

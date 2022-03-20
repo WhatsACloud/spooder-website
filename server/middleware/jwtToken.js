@@ -11,19 +11,19 @@ module.exports = {
     const id = req.body.id
     try {
       const token = jwt.sign({userId: id}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
-      req.body.token = token
+      res.cookie('Authorization', token, {expires: new Date(Date.now() + 60 * 60 * 24 ), HttpOnly: true})
       next()
     } catch (err) {
       next('jwtToken')
     }
   },
   authenticateToken (req, res, next) {
-    const token = req.header('Authorization')
-    // console.log(token)
-    if (token === undefined) next(error.create('No authorization header provided'))
+    const token = req.cookies.Authorization
+    console.log(token)
+    if (token === undefined) return next(error.create('Please relogin!'))
     // console.log(process.env.TOKEN_SECRET)
     const result = jwt.verify(token, process.env.TOKEN_SECRET, (err, data) => {
-      if (err) return next(error.create('please relogin!', {type: "tokenErr"}))
+      if (err) return next(error.create('Please relogin!', {type: "tokenErr"}))
       console.log(data)
       req.body.jwtTokenData = data
       next()
