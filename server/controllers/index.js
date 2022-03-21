@@ -1,7 +1,8 @@
 const routes = {
     '/login': require('./login'),
     '/register': require('./register'),
-    '/webs': require('./spoodaweb')
+    '/webs': require('./spoodaweb'),
+    '/auth': require('./auth')
   }
   
 function addApiRoutes(app) {
