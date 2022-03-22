@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import styles from '../../scss/user.module'
+import styles from './user.module'
 import api from '../../services/api'
 
 function EyeIcon(props) {

@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { Routes, BrowserRouter as Router, Route } from 'react-router-dom';
 
-import Front from './Front'
-import NavBar from './navBar'
-import Home from './Home'
-import { Register, Login } from './user'
-import app from '../scss/app.module'
+import Front from '../Front'
+import NavBar from '../navBar'
+import Home from '../Home'
+import { Register, Login } from '../user'
+import app from './app.module'
 
 function App() {
   return (

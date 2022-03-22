@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { registerSchema } from './userSchema'
 import { object } from 'yup'
 
-import styles from '../../scss/user.module'
+import styles from './user.module'
 import { ErrorBox } from '../errorMsg'
 import { InputBox, PasswordBox, assignError, userLoginHandler } from './shared'
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import styles from '../../scss/user.module'
+import styles from './user.module'
 import { InputBox, PasswordBox, assignError, userLoginHandler } from './shared'
 import { loginSchema } from './userSchema'
 

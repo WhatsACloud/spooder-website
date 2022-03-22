@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../services/api'
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import api from '../../services/api'
+import styles from './home.module.scss'
 
-import Layout from './layout';
+import Layout from '../layout';
 
 async function authorize(navigate) {
   try {
@@ -22,7 +23,9 @@ const Home = () => {
   authorize(navigate)
   return (
     <>
-      <p>test</p>
+      <button>
+        <a href="/webs">webs</a>
+      </button>
     </>
   );
 };

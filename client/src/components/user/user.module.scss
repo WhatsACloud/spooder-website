@@ -1,6 +1,5 @@
-@import './colors.scss';
-@import '../../assets/fontawesome-free-6.0.0-web/scss/fontawesome.scss';
-@import './standard.scss';
+@import '../../scss/colors.scss';
+@import '../../scss/standard.module.scss';
 
 @mixin input-container {
   margin-left: 20px;
@@ -19,7 +18,8 @@
       width: $length;
       border-radius: 50%;
       position: relative;
-      vertical-align: -5px;
+      vertical-align: -10px;
+      margin-top: -10px;
       margin-left: -50px;
       border-style: none;
       transition: background-color 0.2s;
@@ -29,6 +29,8 @@
       }
       .eye {
         font-size: 80%;
+        vertical-align: 5px;
+        margin-left: -1px;
       }
     }
     input {
