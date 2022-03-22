@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import styles from '../../scss/user.module'
 import { InputBox, PasswordBox, assignError, userLoginHandler } from './shared'
 import { loginSchema } from './userSchema'
@@ -30,14 +30,15 @@ async function Login(errorStates, changeErrorState, changeServerErrorState, navi
 }
 
 const login = () => {
-  let navigate = useNavigate()
+  const navigate = useNavigate()
+  const location = useLocation()
   let [ errorStates, changeErrorState ] = useState({
     "Username": false,
     "Email": false,
     "Password": false,
     "RepeatPassword": false
   })
-  let [ serverErrorState, changeServerErrorState ] = useState('')
+  let [ serverErrorState, changeServerErrorState ] = useState(location.state ? location.state.message || '' : '')
 
   return (
     <div>

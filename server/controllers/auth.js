@@ -1,14 +1,14 @@
-// just to test
 const error = require('../middleware/error')
+const token = require('../middleware/jwtToken')
 
 const { Router } = require('express')
 const router = Router()
 
 router.post(
   '/',
+  token.authenticateToken,
   function (req, res, next) {
-    console.log(req.cookies)
-    res.send('a')
+    res.status(200).send({type: true})
   },
   error.errorHandler
 )

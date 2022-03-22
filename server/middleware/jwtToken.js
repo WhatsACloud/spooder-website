@@ -11,7 +11,7 @@ module.exports = {
     const id = req.body.id
     try {
       const token = jwt.sign({userId: id}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
-      res.cookie('Authorization', token, {expires: new Date(Date.now() + 60 * 60 * 24 ), httpOnly: true})
+      res.cookie('Authorization', token, {expires: new Date(Date.now() + 1000 * 60 * 60 * 24 ), httpOnly: true})
       next()
     } catch (err) {
       next('jwtToken')
