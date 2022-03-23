@@ -49,6 +49,7 @@ module.exports = {
       const user = req.body.dbUser
       req.body.dbPassword = user.dataValues.password
       req.body.id = user.dataValues.id
+      req.body.username = user.dataValues.username
       next()
       return
     }

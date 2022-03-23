@@ -37,6 +37,26 @@ $text-size: 20px;
       &.space {
         width: 100%;
       }
+      &.username {
+        div {
+          display: flex;
+          background-color: $light2;
+          a {
+            @include nav-text;
+            vertical-align: middle;
+          }
+          i.accountIcon {
+            font-size: 80%;
+          }
+        }
+      }
     }
+  }
+}
+
+.nil {
+  display: none;
+  a {
+    display: none;
   }
 }

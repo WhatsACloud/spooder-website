@@ -8,7 +8,8 @@ router.post(
   '/',
   token.authenticateToken,
   function (req, res, next) {
-    res.status(200).send({type: true})
+    const tokenData = req.body.jwtTokenData
+    res.status(200).send({type: true, Username: tokenData.Username})
   },
   error.errorHandler
 )

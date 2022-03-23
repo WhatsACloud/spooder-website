@@ -11,9 +11,11 @@ async function authorize(navigate) {
     console.log(result)
     if (result.data.type === true) {
       console.log('authorized!')
+      localStorage.setItem('Username', result.data.Username)
     }
   } catch(err) {
     console.log(err)
+    localStorage.removeItem('Username')
     navigate('/login', {state: {message: 'the authorization failed on server, please relogin.'}})
   }
 }

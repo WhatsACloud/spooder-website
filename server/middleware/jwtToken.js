@@ -9,8 +9,9 @@ dotenv.config({
 module.exports = {
   generateAccessToken (req, res, next) {
     const id = req.body.id
+    const username = req.body.username || req.body.Username
     try {
-      const token = jwt.sign({userId: id}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
+      const token = jwt.sign({userId: id, Username: username}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
       res.cookie('Authorization', token, {expires: new Date(Date.now() + 1000 * 60 * 60 * 24 ), httpOnly: true})
       next()
     } catch (err) {
