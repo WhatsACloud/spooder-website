@@ -1,4 +1,5 @@
 @import '../../scss/colors.scss';
+@import '../../scss/standard.module.scss';
 $text: ghostwhite;
 $text-size: 20px;
 
@@ -30,6 +31,7 @@ $text-size: 20px;
       }
       a {
         @include nav-text;
+        
         &.logo {
           width: 100%;
         }
@@ -38,17 +40,17 @@ $text-size: 20px;
         width: 100%;
       }
       &.username {
-        div {
-          display: flex;
-          background-color: $light2;
-          a {
-            @include nav-text;
-            vertical-align: middle;
-          }
-          i.accountIcon {
-            font-size: 80%;
-          }
-        }
+        background-color: $light2;
+      }
+    }
+    button.normal {
+      @include std-button;
+      background-color: $light1;
+      margin: 5px;
+      min-width: 40px;
+      i.accountIcon {
+        font-size: 150%;
+        margin-top: -5px;
       }
     }
   }

@@ -1,5 +1,36 @@
 @import '../../scss/standard.module.scss';
+@import '../../scss/colors.scss';
 
-button {
-  @include std-button;
+.spoodawebButton {
+  @include std-button(1);
+  font-family: 'Titillium Web', sans-serif;
+  border-color: rgb(163, 163, 163);
+  border-width: 1px;
+  border-style: solid;
+  padding: 0;
+  padding-bottom: 10px;
+  transition: border-color 0.1s;
+  &:hover {
+    border-color: $light3;
+  }
+  div {
+    &.image {
+      width: 100%;
+      min-width: 200px;
+      min-height: 175px;
+    }
+    &.title {
+      border-top-style: solid;
+      border-color: rgb(194, 194, 194);
+      border-width: 1px;
+      padding-top: 10px;
+    }
+  }
+}
+
+ul {
+  display: flex;
+  li {
+    display: flex;
+  }
 }

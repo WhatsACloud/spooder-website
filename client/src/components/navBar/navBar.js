@@ -20,12 +20,10 @@ const navBar = () => {
           <li className={styles.normal}><a href="/about">about</a></li>
           <li className={username ? styles.nil : styles.normal}><a href="/register">register</a></li>
           <li className={username ? styles.nil : styles.normal}><a href="/login">login</a></li>
-          <li className={username ? styles.username : styles.nil}>
-            <div>
-              <a>{username}</a>
-              <i className={`fa fa-user ${styles.accountIcon}`}></i>
-            </div>
-          </li>
+          <li className={username ? styles.username : styles.nil}><a>{username}</a></li>
+          <button className={username ? styles.normal : styles.nil}>
+            <i className={`fa fa-user ${styles.accountIcon}`}></i>
+          </button>
         </ul>
       </nav>
     </div>
