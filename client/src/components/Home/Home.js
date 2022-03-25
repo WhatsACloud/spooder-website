@@ -20,6 +20,11 @@ async function authorize(navigate) {
   }
 }
 
+const Authorizer = React.memo((props) => {
+  authorize(props.navigate)
+  return <></>
+})
+
 function RenderSpoodawebPreviews(props) {
   const spoodawebs = {
     'testing': 'https://lh3.google.com/u/0/d/1cFoaSBuiG6kdkdpLyuYmTVBare_J1dmzGX9Uxa1COEE=w208-iv63',
@@ -40,24 +45,46 @@ function RenderSpoodawebPreviews(props) {
   )
 }
 
+const ContextMenu = (props) => {
+  console.log('a')
+  if (props.show) {
+    return (
+      <div style={{'top': props.y, 'left': props.x}} className={styles.contextMenu}>
+        <ul>
+          <button className={styles.contextMenuButton}>
+            delete
+          </button>
+          <button className={styles.contextMenuButton}>
+            rename
+          </button>
+      </ul>
+      </div>
+    )
+  } else {
+    return <></>
+  }
+}
+
 const Home = () => { // todo: figure out how to stop this thing from rerendering so can stop needlessly hitting backend authorization
   const [ anchorPoint, setAnchorPoint ] = useState({ x: 0, y: 0})
-  const handleContextMenu = useCallback(
-    (e) => {
-      setAnchorPoint({ x: e.pageX, y: e.pageY })
-      e.preventDefault()
-    }
-  )
+  const [ show, setShow ] = useState(false)
+  const handleContextMenu = (e) => {
+    setAnchorPoint({ x: e.pageX, y: e.pageY })
+    setShow(true)
+    e.preventDefault()
+  }
+  const navigate = useNavigate()
+
   useEffect(() => {
     document.addEventListener("contextmenu", handleContextMenu);
     return (() => {
       document.removeEventListener("contextmenu", handleContextMenu);
     })
   })
-  const navigate = useNavigate()
-  authorize(navigate)
   return (
     <>
+      <Authorizer navigate={navigate}></Authorizer>
+      <ContextMenu x={anchorPoint.x} y={anchorPoint.y} show={show}></ContextMenu>
       <RenderSpoodawebPreviews></RenderSpoodawebPreviews>
     </>
   );

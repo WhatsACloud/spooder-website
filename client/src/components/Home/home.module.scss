@@ -34,3 +34,28 @@ ul {
     display: flex;
   }
 }
+
+div.contextMenu {
+  position: absolute;
+  background-color: rgb(204, 204, 204);
+  border-radius: 5px;
+  border-style: none;
+  ul {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    button.contextMenuButton {
+      display: flex;
+      border-style: none;
+      border-bottom-style: solid;
+      border-bottom-width: 1px;
+      padding: 5px;
+      background-color: rgb(197, 197, 197);
+      &:hover {
+        background-color: rgb(170, 170, 170);
+      }
+    }
+  }
+}
