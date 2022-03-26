@@ -26,14 +26,23 @@ const Authorizer = React.memo((props) => {
 })
 
 function RenderSpoodawebPreviews(props) {
+  console.log('rerendered spooderwebPreviews')
   const spoodawebs = {
-    'testing': 'https://lh3.google.com/u/0/d/1cFoaSBuiG6kdkdpLyuYmTVBare_J1dmzGX9Uxa1COEE=w208-iv63',
-    'another test': 'https://thumbs.lucid.app/documents/thumb/f95d1759-4be2-4fee-847a-be2037ca4926/0/163/NULL/140?clipToPage=false'
+    'testing': {
+      img: 'https://lh3.google.com/u/0/d/1cFoaSBuiG6kdkdpLyuYmTVBare_J1dmzGX9Uxa1COEE=w208-iv63',
+      id: 1
+    },
+    'another test': {
+      img: 'https://thumbs.lucid.app/documents/thumb/f95d1759-4be2-4fee-847a-be2037ca4926/0/163/NULL/140?clipToPage=false',
+      id: 2
+    }
   }
   const spoodawebPreviews = Object.keys(spoodawebs).map((spoodaweb) => (
-    <button className={styles.spoodawebButton} onMouseEnter={() => props.setCanShow(true)} onMouseLeave={props.setCanShow(false)}>
+    <button key={spoodaweb}
+      className={`spoodawebPreview ${styles.spoodawebButton}`}
+      onClick={() => props.navigate(`/webs/edit/?q=${spoodawebs[spoodaweb].id}`)}>
       <div className={styles.image}>
-        <img src={spoodawebs[spoodaweb]}></img>
+        <img src={spoodawebs[spoodaweb].img}></img>
       </div>
       <div className={styles.title}>
         <p>{spoodaweb}</p>
@@ -41,11 +50,12 @@ function RenderSpoodawebPreviews(props) {
     </button>
   ))
   return (
-    <ul>{spoodawebPreviews}</ul>
+    <ul className='spoodawebPreviews'>{spoodawebPreviews}</ul>
   )
 }
 
 const ContextMenu = (props) => {
+  console.log('rerendered context menu')
   if (props.show) {
     return (
       <div style={{'top': props.y, 'left': props.x}} className={styles.contextMenu}>
@@ -64,12 +74,21 @@ const ContextMenu = (props) => {
   }
 }
 
-const handleContextMenu = (e, setAnchorPoint, canShow, setShow) => {
+const handleContextMenu = (e, setAnchorPoint, setShow) => {
+  e.preventDefault()
+  let canShow = false
+  const spoodawebPreviews = document.getElementsByClassName('spoodawebPreview')
+  // console.log(spooderwebPreviews)
+  for (const spoodawebPreview of spoodawebPreviews) {
+    if (spoodawebPreview.matches(':hover')) {
+      canShow = true
+      break
+    }
+  }
+  console.log(canShow)
   if (canShow) {
     setAnchorPoint({ x: e.pageX, y: e.pageY })
     setShow(true)
-    
-    e.preventDefault()
   } else {
     setShow(false)
   }
@@ -77,23 +96,19 @@ const handleContextMenu = (e, setAnchorPoint, canShow, setShow) => {
 
 const handleClick = (setShow) => {
   setShow(false)
-  console.log('show: false')
 }
 
-const Home = () => {
+const Home = () => { // to fix constant rerenders
   const [ anchorPoint, setAnchorPoint ] = useState({ x: 0, y: 0})
   const [ show, setShow ] = useState(false) // directly affect whether component can display or not
-  const [ canShow, setCanShow ] = useState(false) // checks if mouse hovering over button, if so then can display
   const navigate = useNavigate()
-
+  
   const handleContextMenuWrapper = e => {
-    handleContextMenu(e, setAnchorPoint, canShow, setShow)
-    console.log(`show: ${show}`, `canShow: ${canShow}`)
+    handleContextMenu(e, setAnchorPoint, setShow)
   }
 
   const handleClickWrapper = e => {
     handleClick(setShow)
-    console.log(`show: ${show}`, `canShow: ${canShow}`)
   }
 
   useEffect(() => {
@@ -104,11 +119,12 @@ const Home = () => {
       document.removeEventListener("click", handleClickWrapper);
     })
   })
+  console.log('rerendered home')
   return (
     <>
       <Authorizer navigate={navigate}></Authorizer>
       <ContextMenu x={anchorPoint.x} y={anchorPoint.y} show={show}></ContextMenu>
-      <RenderSpoodawebPreviews setCanShow={setCanShow}></RenderSpoodawebPreviews>
+      <RenderSpoodawebPreviews navigate={navigate}></RenderSpoodawebPreviews>
     </>
   );
 };
