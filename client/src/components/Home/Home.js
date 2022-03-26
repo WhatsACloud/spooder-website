@@ -30,8 +30,14 @@ function RenderSpoodawebPreviews(props) {
     'testing': 'https://lh3.google.com/u/0/d/1cFoaSBuiG6kdkdpLyuYmTVBare_J1dmzGX9Uxa1COEE=w208-iv63',
     'another test': 'https://thumbs.lucid.app/documents/thumb/f95d1759-4be2-4fee-847a-be2037ca4926/0/163/NULL/140?clipToPage=false'
   }
+  const changeCanShow = (bool) => {
+    
+  }
+  useEffect(() => {
+    props.setCanShow(bool)
+  })
   const spoodawebPreviews = Object.keys(spoodawebs).map((spoodaweb) => (
-    <button className={styles.spoodawebButton} onMouseEnter={() => props.setCanShow(true)} onMouseLeave={props.setCanShow(false)}>
+    <button className={styles.spoodawebButton} onMouseEnter={() => changeCanShow(true)} onMouseLeave={changeCanShow(false)}>
       <div className={styles.image}>
         <img src={spoodawebs[spoodaweb]}></img>
       </div>
@@ -68,7 +74,6 @@ const handleContextMenu = (e, setAnchorPoint, canShow, setShow) => {
   if (canShow) {
     setAnchorPoint({ x: e.pageX, y: e.pageY })
     setShow(true)
-    
     e.preventDefault()
   } else {
     setShow(false)
