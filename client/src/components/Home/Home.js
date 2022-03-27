@@ -2,28 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import styles from './home.module.scss'
+import queryString from 'query-string'
+import Authorizer from '../Authorizer'
 
 import Layout from '../layout';
-
-async function authorize(navigate) {
-  try {
-    const result = await api.post('/auth')
-    console.log(result)
-    if (result.data.type === true) {
-      console.log('authorized!')
-      localStorage.setItem('Username', result.data.Username)
-    }
-  } catch(err) {
-    console.log(err)
-    localStorage.removeItem('Username')
-    navigate('/login', {state: {message: 'the authorization failed on server, please relogin.'}})
-  }
-}
-
-const Authorizer = React.memo((props) => {
-  authorize(props.navigate)
-  return <></>
-})
 
 function RenderSpoodawebPreviews(props) {
   console.log('rerendered spooderwebPreviews')
@@ -40,7 +22,7 @@ function RenderSpoodawebPreviews(props) {
   const spoodawebPreviews = Object.keys(spoodawebs).map((spoodaweb) => (
     <button key={spoodaweb}
       className={`spoodawebPreview ${styles.spoodawebButton}`}
-      onClick={() => props.navigate(`/webs/edit/?q=${spoodawebs[spoodaweb].id}`)}>
+      onClick={() => props.navigate(`/webs/edit/?${queryString.stringify({id: spoodawebs[spoodaweb].id})}`)}>
       <div className={styles.image}>
         <img src={spoodawebs[spoodaweb].img}></img>
       </div>
@@ -50,7 +32,7 @@ function RenderSpoodawebPreviews(props) {
     </button>
   ))
   return (
-    <ul className='spoodawebPreviews'>{spoodawebPreviews}</ul>
+    <ul className={`spoodawebPreviews ${styles.spoodawebPreviews}`}>{spoodawebPreviews}</ul>
   )
 }
 
@@ -75,9 +57,8 @@ const ContextMenu = (props) => {
 }
 
 const handleContextMenu = (e, setAnchorPoint, setShow) => {
-  e.preventDefault()
   let canShow = false
-  const spoodawebPreviews = document.getElementsByClassName('spoodawebPreview')
+  const spoodawebPreviews = document.getElementsByClassName('spoodawebPreviews')
   // console.log(spooderwebPreviews)
   for (const spoodawebPreview of spoodawebPreviews) {
     if (spoodawebPreview.matches(':hover')) {
@@ -89,6 +70,7 @@ const handleContextMenu = (e, setAnchorPoint, setShow) => {
   if (canShow) {
     setAnchorPoint({ x: e.pageX, y: e.pageY })
     setShow(true)
+    e.preventDefault()
   } else {
     setShow(false)
   }

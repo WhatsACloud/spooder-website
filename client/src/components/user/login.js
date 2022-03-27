@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import styles from './user.module'
 import { InputBox, PasswordBox, assignError, userLoginHandler } from './shared'
 import { loginSchema } from './userSchema'
+import Authorizer from '../Authorizer'
 
 const loginEndpoint = '/login'
 
@@ -41,7 +42,8 @@ const login = () => {
   let [ serverErrorState, changeServerErrorState ] = useState(location.state ? location.state.message || '' : '')
 
   return (
-    <div>
+    <>
+      <Authorizer navigate={navigate}></Authorizer>
       <div className={styles.div}>
         <p className={styles.header}>
           Login
@@ -69,7 +71,7 @@ const login = () => {
           </button>
         </form>
       </div>
-    </div>
+    </>
   )
 }
 
