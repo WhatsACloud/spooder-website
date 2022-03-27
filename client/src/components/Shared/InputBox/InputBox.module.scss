@@ -1,0 +1,88 @@
+@mixin input-container {
+  margin-left: 20px;
+  padding-right: 20px;
+  width: 100%;
+  label {
+    display: block;
+    text-align: left;
+    font-size: 15px;
+  }
+  div.inputContainer {
+    button.passwordIcon {
+      $length: 40px;
+      background-color: rgba(0, 0, 0, 0);
+      height: $length;
+      width: $length;
+      border-radius: 50%;
+      position: relative;
+      vertical-align: -10px;
+      margin-top: -10px;
+      margin-left: -50px;
+      border-style: none;
+      transition: background-color 0.2s;
+      cursor: pointer;
+      &:hover {
+        background-color: rgba(168, 168, 168, 0.664);
+      }
+      .eye {
+        font-size: 80%;
+        vertical-align: 5px;
+        margin-left: -1px;
+      }
+    }
+    input {
+      display: inline-block;
+      box-sizing: border-box;
+      padding: 12px 40px;
+      margin: 8px;
+      border-style: solid;
+      border-radius: 5px;
+      border-color: rgb(88, 88, 88);
+      border-width: 1px;
+      width: 80%;
+      font-size: 15px;
+      font-family: 'Courier New', Courier, monospace;
+      outline: none;
+      &::selection {
+        border-color: black;
+      }
+    }
+  }
+}
+
+div {
+  &.normalInputWrapper {
+    @include input-container;
+  }
+  &.errorInputWrapper {
+    @include input-container;
+    label {
+      color: red;
+    }
+    input {
+      border-color: red;
+      color: red;
+      &::placeholder {
+        color: red;
+      }
+    }
+    p.errorMsg {
+      font-size: 15px;
+      color: red;
+    }
+  }
+  &.errorMsg {
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: rgb(255, 210, 210);
+    border-color: rgb(255, 100, 100);
+    color: red;
+    margin: 5px;
+    font-size: 15px;
+  }
+  &.noMsg {
+    display: none;
+  }
+}

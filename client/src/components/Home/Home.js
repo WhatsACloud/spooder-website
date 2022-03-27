@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import styles from './home.module.scss'
 import queryString from 'query-string'
-import Authorizer from '../Authorizer'
+import Authorizer from '../Shared/Authorizer'
+import InputBox from '../Shared/InputBox/InputBox'
 
 import Layout from '../layout';
 
@@ -76,13 +77,30 @@ const handleContextMenu = (e, setAnchorPoint, setShow) => {
   }
 }
 
+const createNewSpoodaweb = () => {
+  try {
+    // await api.post('/')
+  } catch(err) {
+    console.log(err)
+  }
+}
+
 const handleClick = (setShow) => {
   setShow(false)
+}
+
+const Prompt = ({ prompted }) => {
+  return (
+    <div className={prompted ? styles.prompted : styles.unprompted}>
+      <InputBox name="" display="Enter Title of Spoodaweb" noenter={true}></InputBox>
+    </div>
+  )
 }
 
 const Home = () => { // to fix constant rerenders
   const [ anchorPoint, setAnchorPoint ] = useState({ x: 0, y: 0})
   const [ show, setShow ] = useState(false) // directly affect whether component can display or not
+  const [ prompted, setPrompted ] = useState(false)
   const navigate = useNavigate()
   
   const handleContextMenuWrapper = e => {
@@ -106,6 +124,11 @@ const Home = () => { // to fix constant rerenders
     <>
       <Authorizer navigate={navigate}></Authorizer>
       <ContextMenu x={anchorPoint.x} y={anchorPoint.y} show={show}></ContextMenu>
+      <button className={styles.createSpoodawebButton} onClick={() => {setPrompted(!prompted)}}>
+        <i className={`fa fa-plus ${styles.plusIcon}`}></i>
+        create
+      </button>
+      <Prompt prompted={prompted}></Prompt>
       <RenderSpoodawebPreviews navigate={navigate}></RenderSpoodawebPreviews>
     </>
   );

@@ -10,24 +10,6 @@ function EyeIcon(props) {
   }
 }
 
-function InputBox(props) {
-  return (
-    <div className={!!props.errorMsg ? styles.errorInputWrapper: styles.normalInputWrapper}>
-      <label>{props.display}: </label>
-      <div className={styles.inputContainer}>
-        <input
-          type={props.inputType || props.name}
-          id={props.name}
-          placeholder={props.noenter ? props.display: `Enter ${props.display}`}
-          autoCapitalize='none'>
-        </input>
-        {props.children}
-      </div>
-      <p className={styles.errorMsg}>{props.errorMsg}</p>
-    </div>
-  )
-}
-
 function assignError(message, type, errorStates, changeErrorState) {
   console.log(message, type)
   let newObj = {...errorStates}
@@ -78,7 +60,6 @@ function PasswordBox(props) {
 }
 
 export {
-  InputBox,
   PasswordBox,
   assignError,
   userLoginHandler

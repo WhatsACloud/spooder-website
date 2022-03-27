@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import styles from './user.module'
-import { InputBox, PasswordBox, assignError, userLoginHandler } from './shared'
+import { PasswordBox, assignError, userLoginHandler } from './shared'
+import InputBox from '../Shared/InputBox'
 import { loginSchema } from './userSchema'
-import Authorizer from '../Authorizer'
+import Authorizer from '../Shared/Authorizer'
 
 const loginEndpoint = '/login'
 

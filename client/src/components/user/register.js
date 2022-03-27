@@ -6,8 +6,9 @@ import { object } from 'yup'
 
 import styles from './user.module'
 import { ErrorBox } from '../errorMsg'
-import { InputBox, PasswordBox, assignError, userLoginHandler } from './shared'
-import Authorizer from '../Authorizer'
+import { PasswordBox, assignError, userLoginHandler } from './shared'
+import InputBox from '../Shared/InputBox'
+import Authorizer from '../Shared/Authorizer'
 
 const registerEndpoint = "/register"
 
