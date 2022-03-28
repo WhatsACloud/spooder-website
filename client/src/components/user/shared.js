@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import styles from './user.module'
 import api from '../../services/api'
+import InputBox from '../Shared/InputBox'
 
 function EyeIcon(props) {
   if (props.eye) {
@@ -31,6 +32,7 @@ async function userLoginHandler(endpoint, toSend, changeServerErrorState, naviga
 
   } catch(err) {
     console.log(err)
+    console.log('errored!')
     const res = err.response
     console.log(res)
     if (res) {

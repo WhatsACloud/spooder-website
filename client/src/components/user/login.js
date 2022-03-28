@@ -65,7 +65,7 @@ const login = () => {
               changeErrorState,
               changeServerErrorState,
               navigate,
-              document.getElementById("email").value, 
+              document.getElementById("email").value,
               document.getElementById("password").value
               )}>
               Login

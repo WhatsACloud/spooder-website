@@ -105,7 +105,12 @@ button.createSpoodawebButton {
   padding: 30px;
   font-size: 20px;
   font-family: 'Quicksand', sans-serif;
-  
+  display: flex;
+  flex-direction: column;
+  button.createSpoodawebButton {
+    width: fit-content;
+    align-self: center;
+  }
 }
 
 div.prompted {
@@ -118,4 +123,17 @@ div.unprompted {
   @include prompt;
   transition: opacity 0.2s;
   opacity: 0;
+}
+
+div.blankScreen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.281);
+  width: 100%;
+  height: 100vh;
+}
+
+div.none {
+  display: none;
 }

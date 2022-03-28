@@ -78,11 +78,16 @@ const handleContextMenu = (e, setAnchorPoint, setShow) => {
 }
 
 const createNewSpoodaweb = () => {
-  try {
-    // await api.post('/')
-  } catch(err) {
-    console.log(err)
-  }
+  const title = document.getElementById("title").value
+  api.post('/webs/create', {title: title})
+      .then((result) => {
+        console.log(result)
+        console.log('success!')
+      })
+      .catch(err => {
+        console.log(err)
+        console.log('errored!')
+      })
 }
 
 const handleClick = (setShow) => {
@@ -92,7 +97,10 @@ const handleClick = (setShow) => {
 const Prompt = ({ prompted }) => {
   return (
     <div className={prompted ? styles.prompted : styles.unprompted}>
-      <InputBox name="" display="Enter Title of Spoodaweb" noenter={true}></InputBox>
+      <InputBox name="title" display="Enter Title of Spoodaweb" noenter={true}></InputBox>
+      <button className={styles.createSpoodawebButton} onClick={() => {createNewSpoodaweb()}}>
+        create spoodaweb
+      </button>
     </div>
   )
 }
@@ -123,6 +131,7 @@ const Home = () => { // to fix constant rerenders
   return (
     <>
       <Authorizer navigate={navigate}></Authorizer>
+      <div className={prompted ? styles.blankScreen : styles.none}></div>
       <ContextMenu x={anchorPoint.x} y={anchorPoint.y} show={show}></ContextMenu>
       <button className={styles.createSpoodawebButton} onClick={() => {setPrompted(!prompted)}}>
         <i className={`fa fa-plus ${styles.plusIcon}`}></i>
