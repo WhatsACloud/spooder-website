@@ -1,0 +1,19 @@
+$light-error: rgb(255, 214, 214);
+$error: rgb(255, 119, 119);
+
+div {
+  &.errorMsg {
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: rgb(255, 210, 210);
+    border-color: rgb(255, 100, 100);
+    color: red;
+    margin: 5px;
+    font-size: 15px;
+  }
+  &.noMsg {
+    display: none;
+  }
+}

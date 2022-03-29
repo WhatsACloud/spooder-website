@@ -5,6 +5,7 @@ import { PasswordBox, assignError, userLoginHandler } from './shared'
 import InputBox from '../Shared/InputBox'
 import { loginSchema } from './userSchema'
 import Authorizer from '../Shared/Authorizer'
+import { ErrorBox } from '../Shared/errorMsg'
 
 const loginEndpoint = '/login'
 
@@ -52,11 +53,9 @@ const login = () => {
         <form>
           <InputBox name="email" display="Email" errorMsg={errorStates.Email}></InputBox>
           <PasswordBox name="password" display="Password" errorMsg={errorStates.Password}></PasswordBox>
-          <div className={serverErrorState ? styles.errorMsg : styles.noMsg}>
-            <p>
-              {serverErrorState}
-            </p>
-          </div>
+          <ErrorBox>
+            {serverErrorState}
+          </ErrorBox>
           <button
             type="button"
             className={styles.signUp}

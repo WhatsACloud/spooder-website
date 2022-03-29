@@ -4,9 +4,15 @@ import api from '../../services/api'
 import styles from './home.module.scss'
 import queryString from 'query-string'
 import Authorizer from '../Shared/Authorizer'
-import InputBox from '../Shared/InputBox/InputBox'
+import InputBox from '../Shared/InputBox'
+import { ErrorBox } from '../Shared/errorMsg'
+import { object, string, ref } from 'yup'
 
 import Layout from '../layout';
+
+const spoodawebSchema = object({
+  title: string().required('Title is a required field')
+})
 
 function RenderSpoodawebPreviews(props) {
   console.log('rerendered spooderwebPreviews')
@@ -77,28 +83,56 @@ const handleContextMenu = (e, setAnchorPoint, setShow) => {
   }
 }
 
-const createNewSpoodaweb = () => {
+async function createNewSpoodaweb (changeServerErrorState, changeTitleErrorState) {
   const title = document.getElementById("title").value
-  api.post('/webs/create', {title: title})
-      .then((result) => {
-        console.log(result)
-        console.log('success!')
-      })
-      .catch(err => {
-        console.log(err)
-        console.log('errored!')
-      })
+  try {
+    const validateResult = await spoodawebSchema.validate({title: title}, {abortEarly: false})
+    console.log(validateResult)
+    changeTitleErrorState('')
+    try {
+      const postResult = await api.post('/webs/create', {title: title})
+      console.log(postResult)
+      console.log('success!')
+      changeServerErrorState('')
+    } catch(err) {
+      console.log(err)
+      console.log('errored!')
+      changeServerErrorState(err.response.data.message)
+    }
+  } catch(err) {
+    console.log(err)
+    const data = err.inner[0]
+    console.log(data.message)
+    changeTitleErrorState(data.message)
+  }
 }
 
-const handleClick = (setShow) => {
+const handleClick = (setShow, setPrompted) => {
   setShow(false)
+  const blankScreen = document.getElementsByClassName(styles.blankScreen)[0]
+  if (blankScreen && blankScreen.matches(':hover')) {
+    setPrompted(false)
+  }
 }
 
-const Prompt = ({ prompted }) => {
+const Prompt = ({ prompted, titleErrorState, changeTitleErrorState }) => {
+  const [ serverErrorState, changeServerErrorState ] = useState('')
+
+  useEffect(() => {
+    if (!prompted) {
+      window.setTimeout(() => {
+        changeServerErrorState('')
+        changeTitleErrorState('')
+      }, 200)
+    }
+  })
   return (
     <div className={prompted ? styles.prompted : styles.unprompted}>
-      <InputBox name="title" display="Enter Title of Spoodaweb" noenter={true}></InputBox>
-      <button className={styles.createSpoodawebButton} onClick={() => {createNewSpoodaweb()}}>
+      <InputBox name="title" display="Enter Title of Spoodaweb" noenter={true} errorMsg={titleErrorState}></InputBox>
+      <ErrorBox>
+        {serverErrorState}
+      </ErrorBox>
+      <button className={styles.createSpoodawebButton} onClick={() => {createNewSpoodaweb(changeServerErrorState, changeTitleErrorState)}}>
         create spoodaweb
       </button>
     </div>
@@ -109,6 +143,7 @@ const Home = () => { // to fix constant rerenders
   const [ anchorPoint, setAnchorPoint ] = useState({ x: 0, y: 0})
   const [ show, setShow ] = useState(false) // directly affect whether component can display or not
   const [ prompted, setPrompted ] = useState(false)
+  const [ titleErrorState, changeTitleErrorState ] = useState('')
   const navigate = useNavigate()
   
   const handleContextMenuWrapper = e => {
@@ -116,7 +151,7 @@ const Home = () => { // to fix constant rerenders
   }
 
   const handleClickWrapper = e => {
-    handleClick(setShow)
+    handleClick(setShow, setPrompted)
   }
 
   useEffect(() => {
@@ -137,7 +172,7 @@ const Home = () => { // to fix constant rerenders
         <i className={`fa fa-plus ${styles.plusIcon}`}></i>
         create
       </button>
-      <Prompt prompted={prompted}></Prompt>
+      <Prompt prompted={prompted} titleErrorState={titleErrorState} changeTitleErrorState={changeTitleErrorState}></Prompt>
       <RenderSpoodawebPreviews navigate={navigate}></RenderSpoodawebPreviews>
     </>
   );

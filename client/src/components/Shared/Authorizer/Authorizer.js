@@ -27,7 +27,9 @@ const Authorizer = React.memo((props) => {
         }
         if (props.navigate) {
           if (!result) {
-            props.navigate('/login', {state: {message: 'the authorization failed on server, please relogin.'}})
+            if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+              props.navigate('/login', {state: {message: 'the authorization failed on server, please relogin.'}})
+            }
           } else {
             if (window.location.pathname !== '/home') {
               props.navigate('/home')

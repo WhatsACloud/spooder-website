@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import styles from './user.module'
 import api from '../../services/api'
 import InputBox from '../Shared/InputBox'
+import inputBoxStyles from '../Shared/InputBox/InputBox.module'
 
 function EyeIcon(props) {
   if (props.eye) {
@@ -52,7 +53,7 @@ function PasswordBox(props) {
   return (
     <InputBox name={props.name} display={props.display} inputType={inputType} noenter={props.noenter} errorMsg={props.errorMsg}>
       <button
-        className={styles.passwordIcon}
+        className={inputBoxStyles.passwordIcon}
         onClick={() => toggleVisible(!visible)}
         type="button">
           <EyeIcon eye={visible}></EyeIcon>

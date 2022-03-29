@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { registerSchema } from './userSchema'
 import { object } from 'yup'
 
+import { ErrorBox } from '../Shared/errorMsg'
 import styles from './user.module'
-import { ErrorBox } from '../errorMsg'
 import { PasswordBox, assignError, userLoginHandler } from './shared'
 import InputBox from '../Shared/InputBox'
 import Authorizer from '../Shared/Authorizer'
@@ -59,11 +59,9 @@ const Register = () => {
           <InputBox name="email" display="Email" errorMsg={errorStates.Email}></InputBox>
           <PasswordBox name="password" display="Password" errorMsg={errorStates.Password}></PasswordBox>
           <PasswordBox name="repeatPassword" display="Repeat Password" errorMsg={errorStates.RepeatPassword} noenter={true}></PasswordBox>
-          <div className={serverErrorState ? styles.errorMsg : styles.noMsg}>
-            <p>
-              {serverErrorState}
-            </p>
-          </div>
+          <ErrorBox>
+            {serverErrorState}
+          </ErrorBox>
           <button
             type="button"
             className={styles.signUp}
