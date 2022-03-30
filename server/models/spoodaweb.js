@@ -17,5 +17,12 @@ module.exports = {
     } catch (err) {
       next(err)
     }
+  },
+  async get (req, res, next) {
+    try {
+      
+    } catch(err) {
+
+    }
   }
 }

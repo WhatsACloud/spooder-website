@@ -28,4 +28,14 @@ router.post(
   // NOTE TO SELF: PLEASE LOAD BUDS IN ORDER, DO NOT LOAD ALL AT ONCE OR COMPUTER WILL SELF DESTRUCT
 )
 
+const getSpoodawebs = require('../controllerFuncs/getSpoodawebs')
+
+router.post(
+  '/get',
+  getSpoodawebs.validate,
+  jwtToken.authenticateToken,
+  getSpoodawebs.end,
+  errorHandler
+)
+
 module.exports = router
