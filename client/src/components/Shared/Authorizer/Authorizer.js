@@ -13,6 +13,7 @@ async function authorize() {
     return false
   } catch(err) {
     console.log(err)
+    console.log('not authorized! Removing username...')
     localStorage.removeItem('Username')
     return false
   }

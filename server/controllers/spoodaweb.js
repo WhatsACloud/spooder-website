@@ -30,10 +30,10 @@ router.post(
 
 const getSpoodawebs = require('../controllerFuncs/getSpoodawebs')
 
-router.post(
+router.get(
   '/get',
-  getSpoodawebs.validate,
   jwtToken.authenticateToken,
+  spoodawebModel.get,
   getSpoodawebs.end,
   errorHandler
 )

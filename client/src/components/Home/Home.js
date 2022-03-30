@@ -15,7 +15,8 @@ const spoodawebSchema = object({
 })
 
 function RenderSpoodawebPreviews(props) {
-  console.log('rerendered spooderwebPreviews')
+  const [ spoodawebPreviews, setSpoodawebPreviews ] = useState()
+  /*
   const spoodawebs = {
     'testing': {
       img: 'https://lh3.google.com/u/0/d/1cFoaSBuiG6kdkdpLyuYmTVBare_J1dmzGX9Uxa1COEE=w208-iv63',
@@ -26,20 +27,37 @@ function RenderSpoodawebPreviews(props) {
       id: 2
     }
   }
-  const spoodawebPreviews = Object.keys(spoodawebs).map((spoodaweb) => (
-    <button key={spoodaweb}
-      className={`spoodawebPreview ${styles.spoodawebButton}`}
-      onClick={() => props.navigate(`/webs/edit/?${queryString.stringify({id: spoodawebs[spoodaweb].id})}`)}>
-      <div className={styles.image}>
-        <img src={spoodawebs[spoodaweb].img}></img>
-      </div>
-      <div className={styles.title}>
-        <p>{spoodaweb}</p>
-      </div>
-    </button>
-  ))
+  */
+  useEffect(() => {
+    async function GetSpoodawebPreviews() {
+      try {
+        const webs = await api.get('/webs/get')
+        setSpoodawebPreviews(webs.data)
+      } catch(err) {
+        console.log(err)
+      }
+      return null
+    }
+    GetSpoodawebPreviews()
+  })
+  console.log('rerendered spooderwebPreviews')
   return (
-    <ul className={`spoodawebPreviews ${styles.spoodawebPreviews}`}>{spoodawebPreviews}</ul>
+    <>
+      <ul className={`spoodawebPreviews ${styles.spoodawebPreviews}`}>{
+        spoodawebPreviews?.map(spoodaweb => (
+          <button key={spoodaweb.id}
+            className={`spoodawebPreview ${styles.spoodawebButton}`}
+            onClick={() => props.navigate(`/webs/edit/?${queryString.stringify({id: spoodaweb.id})}`)}>
+            <div className={styles.image}>
+              <img src={spoodaweb.img ? spoodaweb.img : ''}></img>
+            </div>
+            <div className={styles.title}>
+              <p>{spoodaweb.title}</p>
+            </div>
+          </button>
+        ))
+      }</ul>
+    </>
   )
 }
 

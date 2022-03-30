@@ -20,9 +20,16 @@ module.exports = {
   },
   async get (req, res, next) {
     try {
-      
+      const webs = await spoodaweb.findAll({
+        where: {
+          fk_user_id: req.body.jwtTokenData.userId
+        }
+      })
+      req.body.webs = webs
+      next()
     } catch(err) {
-
+      console.log(err)
+      next(err)
     }
   }
 }
