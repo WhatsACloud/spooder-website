@@ -83,7 +83,7 @@ const handleContextMenu = (e, setAnchorPoint, setShow) => {
   }
 }
 
-async function createNewSpoodaweb (changeServerErrorState, changeTitleErrorState) {
+async function createNewSpoodaweb (changeServerErrorState, changeTitleErrorState, navigate) {
   const title = document.getElementById("title").value
   try {
     const validateResult = await spoodawebSchema.validate({title: title}, {abortEarly: false})
@@ -91,19 +91,25 @@ async function createNewSpoodaweb (changeServerErrorState, changeTitleErrorState
     changeTitleErrorState('')
     try {
       const postResult = await api.post('/webs/create', {title: title})
-      console.log(postResult)
+      const spoodawebId = postResult.data.spoodawebId
+      console.log(spoodawebId)
       console.log('success!')
       changeServerErrorState('')
+      navigate(`/webs/edit/?${queryString.stringify({id: spoodawebId})}`)
     } catch(err) {
       console.log(err)
       console.log('errored!')
-      changeServerErrorState(err.response.data.message)
+      if (err.response) {
+        changeServerErrorState(err.response.data.message)
+      }
     }
   } catch(err) {
     console.log(err)
-    const data = err.inner[0]
-    console.log(data.message)
-    changeTitleErrorState(data.message)
+    if (err.inner) {
+      const data = err.inner[0]
+      console.log(data.message)
+      changeTitleErrorState(data.message)
+    }
   }
 }
 
@@ -115,7 +121,7 @@ const handleClick = (setShow, setPrompted) => {
   }
 }
 
-const Prompt = ({ prompted, titleErrorState, changeTitleErrorState }) => {
+const Prompt = ({ prompted, titleErrorState, changeTitleErrorState, navigate }) => {
   const [ serverErrorState, changeServerErrorState ] = useState('')
 
   useEffect(() => {
@@ -132,7 +138,7 @@ const Prompt = ({ prompted, titleErrorState, changeTitleErrorState }) => {
       <ErrorBox>
         {serverErrorState}
       </ErrorBox>
-      <button className={styles.createSpoodawebButton} onClick={() => {createNewSpoodaweb(changeServerErrorState, changeTitleErrorState)}}>
+      <button className={styles.createSpoodawebButton} onClick={() => {createNewSpoodaweb(changeServerErrorState, changeTitleErrorState, navigate)}}>
         create spoodaweb
       </button>
     </div>
@@ -172,7 +178,11 @@ const Home = () => { // to fix constant rerenders
         <i className={`fa fa-plus ${styles.plusIcon}`}></i>
         create
       </button>
-      <Prompt prompted={prompted} titleErrorState={titleErrorState} changeTitleErrorState={changeTitleErrorState}></Prompt>
+      <Prompt
+        prompted={prompted}
+        titleErrorState={titleErrorState}
+        changeTitleErrorState={changeTitleErrorState}
+        navigate={navigate}></Prompt>
       <RenderSpoodawebPreviews navigate={navigate}></RenderSpoodawebPreviews>
     </>
   );

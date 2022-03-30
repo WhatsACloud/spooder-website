@@ -13,6 +13,6 @@ module.exports = {
     }
   },
   end (req, res, next) {
-    res.status(201).send({data: {spoodawebId: req.body.spoodawebId, result: true, message: 'spoodaweb successfully created'}, type: true})
+    res.status(201).send({spoodawebId: req.body.spoodawebId, result: true, message: 'spoodaweb successfully created'})
   }
 }

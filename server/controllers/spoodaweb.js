@@ -11,7 +11,7 @@ router.post(
   spoodaweb.validate, 
   jwtToken.authenticateToken, 
   spoodawebModel.create, 
-  spoodaweb.end, 
+  spoodaweb.end,
   errorHandler
 )
 
