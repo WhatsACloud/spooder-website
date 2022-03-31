@@ -12,7 +12,8 @@ module.exports = {
     const username = req.body.username || req.body.Username
     try {
       const token = jwt.sign({userId: id, Username: username}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
-      res.cookie('Authorization', token, {expires: new Date(Date.now() + 1000 * 60 * 60 * 24 ), httpOnly: true})
+      // res.cookie('Authorization', token, {expires: new Date(Date.now() + 1000 * 60 * 60 * 24 ), httpOnly: true})
+      res.cookie('Authorization', token, {expires: new Date(Date.now() + 1000 ), httpOnly: true}) // for testing purposes only
       next()
     } catch (err) {
       next('jwtToken')

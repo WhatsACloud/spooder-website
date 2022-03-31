@@ -4,7 +4,6 @@ import styles from './user.module'
 import { PasswordBox, assignError, userLoginHandler } from './shared'
 import InputBox from '../Shared/InputBox'
 import { loginSchema } from './userSchema'
-import Authorizer from '../Shared/Authorizer'
 import { ErrorBox } from '../Shared/errorMsg'
 
 const loginEndpoint = '/login'
@@ -45,7 +44,6 @@ const login = () => {
 
   return (
     <>
-      <Authorizer navigate={navigate}></Authorizer>
       <div className={styles.div}>
         <p className={styles.header}>
           Login

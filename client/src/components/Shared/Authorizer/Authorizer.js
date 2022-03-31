@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../../../services/api'
 
 async function authorize() {
@@ -20,6 +21,7 @@ async function authorize() {
 }
 
 const Authorizer = (props) => {
+  const navigate = useNavigate()
   useEffect(() => {
     authorize()
       .then((result) => {
@@ -29,11 +31,11 @@ const Authorizer = (props) => {
         if (props.navigate) {
           if (!result) {
             if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-              props.navigate('/login', {state: {message: 'the authorization failed on server, please relogin.'}})
+              navigate('/login', {state: {message: 'the authorization failed on server, please relogin.'}})
             }
           } else {
             if (window.location.pathname !== '/home') {
-              props.navigate('/home')
+              navigate('/home')
             }
           }
         }

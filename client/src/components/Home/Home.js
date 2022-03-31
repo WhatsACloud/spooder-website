@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import styles from './home.module.scss'
 import queryString from 'query-string'
-import Authorizer from '../Shared/Authorizer'
 import InputBox from '../Shared/InputBox'
 import { ErrorBox } from '../Shared/errorMsg'
 import { object, string, ref } from 'yup'
@@ -206,7 +205,6 @@ const Home = () => { // to fix constant rerenders
   console.log('rerendered home')
   return (
     <>
-      <Authorizer navigate={navigate}></Authorizer>
       <div className={prompted ? styles.blankScreen : styles.none}></div>
       <ContextMenu x={anchorPoint.x} y={anchorPoint.y} show={show}></ContextMenu>
       <button className={styles.createSpoodawebButton} onClick={() => {setPrompted(!prompted)}}>

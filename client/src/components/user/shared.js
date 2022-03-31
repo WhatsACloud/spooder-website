@@ -30,6 +30,7 @@ async function userLoginHandler(endpoint, toSend, changeServerErrorState, naviga
     console.log('success!')
     changeServerErrorState('')
     navigate('/home')
+    window.location.reload()
 
   } catch(err) {
     console.log(err)

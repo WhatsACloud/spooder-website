@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './navBar.module';
 
-const navBar = () => {
+const navBar = (props) => {
   const [ username, setUsername ] = useState()
   useEffect(() => {
-    setUsername(localStorage.getItem('Username'))
-    window.addEventListener('storage', () => {
-       
-    })
+    const Username = localStorage.getItem('Username')
+    console.log(Username)
+    setUsername(Username)
   })
 
   return (
