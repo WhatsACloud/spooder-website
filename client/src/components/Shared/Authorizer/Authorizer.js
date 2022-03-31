@@ -25,18 +25,13 @@ const Authorizer = (props) => {
   useEffect(() => {
     authorize()
       .then((result) => {
-        if (props.callback) {
-          props.callback(result)
-        }
-        if (props.navigate) {
-          if (!result) {
-            if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-              navigate('/login', {state: {message: 'the authorization failed on server, please relogin.'}})
-            }
-          } else {
-            if (window.location.pathname !== '/home') {
-              navigate('/home')
-            }
+        if (!result) {
+          if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+            navigate('/login', {state: {message: 'the authorization failed on server, please relogin.'}})
+          }
+        } else {
+          if (window.location.pathname !== '/home') {
+            navigate('/home')
           }
         }
       })

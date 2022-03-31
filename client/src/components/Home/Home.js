@@ -28,7 +28,7 @@ const loading = () => {
   return <p>loading</p>
 }
 
-function SpoodawebPreviews() {
+function SpoodawebPreviews({ navigate }) {
   const [ spoodawebPreviews, setSpoodawebPreviews ] = useState()
   useEffect(() => {
     GetSpoodawebPreviews(setSpoodawebPreviews)
@@ -38,7 +38,7 @@ function SpoodawebPreviews() {
       spoodawebPreviews?.map(spoodaweb => (
         <button key={spoodaweb.id}
           className={`spoodawebPreview ${styles.spoodawebButton}`}
-          onClick={() => props.navigate(`/webs/edit/?${queryString.stringify({id: spoodaweb.id})}`)}>
+          onClick={() => navigate(`/webs/edit/?${queryString.stringify({id: spoodaweb.id})}`)}>
           <div className={styles.image}>
             <img src={spoodaweb.img ? spoodaweb.img : ''}></img>
           </div>
@@ -51,7 +51,7 @@ function SpoodawebPreviews() {
   )
 }
 
-function RenderSpoodawebPreviews(props) {
+function RenderSpoodawebPreviews({ navigate }) {
   /*
   const spoodawebs = {
     'testing': {
@@ -67,7 +67,7 @@ function RenderSpoodawebPreviews(props) {
   return (
     <>
       <Suspense fallback={loading}>
-        <SpoodawebPreviews></SpoodawebPreviews>
+        <SpoodawebPreviews navigate={navigate}></SpoodawebPreviews>
       </Suspense>
     </>
   )

@@ -4,12 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import Layout from './layout';
 
 const Front = () => {
-  const navigate = useNavigate()
-  useEffect(() => {
-    if (localStorage.getItem('Username')) {
-      navigate('/home')
-    }
-  })
   return (
     <div>
       <p>
