@@ -160,11 +160,15 @@ const Prompt = ({ prompted, titleErrorState, changeTitleErrorState, navigate }) 
       window.setTimeout(() => {
         changeServerErrorState('')
         changeTitleErrorState('')
+        document.getElementById('prompt').style.display = 'none'
       }, 200)
+    } else {
+      document.getElementById('prompt').style.display = 'block'
+      // transition: opacity 0.2s;
     }
   })
   return (
-    <div className={prompted ? styles.prompted : styles.unprompted}>
+    <div className={prompted ? styles.prompted : styles.unprompted} id='prompt'>
       <InputBox name="title" display="Enter Title of Spoodaweb" noenter={true} errorMsg={titleErrorState}></InputBox>
       <ErrorBox>
         {serverErrorState}
