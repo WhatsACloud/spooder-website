@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import styles from './home.module.scss'
@@ -14,8 +14,45 @@ const spoodawebSchema = object({
   title: string().required('Title is a required field')
 })
 
-function RenderSpoodawebPreviews(props) {
+async function GetSpoodawebPreviews(setSpoodawebPreviews) {
+  try {
+    const webs = await api.get('/webs/get')
+    setSpoodawebPreviews(webs.data)
+    console.log('api call!')
+  } catch(err) {
+    console.log(err)
+  }
+  return null
+}
+
+const loading = () => {
+  return <p>loading</p>
+}
+
+function SpoodawebPreviews() {
   const [ spoodawebPreviews, setSpoodawebPreviews ] = useState()
+  useEffect(() => {
+    GetSpoodawebPreviews(setSpoodawebPreviews)
+  }, [])
+  return (
+    <ul className={`spoodawebPreviews ${styles.spoodawebPreviews}`}>{
+      spoodawebPreviews?.map(spoodaweb => (
+        <button key={spoodaweb.id}
+          className={`spoodawebPreview ${styles.spoodawebButton}`}
+          onClick={() => props.navigate(`/webs/edit/?${queryString.stringify({id: spoodaweb.id})}`)}>
+          <div className={styles.image}>
+            <img src={spoodaweb.img ? spoodaweb.img : ''}></img>
+          </div>
+          <div className={styles.title}>
+            <p>{spoodaweb.title}</p>
+          </div>
+        </button>
+      ))
+    }</ul>
+  )
+}
+
+function RenderSpoodawebPreviews(props) {
   /*
   const spoodawebs = {
     'testing': {
@@ -28,35 +65,11 @@ function RenderSpoodawebPreviews(props) {
     }
   }
   */
-  useEffect(() => {
-    async function GetSpoodawebPreviews() {
-      try {
-        const webs = await api.get('/webs/get')
-        setSpoodawebPreviews(webs.data)
-      } catch(err) {
-        console.log(err)
-      }
-      return null
-    }
-    GetSpoodawebPreviews()
-  })
-  console.log('rerendered spooderwebPreviews')
   return (
     <>
-      <ul className={`spoodawebPreviews ${styles.spoodawebPreviews}`}>{
-        spoodawebPreviews?.map(spoodaweb => (
-          <button key={spoodaweb.id}
-            className={`spoodawebPreview ${styles.spoodawebButton}`}
-            onClick={() => props.navigate(`/webs/edit/?${queryString.stringify({id: spoodaweb.id})}`)}>
-            <div className={styles.image}>
-              <img src={spoodaweb.img ? spoodaweb.img : ''}></img>
-            </div>
-            <div className={styles.title}>
-              <p>{spoodaweb.title}</p>
-            </div>
-          </button>
-        ))
-      }</ul>
+      <Suspense fallback={loading}>
+        <SpoodawebPreviews></SpoodawebPreviews>
+      </Suspense>
     </>
   )
 }

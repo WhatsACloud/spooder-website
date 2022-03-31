@@ -19,7 +19,7 @@ async function authorize() {
   }
 }
 
-const Authorizer = React.memo((props) => {
+const Authorizer = (props) => {
   useEffect(() => {
     authorize()
       .then((result) => {
@@ -38,8 +38,8 @@ const Authorizer = React.memo((props) => {
           }
         }
       })
-  })
+  }, [])
   return <></>
-})
+}
 
 export default Authorizer
