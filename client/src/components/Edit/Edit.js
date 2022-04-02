@@ -1,10 +1,12 @@
-import React, { Component } from 'react';
-import { Routes, BrowserRouter as Router, Route } from 'react-router-dom';
+import React from 'react'
+import styles from './edit.module'
 
 function Edit() {
   return (
     <>
-      <p>test</p>
+      <div className={styles.scroll}>
+        <p>wtf lol</p>
+      </div>
     </>
   );
 }
