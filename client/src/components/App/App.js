@@ -7,12 +7,10 @@ import Home from '../Home'
 import { Register, Login } from '../user'
 import Edit from '../Edit'
 import app from './app.module'
-import Authorizer from '../Shared/Authorizer'
 
 function App() {
   return (
     <Router>
-      <Authorizer></Authorizer>
       <NavBar />
       <Routes>
         <Route exact path='/' element={<Front/>} />

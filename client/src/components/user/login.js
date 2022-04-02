@@ -5,6 +5,7 @@ import { PasswordBox, assignError, userLoginHandler } from './shared'
 import InputBox from '../Shared/InputBox'
 import { loginSchema } from './userSchema'
 import { ErrorBox } from '../Shared/errorMsg'
+import Authorizer from '../Shared/Authorizer'
 
 const loginEndpoint = '/login'
 
@@ -44,6 +45,7 @@ const login = () => {
 
   return (
     <>
+      <Authorizer navigate={navigate}></Authorizer>
       <div className={styles.div}>
         <p className={styles.header}>
           Login

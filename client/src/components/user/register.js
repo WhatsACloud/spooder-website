@@ -8,6 +8,7 @@ import { ErrorBox } from '../Shared/errorMsg'
 import styles from './user.module'
 import { PasswordBox, assignError, userLoginHandler } from './shared'
 import InputBox from '../Shared/InputBox'
+import Authorizer from '../Shared/Authorizer'
 
 const registerEndpoint = "/register"
 
@@ -48,6 +49,7 @@ const Register = () => {
 
   return (
     <>
+      <Authorizer navigate={navigate}></Authorizer>
       <div className={styles.div}>
         <p className={styles.header}>
           Sign up

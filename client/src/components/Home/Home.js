@@ -6,6 +6,7 @@ import queryString from 'query-string'
 import InputBox from '../Shared/InputBox'
 import { ErrorBox } from '../Shared/errorMsg'
 import { object, string, ref } from 'yup'
+import Authorizer from '../Shared/Authorizer'
 
 import Layout from '../layout';
 
@@ -205,6 +206,7 @@ const Home = () => { // to fix constant rerenders
   console.log('rerendered home')
   return (
     <>
+      <Authorizer requireAuth={true} navigate={navigate}></Authorizer>
       <div className={prompted ? styles.blankScreen : styles.none}></div>
       <ContextMenu x={anchorPoint.x} y={anchorPoint.y} show={show}></ContextMenu>
       <button className={styles.createSpoodawebButton} onClick={() => {setPrompted(!prompted)}}>
