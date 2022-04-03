@@ -39,6 +39,8 @@ async function userLoginHandler(endpoint, toSend, changeServerErrorState, naviga
     console.log(res)
     if (res) {
       changeServerErrorState(`Error ${res.status}: ${res.data.message}`)
+    } else {
+      changeServerErrorState('An error has occured in the server, please try again later.')
     }
   }
 }

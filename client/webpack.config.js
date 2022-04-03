@@ -7,9 +7,9 @@ module.exports = {
   mode: 'development',  
   entry: './src/index.js',
   watch: true,
-  publicPath: '/',
   output: {
-    filename: 'bundle.[hash].js'
+    filename: 'bundle.[hash].js',
+    publicPath: '/'
   },
   devtool: 'inline-source-map',
   module: {
@@ -65,9 +65,7 @@ module.exports = {
   devServer: {
     host: 'localhost',
     port: port,
-    historyApiFallback: {
-      index: 'public/index.html'
-    },
+    historyApiFallback: true,
     open: true
   },
   resolve: {
