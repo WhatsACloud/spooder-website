@@ -131,7 +131,7 @@ const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
     x: x,
     y: y
   })
-}
+} // todo: add ability to detect overlay in objects in canvas
 
 function Edit() {
   const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
