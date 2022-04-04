@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import Authorizer from '../Shared/Authorizer'
 import styles from './edit.module'
-// import { Canvg } from 'canvg'
 
 const gridLink = "http://phrogz.net/tmp/grid.gif"
 
@@ -108,15 +109,18 @@ const mouseUp = (e, setMiddleMouseDown) => {
 }
 
 const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
+  const x = e.pageX
+  const y = e.pageY
   if (!middleMouseDown) {
     setMousePos({
       x: x,
       y: y
     })
+    if (checkInsideHexagon(x, y, 100, 50, 50)) {
+      console.log('inside hexagon!')
+    }
     return
   }
-  const x = e.pageX
-  const y = e.pageY
   if (!mousePos.y) {
     setMousePos({
       x: x,
@@ -126,7 +130,8 @@ const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
   }
   const xDiff = mousePos.x - x
   const yDiff = mousePos.y - y
-  divCanvas.scrollBy(-xDiff*8, -yDiff*8)
+  const multi = 4
+  divCanvas.scrollBy(-xDiff*multi, -yDiff*multi)
   setMousePos({
     x: x,
     y: y
@@ -134,6 +139,7 @@ const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
 } // todo: add ability to detect overlay in objects in canvas
 
 function Edit() {
+  const navigate = useNavigate()
   const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
   const [ mousePos, setMousePos ] = useState({
     x: null,
@@ -158,7 +164,7 @@ function Edit() {
     preCanvas.width = window.innerWidth + 2 * 2000
     preCanvas.height = window.innerHeight + 2 * 2000
     const canvas = preCanvas.getContext('2d')
-    const gradient = canvas.createRadialGradient(150, 50, 5, 90, 60, 100);
+    const gradient = canvas.createRadialGradient(150, 50, 5, 90, 60, 100)
     gradient.addColorStop(1, "rgb(205, 255, 255)")
     gradient.addColorStop(0, "white")
     canvas.fillStyle = gradient
@@ -177,11 +183,12 @@ function Edit() {
   })
   return (
     <>
+      <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <div className={styles.divCanvas} id='divCanvas'>
         <canvas className={styles.canvas} id='canvas'></canvas>
       </div>
     </>
-  );
+  )
 }
 
 /*
@@ -194,24 +201,24 @@ function Edit() {
   <rect fill='url(#p2)' stroke-width="5px"></rect>
 </svg>
 */
-export default Edit;
+export default Edit
 
 /*
 FOR FUTURE REFERENCE
 
 $(document).keydown(function(event) {
-if (event.ctrlKey==true &amp;&amp; (event.which == '61' || event.which == '107' || event.which == '173' || event.which == '109' || event.which == '187' || event.which == '189' ) ) {
-event.preventDefault();
+if (event.ctrlKey==true &amp&amp (event.which == '61' || event.which == '107' || event.which == '173' || event.which == '109' || event.which == '187' || event.which == '189' ) ) {
+event.preventDefault()
 }
 // 107 Num Key +
 // 109 Num Key -
 // 173 Min Key hyphen/underscor Hey
 // 61 Plus key +/= key
-});
+})
 $(window).bind('mousewheel DOMMouseScroll', function (event) {
 if (event.ctrlKey == true) {
-event.preventDefault();
+event.preventDefault()
 }
-});
+})
 
 */

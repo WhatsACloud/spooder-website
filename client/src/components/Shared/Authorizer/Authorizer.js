@@ -24,7 +24,9 @@ const Authorizer = ({ requireAuth=false, navigate }) => {
     authorize()
       .then((result) => {
         if (!result) {
-          navigate('/login', {state: {message: 'the authorization failed on server, please relogin.'}})
+          if (requireAuth) {
+            navigate('/login', {state: {message: 'the authorization failed on server, please relogin.'}})
+          }
         } else {
           if (!requireAuth) {
             navigate('/home')
