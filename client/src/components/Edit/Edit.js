@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Authorizer from '../Shared/Authorizer'
 import styles from './edit.module'
+import konva from 'konva'
+import { KonvaNodeEvent } from 'konva/lib/types'
 
 const gridLink = "http://phrogz.net/tmp/grid.gif"
 
@@ -58,21 +60,6 @@ const spoodawebData = {
   }
 }
 
-const a = 2 * Math.PI / 6
-const r = 50
-const hexagonColor = "rgb(79, 47, 255)"
-
-function drawHexagon(x, y, ctx) {
-  ctx.fillStyle = hexagonColor
-  ctx.beginPath()
-  for (let i = 0; i < 6; i++) {
-    ctx.lineTo(x + r * Math.cos(a * i), y + r * Math.sin(a * i))
-  }
-  ctx.closePath()
-  ctx.stroke()
-  ctx.fill()
-}
-
 const preventZoomKeys = {
   "=": true,
   "+": true,
@@ -96,14 +83,12 @@ const preventZoomScroll = e => {
 
 const mouseDown = (e, setMiddleMouseDown) => {
   if (e.button === 1) {
-    const divCanvas = document.getElementById('divCanvas')
     setMiddleMouseDown(true)
   }
 }
 
 const mouseUp = (e, setMiddleMouseDown) => {
   if (e.button === 1) {
-    const divCanvas = document.getElementById('divCanvas')
     setMiddleMouseDown(false)
   }
 }
@@ -116,9 +101,6 @@ const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
       x: x,
       y: y
     })
-    if (checkInsideHexagon(x, y, 100, 50, 50)) {
-      console.log('inside hexagon!')
-    }
     return
   }
   if (!mousePos.y) {
@@ -130,13 +112,43 @@ const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
   }
   const xDiff = mousePos.x - x
   const yDiff = mousePos.y - y
-  const multi = 4
+  const multi = 2
   divCanvas.scrollBy(-xDiff*multi, -yDiff*multi)
   setMousePos({
     x: x,
     y: y
   })
-} // todo: add ability to detect overlay in objects in canvas
+}
+
+function DrawCanvas() {
+  useEffect(() => {
+    const stage = new konva.Stage({
+      container: document.getElementById('divCanvas'),
+      width: window.innerWidth + 2 * 2000,
+      height: window.innerHeight + 2 * 2000
+    })
+    const mainLayer = new konva.Layer()
+    // document.getElementsByClassName('konvajs-content')[0].addEventListener('wheel', preventZoomScroll)
+    document.addEventListener('wheel', preventZoomScroll)
+
+    for (const name in spoodawebData) {
+      const bud = spoodawebData[name]
+      const hexagon = new konva.RegularPolygon({
+        x: bud.position.x,
+        y: bud.position.y,
+        sides: 6,
+        radius: 40,
+        fill: '#00D2FF',
+        stroke: 'black',
+        strokeWidth: 1,
+        draggable: true,
+      })
+      mainLayer.add(hexagon)
+    }
+    stage.add(mainLayer)
+  }, [])
+  return <></>
+}
 
 function Edit() {
   const navigate = useNavigate()
@@ -156,37 +168,24 @@ function Edit() {
       mouseMove(e, middleMouseDown, mousePos, setMousePos)
     }
     document.addEventListener('keydown', preventZoom)
-    document.getElementById('canvas').addEventListener('wheel', preventZoomScroll)
     document.addEventListener('mousedown', mouseDownWrapper)
     document.addEventListener('mouseup', mouseUpWrapper)
     document.addEventListener('mousemove', mouseMoveWrapper)
-    const preCanvas = document.getElementById('canvas')
-    preCanvas.width = window.innerWidth + 2 * 2000
-    preCanvas.height = window.innerHeight + 2 * 2000
-    const canvas = preCanvas.getContext('2d')
-    const gradient = canvas.createRadialGradient(150, 50, 5, 90, 60, 100)
-    gradient.addColorStop(1, "rgb(205, 255, 255)")
-    gradient.addColorStop(0, "white")
-    canvas.fillStyle = gradient
-    canvas.fillRect(0, 0, preCanvas.width, preCanvas.height)
-    for (const budName in spoodawebData) {
-      const bud = spoodawebData[budName]
-      drawHexagon(bud.position.x, bud.position.y, canvas)
-    }
     return () => {
       document.removeEventListener('keydown', preventZoom)
-      document.getElementById('canvas').removeEventListener('wheel', preventZoomScroll)
+      // document.getElementsByClassName('konvajs-content')[0].removeEventListener('wheel', preventZoomScroll)
+      document.removeEventListener('wheel', preventZoomScroll)
       document.removeEventListener('mousedown', mouseDownWrapper)
       document.removeEventListener('mouseup', mouseUpWrapper)
       document.removeEventListener('mousemove', mouseMoveWrapper)
     }
-  })
+  }, [middleMouseDown])
   return (
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <div className={styles.divCanvas} id='divCanvas'>
-        <canvas className={styles.canvas} id='canvas'></canvas>
       </div>
+      <DrawCanvas></DrawCanvas>
     </>
   )
 }
