@@ -1,13 +1,3 @@
-svg {
-  width: 100%;
-  height: 100%;
-  // position: absolute;
-  rect {
-    width: 100%;
-    height: 100%;
-  }
-}
-
 div.divCanvas {
   position: absolute;
   overflow-x: scroll;
@@ -18,4 +8,17 @@ div.divCanvas {
 
 body {
   overflow: hidden;
+}
+
+div.wrapper {
+  display: flex;
+  flex-direction: row;
+  div.objectDrawer {
+    box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    div.box {
+      div.obj {
+
+      }
+    }
+  }
 }

@@ -120,10 +120,24 @@ const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
   })
 }
 
+function ObjectDrawer({ objs }) {
+  return (
+    <div className={styles.objectDrawer}>
+      <div className={styles.box}>
+        <div className={styles.obj}>
+          <i className="fa fa-hexagon"></i>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function DrawCanvas() {
   useEffect(() => {
     const stage = new konva.Stage({
       container: document.getElementById('divCanvas'),
+      x: 0,
+      y: 200,
       width: window.innerWidth + 2 * 2000,
       height: window.innerHeight + 2 * 2000
     })
@@ -143,6 +157,14 @@ function DrawCanvas() {
         strokeWidth: 1,
         draggable: true,
       })
+      /*
+      const line = new konva.Line({
+        points: [],
+        stroke: 'green',
+        strokeWidth: 2,
+        lineJoin: 'round'
+      })
+      */
       mainLayer.add(hexagon)
     }
     stage.add(mainLayer)
@@ -183,41 +205,12 @@ function Edit() {
   return (
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
-      <div className={styles.divCanvas} id='divCanvas'>
+      <div className={styles.wrapper}>
+        <ObjectDrawer></ObjectDrawer>
+        <div className={styles.divCanvas} id='divCanvas'></div>
       </div>
       <DrawCanvas></DrawCanvas>
     </>
   )
 }
-
-/*
-<svg id='svg'>
-  <defs>
-    <pattern id="p2" patternUnits="userSpaceOnUse" x="0" y="0" width="10" height="10">
-      <image xlinkHref="http://phrogz.net/tmp/grid.gif" width="10" height="10" />
-    </pattern>
-  </defs>
-  <rect fill='url(#p2)' stroke-width="5px"></rect>
-</svg>
-*/
 export default Edit
-
-/*
-FOR FUTURE REFERENCE
-
-$(document).keydown(function(event) {
-if (event.ctrlKey==true &amp&amp (event.which == '61' || event.which == '107' || event.which == '173' || event.which == '109' || event.which == '187' || event.which == '189' ) ) {
-event.preventDefault()
-}
-// 107 Num Key +
-// 109 Num Key -
-// 173 Min Key hyphen/underscor Hey
-// 61 Plus key +/= key
-})
-$(window).bind('mousewheel DOMMouseScroll', function (event) {
-if (event.ctrlKey == true) {
-event.preventDefault()
-}
-})
-
-*/
