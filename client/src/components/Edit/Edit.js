@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Authorizer from '../Shared/Authorizer'
 import styles from './edit.module'
-import konva from 'konva'
-import { KonvaNodeEvent } from 'konva/lib/types'
+import { Stage, Layer, RegularPolygon } from 'react-konva'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCoins, faObjectGroup } from '@fortawesome/free-solid-svg-icons'
+import Hexagon from 'react-svg-hexagon'
 
 const gridLink = "http://phrogz.net/tmp/grid.gif"
 
@@ -83,13 +83,42 @@ const preventZoomScroll = e => {
   }
 }
 
-function ObjectDrawer({ objs, dragging, setDragging }) {
+function Bud({ x, y }) {
+  return (
+    <RegularPolygon
+      x={x}
+      y={y}
+      sides={6}
+      radius={40}
+      fill='#00D2FF'
+      stroke='black'
+      strokeWidth={1}
+      draggable={true}></RegularPolygon>
+  )
+}
+
+function ObjectDrawer({ objs, setDragging, buds, setBuds }) {
+  const createBud = (e) => { // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
+    setDragging(true)
+    console.log(buds)
+    if (buds) {
+      const budsCopy = [...buds]
+      console.log('hey')
+      budsCopy.push(
+        <Bud
+          key={buds.length}
+          x={e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft}
+          y={e.pageY - 40 + divCanvas.scrollTop}></Bud>
+      )
+      setBuds(budsCopy)
+    }
+  }
   return (
     <div className={styles.objectDrawer}>
       <div className={styles.box}>
         <div className={styles.obj}>
           <p>test</p>
-          <button className={styles.drawerButton} onMouseDown={() => setDragging(true)}>
+          <button className={styles.drawerButton} onMouseDown={e => createBud(e)}>
             <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
           </button>
         </div>
@@ -112,7 +141,12 @@ const mouseUp = (e, setMiddleMouseDown, setDragging) => {
   }
 }
 
+function createLine() {
+  
+}
+
 const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
+  const divCanvas = document.getElementById('divCanvas')
   const x = e.pageX
   const y = e.pageY
   if ((!middleMouseDown) || (!mousePos.y || !mousePos.x)) {
@@ -125,7 +159,9 @@ const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
   const xDiff = mousePos.x - x
   const yDiff = mousePos.y - y
   const multi = 8
-  divCanvas.scrollBy(-xDiff*multi, -yDiff*multi)
+  // divCanvas.scrollBy(-xDiff*multi, -yDiff*multi)
+  divCanvas.scrollLeft += -xDiff*multi
+  divCanvas.scrollTop += -yDiff*multi
   setMousePos({
     x: x,
     y: y
@@ -135,20 +171,25 @@ const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
 /*
 to do:
 1. add drawer DONE
-2. add ability to add objects
+2. add ability to add objects DONE
 3. add silk
 */
 
 function drag(e, dragging) {
   if (dragging) {
+    console.log('a')
+    const divCanvas = document.getElementById('divCanvas')
+    // const hexagon = createHexagon(e.pageX - window.innerWidth * 0.15, e.pageY - 40) // x offset: the drawer takes up 15% of window, and need offset to position middle of hexagon
+    // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
+
   }
 }
 
-function FakeDraggableObj({ dragging, mousePos }) {
+function FakeDraggableObj({ dragging, mousePos, buds, setBuds }) {
   const x = mousePos.x
   const y = mousePos.y
   useEffect(() => {
-    const dragWrapper = (e) => drag(e, dragging)
+    const dragWrapper = (e) => drag(e, dragging, buds, setBuds)
     document.addEventListener('mousemove', dragWrapper)
     console.log('rendered')
     return () => {
@@ -157,50 +198,35 @@ function FakeDraggableObj({ dragging, mousePos }) {
     }
   }, [dragging])
   return (
-    <div style={{'top': y, 'left': x}} className={dragging ? styles.fakeDraggableObj : styles.none} id='fakeDraggableObj'>
-      this is a test
+    <div style={{'top': y-32, 'left': x-34}} className={dragging ? styles.fakeDraggableObj : styles.none} id='fakeDraggableObj'>
+      
     </div>
   )
+  // <Hexagon height="80" fill='#00D2FF' stroke='black' strokeWidth='1' ></Hexagon>
 }
 
-function DrawCanvas() {
+function DrawCanvas({ buds, setBuds }) {
   useEffect(() => {
-    const stage = new konva.Stage({
-      container: document.getElementById('divCanvas'),
-      x: 200,
-      y: 0,
-      width: window.innerWidth + 2 * 2000,
-      height: window.innerHeight + 2 * 2000
-    })
-    const mainLayer = new konva.Layer()
-    // document.getElementsByClassName('konvajs-content')[0].addEventListener('wheel', preventZoomScroll)
     document.addEventListener('wheel', preventZoomScroll)
-
-    for (const name in spoodawebData) {
-      const bud = spoodawebData[name]
-      const hexagon = new konva.RegularPolygon({
-        x: bud.position.x,
-        y: bud.position.y,
-        sides: 6,
-        radius: 40,
-        fill: '#00D2FF',
-        stroke: 'black',
-        strokeWidth: 1,
-        draggable: true,
-      })
-      /*
-      const line = new konva.Line({
-        points: [],
-        stroke: 'green',
-        strokeWidth: 2,
-        lineJoin: 'round'
-      })
-      */
-      mainLayer.add(hexagon)
-    }
-    stage.add(mainLayer)
+    let index = -1
+    const leBuds = Object.keys(spoodawebData).map((name) => {
+      index += 1
+      return <Bud key={index} x={spoodawebData[name].position.x} y={spoodawebData[name].position.y}></Bud>
+    })
+    console.log(leBuds)
+    setBuds(leBuds)
   }, [])
-  return <></>
+  return (
+    <Stage
+      x={0}
+      y={0}
+      width={window.innerWidth + 2 * 2000}
+      height={window.innerHeight + 2 * 2000}>
+      <Layer>
+        {buds}
+      </Layer>
+    </Stage>
+  )
 }
 
 function Edit() {
@@ -211,6 +237,7 @@ function Edit() {
     y: null
   })
   const [ dragging, setDragging ] = useState(false)
+  const [ buds, setBuds ] = useState([])
   useEffect(() => {
     const mouseDownWrapper = (e) => {
       mouseDown(e, setMiddleMouseDown)
@@ -238,11 +265,12 @@ function Edit() {
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <div className={styles.wrapper}>
-        <ObjectDrawer setDragging={setDragging}></ObjectDrawer>
-        <FakeDraggableObj dragging={dragging} setDragging={setDragging} mousePos={mousePos}></FakeDraggableObj>
-        <div className={styles.divCanvas} id='divCanvas'></div>
+        <ObjectDrawer setDragging={setDragging} buds={buds} setBuds={setBuds}></ObjectDrawer>
+        <FakeDraggableObj dragging={dragging} setDragging={setDragging} mousePos={mousePos} buds={buds} setBuds={setBuds}></FakeDraggableObj>
+        <div className={styles.divCanvas} id='divCanvas'>
+          <DrawCanvas buds={buds} setBuds={setBuds}></DrawCanvas>
+        </div>
       </div>
-      <DrawCanvas></DrawCanvas>
     </>
   )
 }
