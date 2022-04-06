@@ -175,36 +175,42 @@ to do:
 3. add silk
 */
 
-function drag(e, dragging, buds, setBuds) {
+function drop(e, dragging, buds, setBuds, isMouseHoverCanvas) {
+  console.log(isMouseHoverCanvas)
+  if (!isMouseHoverCanvas) return
   if (dragging) {
-    const selected = buds[buds.length - 1]
-    console.log(selected)
-    selected.props.x = e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft
-    selected.props.y = e.pageY - 40 + divCanvas.scrollTop
+    // const selected = buds[buds.length - 1]
+    // console.log(selected)
+    // selected.props.x = e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft
+    // selected.props.y = e.pageY - 40 + divCanvas.scrollTop
     // const hexagon = createHexagon(e.pageX - window.innerWidth * 0.15, e.pageY - 40) // x offset: the drawer takes up 15% of window, and need offset to position middle of hexagon
     // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
-
+    const budsCopy = [...buds]
+    budsCopy.push(
+      <Bud key={buds.length} x={e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft} y={e.pageY - 40 + divCanvas.scrollTop}></Bud>
+    )
+    setBuds(budsCopy)
   }
 }
 
-function FakeDraggableObj({ dragging, mousePos, buds, setBuds }) {
+function FakeDraggableObj({ dragging, mousePos, buds, setBuds, isMouseHoverCanvas }) {
   const x = mousePos.x
   const y = mousePos.y
   useEffect(() => {
-    const dragWrapper = (e) => drag(e, dragging, buds, setBuds)
-    document.addEventListener('mousemove', dragWrapper)
+    const dropWrapper = (e) => drop(e, dragging, buds, setBuds, isMouseHoverCanvas)
+    document.addEventListener('mouseup', dropWrapper)
     console.log('rendered')
     return () => {
       console.log('unrendered')
-      document.removeEventListener('mousemove', dragWrapper)
+      document.removeEventListener('mouseup', dropWrapper)
     }
   }, [dragging])
   return (
     <div style={{'top': y-32, 'left': x-34}} className={dragging ? styles.fakeDraggableObj : styles.none} id='fakeDraggableObj'>
-      
+      <Hexagon height="80" fill='#00D2FF' stroke='black' strokeWidth='1' ></Hexagon> 
     </div>
   )
-  // <Hexagon height="80" fill='#00D2FF' stroke='black' strokeWidth='1' ></Hexagon>
+  // 
 }
 
 function DrawCanvas({ buds, setBuds }) {
@@ -240,6 +246,7 @@ function Edit() {
   })
   const [ dragging, setDragging ] = useState(false)
   const [ buds, setBuds ] = useState([])
+  const [ isMouseHoverCanvas, setIsMouseHoverCanvas ] = useState(false)
   useEffect(() => {
     const mouseDownWrapper = (e) => {
       mouseDown(e, setMiddleMouseDown)
@@ -254,6 +261,14 @@ function Edit() {
     document.addEventListener('mousedown', mouseDownWrapper)
     document.addEventListener('mouseup', mouseUpWrapper)
     document.addEventListener('mousemove', mouseMoveWrapper)
+    const mouseLeave = () => {
+      setIsMouseHoverCanvas(false)
+    }
+    const mouseEnter = () => {
+      setIsMouseHoverCanvas(true)
+    }
+    document.getElementById('divCanvas').addEventListener("mouseleave", mouseLeave)
+    document.getElementById('divCanvas').addEventListener("mouseover", mouseEnter)
     return () => {
       document.removeEventListener('keydown', preventZoom)
       // document.getElementsByClassName('konvajs-content')[0].removeEventListener('wheel', preventZoomScroll)
@@ -261,6 +276,8 @@ function Edit() {
       document.removeEventListener('mousedown', mouseDownWrapper)
       document.removeEventListener('mouseup', mouseUpWrapper)
       document.removeEventListener('mousemove', mouseMoveWrapper)
+      document.getElementById('divCanvas').removeEventListener("mouseleave", mouseLeave)
+      document.getElementById('divCanvas').removeEventListener("mouseover", mouseEnter)
     }
   }, [middleMouseDown, mousePos])
   return (
@@ -268,7 +285,7 @@ function Edit() {
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <div className={styles.wrapper}>
         <ObjectDrawer setDragging={setDragging} buds={buds} setBuds={setBuds}></ObjectDrawer>
-        <FakeDraggableObj dragging={dragging} setDragging={setDragging} mousePos={mousePos} buds={buds} setBuds={setBuds}></FakeDraggableObj>
+        <FakeDraggableObj dragging={dragging} setDragging={setDragging} mousePos={mousePos} buds={buds} setBuds={setBuds} isMouseHoverCanvas={isMouseHoverCanvas}></FakeDraggableObj>
         <div className={styles.divCanvas} id='divCanvas'>
           <DrawCanvas buds={buds} setBuds={setBuds}></DrawCanvas>
         </div>
