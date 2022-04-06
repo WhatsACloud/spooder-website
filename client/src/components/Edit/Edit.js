@@ -175,10 +175,12 @@ to do:
 3. add silk
 */
 
-function drag(e, dragging) {
+function drag(e, dragging, buds, setBuds) {
   if (dragging) {
-    console.log('a')
-    const divCanvas = document.getElementById('divCanvas')
+    const selected = buds[buds.length - 1]
+    console.log(selected)
+    selected.props.x = e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft
+    selected.props.y = e.pageY - 40 + divCanvas.scrollTop
     // const hexagon = createHexagon(e.pageX - window.innerWidth * 0.15, e.pageY - 40) // x offset: the drawer takes up 15% of window, and need offset to position middle of hexagon
     // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
 
