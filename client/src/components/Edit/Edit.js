@@ -4,6 +4,8 @@ import Authorizer from '../Shared/Authorizer'
 import styles from './edit.module'
 import konva from 'konva'
 import { KonvaNodeEvent } from 'konva/lib/types'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCoins, faObjectGroup } from '@fortawesome/free-solid-svg-icons'
 
 const gridLink = "http://phrogz.net/tmp/grid.gif"
 
@@ -81,29 +83,39 @@ const preventZoomScroll = e => {
   }
 }
 
+function ObjectDrawer({ objs, dragging, setDragging }) {
+  return (
+    <div className={styles.objectDrawer}>
+      <div className={styles.box}>
+        <div className={styles.obj}>
+          <p>test</p>
+          <button className={styles.drawerButton} onMouseDown={() => setDragging(true)}>
+            <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const mouseDown = (e, setMiddleMouseDown) => {
   if (e.button === 1) {
     setMiddleMouseDown(true)
   }
 }
 
-const mouseUp = (e, setMiddleMouseDown) => {
+const mouseUp = (e, setMiddleMouseDown, setDragging) => {
   if (e.button === 1) {
     setMiddleMouseDown(false)
+  } else if (e.button === 0) {
+    setDragging(false)
   }
 }
 
 const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
   const x = e.pageX
   const y = e.pageY
-  if (!middleMouseDown) {
-    setMousePos({
-      x: x,
-      y: y
-    })
-    return
-  }
-  if (!mousePos.y) {
+  if ((!middleMouseDown) || (!mousePos.y || !mousePos.x)) {
     setMousePos({
       x: x,
       y: y
@@ -112,7 +124,7 @@ const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
   }
   const xDiff = mousePos.x - x
   const yDiff = mousePos.y - y
-  const multi = 2
+  const multi = 8
   divCanvas.scrollBy(-xDiff*multi, -yDiff*multi)
   setMousePos({
     x: x,
@@ -120,14 +132,33 @@ const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
   })
 }
 
-function ObjectDrawer({ objs }) {
+/*
+to do:
+1. add drawer DONE
+2. add ability to add objects
+3. add silk
+*/
+
+function drag(e, dragging) {
+  if (dragging) {
+  }
+}
+
+function FakeDraggableObj({ dragging, mousePos }) {
+  const x = mousePos.x
+  const y = mousePos.y
+  useEffect(() => {
+    const dragWrapper = (e) => drag(e, dragging)
+    document.addEventListener('mousemove', dragWrapper)
+    console.log('rendered')
+    return () => {
+      console.log('unrendered')
+      document.removeEventListener('mousemove', dragWrapper)
+    }
+  }, [dragging])
   return (
-    <div className={styles.objectDrawer}>
-      <div className={styles.box}>
-        <div className={styles.obj}>
-          <i className="fa fa-hexagon"></i>
-        </div>
-      </div>
+    <div style={{'top': y, 'left': x}} className={dragging ? styles.fakeDraggableObj : styles.none} id='fakeDraggableObj'>
+      this is a test
     </div>
   )
 }
@@ -136,8 +167,8 @@ function DrawCanvas() {
   useEffect(() => {
     const stage = new konva.Stage({
       container: document.getElementById('divCanvas'),
-      x: 0,
-      y: 200,
+      x: 200,
+      y: 0,
       width: window.innerWidth + 2 * 2000,
       height: window.innerHeight + 2 * 2000
     })
@@ -179,12 +210,13 @@ function Edit() {
     x: null,
     y: null
   })
+  const [ dragging, setDragging ] = useState(false)
   useEffect(() => {
     const mouseDownWrapper = (e) => {
       mouseDown(e, setMiddleMouseDown)
     }
     const mouseUpWrapper = (e) => {
-      mouseUp(e, setMiddleMouseDown)
+      mouseUp(e, setMiddleMouseDown, setDragging)
     }
     const mouseMoveWrapper = (e) => {
       mouseMove(e, middleMouseDown, mousePos, setMousePos)
@@ -201,12 +233,13 @@ function Edit() {
       document.removeEventListener('mouseup', mouseUpWrapper)
       document.removeEventListener('mousemove', mouseMoveWrapper)
     }
-  }, [middleMouseDown])
+  }, [middleMouseDown, mousePos])
   return (
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <div className={styles.wrapper}>
-        <ObjectDrawer></ObjectDrawer>
+        <ObjectDrawer setDragging={setDragging}></ObjectDrawer>
+        <FakeDraggableObj dragging={dragging} setDragging={setDragging} mousePos={mousePos}></FakeDraggableObj>
         <div className={styles.divCanvas} id='divCanvas'></div>
       </div>
       <DrawCanvas></DrawCanvas>

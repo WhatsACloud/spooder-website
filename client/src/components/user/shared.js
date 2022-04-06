@@ -3,12 +3,14 @@ import styles from './user.module'
 import api from '../../services/api'
 import InputBox from '../Shared/InputBox'
 import inputBoxStyles from '../Shared/InputBox/InputBox.module'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 
 function EyeIcon(props) {
   if (props.eye) {
-    return <i className={`fa fa-eye ${styles.eye}`}></i>
+    return <FontAwesomeIcon icon={faEye} className={styles.eye}></FontAwesomeIcon>
   } else {
-    return <i className={`fa fa-eye-slash ${styles.eye}`}></i>
+    return <FontAwesomeIcon icon={faEyeSlash} className={styles.eye}></FontAwesomeIcon>
   }
 }
 
