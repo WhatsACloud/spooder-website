@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Authorizer from '../Shared/Authorizer'
 import styles from './edit.module'
-import { Stage, Layer, RegularPolygon } from 'react-konva'
+import { Stage, Layer, RegularPolygon, Line } from 'react-konva'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCoins, faObjectGroup } from '@fortawesome/free-solid-svg-icons'
+import { faObjectGroup, faLinesLeaning } from '@fortawesome/free-solid-svg-icons'
 import Hexagon from 'react-svg-hexagon'
+import { preventZoom, preventZoomScroll } from './PreventDefault'
+import { mouseDown, mouseUp, mouseMove } from './Events'
 
 const gridLink = "http://phrogz.net/tmp/grid.gif"
 
@@ -62,25 +64,13 @@ const spoodawebData = {
   }
 }
 
-const preventZoomKeys = {
-  "=": true,
-  "+": true,
-  "-": true,
-  "_": true
-}
-
-const preventZoom = e => {
-  if (e.ctrlKey === true && (preventZoomKeys[e.key])) {
-    console.log('success')
-    e.preventDefault()
-  }
-}
-
-const preventZoomScroll = e => {
-  console.log(e)
-  if (e.ctrlKey) {
-    e.preventDefault()
-  }
+function newObj(objs, setObjs, obj, refs, setRefs, ref) {
+  const budsCopy = [...objs]
+  budsCopy.push(obj)
+  console.log('newObj')
+  console.log(budsCopy)
+  setObjs(budsCopy)
+  console.log(objs)
 }
 
 function Bud({ x, y }) {
@@ -97,75 +87,103 @@ function Bud({ x, y }) {
   )
 }
 
-function ObjectDrawer({ objs, setDragging, buds, setBuds }) {
-  const createBud = (e) => { // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
-    setDragging(true)
-    console.log(buds)
-    if (buds) {
-      const budsCopy = [...buds]
-      console.log('hey')
-      budsCopy.push(
-        <Bud
-          key={buds.length}
-          x={e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft}
-          y={e.pageY - 40 + divCanvas.scrollTop}></Bud>
-      )
-      setBuds(budsCopy)
-    }
-  }
+function DrawLine({ points }) { // why does this rerender so much lol
+  console.log(points)
   return (
-    <div className={styles.objectDrawer}>
-      <div className={styles.box}>
-        <div className={styles.obj}>
-          <p>test</p>
-          <button className={styles.drawerButton} onMouseDown={e => createBud(e)}>
-            <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
-          </button>
-        </div>
-      </div>
-    </div>
+    <Line
+      points={[points[0].x, points[0].y, points[1].x, points[1].y]}
+      stroke='black'
+      strokeWidth={15}>
+    </Line>
   )
 }
 
-const mouseDown = (e, setMiddleMouseDown) => {
-  if (e.button === 1) {
-    setMiddleMouseDown(true)
+function Select({ mousePos, toggle, id, objs, setObjs, rootPoint }) {
+  useEffect(() => {
+    if (toggle) {
+      const newObjs = [...objs]
+      newObjs[id] = (
+        <DrawLine points={[
+          rootPoint,
+          mousePos
+        ]}
+        key={objs.length}></DrawLine>
+      )
+      setObjs(newObjs)
+    }
+  }, [mousePos]) 
+  return <></>
+}
+
+function dragLine(e, objs, setObjs, mousePos, setDraggingLine, setId, setRootPoint) {
+  if (e.button === 0) {
+    setDraggingLine(true)
+    setId(objs.length)
+    setRootPoint(mousePos)
+    newObj(objs, setObjs, (
+      <DrawLine points={[
+        {x: mousePos.x, y: mousePos.y},
+        mousePos
+      ]}
+      key={objs.length}></DrawLine>
+    ))
   }
 }
 
-const mouseUp = (e, setMiddleMouseDown, setDragging) => {
-  if (e.button === 1) {
-    setMiddleMouseDown(false)
-  } else if (e.button === 0) {
-    setDragging(false)
+function undragLine(e, objs, setObjs, mousePos, setDraggingLine, setId) {
+  if (e.button === 0) {
+    console.log('no')
+    setDraggingLine(false)
   }
 }
 
-function createLine() {
-  
-}
-
-const mouseMove = (e, middleMouseDown, mousePos, setMousePos) => {
-  const divCanvas = document.getElementById('divCanvas')
-  const x = e.pageX
-  const y = e.pageY
-  if ((!middleMouseDown) || (!mousePos.y || !mousePos.x)) {
-    setMousePos({
-      x: x,
-      y: y
-    })
-    return
+function ObjectDrawer({ objs, setObjs, setDragging, toggle, setToggle, mousePos }) { // pls move the whole line drag thing to another component
+  const [ draggingLine, setDraggingLine ] = useState(false)
+  const [ rootPoint, setRootPoint ] = useState()
+  const [ id, setId ] = useState()
+  const items = {
+    test: [
+      {
+        func: () => setDragging(true),
+        icon: <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
+      },
+      {
+        func: () => setToggle(true),
+        icon: <FontAwesomeIcon icon={faLinesLeaning}></FontAwesomeIcon>
+      }
+    ]
   }
-  const xDiff = mousePos.x - x
-  const yDiff = mousePos.y - y
-  const multi = 8
-  // divCanvas.scrollBy(-xDiff*multi, -yDiff*multi)
-  divCanvas.scrollLeft += -xDiff*multi
-  divCanvas.scrollTop += -yDiff*multi
-  setMousePos({
-    x: x,
-    y: y
-  })
+  // Object.keys().map((name) => { // ill deal with this later
+  useEffect(() => {
+    const dragLineWrapper = (e) => dragLine(e, objs, setObjs, mousePos, setDraggingLine, setId, setRootPoint)
+    const undragLineWrapper = (e) => undragLine(e, objs, setObjs, mousePos, setDraggingLine, setId)
+    if (toggle) {
+      document.addEventListener('mousedown', dragLineWrapper)
+      document.addEventListener('mouseup', undragLineWrapper)
+    }
+    return () => {
+      document.removeEventListener('mousedown', dragLineWrapper)
+      document.removeEventListener('mouseup', undragLineWrapper)
+    }
+  }, [toggle, objs])
+  return (
+    <>
+      <Select mousePos={mousePos} toggle={toggle} id={id} objs={objs} rootPoint={rootPoint} setObjs={setObjs}></Select>
+      <div className={styles.objectDrawer}>
+        <div className={styles.box}>
+          <div className={styles.obj}>
+            <p>test</p>
+            <button className={styles.drawerButton} onMouseDown={() => setDragging(true)}>
+              <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
+            </button>
+            <button className={styles.drawerButton} onMouseDown={() => setToggle(!toggle)}>
+              <FontAwesomeIcon icon={faLinesLeaning}></FontAwesomeIcon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
 }
 
 /*
@@ -175,29 +193,11 @@ to do:
 3. add silk
 */
 
-function drop(e, dragging, buds, setBuds, isMouseHoverCanvas) {
-  console.log(isMouseHoverCanvas)
-  if (!isMouseHoverCanvas) return
-  if (dragging) {
-    // const selected = buds[buds.length - 1]
-    // console.log(selected)
-    // selected.props.x = e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft
-    // selected.props.y = e.pageY - 40 + divCanvas.scrollTop
-    // const hexagon = createHexagon(e.pageX - window.innerWidth * 0.15, e.pageY - 40) // x offset: the drawer takes up 15% of window, and need offset to position middle of hexagon
-    // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
-    const budsCopy = [...buds]
-    budsCopy.push(
-      <Bud key={buds.length} x={e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft} y={e.pageY - 40 + divCanvas.scrollTop}></Bud>
-    )
-    setBuds(budsCopy)
-  }
-}
-
-function FakeDraggableObj({ dragging, mousePos, buds, setBuds, isMouseHoverCanvas }) {
+function FakeDraggableObj({ dragging, mousePos, objs, setObjs, isMouseHoverCanvas }) {
   const x = mousePos.x
   const y = mousePos.y
   useEffect(() => {
-    const dropWrapper = (e) => drop(e, dragging, buds, setBuds, isMouseHoverCanvas)
+    const dropWrapper = (e) => drop(e, dragging, objs, setObjs, isMouseHoverCanvas, Bud)
     document.addEventListener('mouseup', dropWrapper)
     console.log('rendered')
     return () => {
@@ -210,10 +210,9 @@ function FakeDraggableObj({ dragging, mousePos, buds, setBuds, isMouseHoverCanva
       <Hexagon height="80" fill='#00D2FF' stroke='black' strokeWidth='1' ></Hexagon> 
     </div>
   )
-  // 
 }
 
-function DrawCanvas({ buds, setBuds }) {
+function DrawCanvas({ objs, setObjs }) {
   useEffect(() => {
     document.addEventListener('wheel', preventZoomScroll)
     let index = -1
@@ -222,7 +221,7 @@ function DrawCanvas({ buds, setBuds }) {
       return <Bud key={index} x={spoodawebData[name].position.x} y={spoodawebData[name].position.y}></Bud>
     })
     console.log(leBuds)
-    setBuds(leBuds)
+    setObjs(leBuds)
   }, [])
   return (
     <Stage
@@ -231,22 +230,34 @@ function DrawCanvas({ buds, setBuds }) {
       width={window.innerWidth + 2 * 2000}
       height={window.innerHeight + 2 * 2000}>
       <Layer>
-        {buds}
+        {objs}
       </Layer>
     </Stage>
   )
 }
 
+function drop(e, dragging, objs, setObjs) {
+  // console.log(isMouseHoverCanvas)
+  // if (!isMouseHoverCanvas) return
+  if (dragging) {
+    // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
+    newObj(objs, setObjs, (
+      <Bud key={objs.length} x={e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft} y={e.pageY - 40 + divCanvas.scrollTop}></Bud>
+    ))
+    console.log(objs)
+  }
+}
+
 function Edit() {
   const navigate = useNavigate()
   const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
+  const [ dragging, setDragging ] = useState(false)
+  const [ objs, setObjs ] = useState([])
+  const [ toggle, setToggle ] = useState(false)
   const [ mousePos, setMousePos ] = useState({
     x: null,
     y: null
   })
-  const [ dragging, setDragging ] = useState(false)
-  const [ buds, setBuds ] = useState([])
-  const [ isMouseHoverCanvas, setIsMouseHoverCanvas ] = useState(false)
   useEffect(() => {
     const mouseDownWrapper = (e) => {
       mouseDown(e, setMiddleMouseDown)
@@ -259,16 +270,9 @@ function Edit() {
     }
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('mousedown', mouseDownWrapper)
+    document.addEventListener('wheel', preventZoomScroll, { passive: false })
     document.addEventListener('mouseup', mouseUpWrapper)
     document.addEventListener('mousemove', mouseMoveWrapper)
-    const mouseLeave = () => {
-      setIsMouseHoverCanvas(false)
-    }
-    const mouseEnter = () => {
-      setIsMouseHoverCanvas(true)
-    }
-    document.getElementById('divCanvas').addEventListener("mouseleave", mouseLeave)
-    document.getElementById('divCanvas').addEventListener("mouseover", mouseEnter)
     return () => {
       document.removeEventListener('keydown', preventZoom)
       // document.getElementsByClassName('konvajs-content')[0].removeEventListener('wheel', preventZoomScroll)
@@ -276,18 +280,23 @@ function Edit() {
       document.removeEventListener('mousedown', mouseDownWrapper)
       document.removeEventListener('mouseup', mouseUpWrapper)
       document.removeEventListener('mousemove', mouseMoveWrapper)
-      document.getElementById('divCanvas').removeEventListener("mouseleave", mouseLeave)
-      document.getElementById('divCanvas').removeEventListener("mouseover", mouseEnter)
     }
   }, [middleMouseDown, mousePos])
   return (
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <div className={styles.wrapper}>
-        <ObjectDrawer setDragging={setDragging} buds={buds} setBuds={setBuds}></ObjectDrawer>
-        <FakeDraggableObj dragging={dragging} setDragging={setDragging} mousePos={mousePos} buds={buds} setBuds={setBuds} isMouseHoverCanvas={isMouseHoverCanvas}></FakeDraggableObj>
+        <ObjectDrawer setDragging={setDragging} objs={objs} setObjs={setObjs} toggle={toggle} setToggle={setToggle} mousePos={mousePos}></ObjectDrawer>
+        <FakeDraggableObj
+          dragging={dragging}
+          setDragging={setDragging}
+          mousePos={mousePos}
+          objs={objs}
+          setObjs={setObjs}
+          useState={useState}
+          useEffect={useEffect}></FakeDraggableObj>
         <div className={styles.divCanvas} id='divCanvas'>
-          <DrawCanvas buds={buds} setBuds={setBuds}></DrawCanvas>
+          <DrawCanvas objs={objs} setObjs={setObjs}></DrawCanvas>
         </div>
       </div>
     </>
