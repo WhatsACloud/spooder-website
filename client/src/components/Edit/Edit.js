@@ -64,6 +64,19 @@ const spoodawebData = {
   }
 }
 
+/*
+To do:
+1. Touch up silk
+2. Add ability for silk to be glued onto a bud or other silk
+3. optimise the whole thing
+4. add saving ability
+*/
+
+function getCanvasMousePos(mousePos) {
+  console.log(divCanvas.scrollLeft)
+  return {x: mousePos.x - window.innerWidth * 0.15 + divCanvas.scrollLeft, y: mousePos.y - 40 + divCanvas.scrollTop}
+}
+
 function newObj(objs, setObjs, obj, refs, setRefs, ref) {
   const budsCopy = [...objs]
   budsCopy.push(obj)
@@ -88,24 +101,23 @@ function Bud({ x, y }) {
 }
 
 function DrawLine({ points }) { // why does this rerender so much lol
-  console.log(points)
   return (
     <Line
       points={[points[0].x, points[0].y, points[1].x, points[1].y]}
       stroke='black'
-      strokeWidth={15}>
+      strokeWidth={1}>
     </Line>
   )
 }
 
-function Select({ mousePos, toggle, id, objs, setObjs, rootPoint }) {
+function Select({ mousePos, toggle, id, objs, setObjs, rootPoint, draggingLine }) {
   useEffect(() => {
-    if (toggle) {
+    if (toggle && draggingLine) {
       const newObjs = [...objs]
       newObjs[id] = (
         <DrawLine points={[
           rootPoint,
-          mousePos
+          getCanvasMousePos(mousePos)
         ]}
         key={objs.length}></DrawLine>
       )
@@ -119,11 +131,11 @@ function dragLine(e, objs, setObjs, mousePos, setDraggingLine, setId, setRootPoi
   if (e.button === 0) {
     setDraggingLine(true)
     setId(objs.length)
-    setRootPoint(mousePos)
+    setRootPoint(getCanvasMousePos(mousePos))
     newObj(objs, setObjs, (
       <DrawLine points={[
-        {x: mousePos.x, y: mousePos.y},
-        mousePos
+        getCanvasMousePos(mousePos),
+        getCanvasMousePos(mousePos)
       ]}
       key={objs.length}></DrawLine>
     ))
@@ -155,6 +167,7 @@ function ObjectDrawer({ objs, setObjs, setDragging, toggle, setToggle, mousePos 
   }
   // Object.keys().map((name) => { // ill deal with this later
   useEffect(() => {
+    console.log(mousePos)
     const dragLineWrapper = (e) => dragLine(e, objs, setObjs, mousePos, setDraggingLine, setId, setRootPoint)
     const undragLineWrapper = (e) => undragLine(e, objs, setObjs, mousePos, setDraggingLine, setId)
     if (toggle) {
@@ -165,10 +178,10 @@ function ObjectDrawer({ objs, setObjs, setDragging, toggle, setToggle, mousePos 
       document.removeEventListener('mousedown', dragLineWrapper)
       document.removeEventListener('mouseup', undragLineWrapper)
     }
-  }, [toggle, objs])
+  }, [toggle, objs, mousePos])
   return (
     <>
-      <Select mousePos={mousePos} toggle={toggle} id={id} objs={objs} rootPoint={rootPoint} setObjs={setObjs}></Select>
+      <Select mousePos={mousePos} toggle={toggle} id={id} objs={objs} rootPoint={rootPoint} setObjs={setObjs} draggingLine={draggingLine}></Select>
       <div className={styles.objectDrawer}>
         <div className={styles.box}>
           <div className={styles.obj}>
@@ -185,13 +198,6 @@ function ObjectDrawer({ objs, setObjs, setDragging, toggle, setToggle, mousePos 
     </>
   )
 }
-
-/*
-to do:
-1. add drawer DONE
-2. add ability to add objects DONE
-3. add silk
-*/
 
 function FakeDraggableObj({ dragging, mousePos, objs, setObjs, isMouseHoverCanvas }) {
   const x = mousePos.x
