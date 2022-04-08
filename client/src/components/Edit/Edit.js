@@ -73,15 +73,29 @@ To do:
 */
 
 function getCanvasMousePos(mousePos) {
-  console.log(divCanvas.scrollLeft)
   return {x: mousePos.x - window.innerWidth * 0.15 + divCanvas.scrollLeft, y: mousePos.y - 40 + divCanvas.scrollTop}
+}
+
+function isInCanvas(mousePos) {
+  const startX = window.innerWidth * 0.15
+  const startY = 0
+  const endX = window.innerWidth
+  const endY = window.innerHeight
+  const x = mousePos.x
+  const y = mousePos.y
+  const xStartIn = x > startX
+  const yStartIn = y > startY
+  const xEndIn = x < endX
+  const yEndIn = y < endY
+  if (xStartIn && yStartIn && xEndIn && yEndIn) {
+    return true
+  }
+  return false
 }
 
 function newObj(objs, setObjs, obj, refs, setRefs, ref) {
   const budsCopy = [...objs]
   budsCopy.push(obj)
-  console.log('newObj')
-  console.log(budsCopy)
   setObjs(budsCopy)
   console.log(objs)
 }
@@ -119,7 +133,7 @@ function Select({ mousePos, toggle, id, objs, setObjs, rootPoint, draggingLine }
           rootPoint,
           getCanvasMousePos(mousePos)
         ]}
-        key={objs.length}></DrawLine>
+        key={objs.length-1}></DrawLine>
       )
       setObjs(newObjs)
     }
@@ -128,7 +142,9 @@ function Select({ mousePos, toggle, id, objs, setObjs, rootPoint, draggingLine }
 }
 
 function dragLine(e, objs, setObjs, mousePos, setDraggingLine, setId, setRootPoint) {
-  if (e.button === 0) {
+  if (e.button === 0 && isInCanvas(mousePos)) {
+    console.log('dragged line')
+    console.log(objs)
     setDraggingLine(true)
     setId(objs.length)
     setRootPoint(getCanvasMousePos(mousePos))
@@ -167,7 +183,6 @@ function ObjectDrawer({ objs, setObjs, setDragging, toggle, setToggle, mousePos 
   }
   // Object.keys().map((name) => { // ill deal with this later
   useEffect(() => {
-    console.log(mousePos)
     const dragLineWrapper = (e) => dragLine(e, objs, setObjs, mousePos, setDraggingLine, setId, setRootPoint)
     const undragLineWrapper = (e) => undragLine(e, objs, setObjs, mousePos, setDraggingLine, setId)
     if (toggle) {
@@ -226,7 +241,6 @@ function DrawCanvas({ objs, setObjs }) {
       index += 1
       return <Bud key={index} x={spoodawebData[name].position.x} y={spoodawebData[name].position.y}></Bud>
     })
-    console.log(leBuds)
     setObjs(leBuds)
   }, [])
   return (
