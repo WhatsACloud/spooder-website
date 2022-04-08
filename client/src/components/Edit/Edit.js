@@ -66,21 +66,19 @@ const spoodawebData = {
 
 /*
 To do:
-1. Touch up silk
-2. Add ability for silk to be glued onto a bud or other silk
+1. Touch up silk DONE
+2. Add ability for silk to be able to be dragged after placement
 3. optimise the whole thing
-4. add saving ability
+  Probably should have state of refs to all objects for ease of access
+4. Add ability for silk to be glued onto a bud or other silk
+5. add saving ability
 */
 
 function getCanvasMousePos(mousePos) {
   return {x: mousePos.x - window.innerWidth * 0.15 + divCanvas.scrollLeft, y: mousePos.y - 40 + divCanvas.scrollTop}
 }
 
-function isInCanvas(mousePos) {
-  const startX = window.innerWidth * 0.15
-  const startY = 0
-  const endX = window.innerWidth
-  const endY = window.innerHeight
+function withinRect(mousePos, startX, startY, endX, endY) {
   const x = mousePos.x
   const y = mousePos.y
   const xStartIn = x > startX
@@ -91,6 +89,14 @@ function isInCanvas(mousePos) {
     return true
   }
   return false
+}
+
+function isInCanvas(mousePos) {
+  const startX = window.innerWidth * 0.15
+  const startY = 0
+  const endX = window.innerWidth
+  const endY = window.innerHeight
+  return withinRect(mousePos, startX, startY, endX, endY)
 }
 
 function newObj(objs, setObjs, obj, refs, setRefs, ref) {
@@ -114,28 +120,40 @@ function Bud({ x, y }) {
   )
 }
 
+function drawLineOnMouseDown(e) {
+  console.log(e)
+  const mousePos = getCanvasMousePos({x: e.evt.pageX, y: e.evt.pageY})
+  // e.target.attrs.points = [mousePos.x, mousePos.y, mousePos.x+100, mousePos.y+100]
+  const points = e.target.attrs.points
+  console.log(points[0]-15, points[1]-15, points[0]+15, points[1]+15)
+  console.log(mousePos)
+  const inStart = withinRect(mousePos, points[0]-15, points[1]-15, points[0]+15, points[1]+15)
+  console.log('start', inStart)
+  const inEnd = withinRect(mousePos, points[2]-15, points[3]-15, points[2]+15, points[3]+15)
+  console.log('end', inEnd)
+}
+
 function DrawLine({ points }) { // why does this rerender so much lol
   return (
-    <Line
-      points={[points[0].x, points[0].y, points[1].x, points[1].y]}
-      stroke='black'
-      strokeWidth={1}>
-    </Line>
+    <>
+      <Line
+        points={[points[0].x, points[0].y, points[1].x, points[1].y]}
+        stroke='black'
+        strokeWidth={1}
+        onMouseDown={drawLineOnMouseDown}
+        draggable={true}
+        hitStrokeWidth={30}>
+      </Line>
+    </>
   )
 }
 
-function Select({ mousePos, toggle, id, objs, setObjs, rootPoint, draggingLine }) {
+function Select({ mousePos, toggle, id, objs, setObjs, rootPoint, draggingLine, refObjs }) {
   useEffect(() => {
     if (toggle && draggingLine) {
-      const newObjs = [...objs]
-      newObjs[id] = (
-        <DrawLine points={[
-          rootPoint,
-          getCanvasMousePos(mousePos)
-        ]}
-        key={objs.length-1}></DrawLine>
-      )
-      setObjs(newObjs)
+      const canvasMousePos = getCanvasMousePos(mousePos)
+      refObjs[id].attrs.points = [rootPoint.x, rootPoint.y, canvasMousePos.x, canvasMousePos.y]
+      console.log(refObjs[id].attrs.points)
     }
   }, [mousePos]) 
   return <></>
@@ -165,7 +183,7 @@ function undragLine(e, objs, setObjs, mousePos, setDraggingLine, setId) {
   }
 }
 
-function ObjectDrawer({ objs, setObjs, setDragging, toggle, setToggle, mousePos }) { // pls move the whole line drag thing to another component
+function ObjectDrawer({ objs, setObjs, setDragging, toggle, setToggle, mousePos, refObjs }) { // pls move the whole line drag thing to another component
   const [ draggingLine, setDraggingLine ] = useState(false)
   const [ rootPoint, setRootPoint ] = useState()
   const [ id, setId ] = useState()
@@ -196,7 +214,7 @@ function ObjectDrawer({ objs, setObjs, setDragging, toggle, setToggle, mousePos 
   }, [toggle, objs, mousePos])
   return (
     <>
-      <Select mousePos={mousePos} toggle={toggle} id={id} objs={objs} rootPoint={rootPoint} setObjs={setObjs} draggingLine={draggingLine}></Select>
+      <Select mousePos={mousePos} toggle={toggle} id={id} objs={objs} rootPoint={rootPoint} setObjs={setObjs} draggingLine={draggingLine} refObjs={refObjs}></Select>
       <div className={styles.objectDrawer}>
         <div className={styles.box}>
           <div className={styles.obj}>
@@ -204,7 +222,7 @@ function ObjectDrawer({ objs, setObjs, setDragging, toggle, setToggle, mousePos 
             <button className={styles.drawerButton} onMouseDown={() => setDragging(true)}>
               <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
             </button>
-            <button className={styles.drawerButton} onMouseDown={() => setToggle(!toggle)}>
+            <button className={toggle ? styles.darkenedDrawerButton : styles.drawerButton} onMouseDown={() => setToggle(!toggle)}>
               <FontAwesomeIcon icon={faLinesLeaning}></FontAwesomeIcon>
             </button>
           </div>
@@ -233,7 +251,7 @@ function FakeDraggableObj({ dragging, mousePos, objs, setObjs, isMouseHoverCanva
   )
 }
 
-function DrawCanvas({ objs, setObjs }) {
+function DrawCanvas({ objs, setObjs, setRefObjs, refObjs }) {
   useEffect(() => {
     document.addEventListener('wheel', preventZoomScroll)
     let index = -1
@@ -243,12 +261,18 @@ function DrawCanvas({ objs, setObjs }) {
     })
     setObjs(leBuds)
   }, [])
+  console.log(objs[2])
   return (
     <Stage
       x={0}
       y={0}
       width={window.innerWidth + 2 * 2000}
-      height={window.innerHeight + 2 * 2000}>
+      height={window.innerHeight + 2 * 2000}
+      onMouseMove={e => {
+        if (e.target.children) {
+          setRefObjs(e.target.children[0].children)
+        }
+      }}>
       <Layer>
         {objs}
       </Layer>
@@ -272,7 +296,8 @@ function Edit() {
   const navigate = useNavigate()
   const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
   const [ dragging, setDragging ] = useState(false)
-  const [ objs, setObjs ] = useState([])
+  const [ objs, setObjs ] = useState([]) // react objects
+  const [ refObjs, setRefObjs ] = useState([]) // konva js objects
   const [ toggle, setToggle ] = useState(false)
   const [ mousePos, setMousePos ] = useState({
     x: null,
@@ -306,7 +331,7 @@ function Edit() {
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <div className={styles.wrapper}>
-        <ObjectDrawer setDragging={setDragging} objs={objs} setObjs={setObjs} toggle={toggle} setToggle={setToggle} mousePos={mousePos}></ObjectDrawer>
+        <ObjectDrawer setDragging={setDragging} objs={objs} setObjs={setObjs} refObjs={refObjs} toggle={toggle} setToggle={setToggle} mousePos={mousePos}></ObjectDrawer>
         <FakeDraggableObj
           dragging={dragging}
           setDragging={setDragging}
@@ -316,7 +341,7 @@ function Edit() {
           useState={useState}
           useEffect={useEffect}></FakeDraggableObj>
         <div className={styles.divCanvas} id='divCanvas'>
-          <DrawCanvas objs={objs} setObjs={setObjs}></DrawCanvas>
+          <DrawCanvas objs={objs} setObjs={setObjs} setRefObjs={setRefObjs} refObjs={refObjs}></DrawCanvas>
         </div>
       </div>
     </>

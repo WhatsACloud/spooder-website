@@ -48,16 +48,25 @@ div.wrapper {
           border-bottom: 1px solid rgb(216, 216, 216);
           padding: 0;
         }
-        button.drawerButton {
-          @include std-button;
-          padding: 10px;
-          margin: 5px;
-          background-color: rgb(255, 255, 255);
-          transition: background-color 0.2s;
-          &:hover {
-            background-color: rgb(223, 223, 223);
+        button {
+          @mixin baseDrawerButton {
+            @include std-button(1);
+            padding: 10px;
+            margin: 5px;
+            background-color: rgb(255, 255, 255);
+            transition: background-color 0.2s;
           }
-          svg {
+          &.drawerButton {
+            @include baseDrawerButton;
+            &:hover {
+              background-color: rgb(158, 158, 158);
+            }
+            svg {
+            }
+          }
+          &.darkenedDrawerButton {
+            @include baseDrawerButton;
+            background-color: rgb(158, 158, 158);
           }
         }
       }
