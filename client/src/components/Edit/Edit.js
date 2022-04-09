@@ -126,27 +126,61 @@ function drawLineOnMouseDown(e) {
   console.log('end', inEnd)
 }
 
-function drawLine(points) {
+function lineMove(e, draggingLine, selected, mainLayer) {
+  if (isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
+    const mousePos = {x: e.pageX, y: e.pageY}
+    const canvasMousePos = getCanvasMousePos(mousePos)
+    const line = mainLayer.children[selected.layerIndex].children
+    // console.log(line[selected.innerIndex])
+    const start = line[selected.innerIndex]
+    console.log(mousePos)
+    start.setX(canvasMousePos.x)
+    start.setY(canvasMousePos.y)
+    const end = line[Math.abs(selected.innerIndex-1)]
+    // console.log(start.attrs.x, start.attrs.y, end.attrs.x, end.attrs.y, selected.innerIndex, Math.abs(selected.innerIndex-1))
+    line[2].setPoints([start.attrs.x, start.attrs.y, end.attrs.x, end.attrs.y])
+  }
+}
+
+function Circle(points, dragmoveFunc) {
+  const circle = new Konva.Circle({
+    radius: 30,
+    x: points[0].x,
+    y: points[0].y,
+    fill: 'red',
+    stroke: 'black',
+    strokeWidth: 4,
+    draggable: true
+  })
+  circle.on('dragmove', dragmoveFunc)
+  return circle
+}
+
+function drawLine(points, dragmoveFunc) {
+  const group = new Konva.Group()
+  const circleStart = Circle(points, dragmoveFunc)
+  const circleEnd = Circle(points, dragmoveFunc)
   const line = new Konva.Line({
     points: [points[0].x, points[0].y, points[1].x, points[1].y],
     stroke: 'black',
-    strokeWidth: 1,
-    onMouseDown: drawLineOnMouseDown,
-    draggable: true,
-    hitStrokeWidth: 30
+    strokeWidth: 1
   })
-  return line
+  group.add(circleStart, circleEnd, line)
+  return group
 }
 
-function startDrag(e, mousePos, setDraggingLine, setSelected, mainLayer) {
+function startDrag(e, mousePos, draggingLine, setDraggingLine, selected, setSelected, mainLayer) {
   if (e.button === 0 && isInCanvas(mousePos)) {
     const canvasMousePos = getCanvasMousePos(mousePos)
     console.log('dragged line')
     setDraggingLine(true)
-    const line = drawLine([canvasMousePos, canvasMousePos])
+    const line = drawLine(
+      [canvasMousePos, canvasMousePos],
+      evt => lineMove(evt.evt, true, {"layerIndex": evt.target.parent.index, "innerIndex": evt.target.index}, mainLayer)
+    )
     mainLayer.add(line)
     mainLayer.draw()
-    setSelected(line.index)
+    setSelected({"layerIndex": line.index, "innerIndex": 0})
   }
 }
 
@@ -158,23 +192,14 @@ function stopDrag(e, mousePos, setDraggingLine, setSelected) {
   }
 }
 
-function lineMove(e, mousePos, draggingLine, selected, mainLayer) {
-  if (isInCanvas(mousePos) && draggingLine) {
-    const canvasMousePos = getCanvasMousePos(mousePos)
-    const line = mainLayer.children[selected]
-    const points = line.getPoints()
-    line.setPoints([points[0], points[1], canvasMousePos.x, canvasMousePos.y])
-  }
-}
-
 function Select({ mousePos, mainLayer, toggle }) {
   const [ draggingLine, setDraggingLine ] = useState(false)
   const [ selected, setSelected ] = useState()
   // Object.keys().map((name) => { // ill deal with this later
   useEffect(() => {
-    const startDragWrapper = e => startDrag(e, mousePos, setDraggingLine, setSelected, mainLayer)
+    const startDragWrapper = e => startDrag(e, mousePos, draggingLine, setDraggingLine, selected, setSelected, mainLayer)
     const stopDragWrapper = e => stopDrag(e, mousePos, setDraggingLine, setSelected)
-    const dragLineWrapper = e => lineMove(e, mousePos, draggingLine, selected, mainLayer)
+    const dragLineWrapper = e => lineMove(e, draggingLine, selected, mainLayer)
     if (toggle) {
       document.addEventListener('mousemove', dragLineWrapper)
       document.addEventListener('mousedown', startDragWrapper)
