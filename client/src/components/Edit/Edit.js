@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Authorizer from '../Shared/Authorizer'
 import styles from './edit.module'
-import { Stage, Layer, RegularPolygon, Line } from 'react-konva'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faObjectGroup, faLinesLeaning } from '@fortawesome/free-solid-svg-icons'
 import Hexagon from 'react-svg-hexagon'
 import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
+import Konva from 'konva'
 
 const gridLink = "http://phrogz.net/tmp/grid.gif"
 
@@ -99,25 +99,18 @@ function isInCanvas(mousePos) {
   return withinRect(mousePos, startX, startY, endX, endY)
 }
 
-function newObj(objs, setObjs, obj, refs, setRefs, ref) {
-  const budsCopy = [...objs]
-  budsCopy.push(obj)
-  setObjs(budsCopy)
-  console.log(objs)
-}
-
 function Bud({ x, y }) {
-  return (
-    <RegularPolygon
-      x={x}
-      y={y}
-      sides={6}
-      radius={40}
-      fill='#00D2FF'
-      stroke='black'
-      strokeWidth={1}
-      draggable={true}></RegularPolygon>
-  )
+  const bud = new Konva.RegularPolygon({
+    x: x,
+    y: y,
+    sides: 6,
+    radius: 40,
+    fill: '#00D2FF',
+    stroke: 'black',
+    strokeWidth: 1,
+    draggable: true
+  })
+  return bud
 }
 
 function drawLineOnMouseDown(e) {
@@ -133,60 +126,70 @@ function drawLineOnMouseDown(e) {
   console.log('end', inEnd)
 }
 
-function DrawLine({ points }) { // why does this rerender so much lol
-  return (
-    <>
-      <Line
-        points={[points[0].x, points[0].y, points[1].x, points[1].y]}
-        stroke='black'
-        strokeWidth={1}
-        onMouseDown={drawLineOnMouseDown}
-        draggable={true}
-        hitStrokeWidth={30}>
-      </Line>
-    </>
-  )
+function drawLine(points) {
+  const line = new Konva.Line({
+    points: [points[0].x, points[0].y, points[1].x, points[1].y],
+    stroke: 'black',
+    strokeWidth: 1,
+    onMouseDown: drawLineOnMouseDown,
+    draggable: true,
+    hitStrokeWidth: 30
+  })
+  return line
 }
 
-function Select({ mousePos, toggle, id, objs, setObjs, rootPoint, draggingLine, refObjs }) {
-  useEffect(() => {
-    if (toggle && draggingLine) {
-      const canvasMousePos = getCanvasMousePos(mousePos)
-      refObjs[id].attrs.points = [rootPoint.x, rootPoint.y, canvasMousePos.x, canvasMousePos.y]
-      console.log(refObjs[id].attrs.points)
-    }
-  }, [mousePos]) 
-  return <></>
-}
-
-function dragLine(e, objs, setObjs, mousePos, setDraggingLine, setId, setRootPoint) {
+function startDrag(e, mousePos, setDraggingLine, setSelected, mainLayer) {
   if (e.button === 0 && isInCanvas(mousePos)) {
+    const canvasMousePos = getCanvasMousePos(mousePos)
     console.log('dragged line')
-    console.log(objs)
     setDraggingLine(true)
-    setId(objs.length)
-    setRootPoint(getCanvasMousePos(mousePos))
-    newObj(objs, setObjs, (
-      <DrawLine points={[
-        getCanvasMousePos(mousePos),
-        getCanvasMousePos(mousePos)
-      ]}
-      key={objs.length}></DrawLine>
-    ))
+    const line = drawLine([canvasMousePos, canvasMousePos])
+    mainLayer.add(line)
+    mainLayer.draw()
+    setSelected(line.index)
   }
 }
 
-function undragLine(e, objs, setObjs, mousePos, setDraggingLine, setId) {
+function stopDrag(e, mousePos, setDraggingLine, setSelected) {
   if (e.button === 0) {
     console.log('no')
     setDraggingLine(false)
+    setSelected()
   }
 }
 
-function ObjectDrawer({ objs, setObjs, setDragging, toggle, setToggle, mousePos, refObjs }) { // pls move the whole line drag thing to another component
+function lineMove(e, mousePos, draggingLine, selected, mainLayer) {
+  if (isInCanvas(mousePos) && draggingLine) {
+    const canvasMousePos = getCanvasMousePos(mousePos)
+    const line = mainLayer.children[selected]
+    const points = line.getPoints()
+    line.setPoints([points[0], points[1], canvasMousePos.x, canvasMousePos.y])
+  }
+}
+
+function Select({ mousePos, mainLayer, toggle }) {
   const [ draggingLine, setDraggingLine ] = useState(false)
-  const [ rootPoint, setRootPoint ] = useState()
-  const [ id, setId ] = useState()
+  const [ selected, setSelected ] = useState()
+  // Object.keys().map((name) => { // ill deal with this later
+  useEffect(() => {
+    const startDragWrapper = e => startDrag(e, mousePos, setDraggingLine, setSelected, mainLayer)
+    const stopDragWrapper = e => stopDrag(e, mousePos, setDraggingLine, setSelected)
+    const dragLineWrapper = e => lineMove(e, mousePos, draggingLine, selected, mainLayer)
+    if (toggle) {
+      document.addEventListener('mousemove', dragLineWrapper)
+      document.addEventListener('mousedown', startDragWrapper)
+      document.addEventListener('mouseup', stopDragWrapper)
+    }
+    return () => {
+      document.removeEventListener('mousemove', dragLineWrapper)
+      document.removeEventListener('mousedown', startDragWrapper)
+      document.removeEventListener('mouseup', stopDragWrapper)
+    }
+  }, [toggle, mousePos])
+  return <></>
+}
+
+function ObjectDrawer({ setDragging, toggle, setToggle }) {
   const items = {
     test: [
       {
@@ -199,22 +202,8 @@ function ObjectDrawer({ objs, setObjs, setDragging, toggle, setToggle, mousePos,
       }
     ]
   }
-  // Object.keys().map((name) => { // ill deal with this later
-  useEffect(() => {
-    const dragLineWrapper = (e) => dragLine(e, objs, setObjs, mousePos, setDraggingLine, setId, setRootPoint)
-    const undragLineWrapper = (e) => undragLine(e, objs, setObjs, mousePos, setDraggingLine, setId)
-    if (toggle) {
-      document.addEventListener('mousedown', dragLineWrapper)
-      document.addEventListener('mouseup', undragLineWrapper)
-    }
-    return () => {
-      document.removeEventListener('mousedown', dragLineWrapper)
-      document.removeEventListener('mouseup', undragLineWrapper)
-    }
-  }, [toggle, objs, mousePos])
   return (
     <>
-      <Select mousePos={mousePos} toggle={toggle} id={id} objs={objs} rootPoint={rootPoint} setObjs={setObjs} draggingLine={draggingLine} refObjs={refObjs}></Select>
       <div className={styles.objectDrawer}>
         <div className={styles.box}>
           <div className={styles.obj}>
@@ -230,6 +219,15 @@ function ObjectDrawer({ objs, setObjs, setDragging, toggle, setToggle, mousePos,
       </div>
     </>
   )
+}
+
+function drop(e, dragging) {
+  // console.log(isMouseHoverCanvas)
+  // if (!isMouseHoverCanvas) return
+  if (dragging) {
+    // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
+    Bud({x: e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, y: e.pageY - 40 + divCanvas.scrollTop})
+  }
 }
 
 function FakeDraggableObj({ dragging, mousePos, objs, setObjs, isMouseHoverCanvas }) {
@@ -251,7 +249,7 @@ function FakeDraggableObj({ dragging, mousePos, objs, setObjs, isMouseHoverCanva
   )
 }
 
-function DrawCanvas({ objs, setObjs, setRefObjs, refObjs }) {
+function DrawCanvas({ setMainLayer }) {
   useEffect(() => {
     document.addEventListener('wheel', preventZoomScroll)
     let index = -1
@@ -259,45 +257,38 @@ function DrawCanvas({ objs, setObjs, setRefObjs, refObjs }) {
       index += 1
       return <Bud key={index} x={spoodawebData[name].position.x} y={spoodawebData[name].position.y}></Bud>
     })
-    setObjs(leBuds)
+    const divCanvas = document.getElementById('divCanvas')
+    const stage = new Konva.Stage({
+      container: divCanvas,
+      x: 0,
+      y: 0,
+      width: window.innerWidth + 2 * 2000,
+      height: window.innerHeight + 2 * 2000
+    })
+    const mainLayer = new Konva.Layer()
+    for (const name in spoodawebData) {
+      const bud = Bud(spoodawebData[name].position)
+      mainLayer.add(bud)
+    }
+    stage.add(mainLayer)
+    mainLayer.draw()
+    console.log(mainLayer)
+    setMainLayer(mainLayer)
   }, [])
-  console.log(objs[2])
+  /*
+  for stage
+  
+  */
   return (
-    <Stage
-      x={0}
-      y={0}
-      width={window.innerWidth + 2 * 2000}
-      height={window.innerHeight + 2 * 2000}
-      onMouseMove={e => {
-        if (e.target.children) {
-          setRefObjs(e.target.children[0].children)
-        }
-      }}>
-      <Layer>
-        {objs}
-      </Layer>
-    </Stage>
+    <></>
   )
-}
-
-function drop(e, dragging, objs, setObjs) {
-  // console.log(isMouseHoverCanvas)
-  // if (!isMouseHoverCanvas) return
-  if (dragging) {
-    // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
-    newObj(objs, setObjs, (
-      <Bud key={objs.length} x={e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft} y={e.pageY - 40 + divCanvas.scrollTop}></Bud>
-    ))
-    console.log(objs)
-  }
 }
 
 function Edit() {
   const navigate = useNavigate()
   const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
   const [ dragging, setDragging ] = useState(false)
-  const [ objs, setObjs ] = useState([]) // react objects
-  const [ refObjs, setRefObjs ] = useState([]) // konva js objects
+  const [ mainLayer, setMainLayer ] = useState()
   const [ toggle, setToggle ] = useState(false)
   const [ mousePos, setMousePos ] = useState({
     x: null,
@@ -310,38 +301,36 @@ function Edit() {
     const mouseUpWrapper = (e) => {
       mouseUp(e, setMiddleMouseDown, setDragging)
     }
-    const mouseMoveWrapper = (e) => {
+    const mousePosWrapper = (e) => {
       mouseMove(e, middleMouseDown, mousePos, setMousePos)
     }
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('mousedown', mouseDownWrapper)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
     document.addEventListener('mouseup', mouseUpWrapper)
-    document.addEventListener('mousemove', mouseMoveWrapper)
+    document.addEventListener('mousemove', mousePosWrapper)
+    
     return () => {
       document.removeEventListener('keydown', preventZoom)
       // document.getElementsByClassName('konvajs-content')[0].removeEventListener('wheel', preventZoomScroll)
       document.removeEventListener('wheel', preventZoomScroll)
       document.removeEventListener('mousedown', mouseDownWrapper)
       document.removeEventListener('mouseup', mouseUpWrapper)
-      document.removeEventListener('mousemove', mouseMoveWrapper)
+      document.removeEventListener('mousemove', mousePosWrapper)
     }
   }, [middleMouseDown, mousePos])
   return (
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <div className={styles.wrapper}>
-        <ObjectDrawer setDragging={setDragging} objs={objs} setObjs={setObjs} refObjs={refObjs} toggle={toggle} setToggle={setToggle} mousePos={mousePos}></ObjectDrawer>
+        <ObjectDrawer setDragging={setDragging} toggle={toggle} setToggle={setToggle} mousePos={mousePos}></ObjectDrawer>
         <FakeDraggableObj
           dragging={dragging}
           setDragging={setDragging}
-          mousePos={mousePos}
-          objs={objs}
-          setObjs={setObjs}
-          useState={useState}
-          useEffect={useEffect}></FakeDraggableObj>
+          mousePos={mousePos}></FakeDraggableObj>
+        <Select mousePos={mousePos} mainLayer={mainLayer} toggle={toggle}></Select>
         <div className={styles.divCanvas} id='divCanvas'>
-          <DrawCanvas objs={objs} setObjs={setObjs} setRefObjs={setRefObjs} refObjs={refObjs}></DrawCanvas>
+          <DrawCanvas setMainLayer={setMainLayer}></DrawCanvas>
         </div>
       </div>
     </>
