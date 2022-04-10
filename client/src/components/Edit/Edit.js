@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { memo, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Authorizer from '../Shared/Authorizer'
 import styles from './edit.module'
@@ -67,15 +67,14 @@ const spoodawebData = {
 /*
 To do:
 1. Touch up silk DONE
-2. Add ability for silk to be able to be dragged after placement
+2. Add ability for silk to be able to be dragged after placement DONE
 3. optimise the whole thing
-  Probably should have state of refs to all objects for ease of access
 4. Add ability for silk to be glued onto a bud or other silk
 5. add saving ability
 */
 
-function getCanvasMousePos(mousePos) {
-  return {x: mousePos.x - window.innerWidth * 0.15 + divCanvas.scrollLeft, y: mousePos.y - 40 + divCanvas.scrollTop}
+function getCanvasMousePos(x, y) {
+  return {x: x - window.innerWidth * 0.15 + divCanvas.scrollLeft, y: y - 40 + divCanvas.scrollTop}
 }
 
 function withinRect(mousePos, startX, startY, endX, endY) {
@@ -116,7 +115,7 @@ function Bud({ x, y }) {
 function lineCircleMove(e, draggingLine, selected, mainLayer) {
   if (isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
     const mousePos = {x: e.pageX, y: e.pageY}
-    const canvasMousePos = getCanvasMousePos(mousePos)
+    const canvasMousePos = getCanvasMousePos(mousePos.x, mousePos.y)
     const lineGroup = mainLayer.children[selected.layerIndex].children
     const start = lineGroup[selected.innerIndex]
     const end = lineGroup[Math.abs(selected.innerIndex-1)]
@@ -126,7 +125,7 @@ function lineCircleMove(e, draggingLine, selected, mainLayer) {
     start.setY(canvasMousePos.y)
     // line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
     const lineTransform = line.getAbsoluteTransform()
-    lineTransform.m = [1, 0, 0, 1, 0, 0]
+    lineTransform.m = [1, 0, 0, 1, 0, 0] // lol
     console.log(lineTransform.m)
     const newStart = lineTransform.point({x: canvasMousePos.x, y: canvasMousePos.y})
     const newEnd = lineTransform.point({x: end.getX(), y: end.getY()})
@@ -165,9 +164,10 @@ function drawLine(points, circleDragmoveFunc, lineDragmoveFunc, lineDragendFunc)
   return group
 }
 
-function startDrag(e, mousePos, draggingLine, setDraggingLine, selected, setSelected, mainLayer) {
-  if (e.button === 0 && isInCanvas(mousePos)) {
-    const canvasMousePos = getCanvasMousePos(mousePos)
+function startDrag(e, draggingLine, setDraggingLine, selected, setSelected, mainLayer) {
+  console.log(e.pageX, e.pageY)
+  if (e.button === 0 && isInCanvas({x: e.pageX, y: e.pageY})) {
+    const canvasMousePos = getCanvasMousePos(e.pageX, e.pageY)
     console.log('dragged line')
     setDraggingLine(true)
     const line = drawLine(
@@ -186,12 +186,10 @@ function startDrag(e, mousePos, draggingLine, setDraggingLine, selected, setSele
         start.setY(newStart.y)
         end.setX(newEnd.x)
         end.setY(newEnd.y)
-        console.log(lineTransform.m)
       },
       evt => {
         const line = evt.target
         const points = line.getPoints()
-        console.log(points)
       }
     )
     mainLayer.add(line)
@@ -200,7 +198,7 @@ function startDrag(e, mousePos, draggingLine, setDraggingLine, selected, setSele
   }
 }
 
-function stopDrag(e, mousePos, setDraggingLine, setSelected) {
+function stopDrag(e, setDraggingLine, setSelected) {
   if (e.button === 0) {
     console.log('no')
     setDraggingLine(false)
@@ -208,13 +206,13 @@ function stopDrag(e, mousePos, setDraggingLine, setSelected) {
   }
 }
 
-function Select({ mousePos, mainLayer, toggle }) {
+const Select = memo(function Select({ mainLayer, toggle }) {
   const [ draggingLine, setDraggingLine ] = useState(false)
   const [ selected, setSelected ] = useState()
   // Object.keys().map((name) => { // ill deal with this later
   useEffect(() => {
-    const startDragWrapper = e => startDrag(e, mousePos, draggingLine, setDraggingLine, selected, setSelected, mainLayer)
-    const stopDragWrapper = e => stopDrag(e, mousePos, setDraggingLine, setSelected)
+    const startDragWrapper = e => startDrag(e, draggingLine, setDraggingLine, selected, setSelected, mainLayer)
+    const stopDragWrapper = e => stopDrag(e, setDraggingLine, setSelected)
     const dragLineWrapper = e => lineCircleMove(e, draggingLine, selected, mainLayer)
     if (toggle) {
       document.addEventListener('mousemove', dragLineWrapper)
@@ -226,9 +224,9 @@ function Select({ mousePos, mainLayer, toggle }) {
       document.removeEventListener('mousedown', startDragWrapper)
       document.removeEventListener('mouseup', stopDragWrapper)
     }
-  }, [toggle, mousePos])
+  }, [toggle, draggingLine, selected])
   return <></>
-}
+})
 
 function ObjectDrawer({ setDragging, toggle, setToggle }) {
   const items = {
@@ -262,24 +260,25 @@ function ObjectDrawer({ setDragging, toggle, setToggle }) {
   )
 }
 
-function drop(e, dragging) {
+function drop(e, dragging, mainLayer) {
   // console.log(isMouseHoverCanvas)
   // if (!isMouseHoverCanvas) return
-  if (dragging) {
+  if (dragging && isInCanvas({x: e.pageX, y: e.pageY})) {
+    console.log('placed!')
     // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
-    Bud({x: e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, y: e.pageY - 40 + divCanvas.scrollTop})
+    const bud = Bud(getCanvasMousePos(e.pageX, e.pageY))
+    mainLayer.add(bud)
+    mainLayer.draw()
   }
 }
 
-function FakeDraggableObj({ dragging, mousePos, objs, setObjs, isMouseHoverCanvas }) {
+function FakeDraggableObj({ dragging, mousePos, mainLayer }) {
   const x = mousePos.x
   const y = mousePos.y
   useEffect(() => {
-    const dropWrapper = (e) => drop(e, dragging, objs, setObjs, isMouseHoverCanvas, Bud)
+    const dropWrapper = (e) => drop(e, dragging, mainLayer)
     document.addEventListener('mouseup', dropWrapper)
-    console.log('rendered')
     return () => {
-      console.log('unrendered')
       document.removeEventListener('mouseup', dropWrapper)
     }
   }, [dragging])
@@ -367,9 +366,9 @@ function Edit() {
         <ObjectDrawer setDragging={setDragging} toggle={toggle} setToggle={setToggle} mousePos={mousePos}></ObjectDrawer>
         <FakeDraggableObj
           dragging={dragging}
-          setDragging={setDragging}
-          mousePos={mousePos}></FakeDraggableObj>
-        <Select mousePos={mousePos} mainLayer={mainLayer} toggle={toggle}></Select>
+          mousePos={mousePos}
+          mainLayer={mainLayer}></FakeDraggableObj>
+        <Select mainLayer={mainLayer} toggle={toggle}></Select>
         <div className={styles.divCanvas} id='divCanvas'>
           <DrawCanvas setMainLayer={setMainLayer}></DrawCanvas>
         </div>
