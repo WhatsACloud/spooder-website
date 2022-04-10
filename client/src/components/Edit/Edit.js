@@ -113,32 +113,24 @@ function Bud({ x, y }) {
   return bud
 }
 
-function drawLineOnMouseDown(e) {
-  console.log(e)
-  const mousePos = getCanvasMousePos({x: e.evt.pageX, y: e.evt.pageY})
-  // e.target.attrs.points = [mousePos.x, mousePos.y, mousePos.x+100, mousePos.y+100]
-  const points = e.target.attrs.points
-  console.log(points[0]-15, points[1]-15, points[0]+15, points[1]+15)
-  console.log(mousePos)
-  const inStart = withinRect(mousePos, points[0]-15, points[1]-15, points[0]+15, points[1]+15)
-  console.log('start', inStart)
-  const inEnd = withinRect(mousePos, points[2]-15, points[3]-15, points[2]+15, points[3]+15)
-  console.log('end', inEnd)
-}
-
-function lineMove(e, draggingLine, selected, mainLayer) {
+function lineCircleMove(e, draggingLine, selected, mainLayer) {
   if (isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
     const mousePos = {x: e.pageX, y: e.pageY}
     const canvasMousePos = getCanvasMousePos(mousePos)
-    const line = mainLayer.children[selected.layerIndex].children
-    // console.log(line[selected.innerIndex])
-    const start = line[selected.innerIndex]
-    console.log(mousePos)
+    const lineGroup = mainLayer.children[selected.layerIndex].children
+    const start = lineGroup[selected.innerIndex]
+    const end = lineGroup[Math.abs(selected.innerIndex-1)]
+    const line = lineGroup[2]
+    // console.log(newStart)
     start.setX(canvasMousePos.x)
     start.setY(canvasMousePos.y)
-    const end = line[Math.abs(selected.innerIndex-1)]
-    // console.log(start.attrs.x, start.attrs.y, end.attrs.x, end.attrs.y, selected.innerIndex, Math.abs(selected.innerIndex-1))
-    line[2].setPoints([start.attrs.x, start.attrs.y, end.attrs.x, end.attrs.y])
+    // line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
+    const lineTransform = line.getAbsoluteTransform()
+    lineTransform.m = [1, 0, 0, 1, 0, 0]
+    console.log(lineTransform.m)
+    const newStart = lineTransform.point({x: canvasMousePos.x, y: canvasMousePos.y})
+    const newEnd = lineTransform.point({x: end.getX(), y: end.getY()})
+    line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
   }
 }
 
@@ -156,15 +148,19 @@ function Circle(points, dragmoveFunc) {
   return circle
 }
 
-function drawLine(points, dragmoveFunc) {
+function drawLine(points, circleDragmoveFunc, lineDragmoveFunc, lineDragendFunc) {
   const group = new Konva.Group()
-  const circleStart = Circle(points, dragmoveFunc)
-  const circleEnd = Circle(points, dragmoveFunc)
+  const circleStart = Circle(points, circleDragmoveFunc)
+  const circleEnd = Circle(points, circleDragmoveFunc)
   const line = new Konva.Line({
     points: [points[0].x, points[0].y, points[1].x, points[1].y],
     stroke: 'black',
-    strokeWidth: 1
+    strokeWidth: 1,
+    hitStrokeWidth: 30,
+    draggable: true,
   })
+  line.on('dragmove', lineDragmoveFunc)
+  line.on('dragend', lineDragendFunc)
   group.add(circleStart, circleEnd, line)
   return group
 }
@@ -176,7 +172,27 @@ function startDrag(e, mousePos, draggingLine, setDraggingLine, selected, setSele
     setDraggingLine(true)
     const line = drawLine(
       [canvasMousePos, canvasMousePos],
-      evt => lineMove(evt.evt, true, {"layerIndex": evt.target.parent.index, "innerIndex": evt.target.index}, mainLayer)
+      evt => lineCircleMove(evt.evt, true, {"layerIndex": evt.target.parent.index, "innerIndex": evt.target.index}, mainLayer),
+      evt => {
+        const line = evt.target
+        const lineGroup = line.parent.children
+        const points = line.getPoints()
+        const start = lineGroup[0]
+        const end = lineGroup[1]
+        const lineTransform = line.getAbsoluteTransform()
+        const newStart = lineTransform.point({x: points[0], y: points[1]})
+        const newEnd = lineTransform.point({x: points[2], y: points[3]})
+        start.setX(newStart.x)
+        start.setY(newStart.y)
+        end.setX(newEnd.x)
+        end.setY(newEnd.y)
+        console.log(lineTransform.m)
+      },
+      evt => {
+        const line = evt.target
+        const points = line.getPoints()
+        console.log(points)
+      }
     )
     mainLayer.add(line)
     mainLayer.draw()
@@ -199,7 +215,7 @@ function Select({ mousePos, mainLayer, toggle }) {
   useEffect(() => {
     const startDragWrapper = e => startDrag(e, mousePos, draggingLine, setDraggingLine, selected, setSelected, mainLayer)
     const stopDragWrapper = e => stopDrag(e, mousePos, setDraggingLine, setSelected)
-    const dragLineWrapper = e => lineMove(e, draggingLine, selected, mainLayer)
+    const dragLineWrapper = e => lineCircleMove(e, draggingLine, selected, mainLayer)
     if (toggle) {
       document.addEventListener('mousemove', dragLineWrapper)
       document.addEventListener('mousedown', startDragWrapper)

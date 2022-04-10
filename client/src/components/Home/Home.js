@@ -8,6 +8,9 @@ import { ErrorBox } from '../Shared/errorMsg'
 import { object, string, ref } from 'yup'
 import Authorizer from '../Shared/Authorizer'
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
+
 import Layout from '../layout';
 
 const spoodawebSchema = object({
@@ -210,7 +213,7 @@ const Home = () => { // to fix constant rerenders
       <div className={prompted ? styles.blankScreen : styles.none}></div>
       <ContextMenu x={anchorPoint.x} y={anchorPoint.y} show={show}></ContextMenu>
       <button className={styles.createSpoodawebButton} onClick={() => {setPrompted(!prompted)}}>
-        <i className={`fa fa-plus ${styles.plusIcon}`}></i>
+        <FontAwesomeIcon icon={faPlus} className={styles.plusIcon}></FontAwesomeIcon>
         create
       </button>
       <Prompt
