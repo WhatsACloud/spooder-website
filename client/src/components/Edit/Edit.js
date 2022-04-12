@@ -98,8 +98,11 @@ function isInCanvas(mousePos) {
   return withinRect(mousePos, startX, startY, endX, endY)
 }
 
-function Bud({ x, y }) {
-  const bud = new Konva.RegularPolygon({
+function Bud({ x, y, borderOn }) {
+  borderOn = (evt) => {
+    console.log(evt)
+  }
+  const renderedBud = new Konva.RegularPolygon({
     x: x,
     y: y,
     sides: 6,
@@ -109,6 +112,25 @@ function Bud({ x, y }) {
     strokeWidth: 1,
     draggable: true
   })
+  const hitBorderBud = new Konva.RegularPolygon({
+    x: x,
+    y: y,
+    sides: 6,
+    radius: 40,
+    fill: '#00D2FF',
+    stroke: 'black',
+    fillEnabled: false,
+    strokeWidth: 10
+  })
+  renderedBud.on('dragmove', (evt) => {
+    const hitBorderBud = evt.target.parent.children[1]
+    const renderedBud = evt.target
+    hitBorderBud.setX(renderedBud.getX())
+    hitBorderBud.setY(renderedBud.getY())
+  })
+  hitBorderBud.on('mousemove', borderOn)
+  const bud = new Konva.Group()
+  bud.add(renderedBud, hitBorderBud)
   return bud
 }
 
@@ -116,17 +138,17 @@ function lineCircleMove(e, draggingLine, selected, mainLayer) {
   if (isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
     const mousePos = {x: e.pageX, y: e.pageY}
     const canvasMousePos = getCanvasMousePos(mousePos.x, mousePos.y)
+    console.log(selected.innerIndex)
     const lineGroup = mainLayer.children[selected.layerIndex].children
     const start = lineGroup[selected.innerIndex]
-    const end = lineGroup[Math.abs(selected.innerIndex-1)]
-    const line = lineGroup[2]
+    const end = lineGroup[Math.abs(selected.innerIndex-2)+1]
+    const line = lineGroup[0]
     // console.log(newStart)
     start.setX(canvasMousePos.x)
     start.setY(canvasMousePos.y)
     // line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
     const lineTransform = line.getAbsoluteTransform()
     lineTransform.m = [1, 0, 0, 1, 0, 0] // lol
-    console.log(lineTransform.m)
     const newStart = lineTransform.point({x: canvasMousePos.x, y: canvasMousePos.y})
     const newEnd = lineTransform.point({x: end.getX(), y: end.getY()})
     line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
@@ -135,12 +157,13 @@ function lineCircleMove(e, draggingLine, selected, mainLayer) {
 
 function Circle(points, dragmoveFunc) {
   const circle = new Konva.Circle({
-    radius: 30,
+    radius: 5,
     x: points[0].x,
     y: points[0].y,
-    fill: 'red',
+    fill: 'black',
     stroke: 'black',
     strokeWidth: 4,
+    hitStrokeWidth: 30,
     draggable: true
   })
   circle.on('dragmove', dragmoveFunc)
@@ -160,7 +183,7 @@ function drawLine(points, circleDragmoveFunc, lineDragmoveFunc, lineDragendFunc)
   })
   line.on('dragmove', lineDragmoveFunc)
   line.on('dragend', lineDragendFunc)
-  group.add(circleStart, circleEnd, line)
+  group.add(line, circleStart, circleEnd)
   return group
 }
 
@@ -177,8 +200,8 @@ function startDrag(e, draggingLine, setDraggingLine, selected, setSelected, main
         const line = evt.target
         const lineGroup = line.parent.children
         const points = line.getPoints()
-        const start = lineGroup[0]
-        const end = lineGroup[1]
+        const start = lineGroup[1]
+        const end = lineGroup[2]
         const lineTransform = line.getAbsoluteTransform()
         const newStart = lineTransform.point({x: points[0], y: points[1]})
         const newEnd = lineTransform.point({x: points[2], y: points[3]})
@@ -194,7 +217,7 @@ function startDrag(e, draggingLine, setDraggingLine, selected, setSelected, main
     )
     mainLayer.add(line)
     mainLayer.draw()
-    setSelected({"layerIndex": line.index, "innerIndex": 0})
+    setSelected({"layerIndex": line.index, "innerIndex": 1})
   }
 }
 
@@ -330,6 +353,7 @@ function Edit() {
   const [ dragging, setDragging ] = useState(false)
   const [ mainLayer, setMainLayer ] = useState()
   const [ toggle, setToggle ] = useState(false)
+  const [ hoverBudBorder, setHoverBudBorder ] = useState(false)
   const [ mousePos, setMousePos ] = useState({
     x: null,
     y: null
