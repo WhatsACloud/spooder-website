@@ -98,10 +98,48 @@ function isInCanvas(mousePos) {
   return withinRect(mousePos, startX, startY, endX, endY)
 }
 
-function Bud({ x, y, borderOn }) {
-  borderOn = (evt) => {
-    console.log(evt)
+function getHexagonPoints(r, x, y) {
+  const points = []
+  const a = 2 * Math.PI / 6
+  let lastPoint = {x: x + r, y: y + r}
+  for (var i = 1; i < 7; i++) {
+    const newPoint = {x: x + r * Math.cos(a * i), y: y + r * Math.sin(a * i)}
+    points.push([
+      lastPoint,
+      newPoint
+    ])
+    lastPoint = newPoint
   }
+  return points
+}
+
+function degreesToRadians(degrees) {
+  return degrees * (Math.PI/180)
+}
+
+function Bud({ x, y, borderOn }) {
+  /*
+  gradient = rise / run
+  rise = 
+  */
+  borderOn = (evt) => {
+    const budBorder = evt.target
+    const mousePos = getCanvasMousePos(evt.evt.pageX, evt.evt.pageY)
+    const x = budBorder.getX()
+    const y = budBorder.getY()
+    const run = Math.sin(degreesToRadians(60)) * 40
+    const rise = Math.cos(degreesToRadians(60)) * 40
+    const gradient = rise / run
+    const hexagonPoints = getHexagonPoints(40, x, y)
+    for (const lineIndex in hexagonPoints) {
+      const line = hexagonPoints[lineIndex]
+      const mainLayer = evt.target.parent.parent
+      const highlighter = mainLayer.children[2] // WARNING ONLY TEMPORARY FIX
+      highlighter.setX(mousePos.y / gradient)
+      highlighter.setY(mousePos.x * gradient)
+    }
+  }
+  const bud = new Konva.Group()
   const renderedBud = new Konva.RegularPolygon({
     x: x,
     y: y,
@@ -117,8 +155,7 @@ function Bud({ x, y, borderOn }) {
     y: y,
     sides: 6,
     radius: 40,
-    fill: '#00D2FF',
-    stroke: 'black',
+    stroke: 'rgba(0, 0, 0, 0)',
     fillEnabled: false,
     strokeWidth: 10
   })
@@ -129,7 +166,6 @@ function Bud({ x, y, borderOn }) {
     hitBorderBud.setY(renderedBud.getY())
   })
   hitBorderBud.on('mousemove', borderOn)
-  const bud = new Konva.Group()
   bud.add(renderedBud, hitBorderBud)
   return bud
 }
@@ -333,6 +369,13 @@ function DrawCanvas({ setMainLayer }) {
       const bud = Bud(spoodawebData[name].position)
       mainLayer.add(bud)
     }
+    const budAnchorHighlighter = new Konva.Circle({
+      radius: 5,
+      x: 0,
+      y: 0,
+      fill: 'black'
+    })
+    mainLayer.add(budAnchorHighlighter)
     stage.add(mainLayer)
     mainLayer.draw()
     console.log(mainLayer)
