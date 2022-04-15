@@ -98,23 +98,46 @@ function isInCanvas(mousePos) {
   return withinRect(mousePos, startX, startY, endX, endY)
 }
 
-function getHexagonPoints(r, x, y) {
-  const points = []
+function getHexagonLines(r, points) {
+  const lines = []
   const a = 2 * Math.PI / 6
-  let lastPoint = {x: x + r, y: y + r}
-  for (var i = 1; i < 7; i++) {
-    const newPoint = {x: x + r * Math.cos(a * i), y: y + r * Math.sin(a * i)}
-    points.push([
+  let lastPoint = points[0]
+  for (let i = 1; i < 7; i++) {
+    let newPoint = points[i]
+    if (newPoint === undefined) {
+      newPoint = points[0]
+    }
+    lines.push([
       lastPoint,
       newPoint
     ])
     lastPoint = newPoint
   }
-  return points
+  return lines
 }
 
 function degreesToRadians(degrees) {
   return degrees * (Math.PI/180)
+}
+
+const a = 2 * Math.PI / 6
+
+function hexagonPoints(r, x, y) {
+  const points = []
+  for (var i = 0; i < 6; i++) {
+    points.push({x: x + r * Math.cos(a * i), y: y + r * Math.sin(a * i)})
+  }
+  return points
+}
+
+function drawHexagon(ctx, points) {
+  ctx.beginPath()
+  for (var i = 0; i < 6; i++) {
+    const x = points[i].x
+    const y = points[i].y
+    ctx.lineTo(x, y)
+  }
+  ctx.closePath()
 }
 
 function Bud({ x, y, borderOn }) {
@@ -124,46 +147,76 @@ function Bud({ x, y, borderOn }) {
   */
   borderOn = (evt) => {
     const budBorder = evt.target
+    const bud = evt.target.parent.children[0]
     const mousePos = getCanvasMousePos(evt.evt.pageX, evt.evt.pageY)
     const x = budBorder.getX()
     const y = budBorder.getY()
-    const run = Math.sin(degreesToRadians(60)) * 40
-    const rise = Math.cos(degreesToRadians(60)) * 40
-    const gradient = rise / run
-    const hexagonPoints = getHexagonPoints(40, x, y)
+    const points = bud.getAttr('points')
+    const hexagonPoints = getHexagonLines(40, points)
+    const nearestPointIndexes = {"hexagonLineIndex": null, "lineIndex": null}
+    let nearestPointAmt = {x: 1000000000000000, y: 1000000000000000}
     for (const lineIndex in hexagonPoints) {
       const line = hexagonPoints[lineIndex]
-      const mainLayer = evt.target.parent.parent
-      const highlighter = mainLayer.children[2] // WARNING ONLY TEMPORARY FIX
-      highlighter.setX(mousePos.y / gradient)
-      highlighter.setY(mousePos.x * gradient)
+      for (const pointIndex in line) {
+        const point = line[pointIndex]
+        const xDist = Math.abs(mousePos.x - point.x)
+        const yDist = Math.abs(mousePos.y - point.y)
+        if (xDist < nearestPointAmt.x && yDist < nearestPointAmt.y) {
+          nearestPointAmt = {x: xDist, y: yDist}
+          nearestPointIndexes.hexagonLineIndex = lineIndex
+          nearestPointIndexes.lineIndex = pointIndex
+        }
+      }
     }
+    const nearestLine = hexagonPoints[nearestPointIndexes.hexagonLineIndex]
+    const run = Math.sin(degreesToRadians(Math.abs(nearestLine[0].x-nearestLine[1].x))) * 40
+    const rise = Math.cos(degreesToRadians(Math.abs(nearestLine[0].y-nearestLine[1].y))) * 40
+    const gradient = rise / run
+    const mainLayer = evt.target.parent.parent
+    const highlighter = mainLayer.children[2] // WARNING ONLY TEMPORARY FIX
+    // highlighter.setX(mousePos.y / gradient)
+    highlighter.setX(mousePos.x)
+    highlighter.setY(mousePos.x * gradient)
   }
   const bud = new Konva.Group()
-  const renderedBud = new Konva.RegularPolygon({
+  const radius = 40
+  const strokeWidth = 40
+  const sceneFunc = (ctx, shape) => {
+    const x = 0
+    const y = 0
+    const points = hexagonPoints(shape.getAttr('radius'), x, y)
+    drawHexagon(ctx, points)
+    ctx.fillStrokeShape(shape)
+  }
+  const renderedBud = new Konva.Shape({
     x: x,
     y: y,
-    sides: 6,
-    radius: 40,
+    radius: radius,
     fill: '#00D2FF',
     stroke: 'black',
     strokeWidth: 1,
-    draggable: true
+    draggable: true,
+    points: hexagonPoints(radius, x, y),
+    sceneFunc: sceneFunc
   })
-  const hitBorderBud = new Konva.RegularPolygon({
+  
+  const hitBorderBud = new Konva.Shape({
     x: x,
     y: y,
-    sides: 6,
-    radius: 40,
+    radius: radius+strokeWidth/2,
+    fill: 'rgba(0, 0, 0, 0)',
     stroke: 'rgba(0, 0, 0, 0)',
     fillEnabled: false,
-    strokeWidth: 10
+    strokeWidth: strokeWidth,
+    sceneFunc: sceneFunc
   })
   renderedBud.on('dragmove', (evt) => {
     const hitBorderBud = evt.target.parent.children[1]
     const renderedBud = evt.target
-    hitBorderBud.setX(renderedBud.getX())
-    hitBorderBud.setY(renderedBud.getY())
+    const x = renderedBud.getX()
+    const y = renderedBud.getY()
+    hitBorderBud.setX(x)
+    hitBorderBud.setY(y)
   })
   hitBorderBud.on('mousemove', borderOn)
   bud.add(renderedBud, hitBorderBud)
