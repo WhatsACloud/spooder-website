@@ -98,7 +98,7 @@ function isInCanvas(mousePos) {
   return withinRect(mousePos, startX, startY, endX, endY)
 }
 
-function getHexagonLines(r, points) {
+function getHexagonLines(points) {
   const lines = []
   const a = 2 * Math.PI / 6
   let lastPoint = points[0]
@@ -150,13 +150,6 @@ function Bud({ x, y, borderOn }) {
   const bud = new Konva.Group()
   const radius = 40
   const strokeWidth = 40
-  const sceneFunc = (ctx, shape) => {
-    const x = 0
-    const y = 0
-    const points = hexagonPoints(shape.getAttr('radius'), x, y)
-    drawHexagon(ctx, points)
-    ctx.fillStrokeShape(shape)
-  }
   const renderedBud = new Konva.Shape({
     x: x,
     y: y,
@@ -166,20 +159,47 @@ function Bud({ x, y, borderOn }) {
     strokeWidth: 1,
     draggable: true,
     points: hexagonPoints(radius, x, y),
-    sceneFunc: sceneFunc
+    sceneFunc: (ctx, shape) => {
+      const points = hexagonPoints(shape.getAttr('radius'), 0, 0)
+      drawHexagon(ctx, points)
+      ctx.fillStrokeShape(shape)
+    }
   })
   renderedBud.on('dragmove', (evt) => {
     const renderedBud = evt.target
     const x = renderedBud.getX()
     const y = renderedBud.getY()
+    const siblings = evt.target.parent.children.slice(1)
+    for (const siblingIndex in siblings) {
+      const hit = siblings[siblingIndex]
+      hit.setX(x)
+      hit.setY(y)
+      console.log(hit)
+    }
   })
-  const points = getHexagonLines(radius, renderedBud.getAttr('points'))
-  for (const pointIndex in points) {
-    const point = points[pointIndex]
-    console.log(point)
-  }
   // hitBorderBud.on('mousemove', borderOn)
   bud.add(renderedBud)
+  const lines = getHexagonLines(renderedBud.getAttr('points'))
+  const hitLines = getHexagonLines(hexagonPoints(radius+strokeWidth, x, y))
+  for (const lineIndex in lines) {
+    const line = lines[lineIndex]
+    console.log(line)
+    const hitArea = new Konva.Shape({
+      x: 0,
+      y: 0,
+      fill: 'black',
+      sceneFunc: (ctx, shape) => {
+        const hitLine = hitLines[lineIndex]
+        ctx.beginPath()
+        ctx.lineTo(line[0].x, line[0].y)
+        ctx.lineTo(line[1].x, line[1].y)
+        ctx.lineTo(hitLine[1].x, hitLine[1].y)
+        ctx.lineTo(hitLine[0].x, hitLine[0].y)
+        ctx.fillStrokeShape(shape)
+      }
+    })
+    bud.add(hitArea)
+  }
   return bud
 }
 
