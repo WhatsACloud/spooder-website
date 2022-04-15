@@ -172,9 +172,11 @@ function Bud({ x, y, borderOn }) {
     const siblings = evt.target.parent.children.slice(1)
     for (const siblingIndex in siblings) {
       const hit = siblings[siblingIndex]
-      hit.setX(x)
-      hit.setY(y)
-      console.log(hit)
+      const hitTransform = hit.getAbsoluteTransform()
+      hitTransform.m = [1, 0, 0, 1, 0, 0] // lol
+      const hitPos = hitTransform.point({x: x, y: y})
+      hit.setX(hitPos.x)
+      hit.setY(hitPos.y)
     }
   })
   // hitBorderBud.on('mousemove', borderOn)
