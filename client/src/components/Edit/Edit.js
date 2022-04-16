@@ -33,8 +33,8 @@ const spoodawebData = {
         "3": 0.65
     },
     "position": {
-      "x": 100,
-      "y": 50
+      "x": 80,
+      "y": 70
     }
   },
   "gay": {
@@ -58,8 +58,8 @@ const spoodawebData = {
         "3": 0.65
     },
     "position": {
-      "x": 200,
-      "y": 120
+      "x": 500,
+      "y": 500
     }
   }
 }
@@ -100,7 +100,6 @@ function isInCanvas(mousePos) {
 
 function getHexagonLines(points) {
   const lines = []
-  const a = 2 * Math.PI / 6
   let lastPoint = points[0]
   for (let i = 1; i < 7; i++) {
     let newPoint = points[i]
@@ -141,10 +140,6 @@ function drawHexagon(ctx, points) {
 }
 
 function Bud({ x, y, borderOn }) {
-  /*
-  gradient = rise / run
-  rise = 
-  */
   borderOn = (evt) => {
   }
   const bud = new Konva.Group()
@@ -169,11 +164,14 @@ function Bud({ x, y, borderOn }) {
     const renderedBud = evt.target
     const x = renderedBud.getX()
     const y = renderedBud.getY()
+    renderedBud.setAttr('points', hexagonPoints(radius, x, y))
+    const lines = getHexagonLines(renderedBud.getAttr('points'))
     const siblings = evt.target.parent.children.slice(1)
     for (const siblingIndex in siblings) {
       const hit = siblings[siblingIndex]
       hit.setX(x)
       hit.setY(y)
+      hit.setAttr('borderPoints', lines[siblingIndex])
     }
   })
   // hitBorderBud.on('mousemove', borderOn)
@@ -186,7 +184,8 @@ function Bud({ x, y, borderOn }) {
     const hitArea = new Konva.Shape({
       x: x,
       y: y,
-      fill: 'black',
+      borderPoints: line,
+      fill: 'rgba(0, 0, 0, 0)',
       sceneFunc: (ctx, shape) => {
         const hitLine = hitLines[lineIndex]
         ctx.beginPath()
@@ -196,6 +195,88 @@ function Bud({ x, y, borderOn }) {
         ctx.lineTo(hitLine[0].x-x, hitLine[0].y-y)
         ctx.fillStrokeShape(shape)
       }
+    })
+    hitArea.on('mousemove', (evt) => {
+      const mousePos = getCanvasMousePos(evt.evt.pageX, evt.evt.pageY)
+      const hitLinePoints = evt.target.getAttr('borderPoints')
+      const rise = hitLinePoints[1].y - hitLinePoints[0].y
+      const run = hitLinePoints[1].x - hitLinePoints[0].x
+      const gradient = rise / run
+      const highlighter = evt.target.parent.parent.parent.find('.highlighter')[0]
+      const bud = evt.target.parent.children[0]
+      // console.log(evt.target.index)
+      const hitIndex = evt.target.index
+      let x
+      let y
+      if (hitIndex === 2 || hitIndex === 5) {
+        x = mousePos.x
+        y = evt.target.getAttr('borderPoints')[0].y
+      } else if (hitIndex === 3) {
+        x = (
+          Math.abs(evt.target.getY() - mousePos.y)
+          / gradient
+          + hitLinePoints[1].x
+        )
+        y = mousePos.y
+      } else if (hitIndex === 6) { // yandere dev moment
+        x = (
+          - (
+            Math.abs(evt.target.getY() - mousePos.y)
+            / gradient
+          )
+          + hitLinePoints[1].x
+        )
+        y = mousePos.y
+      } else if (hitIndex === 1) {
+        x = (
+          Math.abs(evt.target.getY() - mousePos.y)
+          / gradient
+          + hitLinePoints[1].x
+          + radius / 2
+        )
+        y = mousePos.y
+      } else if (hitIndex === 4) {
+        x = (
+          - (
+            Math.abs(evt.target.getY() - mousePos.y)
+            / gradient
+          )
+          + hitLinePoints[1].x
+          - radius / 2
+        )
+        y = mousePos.y
+      }
+      
+      if (x === undefined) {
+        console.log('a')
+      }
+      let xStartingPointIndex = 0
+      let yStartingPointIndex = 1
+      if (hitIndex > 3) {
+        xStartingPointIndex = 1
+        yStartingPointIndex = 0
+      }
+      if (hitIndex === 3) {
+        xStartingPointIndex = 0
+        yStartingPointIndex = 0
+      } else if (hitIndex === 6) {
+        xStartingPointIndex = 1
+        yStartingPointIndex = 1
+      }
+      console.log(x, y, hitLinePoints)
+      if (x > hitLinePoints[xStartingPointIndex].x) {
+        x = hitLinePoints[xStartingPointIndex].x
+      } else if (x < hitLinePoints[Math.abs(xStartingPointIndex-1)].x) { // gets opposite point
+        x = hitLinePoints[Math.abs(xStartingPointIndex-1)].x
+      }
+      if (y > hitLinePoints[yStartingPointIndex].y) {
+        y = hitLinePoints[yStartingPointIndex].y
+      } else if (y < hitLinePoints[Math.abs(yStartingPointIndex-1)].y) {
+        y = hitLinePoints[Math.abs(yStartingPointIndex-1)].y
+      }
+      console.log(x, y)
+      highlighter.setX(x)
+      highlighter.setY(y)
     })
     bud.add(hitArea)
   }
@@ -405,7 +486,8 @@ function DrawCanvas({ setMainLayer }) {
       radius: 5,
       x: 0,
       y: 0,
-      fill: 'black'
+      fill: 'grey',
+      name: 'highlighter'
     })
     mainLayer.add(budAnchorHighlighter)
     stage.add(mainLayer)
