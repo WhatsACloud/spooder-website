@@ -172,11 +172,8 @@ function Bud({ x, y, borderOn }) {
     const siblings = evt.target.parent.children.slice(1)
     for (const siblingIndex in siblings) {
       const hit = siblings[siblingIndex]
-      const hitTransform = hit.getAbsoluteTransform()
-      hitTransform.m = [1, 0, 0, 1, 0, 0] // lol
-      const hitPos = hitTransform.point({x: x, y: y})
-      hit.setX(hitPos.x)
-      hit.setY(hitPos.y)
+      hit.setX(x)
+      hit.setY(y)
     }
   })
   // hitBorderBud.on('mousemove', borderOn)
@@ -187,16 +184,16 @@ function Bud({ x, y, borderOn }) {
     const line = lines[lineIndex]
     console.log(line)
     const hitArea = new Konva.Shape({
-      x: 0,
-      y: 0,
+      x: x,
+      y: y,
       fill: 'black',
       sceneFunc: (ctx, shape) => {
         const hitLine = hitLines[lineIndex]
         ctx.beginPath()
-        ctx.lineTo(line[0].x, line[0].y)
-        ctx.lineTo(line[1].x, line[1].y)
-        ctx.lineTo(hitLine[1].x, hitLine[1].y)
-        ctx.lineTo(hitLine[0].x, hitLine[0].y)
+        ctx.lineTo(line[0].x-x, line[0].y-y)
+        ctx.lineTo(line[1].x-x, line[1].y-y)
+        ctx.lineTo(hitLine[1].x-x, hitLine[1].y-y)
+        ctx.lineTo(hitLine[0].x-x, hitLine[0].y-y)
         ctx.fillStrokeShape(shape)
       }
     })
