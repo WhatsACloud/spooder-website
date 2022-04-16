@@ -263,6 +263,7 @@ function Bud({ x, y, borderOn }) {
         xStartingPointIndex = 1
         yStartingPointIndex = 1
       }
+      console.log(x, y, hitLinePoints)
       if (x > hitLinePoints[xStartingPointIndex].x) {
         x = hitLinePoints[xStartingPointIndex].x
       } else if (x < hitLinePoints[Math.abs(xStartingPointIndex-1)].x) { // gets opposite point
@@ -273,6 +274,7 @@ function Bud({ x, y, borderOn }) {
       } else if (y < hitLinePoints[Math.abs(yStartingPointIndex-1)].y) {
         y = hitLinePoints[Math.abs(yStartingPointIndex-1)].y
       }
+      console.log(x, y)
       highlighter.setX(x)
       highlighter.setY(y)
     })
