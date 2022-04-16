@@ -139,7 +139,9 @@ function drawHexagon(ctx, points) {
   ctx.closePath()
 }
 
-function Bud({ x, y }) {
+function Bud({ x, y, borderOn }) {
+  borderOn = (evt) => {
+  }
   const bud = new Konva.Group()
   const radius = 40
   const strokeWidth = 40
@@ -176,7 +178,6 @@ function Bud({ x, y }) {
   bud.add(renderedBud)
   const lines = getHexagonLines(renderedBud.getAttr('points'))
   const hitLines = getHexagonLines(hexagonPoints(radius+strokeWidth, x, y))
-  const hitGroup = new Konva.Group({x: x, y: y})
   for (const lineIndex in lines) {
     const line = lines[lineIndex]
     console.log(line)
@@ -184,14 +185,14 @@ function Bud({ x, y }) {
       x: x,
       y: y,
       borderPoints: line,
-      fill: 'black',
+      fill: 'rgba(0, 0, 0, 0)',
       sceneFunc: (ctx, shape) => {
         const hitLine = hitLines[lineIndex]
         ctx.beginPath()
-        ctx.lineTo(line[0].x-2*x, line[0].y-2*y)
-        ctx.lineTo(line[1].x-2*x, line[1].y-2*y)
-        ctx.lineTo(hitLine[1].x-2*x, hitLine[1].y-2*y)
-        ctx.lineTo(hitLine[0].x-2*x, hitLine[0].y-2*y)
+        ctx.lineTo(line[0].x-x, line[0].y-y)
+        ctx.lineTo(line[1].x-x, line[1].y-y)
+        ctx.lineTo(hitLine[1].x-x, hitLine[1].y-y)
+        ctx.lineTo(hitLine[0].x-x, hitLine[0].y-y)
         ctx.fillStrokeShape(shape)
       }
     })
@@ -201,11 +202,10 @@ function Bud({ x, y }) {
       const rise = hitLinePoints[1].y - hitLinePoints[0].y
       const run = hitLinePoints[1].x - hitLinePoints[0].x
       const gradient = rise / run
-      const highlighter = evt.target.parent.parent.parent.parent.find('.highlighter')[0]
-      const bud = evt.target.parent.parent.children[0]
+      const highlighter = evt.target.parent.parent.parent.find('.highlighter')[0]
+      const bud = evt.target.parent.children[0]
       // console.log(evt.target.index)
-      const hitIndex = evt.target.index+1
-      console.log(hitIndex)
+      const hitIndex = evt.target.index
       let x
       let y
       if (hitIndex === 2 || hitIndex === 5) {
@@ -263,6 +263,7 @@ function Bud({ x, y }) {
         xStartingPointIndex = 1
         yStartingPointIndex = 1
       }
+      console.log(x, y, hitLinePoints)
       if (x > hitLinePoints[xStartingPointIndex].x) {
         x = hitLinePoints[xStartingPointIndex].x
       } else if (x < hitLinePoints[Math.abs(xStartingPointIndex-1)].x) { // gets opposite point
@@ -273,12 +274,12 @@ function Bud({ x, y }) {
       } else if (y < hitLinePoints[Math.abs(yStartingPointIndex-1)].y) {
         y = hitLinePoints[Math.abs(yStartingPointIndex-1)].y
       }
+      console.log(x, y)
       highlighter.setX(x)
       highlighter.setY(y)
     })
-    hitGroup.add(hitArea)
+    bud.add(hitArea)
   }
-  bud.add(hitGroup)
   return bud
 }
 
