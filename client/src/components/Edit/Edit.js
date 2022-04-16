@@ -166,11 +166,12 @@ function Bud({ x, y, borderOn }) {
     const y = renderedBud.getY()
     renderedBud.setAttr('points', hexagonPoints(radius, x, y))
     const lines = getHexagonLines(renderedBud.getAttr('points'))
-    const siblings = evt.target.parent.children.slice(1)
+    const siblings = evt.target.parent.children[1].children
     for (const siblingIndex in siblings) {
       const hit = siblings[siblingIndex]
       hit.setX(x)
       hit.setY(y)
+      console.log(lines[siblingIndex][0], siblingIndex)
       hit.setAttr('borderPoints', lines[siblingIndex])
     }
   })
@@ -178,6 +179,10 @@ function Bud({ x, y, borderOn }) {
   bud.add(renderedBud)
   const lines = getHexagonLines(renderedBud.getAttr('points'))
   const hitLines = getHexagonLines(hexagonPoints(radius+strokeWidth, x, y))
+  const hitGroup = new Konva.Group({
+    x: x,
+    y: y
+  })
   for (const lineIndex in lines) {
     const line = lines[lineIndex]
     console.log(line)
@@ -185,14 +190,14 @@ function Bud({ x, y, borderOn }) {
       x: x,
       y: y,
       borderPoints: line,
-      fill: 'rgba(0, 0, 0, 0)',
+      fill: 'black',
       sceneFunc: (ctx, shape) => {
         const hitLine = hitLines[lineIndex]
         ctx.beginPath()
-        ctx.lineTo(line[0].x-x, line[0].y-y)
-        ctx.lineTo(line[1].x-x, line[1].y-y)
-        ctx.lineTo(hitLine[1].x-x, hitLine[1].y-y)
-        ctx.lineTo(hitLine[0].x-x, hitLine[0].y-y)
+        ctx.lineTo(line[0].x-2*x, line[0].y-2*y)
+        ctx.lineTo(line[1].x-2*x, line[1].y-2*y)
+        ctx.lineTo(hitLine[1].x-2*x, hitLine[1].y-2*y)
+        ctx.lineTo(hitLine[0].x-2*x, hitLine[0].y-2*y)
         ctx.fillStrokeShape(shape)
       }
     })
@@ -202,10 +207,10 @@ function Bud({ x, y, borderOn }) {
       const rise = hitLinePoints[1].y - hitLinePoints[0].y
       const run = hitLinePoints[1].x - hitLinePoints[0].x
       const gradient = rise / run
-      const highlighter = evt.target.parent.parent.parent.find('.highlighter')[0]
-      const bud = evt.target.parent.children[0]
+      const highlighter = evt.target.parent.parent.parent.parent.find('.highlighter')[0]
+      const bud = evt.target.parent.parent.children[0]
       // console.log(evt.target.index)
-      const hitIndex = evt.target.index
+      const hitIndex = evt.target.index+1
       let x
       let y
       if (hitIndex === 2 || hitIndex === 5) {
@@ -252,6 +257,7 @@ function Bud({ x, y, borderOn }) {
       }
       let xStartingPointIndex = 0
       let yStartingPointIndex = 1
+      console.log(x, y)
       if (hitIndex > 3) {
         xStartingPointIndex = 1
         yStartingPointIndex = 0
@@ -276,8 +282,9 @@ function Bud({ x, y, borderOn }) {
       highlighter.setX(x)
       highlighter.setY(y)
     })
-    bud.add(hitArea)
+    hitGroup.add(hitArea)
   }
+  bud.add(hitGroup)
   return bud
 }
 
