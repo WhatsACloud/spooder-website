@@ -141,6 +141,8 @@ function drawHexagon(ctx, points) {
   ctx.closePath()
 }
 
+let test = true
+
 function Bud(x, y, setHoverBudBorder, lineDragging) {
   const bud = new Konva.Group()
   const radius = 40
@@ -202,7 +204,8 @@ function Bud(x, y, setHoverBudBorder, lineDragging) {
       }
     })
     hitArea.on('mousemove', (evt) => {
-      console.log(lineDragging)
+      // console.log(lineDragging)
+      console.log(test)
       const mousePos = getCanvasMousePos(evt.evt.pageX, evt.evt.pageY)
       const hitLinePoints = evt.target.getAttr('borderPoints')
       const rise = hitLinePoints[1].y - hitLinePoints[0].y
