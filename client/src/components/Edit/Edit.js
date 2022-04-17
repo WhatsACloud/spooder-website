@@ -141,10 +141,89 @@ function drawHexagon(ctx, points) {
   ctx.closePath()
 }
 
-let test = true
+const snapToPreview = (evt) => {
+  const radius = 40
+  const mousePos = getCanvasMousePos(evt.evt.pageX, evt.evt.pageY)
+  const hitLinePoints = evt.target.getAttr('borderPoints')
+  const rise = hitLinePoints[1].y - hitLinePoints[0].y
+  const run = hitLinePoints[1].x - hitLinePoints[0].x
+  const gradient = rise / run
+  const highlighter = evt.target.parent.parent.parent.parent.find('.highlighter')[0]
+  const bud = evt.target.parent.parent.children[0]
+  const hitIndex = evt.target.index+1
+  let x
+  let y
+  if (hitIndex === 2 || hitIndex === 5) {
+    x = mousePos.x
+    y = evt.target.getAttr('borderPoints')[0].y
+  } else if (hitIndex === 3) {
+    x = (
+      Math.abs(evt.target.getY() - mousePos.y)
+      / gradient
+      + hitLinePoints[1].x
+    )
+    y = mousePos.y
+  } else if (hitIndex === 6) { // yandere dev moment
+    x = (
+      - (
+        Math.abs(evt.target.getY() - mousePos.y)
+        / gradient
+      )
+      + hitLinePoints[1].x
+    )
+    y = mousePos.y
+  } else if (hitIndex === 1) {
+    x = (
+      Math.abs(evt.target.getY() - mousePos.y)
+      / gradient
+      + hitLinePoints[1].x
+      + radius / 2
+    )
+    y = mousePos.y
+  } else if (hitIndex === 4) {
+    x = (
+      - (
+        Math.abs(evt.target.getY() - mousePos.y)
+        / gradient
+      )
+      + hitLinePoints[1].x
+      - radius / 2
+    )
+    y = mousePos.y
+  }
+  
+  if (x === undefined) {
+    console.log('a')
+  }
+  let xStartingPointIndex = 0
+  let yStartingPointIndex = 1
+  if (hitIndex > 3) {
+    xStartingPointIndex = 1
+    yStartingPointIndex = 0
+  }
+  if (hitIndex === 3) {
+    xStartingPointIndex = 0
+    yStartingPointIndex = 0
+  } else if (hitIndex === 6) {
+    xStartingPointIndex = 1
+    yStartingPointIndex = 1
+  }
+  if (x > hitLinePoints[xStartingPointIndex].x) {
+    x = hitLinePoints[xStartingPointIndex].x
+  } else if (x < hitLinePoints[Math.abs(xStartingPointIndex-1)].x) { // gets opposite point
+    x = hitLinePoints[Math.abs(xStartingPointIndex-1)].x
+  }
+  if (y > hitLinePoints[yStartingPointIndex].y) {
+    y = hitLinePoints[yStartingPointIndex].y
+  } else if (y < hitLinePoints[Math.abs(yStartingPointIndex-1)].y) {
+    y = hitLinePoints[Math.abs(yStartingPointIndex-1)].y
+  }
+  highlighter.setX(x)
+  highlighter.setY(y)
+}
 
-function Bud(x, y, setHoverBudBorder, lineDragging) {
-  const bud = new Konva.Group()
+function Bud(x, y, setHoverBudBorder) {
+  const bud = new Konva.Group({name: 'bud'})
   const radius = 40
   const strokeWidth = 40
   const renderedBud = new Konva.Shape({
@@ -203,89 +282,6 @@ function Bud(x, y, setHoverBudBorder, lineDragging) {
         ctx.fillStrokeShape(shape)
       }
     })
-    hitArea.on('mousemove', (evt) => {
-      // console.log(lineDragging)
-      console.log(test)
-      const mousePos = getCanvasMousePos(evt.evt.pageX, evt.evt.pageY)
-      const hitLinePoints = evt.target.getAttr('borderPoints')
-      const rise = hitLinePoints[1].y - hitLinePoints[0].y
-      const run = hitLinePoints[1].x - hitLinePoints[0].x
-      const gradient = rise / run
-      const highlighter = evt.target.parent.parent.parent.parent.find('.highlighter')[0]
-      const bud = evt.target.parent.parent.children[0]
-      // console.log(evt.target.index)
-      const hitIndex = evt.target.index+1
-      let x
-      let y
-      if (hitIndex === 2 || hitIndex === 5) {
-        x = mousePos.x
-        y = evt.target.getAttr('borderPoints')[0].y
-      } else if (hitIndex === 3) {
-        x = (
-          Math.abs(evt.target.getY() - mousePos.y)
-          / gradient
-          + hitLinePoints[1].x
-        )
-        y = mousePos.y
-      } else if (hitIndex === 6) { // yandere dev moment
-        x = (
-          - (
-            Math.abs(evt.target.getY() - mousePos.y)
-            / gradient
-          )
-          + hitLinePoints[1].x
-        )
-        y = mousePos.y
-      } else if (hitIndex === 1) {
-        x = (
-          Math.abs(evt.target.getY() - mousePos.y)
-          / gradient
-          + hitLinePoints[1].x
-          + radius / 2
-        )
-        y = mousePos.y
-      } else if (hitIndex === 4) {
-        x = (
-          - (
-            Math.abs(evt.target.getY() - mousePos.y)
-            / gradient
-          )
-          + hitLinePoints[1].x
-          - radius / 2
-        )
-        y = mousePos.y
-      }
-      
-      if (x === undefined) {
-        console.log('a')
-      }
-      let xStartingPointIndex = 0
-      let yStartingPointIndex = 1
-      console.log(x, y)
-      if (hitIndex > 3) {
-        xStartingPointIndex = 1
-        yStartingPointIndex = 0
-      }
-      if (hitIndex === 3) {
-        xStartingPointIndex = 0
-        yStartingPointIndex = 0
-      } else if (hitIndex === 6) {
-        xStartingPointIndex = 1
-        yStartingPointIndex = 1
-      }
-      if (x > hitLinePoints[xStartingPointIndex].x) {
-        x = hitLinePoints[xStartingPointIndex].x
-      } else if (x < hitLinePoints[Math.abs(xStartingPointIndex-1)].x) { // gets opposite point
-        x = hitLinePoints[Math.abs(xStartingPointIndex-1)].x
-      }
-      if (y > hitLinePoints[yStartingPointIndex].y) {
-        y = hitLinePoints[yStartingPointIndex].y
-      } else if (y < hitLinePoints[Math.abs(yStartingPointIndex-1)].y) {
-        y = hitLinePoints[Math.abs(yStartingPointIndex-1)].y
-      }
-      highlighter.setX(x)
-      highlighter.setY(y)
-    })
     hitGroup.add(hitArea)
   }
   hitGroup.on('mouseover', (evt) => {
@@ -318,7 +314,16 @@ function lineCircleMove(e, draggingLine, selected, mainLayer) {
   }
 }
 
-function Circle(points, dragmoveFunc) {
+
+
+/*
+
+TO DO
+change normal functions to () => {} syntax and react functions to function syntax
+
+*/
+
+function Circle(points, dragmoveFunc, setDraggingLine) {
   const circle = new Konva.Circle({
     radius: 5,
     x: points[0].x,
@@ -329,14 +334,22 @@ function Circle(points, dragmoveFunc) {
     hitStrokeWidth: 30,
     draggable: true
   })
+  const lineStopDragging = () => {
+    setDraggingLine(false)
+    removeEventListener('mouseup', lineStopDragging)
+   }
+  circle.on('mousedown', () => {
+    setDraggingLine(true)
+    addEventListener('mouseup', lineStopDragging)
+  })
   circle.on('dragmove', dragmoveFunc)
   return circle
 }
 
-function drawLine(points, circleDragmoveFunc, lineDragmoveFunc, lineDragendFunc) {
+function drawLine(points, circleDragmoveFunc, lineDragmoveFunc, lineDragendFunc, setDraggingLine) {
   const group = new Konva.Group()
-  const circleStart = Circle(points, circleDragmoveFunc)
-  const circleEnd = Circle(points, circleDragmoveFunc)
+  const circleStart = Circle(points, circleDragmoveFunc, setDraggingLine)
+  const circleEnd = Circle(points, circleDragmoveFunc, setDraggingLine)
   const line = new Konva.Line({
     points: [points[0].x, points[0].y, points[1].x, points[1].y],
     stroke: 'black',
@@ -376,7 +389,8 @@ function startDrag(e, draggingLine, setDraggingLine, selected, setSelected, main
       evt => {
         const line = evt.target
         const points = line.getPoints()
-      }
+      },
+      setDraggingLine
     )
     mainLayer.add(line)
     mainLayer.draw()
@@ -392,7 +406,36 @@ function stopDrag(e, setDraggingLine, setSelected) {
   }
 }
 
-const Select = memo(function Select({ mainLayer, lineDragging }) {
+function UpdateBudBorderEvt({ draggingLine, mainLayer }) {
+  useEffect(() => {
+    if (!mainLayer) return
+    const stage = mainLayer.parent
+    const buds = stage.find('.bud')
+    if (draggingLine) {
+      for (const budIndex in buds) {
+        const bud = buds[budIndex]
+        const hitAreas = bud.children[1].children
+        for (const hitAreaIndex in hitAreas) {
+          const hitArea = hitAreas[hitAreaIndex]
+          hitArea.on('mousemove', snapToPreview)
+        }
+      }
+    } else {
+      for (const budIndex in buds) {
+        const bud = buds[budIndex]
+        const hitAreas = bud.children[1].children
+        for (const hitAreaIndex in hitAreas) {
+          const hitArea = hitAreas[hitAreaIndex]
+          hitArea.off('mousemove')
+        }
+      }
+    }
+
+  }, [draggingLine])
+  return <></>
+}
+
+const Select = memo(function Select({ mainLayer, toggleCanDragLine }) {
   const [ draggingLine, setDraggingLine ] = useState(false)
   const [ selected, setSelected ] = useState()
   // Object.keys().map((name) => { // ill deal with this later
@@ -400,7 +443,7 @@ const Select = memo(function Select({ mainLayer, lineDragging }) {
     const startDragWrapper = e => startDrag(e, draggingLine, setDraggingLine, selected, setSelected, mainLayer)
     const stopDragWrapper = e => stopDrag(e, setDraggingLine, setSelected)
     const dragLineWrapper = e => lineCircleMove(e, draggingLine, selected, mainLayer)
-    if (lineDragging) {
+    if (toggleCanDragLine) {
       document.addEventListener('mousemove', dragLineWrapper)
       document.addEventListener('mousedown', startDragWrapper)
       document.addEventListener('mouseup', stopDragWrapper)
@@ -410,11 +453,15 @@ const Select = memo(function Select({ mainLayer, lineDragging }) {
       document.removeEventListener('mousedown', startDragWrapper)
       document.removeEventListener('mouseup', stopDragWrapper)
     }
-  }, [lineDragging, draggingLine, selected])
-  return <></>
+  }, [toggleCanDragLine, draggingLine, selected])
+  return (
+    <>
+      <UpdateBudBorderEvt draggingLine={draggingLine} mainLayer={mainLayer}></UpdateBudBorderEvt>
+    </>
+  )
 })
 
-function ObjectDrawer({ setDragging, lineDragging, setLineDragging }) {
+function ObjectDrawer({ setDragging, toggleCanDragLine, setToggleCanDragLine }) {
   const items = {
     test: [
       {
@@ -422,7 +469,7 @@ function ObjectDrawer({ setDragging, lineDragging, setLineDragging }) {
         icon: <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
       },
       {
-        func: () => setLineDragging(true),
+        func: () => setToggleCanDragLine(true),
         icon: <FontAwesomeIcon icon={faLinesLeaning}></FontAwesomeIcon>
       }
     ]
@@ -436,7 +483,7 @@ function ObjectDrawer({ setDragging, lineDragging, setLineDragging }) {
             <button className={styles.drawerButton} onMouseDown={() => setDragging(true)}>
               <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
             </button>
-            <button className={lineDragging ? styles.darkenedDrawerButton : styles.drawerButton} onMouseDown={() => setLineDragging(!lineDragging)}>
+            <button className={toggleCanDragLine ? styles.darkenedDrawerButton : styles.drawerButton} onMouseDown={() => setToggleCanDragLine(!toggleCanDragLine)}>
               <FontAwesomeIcon icon={faLinesLeaning}></FontAwesomeIcon>
             </button>
           </div>
@@ -446,24 +493,24 @@ function ObjectDrawer({ setDragging, lineDragging, setLineDragging }) {
   )
 }
 
-function drop(e, dragging, mainLayer, setHoverBudBorder, lineDragging) {
+function drop(e, dragging, mainLayer, setHoverBudBorder, toggleCanDragLine) {
   // console.log(isMouseHoverCanvas)
   // if (!isMouseHoverCanvas) return
   if (dragging && isInCanvas({x: e.pageX, y: e.pageY})) {
     console.log('placed!')
     // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
     const canvasMousePos = getCanvasMousePos(e.pageX, e.pageY)
-    const bud = Bud(canvasMousePos.x, canvasMousePos.y, setHoverBudBorder, lineDragging)
+    const bud = Bud(canvasMousePos.x, canvasMousePos.y, setHoverBudBorder)
     mainLayer.add(bud)
     mainLayer.draw()
   }
 }
 
-function FakeDraggableObj({ dragging, mousePos, mainLayer, setHoverBudBorder, lineDragging }) {
+function FakeDraggableObj({ dragging, mousePos, mainLayer, setHoverBudBorder, toggleCanDragLine }) {
   const x = mousePos.x
   const y = mousePos.y
   useEffect(() => {
-    const dropWrapper = (e) => drop(e, dragging, mainLayer, setHoverBudBorder, lineDragging)
+    const dropWrapper = (e) => drop(e, dragging, mainLayer, setHoverBudBorder, toggleCanDragLine)
     document.addEventListener('mouseup', dropWrapper)
     return () => {
       document.removeEventListener('mouseup', dropWrapper)
@@ -476,7 +523,7 @@ function FakeDraggableObj({ dragging, mousePos, mainLayer, setHoverBudBorder, li
   )
 }
 
-function DrawCanvas({ setMainLayer, setHoverBudBorder, lineDragging }) {
+function DrawCanvas({ setMainLayer, setHoverBudBorder, toggleCanDragLine }) {
   useEffect(() => {
     document.addEventListener('wheel', preventZoomScroll)
     let index = -1
@@ -490,7 +537,7 @@ function DrawCanvas({ setMainLayer, setHoverBudBorder, lineDragging }) {
     })
     const mainLayer = new Konva.Layer()
     for (const name in spoodawebData) {
-      const bud = Bud(spoodawebData[name].position.x, spoodawebData[name].position.y, setHoverBudBorder, lineDragging)
+      const bud = Bud(spoodawebData[name].position.x, spoodawebData[name].position.y, setHoverBudBorder, toggleCanDragLine)
       mainLayer.add(bud)
     }
     const budAnchorHighlighter = new Konva.Circle({
@@ -520,7 +567,7 @@ function Edit() {
   const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
   const [ dragging, setDragging ] = useState(false)
   const [ mainLayer, setMainLayer ] = useState()
-  const [ lineDragging, setLineDragging ] = useState(false)
+  const [ toggleCanDragLine, setToggleCanDragLine ] = useState(false)
   const [ hoverBudBorder, setHoverBudBorder ] = useState(false)
   const [ mousePos, setMousePos ] = useState({
     x: null,
@@ -556,20 +603,20 @@ function Edit() {
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <div className={styles.wrapper}>
         <ObjectDrawer setDragging={setDragging}
-          lineDragging={lineDragging}
-          setLineDragging={setLineDragging}
+          toggleCanDragLine={toggleCanDragLine}
+          setToggleCanDragLine={setToggleCanDragLine}
           mousePos={mousePos}></ObjectDrawer>
         <FakeDraggableObj
           dragging={dragging}
           mousePos={mousePos}
           mainLayer={mainLayer}
           setHoverBudBorder={setHoverBudBorder}
-          lineDragging={lineDragging}></FakeDraggableObj>
-        <Select mainLayer={mainLayer} lineDragging={lineDragging}></Select>
+          toggleCanDragLine={toggleCanDragLine}></FakeDraggableObj>
+        <Select mainLayer={mainLayer} toggleCanDragLine={toggleCanDragLine}></Select>
         <div className={styles.divCanvas} id='divCanvas'>
           <DrawCanvas setMainLayer={setMainLayer}
           setHoverBudBorder={setHoverBudBorder}
-          lineDragging={lineDragging}></DrawCanvas>
+          toggleCanDragLine={toggleCanDragLine}></DrawCanvas>
         </div>
       </div>
     </>
