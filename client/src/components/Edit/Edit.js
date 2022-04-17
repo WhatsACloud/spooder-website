@@ -9,6 +9,8 @@ import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
 import Konva from 'konva'
 
+Konva.hitOnDragEnabled = true
+
 const gridLink = "http://phrogz.net/tmp/grid.gif"
 
 const spoodawebData = {
@@ -139,9 +141,7 @@ function drawHexagon(ctx, points) {
   ctx.closePath()
 }
 
-function Bud({ x, y, borderOn }) {
-  borderOn = (evt) => {
-  }
+function Bud(x, y, setHoverBudBorder, lineDragging) {
   const bud = new Konva.Group()
   const radius = 40
   const strokeWidth = 40
@@ -202,6 +202,7 @@ function Bud({ x, y, borderOn }) {
       }
     })
     hitArea.on('mousemove', (evt) => {
+      console.log(lineDragging)
       const mousePos = getCanvasMousePos(evt.evt.pageX, evt.evt.pageY)
       const hitLinePoints = evt.target.getAttr('borderPoints')
       const rise = hitLinePoints[1].y - hitLinePoints[0].y
@@ -284,6 +285,12 @@ function Bud({ x, y, borderOn }) {
     })
     hitGroup.add(hitArea)
   }
+  hitGroup.on('mouseover', (evt) => {
+    setHoverBudBorder(true)
+  })
+  hitGroup.on('mouseout', (evt) => {
+    setHoverBudBorder(false)
+  })
   bud.add(hitGroup)
   return bud
 }
@@ -292,7 +299,6 @@ function lineCircleMove(e, draggingLine, selected, mainLayer) {
   if (isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
     const mousePos = {x: e.pageX, y: e.pageY}
     const canvasMousePos = getCanvasMousePos(mousePos.x, mousePos.y)
-    console.log(selected.innerIndex)
     const lineGroup = mainLayer.children[selected.layerIndex].children
     const start = lineGroup[selected.innerIndex]
     const end = lineGroup[Math.abs(selected.innerIndex-2)+1]
@@ -383,7 +389,7 @@ function stopDrag(e, setDraggingLine, setSelected) {
   }
 }
 
-const Select = memo(function Select({ mainLayer, toggle }) {
+const Select = memo(function Select({ mainLayer, lineDragging }) {
   const [ draggingLine, setDraggingLine ] = useState(false)
   const [ selected, setSelected ] = useState()
   // Object.keys().map((name) => { // ill deal with this later
@@ -391,7 +397,7 @@ const Select = memo(function Select({ mainLayer, toggle }) {
     const startDragWrapper = e => startDrag(e, draggingLine, setDraggingLine, selected, setSelected, mainLayer)
     const stopDragWrapper = e => stopDrag(e, setDraggingLine, setSelected)
     const dragLineWrapper = e => lineCircleMove(e, draggingLine, selected, mainLayer)
-    if (toggle) {
+    if (lineDragging) {
       document.addEventListener('mousemove', dragLineWrapper)
       document.addEventListener('mousedown', startDragWrapper)
       document.addEventListener('mouseup', stopDragWrapper)
@@ -401,11 +407,11 @@ const Select = memo(function Select({ mainLayer, toggle }) {
       document.removeEventListener('mousedown', startDragWrapper)
       document.removeEventListener('mouseup', stopDragWrapper)
     }
-  }, [toggle, draggingLine, selected])
+  }, [lineDragging, draggingLine, selected])
   return <></>
 })
 
-function ObjectDrawer({ setDragging, toggle, setToggle }) {
+function ObjectDrawer({ setDragging, lineDragging, setLineDragging }) {
   const items = {
     test: [
       {
@@ -413,7 +419,7 @@ function ObjectDrawer({ setDragging, toggle, setToggle }) {
         icon: <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
       },
       {
-        func: () => setToggle(true),
+        func: () => setLineDragging(true),
         icon: <FontAwesomeIcon icon={faLinesLeaning}></FontAwesomeIcon>
       }
     ]
@@ -427,7 +433,7 @@ function ObjectDrawer({ setDragging, toggle, setToggle }) {
             <button className={styles.drawerButton} onMouseDown={() => setDragging(true)}>
               <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
             </button>
-            <button className={toggle ? styles.darkenedDrawerButton : styles.drawerButton} onMouseDown={() => setToggle(!toggle)}>
+            <button className={lineDragging ? styles.darkenedDrawerButton : styles.drawerButton} onMouseDown={() => setLineDragging(!lineDragging)}>
               <FontAwesomeIcon icon={faLinesLeaning}></FontAwesomeIcon>
             </button>
           </div>
@@ -437,23 +443,24 @@ function ObjectDrawer({ setDragging, toggle, setToggle }) {
   )
 }
 
-function drop(e, dragging, mainLayer) {
+function drop(e, dragging, mainLayer, setHoverBudBorder, lineDragging) {
   // console.log(isMouseHoverCanvas)
   // if (!isMouseHoverCanvas) return
   if (dragging && isInCanvas({x: e.pageX, y: e.pageY})) {
     console.log('placed!')
     // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
-    const bud = Bud(getCanvasMousePos(e.pageX, e.pageY))
+    const canvasMousePos = getCanvasMousePos(e.pageX, e.pageY)
+    const bud = Bud(canvasMousePos.x, canvasMousePos.y, setHoverBudBorder, lineDragging)
     mainLayer.add(bud)
     mainLayer.draw()
   }
 }
 
-function FakeDraggableObj({ dragging, mousePos, mainLayer }) {
+function FakeDraggableObj({ dragging, mousePos, mainLayer, setHoverBudBorder, lineDragging }) {
   const x = mousePos.x
   const y = mousePos.y
   useEffect(() => {
-    const dropWrapper = (e) => drop(e, dragging, mainLayer)
+    const dropWrapper = (e) => drop(e, dragging, mainLayer, setHoverBudBorder, lineDragging)
     document.addEventListener('mouseup', dropWrapper)
     return () => {
       document.removeEventListener('mouseup', dropWrapper)
@@ -466,14 +473,10 @@ function FakeDraggableObj({ dragging, mousePos, mainLayer }) {
   )
 }
 
-function DrawCanvas({ setMainLayer }) {
+function DrawCanvas({ setMainLayer, setHoverBudBorder, lineDragging }) {
   useEffect(() => {
     document.addEventListener('wheel', preventZoomScroll)
     let index = -1
-    const leBuds = Object.keys(spoodawebData).map((name) => {
-      index += 1
-      return <Bud key={index} x={spoodawebData[name].position.x} y={spoodawebData[name].position.y}></Bud>
-    })
     const divCanvas = document.getElementById('divCanvas')
     const stage = new Konva.Stage({
       container: divCanvas,
@@ -484,7 +487,7 @@ function DrawCanvas({ setMainLayer }) {
     })
     const mainLayer = new Konva.Layer()
     for (const name in spoodawebData) {
-      const bud = Bud(spoodawebData[name].position)
+      const bud = Bud(spoodawebData[name].position.x, spoodawebData[name].position.y, setHoverBudBorder, lineDragging)
       mainLayer.add(bud)
     }
     const budAnchorHighlighter = new Konva.Circle({
@@ -514,7 +517,7 @@ function Edit() {
   const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
   const [ dragging, setDragging ] = useState(false)
   const [ mainLayer, setMainLayer ] = useState()
-  const [ toggle, setToggle ] = useState(false)
+  const [ lineDragging, setLineDragging ] = useState(false)
   const [ hoverBudBorder, setHoverBudBorder ] = useState(false)
   const [ mousePos, setMousePos ] = useState({
     x: null,
@@ -549,14 +552,21 @@ function Edit() {
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <div className={styles.wrapper}>
-        <ObjectDrawer setDragging={setDragging} toggle={toggle} setToggle={setToggle} mousePos={mousePos}></ObjectDrawer>
+        <ObjectDrawer setDragging={setDragging}
+          lineDragging={lineDragging}
+          setLineDragging={setLineDragging}
+          mousePos={mousePos}></ObjectDrawer>
         <FakeDraggableObj
           dragging={dragging}
           mousePos={mousePos}
-          mainLayer={mainLayer}></FakeDraggableObj>
-        <Select mainLayer={mainLayer} toggle={toggle}></Select>
+          mainLayer={mainLayer}
+          setHoverBudBorder={setHoverBudBorder}
+          lineDragging={lineDragging}></FakeDraggableObj>
+        <Select mainLayer={mainLayer} lineDragging={lineDragging}></Select>
         <div className={styles.divCanvas} id='divCanvas'>
-          <DrawCanvas setMainLayer={setMainLayer}></DrawCanvas>
+          <DrawCanvas setMainLayer={setMainLayer}
+          setHoverBudBorder={setHoverBudBorder}
+          lineDragging={lineDragging}></DrawCanvas>
         </div>
       </div>
     </>
