@@ -252,7 +252,6 @@ function Bud(x, y, setHoverBudBorder) {
       const hit = siblings[siblingIndex]
       hit.setX(x)
       hit.setY(y)
-      console.log(lines[siblingIndex][0], siblingIndex)
       hit.setAttr('borderPoints', lines[siblingIndex])
     }
   })
@@ -284,14 +283,35 @@ function Bud(x, y, setHoverBudBorder) {
     })
     hitGroup.add(hitArea)
   }
-  hitGroup.on('mouseover', (evt) => {
-    setHoverBudBorder(true)
-  })
-  hitGroup.on('mouseout', (evt) => {
-    setHoverBudBorder(false)
-  })
   bud.add(hitGroup)
   return bud
+}
+
+const updateLinePos = (lineCircle, x, y) => {
+  lineCircle.setX(x)
+  lineCircle.setY(y)
+  const lineGroup = lineCircle.parent
+  const line = lineGroup.children[0]
+  const lineTransform = line.getAbsoluteTransform()
+  lineTransform.m = [1, 0, 0, 1, 0, 0] // lol
+  const end = lineGroup.children[Math.abs(lineCircle.index-2)+1]
+  const newStart = lineTransform.point({x: x, y: y})
+  const newEnd = lineTransform.point({x: end.getX(), y: end.getY()})
+  line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
+}
+
+const stopDrag = (e, func, lineCircle) => {
+  if (e.button === 0) {
+    console.log('no')
+    const stage = Konva.stages[0]
+    if (stage && lineCircle) {
+      const highlighter = stage.find('.highlighter')[0]
+      const x = highlighter.getX()
+      const y = highlighter.getY()
+      updateLinePos(lineCircle, x, y)
+    }
+    func()
+  }
 }
 
 function lineCircleMove(e, draggingLine, selected, mainLayer) {
@@ -300,17 +320,7 @@ function lineCircleMove(e, draggingLine, selected, mainLayer) {
     const canvasMousePos = getCanvasMousePos(mousePos.x, mousePos.y)
     const lineGroup = mainLayer.children[selected.layerIndex].children
     const start = lineGroup[selected.innerIndex]
-    const end = lineGroup[Math.abs(selected.innerIndex-2)+1]
-    const line = lineGroup[0]
-    // console.log(newStart)
-    start.setX(canvasMousePos.x)
-    start.setY(canvasMousePos.y)
-    // line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
-    const lineTransform = line.getAbsoluteTransform()
-    lineTransform.m = [1, 0, 0, 1, 0, 0] // lol
-    const newStart = lineTransform.point({x: canvasMousePos.x, y: canvasMousePos.y})
-    const newEnd = lineTransform.point({x: end.getX(), y: end.getY()})
-    line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
+    updateLinePos(start, canvasMousePos.x, canvasMousePos.y)
   }
 }
 
@@ -320,7 +330,7 @@ function lineCircleMove(e, draggingLine, selected, mainLayer) {
 
 TO DO
 change normal functions to () => {} syntax and react functions to function syntax
-
+change all stage variables to Konva.stages[0] and remove mainLayer react state
 */
 
 function Circle(points, dragmoveFunc, setDraggingLine) {
@@ -328,19 +338,22 @@ function Circle(points, dragmoveFunc, setDraggingLine) {
     radius: 5,
     x: points[0].x,
     y: points[0].y,
-    fill: 'black',
-    stroke: 'black',
+    fill: 'red',
+    stroke: 'red',
     strokeWidth: 4,
     hitStrokeWidth: 30,
     draggable: true
   })
-  const lineStopDragging = () => {
-    setDraggingLine(false)
-    removeEventListener('mouseup', lineStopDragging)
-   }
+  const stopDragWrapper = (e) => {
+    stopDrag(e, () => {
+      setDraggingLine(false)
+      removeEventListener('mouseup', stopDragWrapper)
+    },
+    circle)
+  }
   circle.on('mousedown', () => {
     setDraggingLine(true)
-    addEventListener('mouseup', lineStopDragging)
+    addEventListener('mouseup', stopDragWrapper)
   })
   circle.on('dragmove', dragmoveFunc)
   return circle
@@ -398,36 +411,43 @@ function startDrag(e, draggingLine, setDraggingLine, selected, setSelected, main
   }
 }
 
-function stopDrag(e, setDraggingLine, setSelected) {
-  if (e.button === 0) {
-    console.log('no')
-    setDraggingLine(false)
-    setSelected()
-  }
-}
-
-function UpdateBudBorderEvt({ draggingLine, mainLayer }) {
+function UpdateBudBorderEvt({ draggingLine }) {
   useEffect(() => {
-    if (!mainLayer) return
-    const stage = mainLayer.parent
+    const stage = Konva.stages[0]
+    if (!stage) return
     const buds = stage.find('.bud')
+    const highlighter = stage.find('.highlighter')[0]
     if (draggingLine) {
-      for (const budIndex in buds) {
+      for (const budIndex in buds) { // to change this cause performance issues
         const bud = buds[budIndex]
-        const hitAreas = bud.children[1].children
+        const hitGroup = bud.children[1]
+        const hitAreas = hitGroup.children
         for (const hitAreaIndex in hitAreas) {
           const hitArea = hitAreas[hitAreaIndex]
           hitArea.on('mousemove', snapToPreview)
         }
+        hitGroup.on('mouseenter', (evt) => { // TODO: stop listening and unlistening to events
+          const stage = evt.target.parent.parent.parent.parent
+          const highlighter = stage.find('.highlighter')[0]
+          highlighter.show()
+        })
+        hitGroup.on('mouseleave', (evt) => {
+          const stage = evt.target.parent.parent.parent.parent
+          const highlighter = stage.find('.highlighter')[0]
+          highlighter.hide()
+        })
       }
     } else {
       for (const budIndex in buds) {
         const bud = buds[budIndex]
-        const hitAreas = bud.children[1].children
+        const hitGroup = bud.children[1]
+        const hitAreas = hitGroup.children
         for (const hitAreaIndex in hitAreas) {
           const hitArea = hitAreas[hitAreaIndex]
           hitArea.off('mousemove')
         }
+        hitGroup.off('mouseenter')
+        hitGroup.off('mouseleave')
       }
     }
 
@@ -440,8 +460,18 @@ const Select = memo(function Select({ mainLayer, toggleCanDragLine }) {
   const [ selected, setSelected ] = useState()
   // Object.keys().map((name) => { // ill deal with this later
   useEffect(() => {
+    let lineCircle
+    if (selected) {
+      const stage = Konva.stages[0]
+      const line = stage.children[0].children[selected.layerIndex]
+      lineCircle = line.children[selected.innerIndex]
+    }
     const startDragWrapper = e => startDrag(e, draggingLine, setDraggingLine, selected, setSelected, mainLayer)
-    const stopDragWrapper = e => stopDrag(e, setDraggingLine, setSelected)
+    const stopDragWrapper = e => stopDrag(e, () => {
+      setDraggingLine(false)
+      setSelected()
+    },
+    lineCircle)
     const dragLineWrapper = e => lineCircleMove(e, draggingLine, selected, mainLayer)
     if (toggleCanDragLine) {
       document.addEventListener('mousemove', dragLineWrapper)
@@ -545,7 +575,8 @@ function DrawCanvas({ setMainLayer, setHoverBudBorder, toggleCanDragLine }) {
       x: 0,
       y: 0,
       fill: 'grey',
-      name: 'highlighter'
+      name: 'highlighter',
+      visible: false
     })
     mainLayer.add(budAnchorHighlighter)
     stage.add(mainLayer)
