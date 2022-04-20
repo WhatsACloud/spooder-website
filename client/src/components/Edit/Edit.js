@@ -161,10 +161,11 @@ const stopDrag = (e, func, lineCircle) => {
   }
 }
 
-function lineCircleMove(e, draggingLine, selected, mainLayer) {
+function lineCircleMove(e, draggingLine, selected) {
   if (isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
     const mousePos = {x: e.pageX, y: e.pageY}
     const canvasMousePos = getCanvasMousePos(mousePos.x, mousePos.y)
+    const mainLayer = Konva.stages[0].children[0]
     const lineGroup = mainLayer.children[selected.layerIndex].children
     const start = lineGroup[selected.innerIndex]
     updateLinePos(start, canvasMousePos.x, canvasMousePos.y)
@@ -226,7 +227,7 @@ function drawLine(points, circleDragmoveFunc, lineDragmoveFunc, lineDragendFunc,
   return group
 }
 
-function startDrag(e, draggingLine, setDraggingLine, selected, setSelected, mainLayer) {
+function startDrag(e, setDraggingLine, setSelected) {
   console.log(e.pageX, e.pageY)
   if (e.button === 0 && isInCanvas({x: e.pageX, y: e.pageY})) {
     const canvasMousePos = getCanvasMousePos(e.pageX, e.pageY)
@@ -234,7 +235,7 @@ function startDrag(e, draggingLine, setDraggingLine, selected, setSelected, main
     setDraggingLine(true)
     const line = drawLine(
       [canvasMousePos, canvasMousePos],
-      evt => lineCircleMove(evt.evt, true, {"layerIndex": evt.target.parent.index, "innerIndex": evt.target.index}, mainLayer),
+      evt => lineCircleMove(evt.evt, true, {"layerIndex": evt.target.parent.index, "innerIndex": evt.target.index}),
       evt => {
         const line = evt.target
         const lineGroup = line.parent.children
@@ -255,6 +256,7 @@ function startDrag(e, draggingLine, setDraggingLine, selected, setSelected, main
       },
       setDraggingLine
     )
+    const mainLayer = Konva.stages[0].children[0]
     mainLayer.add(line)
     mainLayer.draw()
     setSelected({"layerIndex": line.index, "innerIndex": 1})
@@ -316,7 +318,7 @@ const Select = memo(function Select({ mainLayer, toggleCanDragLine }) {
       const line = stage.children[0].children[selected.layerIndex]
       lineCircle = line.children[selected.innerIndex]
     }
-    const startDragWrapper = e => startDrag(e, draggingLine, setDraggingLine, selected, setSelected, mainLayer)
+    const startDragWrapper = e => startDrag(e, setDraggingLine, setSelected)
     const stopDragWrapper = e => stopDrag(e, () => {
       setDraggingLine(false)
       setSelected()
