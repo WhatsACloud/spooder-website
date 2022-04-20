@@ -9,157 +9,16 @@ import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
 import { getCanvasMousePos, isInCanvas, getHexagonLines, hexagonPoints, drawHexagon, snapToPreview } from './HelperFuncs'
 import FakeDraggableObj from './FakeDraggableObj'
+import * as shapes from './Shapes'
+
+import spoodawebData from './TestingSpoodawebData'
 
 import Konva from 'konva'
+import * as reactKonva from 'react-konva'
 
 Konva.hitOnDragEnabled = true
 
 const gridLink = "http://phrogz.net/tmp/grid.gif"
-
-const spoodawebData = {
-  "a test": {
-    "pronounciation": "pronounciation test",
-    "contexts": [
-        "this is a context for testing",
-        "this is the second context"
-    ],
-    "examples": [
-        [
-            "does this link up with the context???",
-            "does this too?"
-        ],
-        [
-            "this should go to the second context"
-        ]
-    ],
-    "links": {
-        "1": 0.1,
-        "2": 1,
-        "3": 0.65
-    },
-    "position": {
-      "x": 80,
-      "y": 70
-    }
-  },
-  "gay": {
-    "pronounciation": "pronounciation test",
-    "contexts": [
-        "this is a context for testing",
-        "this is the second context"
-    ],
-    "examples": [
-        [
-            "does this link up with the context???",
-            "does this too?"
-        ],
-        [
-            "this should go to the second context"
-        ]
-    ],
-    "links": {
-        "1": 0.1,
-        "2": 1,
-        "3": 0.65
-    },
-    "position": {
-      "x": 500,
-      "y": 500
-    }
-  }
-}
-
-function Bud(x, y, setHoverBudBorder) {
-  const bud = new Konva.Group({name: 'bud'})
-  const radius = 40
-  const strokeWidth = 40
-  const renderedBud = new Konva.Shape({
-    x: x,
-    y: y,
-    radius: radius,
-    fill: '#00D2FF',
-    stroke: 'black',
-    strokeWidth: 1,
-    draggable: true,
-    points: hexagonPoints(radius, x, y),
-    sceneFunc: (ctx, shape) => {
-      const points = hexagonPoints(shape.getAttr('radius'), 0, 0)
-      drawHexagon(ctx, points)
-      ctx.fillStrokeShape(shape)
-    }
-  })
-  renderedBud.on('dragmove', (evt) => {
-    const renderedBud = evt.target
-    const x = renderedBud.getX()
-    const y = renderedBud.getY()
-    renderedBud.setAttr('points', hexagonPoints(radius, x, y))
-    const lines = getHexagonLines(renderedBud.getAttr('points'))
-    const siblings = evt.target.parent.children[1].children
-    for (const siblingIndex in siblings) {
-      const hit = siblings[siblingIndex]
-      hit.setX(x)
-      hit.setY(y)
-      hit.setAttr('borderPoints', lines[siblingIndex])
-    }
-  })
-  // hitBorderBud.on('mousemove', borderOn)
-  bud.add(renderedBud)
-  const lines = getHexagonLines(renderedBud.getAttr('points'))
-  const hitLines = getHexagonLines(hexagonPoints(radius+strokeWidth, x, y))
-  const hitGroup = new Konva.Group({
-    x: x,
-    y: y
-  })
-  for (const lineIndex in lines) {
-    const line = lines[lineIndex]
-    console.log(line)
-    const hitArea = new Konva.Shape({
-      x: x,
-      y: y,
-      borderPoints: line,
-      fill: 'black',
-      sceneFunc: (ctx, shape) => {
-        const hitLine = hitLines[lineIndex]
-        ctx.beginPath()
-        ctx.lineTo(line[0].x-2*x, line[0].y-2*y)
-        ctx.lineTo(line[1].x-2*x, line[1].y-2*y)
-        ctx.lineTo(hitLine[1].x-2*x, hitLine[1].y-2*y)
-        ctx.lineTo(hitLine[0].x-2*x, hitLine[0].y-2*y)
-        ctx.fillStrokeShape(shape)
-      }
-    })
-    hitGroup.add(hitArea)
-  }
-  bud.add(hitGroup)
-  return bud
-}
-
-const updateLinePos = (lineCircle, x, y) => {
-  lineCircle.setX(x)
-  lineCircle.setY(y)
-  const lineGroup = lineCircle.parent
-  const line = lineGroup.children[0]
-  const lineTransform = line.getAbsoluteTransform()
-  lineTransform.m = [1, 0, 0, 1, 0, 0] // lol
-  const end = lineGroup.children[Math.abs(lineCircle.index-2)+1]
-  const newStart = lineTransform.point({x: x, y: y})
-  const newEnd = lineTransform.point({x: end.getX(), y: end.getY()})
-  line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
-}
-
-const stopDrag = (e, func, lineCircle) => {
-  if (e.button === 0) {
-    console.log('no')
-    const stage = Konva.stages[0]
-    if (stage && lineCircle) {
-      const highlighter = stage.find('.highlighter')[0]
-      const x = highlighter.getX()
-      const y = highlighter.getY()
-      updateLinePos(lineCircle, x, y)
-    }
-    func()
-  }
-}
 
 function lineCircleMove(e, draggingLine, selected) {
   if (isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
@@ -183,32 +42,6 @@ change normal functions to () => {} syntax and react functions to function synta
 change all stage variables to Konva.stages[0] and remove mainLayer react state
 add saving ability
 */
-
-function Circle(points, dragmoveFunc, setDraggingLine) {
-  const circle = new Konva.Circle({
-    radius: 5,
-    x: points[0].x,
-    y: points[0].y,
-    fill: 'red',
-    stroke: 'red',
-    strokeWidth: 4,
-    hitStrokeWidth: 30,
-    draggable: true
-  })
-  const stopDragWrapper = (e) => {
-    stopDrag(e, () => {
-      setDraggingLine(false)
-      removeEventListener('mouseup', stopDragWrapper)
-    },
-    circle)
-  }
-  circle.on('mousedown', () => {
-    setDraggingLine(true)
-    addEventListener('mouseup', stopDragWrapper)
-  })
-  circle.on('dragmove', dragmoveFunc)
-  return circle
-}
 
 function drawLine(points, circleDragmoveFunc, lineDragmoveFunc, lineDragendFunc, setDraggingLine) {
   const group = new Konva.Group()
@@ -389,42 +222,30 @@ function drop(e, dragging, mainLayer, setHoverBudBorder, toggleCanDragLine) {
 }
 
 function DrawCanvas({ setMainLayer, setHoverBudBorder, toggleCanDragLine }) {
+  const [ objs, setobjs ] = useState()
+  const [ objsDesClose, setObjsDesClose ] = useState() // objs arranged by position from root pos descending
+  const [ objData, setObjData ] = useState() // for internal details of buds, silk, like their meaning
+  const [ rendered, setRendered ] = useState()
   useEffect(() => {
     document.addEventListener('wheel', preventZoomScroll)
     let index = -1
     const divCanvas = document.getElementById('divCanvas')
-    const stage = new Konva.Stage({
-      container: divCanvas,
-      x: 0,
-      y: 0,
-      width: window.innerWidth + 2 * 2000,
-      height: window.innerHeight + 2 * 2000
-    })
     const mainLayer = new Konva.Layer()
     for (const name in spoodawebData) {
       const bud = Bud(spoodawebData[name].position.x, spoodawebData[name].position.y, setHoverBudBorder, toggleCanDragLine)
       mainLayer.add(bud)
     }
-    const budAnchorHighlighter = new Konva.Circle({
-      radius: 5,
-      x: 0,
-      y: 0,
-      fill: 'grey',
-      name: 'highlighter',
-      visible: false
-    })
-    mainLayer.add(budAnchorHighlighter)
-    stage.add(mainLayer)
-    mainLayer.draw()
-    console.log(mainLayer)
-    setMainLayer(mainLayer)
   }, [])
-  /*
-  for stage
-  
-  */
   return (
-    <></>
+    <reactKonva.Stage
+      x={0}
+      y={0}
+      width={window.innerWidth + 2 * 2000}
+      height={window.innerHeight + 2 * 2000}>
+      <reactKonva.Layer>
+        {rendered}
+      </reactKonva.Layer>
+    </reactKonva.Stage>
   )
 }
 

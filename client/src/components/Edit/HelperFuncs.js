@@ -1,6 +1,7 @@
 function getCanvasMousePos(x, y) {
   return {x: x - window.innerWidth * 0.15 + divCanvas.scrollLeft, y: y - 40 + divCanvas.scrollTop}
 }
+export { getCanvasMousePos as getCanvasMousePos }
 
 function withinRect(mousePos, startX, startY, endX, endY) {
   const x = mousePos.x
@@ -22,6 +23,7 @@ function isInCanvas(mousePos) {
   const endY = window.innerHeight
   return withinRect(mousePos, startX, startY, endX, endY)
 }
+export { isInCanvas as isInCanvas }
 
 function getHexagonLines(points) {
   const lines = []
@@ -39,6 +41,7 @@ function getHexagonLines(points) {
   }
   return lines
 }
+export { getHexagonLines as getHexagonLines }
 
 const a = 2 * Math.PI / 6
 
@@ -49,6 +52,7 @@ function hexagonPoints(r, x, y) {
   }
   return points
 }
+export { hexagonPoints as hexagonPoints }
 
 function drawHexagon(ctx, points) {
   ctx.beginPath()
@@ -59,6 +63,7 @@ function drawHexagon(ctx, points) {
   }
   ctx.closePath()
 }
+export { drawHexagon as drawHexagon }
 
 const snapToPreview = (evt) => {
   const radius = 40
@@ -140,12 +145,33 @@ const snapToPreview = (evt) => {
   highlighter.setX(x)
   highlighter.setY(y)
 }
+export { snapToPreview as snapToPreview }
 
-module.exports = {
-  getCanvasMousePos: getCanvasMousePos,
-  isInCanvas: isInCanvas,
-  getHexagonLines: getHexagonLines,
-  hexagonPoints: hexagonPoints,
-  drawHexagon: drawHexagon,
-  snapToPreview: snapToPreview
+const updateLinePos = (lineCircle, x, y) => {
+  lineCircle.setX(x)
+  lineCircle.setY(y)
+  const lineGroup = lineCircle.parent
+  const line = lineGroup.children[0]
+  const lineTransform = line.getAbsoluteTransform()
+  lineTransform.m = [1, 0, 0, 1, 0, 0] // lol
+  const end = lineGroup.children[Math.abs(lineCircle.index-2)+1]
+  const newStart = lineTransform.point({x: x, y: y})
+  const newEnd = lineTransform.point({x: end.getX(), y: end.getY()})
+  line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
 }
+export { updateLinePos as updateLinePos }
+
+const stopDrag = (e, func, lineCircle) => { // todo: remove lineCircle, add mouseup event for border detectors and document
+  if (e.button === 0) {
+    console.log('no')
+    const stage = Konva.stages[0]
+    if (stage && lineCircle) {
+      const highlighter = stage.find('.highlighter')[0]
+      const x = highlighter.getX()
+      const y = highlighter.getY()
+      updateLinePos(lineCircle, x, y)
+    }
+    func()
+  }
+}
+export { stopDrag as stopDrag }
