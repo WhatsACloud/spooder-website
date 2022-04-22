@@ -226,16 +226,8 @@ function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine })
     }
     */
   }, [])
-  if (leStage) {
-    return (
-      React.createElement(leStage, null, rendered)
-    )
-  } else {
-    return <></>
-  }
-  /*
-
-  <ReactKonva.Stage
+  return (
+    <ReactKonva.Stage
       x={0}
       y={0}
       width={window.innerWidth + 2 * 2000}
@@ -244,6 +236,8 @@ function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine })
         {rendered}
       </ReactKonva.Layer>
     </ReactKonva.Stage>
+  )
+  /*
 
   */
 }
