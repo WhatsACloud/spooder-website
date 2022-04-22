@@ -14,7 +14,7 @@ import * as shapes from './Shapes'
 import spoodawebData from './TestingSpoodawebData'
 
 import Konva from 'konva'
-import * as reactKonva from 'react-konva'
+import * as ReactKonva from 'react-konva'
 
 Konva.hitOnDragEnabled = true
 
@@ -204,30 +204,55 @@ function drop(e, dragging, mainLayer, setHoverBudBorder, toggleCanDragLine) {
   }
 }
 
-function DrawCanvas({ setMainLayer, setHoverBudBorder, toggleCanDragLine }) {
-  const [ objs, setobjs ] = useState()
-  const [ objsDesClose, setObjsDesClose ] = useState() // objs arranged by position from root pos descending
-  const [ objData, setObjData ] = useState() // for internal details of buds, silk, like their meaning
-  const [ rendered, setRendered ] = useState()
+function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine }) {
+  const [ leStage, setLeStage ] = useState()
   useEffect(() => {
     document.addEventListener('wheel', preventZoomScroll)
+    const divCanvas = document.getElementById('divCanvas')
+    const stage = new Konva.Stage({
+      container: divCanvas,
+      x: 0,
+      y: 0,
+      width: window.innerWidth + 2 * 2000,
+      height: window.innerHeight + 2 * 2000
+    })
+    setLeStage(stage.content)
+    console.log(stage.content)
+    /*
     let index = -1
     for (const name in spoodawebData) {
       const bud = Bud(spoodawebData[name].position.x, spoodawebData[name].position.y, setHoverBudBorder, toggleCanDragLine)
       mainLayer.add(bud)
     }
+    */
   }, [])
-  return (
-    <reactKonva.Stage
+  if (leStage) {
+    return (
+      React.createElement(leStage, null, rendered)
+    )
+  } else {
+    return <></>
+  }
+  /*
+
+  <ReactKonva.Stage
       x={0}
       y={0}
       width={window.innerWidth + 2 * 2000}
       height={window.innerHeight + 2 * 2000}>
-      <reactKonva.Layer>
+      <ReactKonva.Layer>
         {rendered}
-      </reactKonva.Layer>
-    </reactKonva.Stage>
-  )
+      </ReactKonva.Layer>
+    </ReactKonva.Stage>
+
+  */
+}
+
+function UpdateObjs({ objs, setRendered }) {
+  useEffect(() => {
+
+  }, [ objs ])
+  return <></>
 }
 
 function Edit() {
@@ -241,6 +266,8 @@ function Edit() {
     x: null,
     y: null
   })
+  const [ objs, setObjs ] = useState(spoodawebData)
+  const [ rendered, setRendered ] = useState()
   useEffect(() => {
     const mouseDownWrapper = (e) => {
       mouseDown(e, setMiddleMouseDown)
@@ -269,20 +296,13 @@ function Edit() {
   return (
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
+      <UpdateObjs objs={objs} setRendered={setRendered}></UpdateObjs>
       <div className={styles.wrapper}>
-        <ObjectDrawer setDragging={setDragging}
-          toggleCanDragLine={toggleCanDragLine}
-          setToggleCanDragLine={setToggleCanDragLine}
-          mousePos={mousePos}></ObjectDrawer>
-        <FakeDraggableObj
-          dragging={dragging}
-          mousePos={mousePos}
-          setHoverBudBorder={setHoverBudBorder}
-          toggleCanDragLine={toggleCanDragLine}
-          drop={drop}></FakeDraggableObj>
         <Select toggleCanDragLine={toggleCanDragLine}></Select>
         <div className={styles.divCanvas} id='divCanvas'>
-          <DrawCanvas setMainLayer={setMainLayer}
+          <DrawCanvas
+          rendered={rendered}
+          setObjs={setObjs}
           setHoverBudBorder={setHoverBudBorder}
           toggleCanDragLine={toggleCanDragLine}></DrawCanvas>
         </div>
@@ -291,3 +311,18 @@ function Edit() {
   )
 }
 export default Edit
+
+/*
+
+<ObjectDrawer setDragging={setDragging}
+  toggleCanDragLine={toggleCanDragLine}
+  setToggleCanDragLine={setToggleCanDragLine}
+  mousePos={mousePos}></ObjectDrawer>
+<FakeDraggableObj
+  dragging={dragging}
+  mousePos={mousePos}
+  setHoverBudBorder={setHoverBudBorder}
+  toggleCanDragLine={toggleCanDragLine}
+  drop={drop}></FakeDraggableObj>
+
+*/
