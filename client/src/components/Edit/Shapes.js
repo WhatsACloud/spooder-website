@@ -17,7 +17,7 @@ function budAnchorHighlighter() {
 }
 export { budAnchorHighlighter as budAnchorHighlighter }
 
-function Circle(points, dragmoveFunc, setDraggingLine) { // todo: continue the react konva migration
+function SilkEnd({ points, dragmoveFunc, setDraggingLine }) {
   const stopDragWrapper = (e) => {
     stopDrag(e, () => {
       setDraggingLine(false)
@@ -42,7 +42,31 @@ function Circle(points, dragmoveFunc, setDraggingLine) { // todo: continue the r
     </reactKonva.Circle>
   )
 }
-export { Circle as Circle }
+export { SilkEnd as SilkEnd }
+
+function Silk(points, circleDragmoveFunc, lineDragmoveFunc, lineDragendFunc, setDraggingLine) {
+  return (
+    <reactKonva.Group>
+      <SilkEnd
+        points={points}
+        circleDragmoveFunc={circleDragmoveFunc}
+        setDraggingLine={setDraggingLine}></SilkEnd>
+      <SilkEnd
+        points={points}
+        circleDragmoveFunc={circleDragmoveFunc}
+        setDraggingLine={setDraggingLine}></SilkEnd>
+      <reactKonva.Line
+        points={[points[0].x, points[0].y, points[1].x, points[1].y]}
+        stroke='black'
+        strokeWidth={1}
+        hitStrokeWidth={30}
+        draggable={true}
+        onDragMove={lineDragmoveFunc}
+        onDragEnd={lineDragendFunc}></reactKonva.Line>
+    </reactKonva.Group>
+  )
+}
+export { Silk as Silk }
 
 function Bud(x, y) {
   const radius = 40

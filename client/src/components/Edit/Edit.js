@@ -43,23 +43,6 @@ change all stage variables to Konva.stages[0] and remove mainLayer react state
 add saving ability
 */
 
-function drawLine(points, circleDragmoveFunc, lineDragmoveFunc, lineDragendFunc, setDraggingLine) {
-  const group = new Konva.Group()
-  const circleStart = Circle(points, circleDragmoveFunc, setDraggingLine)
-  const circleEnd = Circle(points, circleDragmoveFunc, setDraggingLine)
-  const line = new Konva.Line({
-    points: [points[0].x, points[0].y, points[1].x, points[1].y],
-    stroke: 'black',
-    strokeWidth: 1,
-    hitStrokeWidth: 30,
-    draggable: true,
-  })
-  line.on('dragmove', lineDragmoveFunc)
-  line.on('dragend', lineDragendFunc)
-  group.add(line, circleStart, circleEnd)
-  return group
-}
-
 function startDrag(e, setDraggingLine, setSelected) {
   console.log(e.pageX, e.pageY)
   if (e.button === 0 && isInCanvas({x: e.pageX, y: e.pageY})) {
@@ -229,8 +212,6 @@ function DrawCanvas({ setMainLayer, setHoverBudBorder, toggleCanDragLine }) {
   useEffect(() => {
     document.addEventListener('wheel', preventZoomScroll)
     let index = -1
-    const divCanvas = document.getElementById('divCanvas')
-    const mainLayer = new Konva.Layer()
     for (const name in spoodawebData) {
       const bud = Bud(spoodawebData[name].position.x, spoodawebData[name].position.y, setHoverBudBorder, toggleCanDragLine)
       mainLayer.add(bud)
