@@ -8,7 +8,7 @@ import { faObjectGroup, faLinesLeaning } from '@fortawesome/free-solid-svg-icons
 import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
 import { getCanvasMousePos, isInCanvas, getHexagonLines, hexagonPoints, drawHexagon, snapToPreview } from './HelperFuncs'
-import FakeDraggableObj from './FakeDraggableObj'
+// import { FakeDraggableObj, ObjectDrawer } from './OtherElements'
 import * as shapes from './Shapes'
 
 import spoodawebData from './TestingSpoodawebData'
@@ -123,7 +123,7 @@ function UpdateBudBorderEvt({ draggingLine }) {
   return <></>
 }
 
-const Select = memo(function Select({ mainLayer, toggleCanDragLine }) {
+const Select = memo(function Select({ mainLayer, toggleCanDragLine }) { // wtf no
   const [ draggingLine, setDraggingLine ] = useState(false)
   const [ selected, setSelected ] = useState()
   // Object.keys().map((name) => { // ill deal with this later
@@ -159,38 +159,6 @@ const Select = memo(function Select({ mainLayer, toggleCanDragLine }) {
   )
 })
 
-function ObjectDrawer({ setDragging, toggleCanDragLine, setToggleCanDragLine }) {
-  const items = {
-    test: [
-      {
-        func: () => setDragging(true),
-        icon: <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
-      },
-      {
-        func: () => setToggleCanDragLine(true),
-        icon: <FontAwesomeIcon icon={faLinesLeaning}></FontAwesomeIcon>
-      }
-    ]
-  }
-  return (
-    <>
-      <div className={styles.objectDrawer}>
-        <div className={styles.box}>
-          <div className={styles.obj}>
-            <p>test</p>
-            <button className={styles.drawerButton} onMouseDown={() => setDragging(true)}>
-              <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
-            </button>
-            <button className={toggleCanDragLine ? styles.darkenedDrawerButton : styles.drawerButton} onMouseDown={() => setToggleCanDragLine(!toggleCanDragLine)}>
-              <FontAwesomeIcon icon={faLinesLeaning}></FontAwesomeIcon>
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
-  )
-}
-
 function drop(e, dragging, mainLayer, setHoverBudBorder, toggleCanDragLine) {
   // console.log(isMouseHoverCanvas)
   // if (!isMouseHoverCanvas) return
@@ -204,18 +172,16 @@ function drop(e, dragging, mainLayer, setHoverBudBorder, toggleCanDragLine) {
   }
 }
 
-function DrawCanvas({ setMainLayer, setHoverBudBorder, toggleCanDragLine }) {
-  const [ objs, setobjs ] = useState()
-  const [ objsDesClose, setObjsDesClose ] = useState() // objs arranged by position from root pos descending
-  const [ objData, setObjData ] = useState() // for internal details of buds, silk, like their meaning
-  const [ rendered, setRendered ] = useState()
+function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine }) { // should download objects by range, e.g. only download nearby objects from server
   useEffect(() => {
     document.addEventListener('wheel', preventZoomScroll)
+    /*
     let index = -1
     for (const name in spoodawebData) {
       const bud = Bud(spoodawebData[name].position.x, spoodawebData[name].position.y, setHoverBudBorder, toggleCanDragLine)
       mainLayer.add(bud)
     }
+    */
   }, [])
   return (
     <reactKonva.Stage
@@ -230,17 +196,26 @@ function DrawCanvas({ setMainLayer, setHoverBudBorder, toggleCanDragLine }) {
   )
 }
 
+function UpdateObjs({ objs, setRendered }) { // update rendered objs upon change in objs
+  useEffect(() => {
+    console.log(objs)
+  }, [ objs ])
+  return <></>
+}
+
 function Edit() {
   const navigate = useNavigate()
   const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
   const [ dragging, setDragging ] = useState(false)
-  const [ mainLayer, setMainLayer ] = useState()
   const [ toggleCanDragLine, setToggleCanDragLine ] = useState(false)
   const [ hoverBudBorder, setHoverBudBorder ] = useState(false)
-  const [ mousePos, setMousePos ] = useState({
+  const [ mousePos, setMousePos ] = useState({ // probably should remove this
     x: null,
     y: null
   })
+  const [ objs, setObjs ] = useState(spoodawebData) // should separate objs into their position and meaning in different states
+  const [ rendered, setRendered ] = useState()
+
   useEffect(() => {
     const mouseDownWrapper = (e) => {
       mouseDown(e, setMiddleMouseDown)
@@ -269,20 +244,13 @@ function Edit() {
   return (
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
+      <UpdateObjs objs={objs} setRendered={setRendered}></UpdateObjs>
       <div className={styles.wrapper}>
-        <ObjectDrawer setDragging={setDragging}
-          toggleCanDragLine={toggleCanDragLine}
-          setToggleCanDragLine={setToggleCanDragLine}
-          mousePos={mousePos}></ObjectDrawer>
-        <FakeDraggableObj
-          dragging={dragging}
-          mousePos={mousePos}
-          setHoverBudBorder={setHoverBudBorder}
-          toggleCanDragLine={toggleCanDragLine}
-          drop={drop}></FakeDraggableObj>
         <Select toggleCanDragLine={toggleCanDragLine}></Select>
         <div className={styles.divCanvas} id='divCanvas'>
-          <DrawCanvas setMainLayer={setMainLayer}
+          <DrawCanvas
+          rendered={rendered}
+          setObjs={setObjs}
           setHoverBudBorder={setHoverBudBorder}
           toggleCanDragLine={toggleCanDragLine}></DrawCanvas>
         </div>
@@ -291,3 +259,18 @@ function Edit() {
   )
 }
 export default Edit
+
+/*
+
+<ObjectDrawer setDragging={setDragging}
+  toggleCanDragLine={toggleCanDragLine}
+  setToggleCanDragLine={setToggleCanDragLine}
+  mousePos={mousePos}></ObjectDrawer>
+<FakeDraggableObj
+  dragging={dragging}
+  mousePos={mousePos}
+  setHoverBudBorder={setHoverBudBorder}
+  toggleCanDragLine={toggleCanDragLine}
+  drop={drop}></FakeDraggableObj>
+
+*/
