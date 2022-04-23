@@ -205,19 +205,8 @@ function drop(e, dragging, mainLayer, setHoverBudBorder, toggleCanDragLine) {
 }
 
 function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine }) {
-  const [ leStage, setLeStage ] = useState()
   useEffect(() => {
     document.addEventListener('wheel', preventZoomScroll)
-    const divCanvas = document.getElementById('divCanvas')
-    const stage = new Konva.Stage({
-      container: divCanvas,
-      x: 0,
-      y: 0,
-      width: window.innerWidth + 2 * 2000,
-      height: window.innerHeight + 2 * 2000
-    })
-    setLeStage(stage.content)
-    console.log(stage.content)
     /*
     let index = -1
     for (const name in spoodawebData) {
@@ -225,7 +214,11 @@ function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine })
       mainLayer.add(bud)
     }
     */
-  }, [])
+   console.log(rendered)
+   return () => {
+    document.removeEventListener('wheel', preventZoomScroll)
+   }
+  }, [rendered])
   return (
     <ReactKonva.Stage
       x={0}
@@ -237,15 +230,26 @@ function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine })
       </ReactKonva.Layer>
     </ReactKonva.Stage>
   )
-  /*
-
-  */
 }
 
-function UpdateObjs({ objs, setRendered }) {
+function UpdateObjs({ objs, setRendered, rendered }) {
   useEffect(() => {
-
-  }, [ objs ])
+    console.log('how')
+    const newRendered = rendered
+    for (const objName in objs) {
+      const obj = objs[objName]
+      console.log(obj)
+      if (obj.type === 'bud') {
+        newRendered.push(
+          <shapes.Bud
+            x={obj.position.x}
+            y={obj.position.y}
+            key={newRendered.length}></shapes.Bud>
+        )
+      }      
+    }
+    setRendered(newRendered)
+  }, [objs])
   return <></>
 }
 
@@ -261,7 +265,7 @@ function Edit() {
     y: null
   })
   const [ objs, setObjs ] = useState(spoodawebData)
-  const [ rendered, setRendered ] = useState()
+  const [ rendered, setRendered ] = useState([])
   useEffect(() => {
     const mouseDownWrapper = (e) => {
       mouseDown(e, setMiddleMouseDown)
@@ -290,7 +294,6 @@ function Edit() {
   return (
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
-      <UpdateObjs objs={objs} setRendered={setRendered}></UpdateObjs>
       <div className={styles.wrapper}>
         <Select toggleCanDragLine={toggleCanDragLine}></Select>
         <div className={styles.divCanvas} id='divCanvas'>
@@ -301,6 +304,7 @@ function Edit() {
           toggleCanDragLine={toggleCanDragLine}></DrawCanvas>
         </div>
       </div>
+      <UpdateObjs objs={objs} setRendered={setRendered} rendered={rendered}></UpdateObjs>
     </>
   )
 }

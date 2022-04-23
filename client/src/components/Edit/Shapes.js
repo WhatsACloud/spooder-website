@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
 import { getHexagonLines, hexagonPoints, drawHexagon, stopDrag } from './HelperFuncs'
 
@@ -68,27 +68,31 @@ function Silk(points, circleDragmoveFunc, lineDragmoveFunc, lineDragendFunc, set
 }
 export { Silk as Silk }
 
-function Bud(x, y) {
+function Bud({ x, y }) {
   const radius = 40
+  const strokeWidth = 40
   const lines = getHexagonLines(hexagonPoints(radius, x, y))
   const hitLines = getHexagonLines(hexagonPoints(radius+strokeWidth, x, y))
-  const hitAreas = lines.map((line) => {
-    <reactKonva.Shape
-      x={x}
-      y={y}
-      borderPoints={line}
-      fill='black'
-      sceneFunc={(ctx, shape) => {
-        const hitLine = hitLines[lineIndex]
-        ctx.beginPath()
-        ctx.lineTo(line[0].x-2*x, line[0].y-2*y)
-        ctx.lineTo(line[1].x-2*x, line[1].y-2*y)
-        ctx.lineTo(hitLine[1].x-2*x, hitLine[1].y-2*y)
-        ctx.lineTo(hitLine[0].x-2*x, hitLine[0].y-2*y)
-        ctx.fillStrokeShape(shape)
-      }}>
-
-    </reactKonva.Shape>
+  const hitAreas = lines.map((line, lineIndex) => {
+    return (
+      <reactKonva.Shape
+        key={lineIndex}
+        x={x}
+        y={y}
+        borderPoints={line}
+        fill='black'
+        sceneFunc={(ctx, shape) => {
+          const hitLine = hitLines[lineIndex]
+          ctx.beginPath()
+          ctx.lineTo(hitLine[0].x-2*x, hitLine[0].y-2*y)
+          ctx.lineTo(line[0].x-2*x, line[0].y-2*y)
+          ctx.lineTo(line[1].x-2*x, line[1].y-2*y)
+          ctx.lineTo(hitLine[1].x-2*x, hitLine[1].y-2*y)
+          ctx.fillStrokeShape(shape)
+        }}>
+  
+      </reactKonva.Shape>
+    )
   })
   return (
     <reactKonva.Group

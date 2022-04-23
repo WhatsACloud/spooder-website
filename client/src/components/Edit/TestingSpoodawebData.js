@@ -22,7 +22,8 @@ const spoodawebData = {
     "position": {
       "x": 80,
       "y": 70
-    }
+    },
+    "type": "bud"
   },
   "gay": {
     "pronounciation": "pronounciation test",
@@ -47,7 +48,8 @@ const spoodawebData = {
     "position": {
       "x": 500,
       "y": 500
-    }
+    },
+    "type": "bud"
   }
 }
 
