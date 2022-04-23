@@ -19,11 +19,9 @@ module.exports = {
       setMiddleMouseDown(true)
     }
   },
-  mouseUp: (e, setMiddleMouseDown, setDragging) => {
+  mouseUp: (e, setMiddleMouseDown) => {
     if (e.button === 1) {
       setMiddleMouseDown(false)
-    } else if (e.button === 0) {
-      setDragging(false)
     }
   },
   mouseMove: (e, middleMouseDown, mousePos, setMousePos) => {

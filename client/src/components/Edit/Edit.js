@@ -204,6 +204,35 @@ function drop(e, dragging, mainLayer, setHoverBudBorder, toggleCanDragLine) {
   }
 }
 
+function DetectMouseMove () {
+  const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
+  const [ mousePos, setMousePos ] = useState({
+    x: null,
+    y: null
+  })
+  useEffect(() => {
+    const mousePosWrapper = (e) => {
+      mouseMove(e, middleMouseDown, mousePos, setMousePos)
+    }
+    const mouseDownWrapper = (e) => {
+      mouseDown(e, setMiddleMouseDown)
+    }
+    const mouseUpWrapper = (e) => {
+      // mouseUp(e, setMiddleMouseDown, setDragging)
+      mouseUp(e, setMiddleMouseDown)
+    }
+    document.addEventListener('mousemove', mousePosWrapper)
+    document.addEventListener('mouseup', mouseUpWrapper)
+    document.addEventListener('mousedown', mouseDownWrapper)
+    return () => {
+      document.removeEventListener('mousemove', mousePosWrapper)
+      document.removeEventListener('mousedown', mouseDownWrapper)
+      document.removeEventListener('mouseup', mouseUpWrapper)
+    }
+  }, [ mousePos, middleMouseDown ])
+  return <></>
+}
+
 function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine }) {
   useEffect(() => {
     document.addEventListener('wheel', preventZoomScroll)
@@ -218,7 +247,7 @@ function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine })
    return () => {
     document.removeEventListener('wheel', preventZoomScroll)
    }
-  }, [rendered])
+  })
   return (
     <ReactKonva.Stage
       x={0}
@@ -235,10 +264,9 @@ function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine })
 function UpdateObjs({ objs, setRendered, rendered }) {
   useEffect(() => {
     console.log('how')
-    const newRendered = rendered
+    const newRendered = [...rendered]
     for (const objName in objs) {
       const obj = objs[objName]
-      console.log(obj)
       if (obj.type === 'bud') {
         newRendered.push(
           <shapes.Bud
@@ -255,45 +283,24 @@ function UpdateObjs({ objs, setRendered, rendered }) {
 
 function Edit() {
   const navigate = useNavigate()
-  const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
   const [ dragging, setDragging ] = useState(false)
-  const [ mainLayer, setMainLayer ] = useState()
   const [ toggleCanDragLine, setToggleCanDragLine ] = useState(false)
   const [ hoverBudBorder, setHoverBudBorder ] = useState(false)
-  const [ mousePos, setMousePos ] = useState({
-    x: null,
-    y: null
-  })
   const [ objs, setObjs ] = useState(spoodawebData)
   const [ rendered, setRendered ] = useState([])
   useEffect(() => {
-    const mouseDownWrapper = (e) => {
-      mouseDown(e, setMiddleMouseDown)
-    }
-    const mouseUpWrapper = (e) => {
-      mouseUp(e, setMiddleMouseDown, setDragging)
-    }
-    const mousePosWrapper = (e) => {
-      mouseMove(e, middleMouseDown, mousePos, setMousePos)
-    }
     document.addEventListener('keydown', preventZoom)
-    document.addEventListener('mousedown', mouseDownWrapper)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
-    document.addEventListener('mouseup', mouseUpWrapper)
-    document.addEventListener('mousemove', mousePosWrapper)
-    
+    console.log(rendered)
     return () => {
       document.removeEventListener('keydown', preventZoom)
-      // document.getElementsByClassName('konvajs-content')[0].removeEventListener('wheel', preventZoomScroll)
       document.removeEventListener('wheel', preventZoomScroll)
-      document.removeEventListener('mousedown', mouseDownWrapper)
-      document.removeEventListener('mouseup', mouseUpWrapper)
-      document.removeEventListener('mousemove', mousePosWrapper)
     }
-  }, [middleMouseDown, mousePos])
+  }, [ objs, rendered ])
   return (
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
+      <DetectMouseMove></DetectMouseMove>
       <div className={styles.wrapper}>
         <Select toggleCanDragLine={toggleCanDragLine}></Select>
         <div className={styles.divCanvas} id='divCanvas'>
@@ -304,7 +311,10 @@ function Edit() {
           toggleCanDragLine={toggleCanDragLine}></DrawCanvas>
         </div>
       </div>
-      <UpdateObjs objs={objs} setRendered={setRendered} rendered={rendered}></UpdateObjs>
+      <UpdateObjs 
+      objs={objs}
+      setRendered={setRendered}
+      rendered={rendered}></UpdateObjs>
     </>
   )
 }
