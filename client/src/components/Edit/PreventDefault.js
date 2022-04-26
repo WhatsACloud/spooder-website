@@ -8,7 +8,6 @@ const preventZoomKeys = {
 module.exports = {
   preventZoom: e => {
     if (e.ctrlKey === true && (preventZoomKeys[e.key])) {
-      console.log('success')
       e.preventDefault()
     }
   },

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
-import { getHexagonLines, hexagonPoints, drawHexagon, stopDrag } from './HelperFuncs'
+import { getHexagonLines, hexagonPoints, drawHexagon, stopDragLine } from './HelperFuncs'
 
-function budAnchorHighlighter() {
+function BudAnchorHighlighter() {
   return (
     <reactKonva.Circle
       radius={5}
@@ -15,13 +15,13 @@ function budAnchorHighlighter() {
     </reactKonva.Circle>
   )
 }
-export { budAnchorHighlighter as budAnchorHighlighter }
+export { BudAnchorHighlighter as BudAnchorHighlighter }
 
 function SilkEnd({ points, dragmoveFunc, setDraggingLine }) {
-  const stopDragWrapper = (e) => {
-    stopDrag(e, () => {
+  const stopDragLineWrapper = (e) => {
+    stopDragLine(e, () => {
       setDraggingLine(false)
-      removeEventListener('mouseup', stopDragWrapper)
+      removeEventListener('mouseup', stopDragLineWrapper)
     })
   }
   return (
@@ -36,7 +36,7 @@ function SilkEnd({ points, dragmoveFunc, setDraggingLine }) {
       draggable={true}
       onMouseDown={() => {
         setDraggingLine(true)
-        addEventListener('mouseup', stopDragWrapper)
+        addEventListener('mouseup', stopDragLineWrapper)
       }}
       onDragMove={dragmoveFunc}>
     </reactKonva.Circle>
@@ -44,9 +44,30 @@ function SilkEnd({ points, dragmoveFunc, setDraggingLine }) {
 }
 export { SilkEnd as SilkEnd }
 
-function Silk(points, circleDragmoveFunc, lineDragmoveFunc, lineDragendFunc, setDraggingLine) {
+function Silk({ points, lineCircleMove, setDraggingLine, objId }) {
+  const circleDragmoveFunc = evt => lineCircleMove(evt.evt, true, {"layerIndex": evt.target.parent.index, "innerIndex": evt.target.index})
+  const lineDragmoveFunc = evt => {
+    const line = evt.target
+    const lineGroup = line.parent.children
+    const points = line.getPoints()
+    const start = lineGroup[1]
+    const end = lineGroup[2]
+    const lineTransform = line.getAbsoluteTransform()
+    const newStart = lineTransform.point({x: points[0], y: points[1]})
+    const newEnd = lineTransform.point({x: points[2], y: points[3]})
+    start.setX(newStart.x)
+    start.setY(newStart.y)
+    end.setX(newEnd.x)
+    end.setY(newEnd.y)
+  }
+  const lineDragendFunc = evt => {
+    const line = evt.target
+    const points = line.getPoints()
+  }
+  console.log(objId)
   return (
-    <reactKonva.Group>
+    <reactKonva.Group
+      objId={objId}>
       <SilkEnd
         points={points}
         circleDragmoveFunc={circleDragmoveFunc}
@@ -68,7 +89,7 @@ function Silk(points, circleDragmoveFunc, lineDragmoveFunc, lineDragendFunc, set
 }
 export { Silk as Silk }
 
-function Bud({ x, y }) {
+function Bud({ x, y, objId }) {
   const radius = 40
   const strokeWidth = 40
   const lines = getHexagonLines(hexagonPoints(radius, x, y))
@@ -96,7 +117,8 @@ function Bud({ x, y }) {
   })
   return (
     <reactKonva.Group
-      name='bud'>
+      name='bud'
+      objId={objId}>
         <reactKonva.Shape
           x={x}
           y={y}

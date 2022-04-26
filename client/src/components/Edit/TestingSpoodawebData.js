@@ -1,5 +1,6 @@
-const spoodawebData = {
-  "a test": {
+const spoodawebData = [
+  {
+    "name": "a test",
     "pronounciation": "pronounciation test",
     "contexts": [
         "this is a context for testing",
@@ -23,9 +24,11 @@ const spoodawebData = {
       "x": 80,
       "y": 70
     },
+    "objId": 0,
     "type": "bud"
   },
-  "gay": {
+  {
+    "name": "gay",
     "pronounciation": "pronounciation test",
     "contexts": [
         "this is a context for testing",
@@ -49,8 +52,9 @@ const spoodawebData = {
       "x": 500,
       "y": 500
     },
+    "objId": 69,
     "type": "bud"
   }
-}
+]
 
 export default spoodawebData

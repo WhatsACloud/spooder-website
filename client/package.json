@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "dev": "webpack-dev-server --config webpack.config.js --progress --hot --mode development"
   },
   "keywords": [],
@@ -33,6 +33,7 @@
     "canvas": "^2.9.1",
     "canvg": "^4.0.0",
     "core-js": "^3.21.1",
+    "jest": "^27.5.1",
     "konva": "^8.3.5",
     "node-sass": "^7.0.1",
     "prop-types": "^15.8.1",

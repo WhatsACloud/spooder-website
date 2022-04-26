@@ -1,9 +1,16 @@
-function getCanvasMousePos(x, y) {
+import Konva from 'konva'
+
+const getKonvaObjs = () => {
+  return Konva.stages[0].children[0].children
+}
+export { getKonvaObjs as getKonvaObjs }
+
+const getCanvasMousePos = (x, y) => {
   return {x: x - window.innerWidth * 0.15 + divCanvas.scrollLeft, y: y - 40 + divCanvas.scrollTop}
 }
 export { getCanvasMousePos as getCanvasMousePos }
 
-function withinRect(mousePos, startX, startY, endX, endY) {
+const withinRect = (mousePos, startX, startY, endX, endY) => {
   const x = mousePos.x
   const y = mousePos.y
   const xStartIn = x > startX
@@ -16,7 +23,21 @@ function withinRect(mousePos, startX, startY, endX, endY) {
   return false
 }
 
-function isInCanvas(mousePos) {
+import { budSample } from './spoodawebSampleData'
+
+const setBud = (setObjsToUpdate, details) => { // { pronounciation, contexts, examples, links, position, type }
+  const obj = {...budSample}
+  for (const name in details) { // todo: add jest, make a username generator in python
+    if (name in obj) {
+      const detail = details[name]
+      obj[name] = detail
+    }
+  }
+  setObjsToUpdate([obj])
+}
+export { setBud as setBud }
+
+const isInCanvas = (mousePos) => {
   const startX = window.innerWidth * 0.15
   const startY = 0
   const endX = window.innerWidth
@@ -25,7 +46,7 @@ function isInCanvas(mousePos) {
 }
 export { isInCanvas as isInCanvas }
 
-function getHexagonLines(points) {
+const getHexagonLines = (points) => {
   const lines = []
   let lastPoint = points[0]
   for (let i = 1; i < 7; i++) {
@@ -45,7 +66,7 @@ export { getHexagonLines as getHexagonLines }
 
 const a = 2 * Math.PI / 6
 
-function hexagonPoints(r, x, y) {
+const hexagonPoints = (r, x, y) => {
   const points = []
   for (var i = 0; i < 6; i++) {
     points.push({x: x + r * Math.cos(a * i), y: y + r * Math.sin(a * i)})
@@ -54,7 +75,7 @@ function hexagonPoints(r, x, y) {
 }
 export { hexagonPoints as hexagonPoints }
 
-function drawHexagon(ctx, points) {
+const drawHexagon = (ctx, points) => {
   ctx.beginPath()
   for (var i = 0; i < 6; i++) {
     const x = points[i].x
@@ -151,17 +172,59 @@ const updateLinePos = (lineCircle, x, y) => {
   lineCircle.setX(x)
   lineCircle.setY(y)
   const lineGroup = lineCircle.parent
-  const line = lineGroup.children[0]
+  const line = lineGroup.children[2]
   const lineTransform = line.getAbsoluteTransform()
   lineTransform.m = [1, 0, 0, 1, 0, 0] // lol
-  const end = lineGroup.children[Math.abs(lineCircle.index-2)+1]
+  const end = lineGroup.children[Math.abs(lineCircle.index-1)]
   const newStart = lineTransform.point({x: x, y: y})
   const newEnd = lineTransform.point({x: end.getX(), y: end.getY()})
   line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
 }
 export { updateLinePos as updateLinePos }
 
-const stopDrag = (e, func, lineCircle) => { // todo: remove lineCircle, add mouseup event for border detectors and document
+const getObjById = (id) => {
+  const objs = getKonvaObjs()
+  for (const obj of objs) {
+    if (obj.getAttr('objId') === id) {
+      return obj
+    }
+  }
+  return false
+}
+export { getObjById as getObjById }
+
+const lineCircleMove = (e, draggingLine, selected) => {
+  if (isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
+    const mousePos = {x: e.pageX, y: e.pageY}
+    const canvasMousePos = getCanvasMousePos(mousePos.x, mousePos.y)
+    const lineGroup = getObjById(selected.objId).children
+    const start = lineGroup[selected.innerIndex]
+    updateLinePos(start, canvasMousePos.x, canvasMousePos.y)
+  }
+}
+export { lineCircleMove as lineCircleMove }
+
+import * as Shapes from './Shapes'
+import React from 'react'
+import { silkSample } from './spoodawebSampleData'
+
+const startDragLine = (e, setDraggingLine, setSelected, setObjsToUpdate, nextObjId, setNextObjId) => {
+  console.log(e.pageX, e.pageY)
+  if (e.button === 0 && isInCanvas({x: e.pageX, y: e.pageY})) {
+    const canvasMousePos = getCanvasMousePos(e.pageX, e.pageY)
+    console.log('dragged line')
+    setDraggingLine(true)
+    const line = {...silkSample}
+    line.positions = [canvasMousePos, canvasMousePos]
+    line.objId = nextObjId
+    setObjsToUpdate([line])
+    setSelected({"objId": nextObjId, "innerIndex": 1})
+    setNextObjId(nextObjId+1)
+  }
+}
+export { startDragLine as startDragLine }
+
+const stopDragLine = (e, func, lineCircle) => { // todo: remove lineCircle, add mouseup event for border detectors and document
   if (e.button === 0) {
     console.log('no')
     const stage = Konva.stages[0]
@@ -174,4 +237,4 @@ const stopDrag = (e, func, lineCircle) => { // todo: remove lineCircle, add mous
     func()
   }
 }
-export { stopDrag as stopDrag }
+export { stopDragLine as stopDragLine }
