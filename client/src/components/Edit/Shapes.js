@@ -20,12 +20,9 @@ export { BudAnchorHighlighter as BudAnchorHighlighter }
 import { lineCircleMove } from './HelperFuncs'
 
 function SilkEnd({ points, setDraggingLine }) {
-  const circleDragmoveFunc = evt => lineCircleMove(evt.evt, true, {"objId": evt.target.parent.index, "innerIndex": evt.target.index})
+  const circleDragmoveFunc = evt => lineCircleMove(evt.evt, true, {"objId": evt.target.parent.getAttr('objId'), "innerIndex": evt.target.index}) 
   const stopDragLineWrapper = (e) => {
-    stopDragLine(e, () => {
-      setDraggingLine(false)
-      removeEventListener('mouseup', stopDragLineWrapper)
-    })
+    document.removeEventListener('mouseup', stopDragLineWrapper)
   }
   return (
     <reactKonva.Circle
@@ -39,7 +36,7 @@ function SilkEnd({ points, setDraggingLine }) {
       draggable={true}
       onMouseDown={() => {
         setDraggingLine(true)
-        addEventListener('mouseup', stopDragLineWrapper)
+        document.addEventListener('mouseup', stopDragLineWrapper)
       }}
       onDragMove={circleDragmoveFunc}>
     </reactKonva.Circle>
@@ -114,9 +111,6 @@ function Bud({ x, y, objId, setHoverBudBorder }) {
           ctx.lineTo(line[1].x-2*x, line[1].y-2*y)
           ctx.lineTo(hitLine[1].x-2*x, hitLine[1].y-2*y)
           ctx.fillStrokeShape(shape)
-        }}
-        onMouseOver={(e) => {
-          setHoverBudBorder(true)
         }}>
   
       </reactKonva.Shape>
@@ -160,6 +154,9 @@ function Bud({ x, y, objId, setHoverBudBorder }) {
           y={y}
           onMouseLeave={(e) => {
             setHoverBudBorder(false)
+          }}
+          onMouseEnter={(e) => {
+            setHoverBudBorder(true)
           }}>
           {hitAreas}
         </reactKonva.Group>

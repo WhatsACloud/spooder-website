@@ -194,7 +194,6 @@ const getObjById = (id) => {
 export { getObjById as getObjById }
 
 const lineCircleMove = (e, draggingLine, selected) => {
-  console.log(isInCanvas({x: e.pageX, y: e.pageY}), draggingLine)
   if (isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
     const mousePos = {x: e.pageX, y: e.pageY}
     const canvasMousePos = getCanvasMousePos(mousePos.x, mousePos.y)
@@ -210,7 +209,6 @@ import React from 'react'
 import { silkSample } from './spoodawebSampleData'
 
 const startDragLine = (e, setDraggingLine, setSelected, setObjsToUpdate, nextObjId, setNextObjId) => {
-  console.log(e.pageX, e.pageY)
   if (e.button === 0 && isInCanvas({x: e.pageX, y: e.pageY})) {
     const canvasMousePos = getCanvasMousePos(e.pageX, e.pageY)
     console.log('dragged line')
@@ -221,12 +219,13 @@ const startDragLine = (e, setDraggingLine, setSelected, setObjsToUpdate, nextObj
     setObjsToUpdate([line])
     setSelected({"objId": nextObjId, "innerIndex": 1})
     setNextObjId(nextObjId+1)
+    const renderedLine = getObjById(line.objId)
+    renderedLine.moveToBottom()
   }
 }
 export { startDragLine as startDragLine }
 
-const stopDragLine = (e, func, lineCircle) => { // todo: remove lineCircle, add mouseup event for border detectors and document
-  console.log(e)
+const stopDragLine = (e, lineCircle) => { // todo: remove lineCircle, add mouseup event for border detectors and document
   if (e.button === 0) {
     console.log('no')
     const stage = Konva.stages[0]
@@ -236,7 +235,6 @@ const stopDragLine = (e, func, lineCircle) => { // todo: remove lineCircle, add 
       const y = highlighter.getY()
       updateLinePos(lineCircle, x, y)
     }
-    func()
   }
 }
 export { stopDragLine as stopDragLine }

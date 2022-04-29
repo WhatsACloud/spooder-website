@@ -34,8 +34,7 @@ function UpdateBudBorderEvt({ draggingLine, hoverBudBorder }) {
     if (!stage) return
     const buds = stage.find('.bud')
     const highlighter = stage.find('.highlighter')[0]
-    console.log(draggingLine)
-    if (draggingLine) {
+    if (draggingLine && hoverBudBorder) {
       for (const budIndex in buds) { // to change this cause performance issues
         const bud = buds[budIndex]
         const hitGroup = bud.children[1]
@@ -69,11 +68,11 @@ function UpdateBudBorderEvt({ draggingLine, hoverBudBorder }) {
       }
     }
 
-  }, [draggingLine])
+  }, [ draggingLine, hoverBudBorder ])
   return <></>
 }
 
-const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate, setDraggingLine, nextObjId, setNextObjId }) => { // still a functional component
+const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate, hoverBudBorder, setDraggingLine, nextObjId, setNextObjId }) => { // still a functional component
   const [ selected, setSelected ] = useState()
   // Object.keys().map((name) => { // ill deal with this later
   useEffect(() => {
@@ -85,23 +84,37 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
       }
     }
     const startDragLineWrapper = e => startDragLine(e, setDraggingLine, setSelected, setObjsToUpdate, nextObjId, setNextObjId)
-    const stopDragLineWrapper = e => stopDragLine(e, () => {
+    const stopDragLineWrapper = e => stopDragLine(e, lineCircle)
+    const dragLineWrapper = e => lineCircleMove(e, draggingLine, selected)
+    const dropLine = () => {
       setDraggingLine(false)
       setSelected()
-    },
-    lineCircle)
-    const dragLineWrapper = e => lineCircleMove(e, draggingLine, selected)
+    }
+    if (toggleCanDragLine) {
+      document.addEventListener('mousedown', startDragLineWrapper)
+    } else {
+      document.removeEventListener('mousedown', startDragLineWrapper)
+    }
     if (toggleCanDragLine) {
       document.addEventListener('mousemove', dragLineWrapper)
-      document.addEventListener('mousedown', startDragLineWrapper)
+      document.addEventListener('mouseup', dropLine)
+    } else {
+      document.removeEventListener('mousemove', dragLineWrapper)
+      document.removeEventListener('mouseup', dropLine)
+    }
+    console.log("dragging line", draggingLine, "hover bud border", hoverBudBorder)
+    if (draggingLine && hoverBudBorder) {
       document.addEventListener('mouseup', stopDragLineWrapper)
+    } else {
+      document.removeEventListener('mouseup', stopDragLineWrapper)
     }
     return () => {
       document.removeEventListener('mousemove', dragLineWrapper)
       document.removeEventListener('mousedown', startDragLineWrapper)
       document.removeEventListener('mouseup', stopDragLineWrapper)
+      document.removeEventListener('mouseup', dropLine)
     }
-  }, [toggleCanDragLine, draggingLine, selected])
+  }, [ toggleCanDragLine, draggingLine, selected, hoverBudBorder ])
   return (
     <></>
   )
@@ -241,6 +254,7 @@ function Edit() {
           nextObjId={nextObjId}
           setDraggingLine={setDraggingLine}
           setNextObjId={setNextObjId}
+          hoverBudBorder={hoverBudBorder}
           draggingLine={draggingLine}></LineDragUpdater>
         <OtherElements.ObjectDrawer
           setDragging={setDragging}
