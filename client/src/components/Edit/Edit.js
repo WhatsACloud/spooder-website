@@ -28,12 +28,13 @@ change all stage variables to Konva.stages[0] and remove mainLayer react state
 add saving ability
 */
 
-function UpdateBudBorderEvt({ draggingLine }) {
+function UpdateBudBorderEvt({ draggingLine, hoverBudBorder }) {
   useEffect(() => {
     const stage = Konva.stages[0]
     if (!stage) return
     const buds = stage.find('.bud')
     const highlighter = stage.find('.highlighter')[0]
+    console.log(draggingLine)
     if (draggingLine) {
       for (const budIndex in buds) { // to change this cause performance issues
         const bud = buds[budIndex]
@@ -72,14 +73,12 @@ function UpdateBudBorderEvt({ draggingLine }) {
   return <></>
 }
 
-const LineDragUpdater = memo(({ toggleCanDragLine, setObjsToUpdate, nextObjId, setNextObjId }) => { // still a functional component
-  const [ draggingLine, setDraggingLine ] = useState(false)
+const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate, setDraggingLine, nextObjId, setNextObjId }) => { // still a functional component
   const [ selected, setSelected ] = useState()
   // Object.keys().map((name) => { // ill deal with this later
   useEffect(() => {
     let lineCircle
     if (selected) {
-      console.log(getKonvaObjs())
       const line = getObjById(selected.objId)
       if (line) {
         lineCircle = line.children[selected.innerIndex]
@@ -104,9 +103,7 @@ const LineDragUpdater = memo(({ toggleCanDragLine, setObjsToUpdate, nextObjId, s
     }
   }, [toggleCanDragLine, draggingLine, selected])
   return (
-    <>
-      <UpdateBudBorderEvt draggingLine={draggingLine}></UpdateBudBorderEvt>
-    </>
+    <></>
   )
 })
 
@@ -139,7 +136,7 @@ function MouseMoveDetector() {
   return <></>
 }
 
-function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine }) {
+function DrawCanvas({ rendered, setObjs, toggleCanDragLine }) {
   useEffect(() => {
     /*
     let index = -1
@@ -149,7 +146,7 @@ function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine })
     }
     */
    console.log(rendered)
-  })
+  }, [])
   return (
     <ReactKonva.Stage
       x={0}
@@ -164,35 +161,31 @@ function DrawCanvas({ rendered, setObjs, setHoverBudBorder, toggleCanDragLine })
   )
 }
 
-function UpdateObjs({ objsToUpdate, objs, setObjs, setRendered, rendered }) { // to add some updating of positions AND maybe index in the object itself to be specific
+
+
+function UpdateObjs({ objsToUpdate, objs, setDraggingLine, setObjs, setRendered, rendered, setHoverBudBorder }) { // to add some updating of positions AND maybe index in the object itself to be specific
   useEffect(() => {
     console.log('how')
     const newRendered = [...rendered]
     for (const objId in objsToUpdate) {
       const obj = objsToUpdate[objId]
-      console.log(obj)
-      console.log(rendered)
       if (obj.type === 'bud') {
         newRendered.push(
           <Shapes.Bud
             x={obj.position.x}
             y={obj.position.y}
             key={newRendered.length}
-            objId={obj.objId}></Shapes.Bud>
+            objId={obj.objId}
+            setHoverBudBorder={setHoverBudBorder}
+            ></Shapes.Bud>
         )
       } else if (obj.type === 'silk') {
-        console.log(obj)
-        /*
-        newRendered.push(
-          <Shapes.Silk
-            points={}></Shapes.Silk>
-        )
-        */
         newRendered.push(
           <Shapes.Silk
             points={obj.positions}
             lineCircleMove={lineCircleMove}
             key={newRendered.length}
+            setDraggingLine={setDraggingLine}
             objId={obj.objId}></Shapes.Silk>
         )
       } else {
@@ -217,10 +210,10 @@ function Edit() {
   const [ objsToUpdate, setObjsToUpdate ] = useState(spoodawebData)
   const [ rendered, setRendered ] = useState([])
   const [ nextObjId, setNextObjId ] = useState(spoodawebData.length)
+  const [ draggingLine, setDraggingLine ] = useState(false)
   useEffect(() => {
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
-    console.log(rendered)
     return () => {
       document.removeEventListener('keydown', preventZoom)
       document.removeEventListener('wheel', preventZoomScroll)
@@ -235,13 +228,20 @@ function Edit() {
       setRendered={setRendered}
       rendered={rendered}
       setObjs={setObjs}
+      setHoverBudBorder={setHoverBudBorder}
+      setDraggingLine={setDraggingLine}
       objs={objs}></UpdateObjs>
+      <UpdateBudBorderEvt
+        draggingLine={draggingLine}
+        hoverBudBorder={hoverBudBorder}></UpdateBudBorderEvt>
       <div className={styles.wrapper}>
         <LineDragUpdater
           toggleCanDragLine={toggleCanDragLine}
           setObjsToUpdate={setObjsToUpdate}
           nextObjId={nextObjId}
-          setNextObjId={setNextObjId}></LineDragUpdater>
+          setDraggingLine={setDraggingLine}
+          setNextObjId={setNextObjId}
+          draggingLine={draggingLine}></LineDragUpdater>
         <OtherElements.ObjectDrawer
           setDragging={setDragging}
           toggleCanDragLine={toggleCanDragLine}
@@ -254,7 +254,6 @@ function Edit() {
           <DrawCanvas
           rendered={rendered}
           setObjsToUpdate={setObjsToUpdate}
-          setHoverBudBorder={setHoverBudBorder}
           toggleCanDragLine={toggleCanDragLine}></DrawCanvas>
         </div>
       </div>

@@ -172,10 +172,10 @@ const updateLinePos = (lineCircle, x, y) => {
   lineCircle.setX(x)
   lineCircle.setY(y)
   const lineGroup = lineCircle.parent
-  const line = lineGroup.children[2]
+  const line = lineGroup.children[0]
   const lineTransform = line.getAbsoluteTransform()
   lineTransform.m = [1, 0, 0, 1, 0, 0] // lol
-  const end = lineGroup.children[Math.abs(lineCircle.index-1)]
+  const end = lineGroup.children[Math.abs(lineCircle.index-2)+1]
   const newStart = lineTransform.point({x: x, y: y})
   const newEnd = lineTransform.point({x: end.getX(), y: end.getY()})
   line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
@@ -194,6 +194,7 @@ const getObjById = (id) => {
 export { getObjById as getObjById }
 
 const lineCircleMove = (e, draggingLine, selected) => {
+  console.log(isInCanvas({x: e.pageX, y: e.pageY}), draggingLine)
   if (isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
     const mousePos = {x: e.pageX, y: e.pageY}
     const canvasMousePos = getCanvasMousePos(mousePos.x, mousePos.y)
@@ -225,6 +226,7 @@ const startDragLine = (e, setDraggingLine, setSelected, setObjsToUpdate, nextObj
 export { startDragLine as startDragLine }
 
 const stopDragLine = (e, func, lineCircle) => { // todo: remove lineCircle, add mouseup event for border detectors and document
+  console.log(e)
   if (e.button === 0) {
     console.log('no')
     const stage = Konva.stages[0]

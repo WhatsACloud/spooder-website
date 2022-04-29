@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
-import { getHexagonLines, hexagonPoints, drawHexagon, stopDragLine } from './HelperFuncs'
+import { getHexagonLines, hexagonPoints, drawHexagon, stopDragLine, getKonvaObjs } from './HelperFuncs'
 
 function BudAnchorHighlighter() {
   return (
@@ -17,7 +17,10 @@ function BudAnchorHighlighter() {
 }
 export { BudAnchorHighlighter as BudAnchorHighlighter }
 
-function SilkEnd({ points, dragmoveFunc, setDraggingLine }) {
+import { lineCircleMove } from './HelperFuncs'
+
+function SilkEnd({ points, setDraggingLine }) {
+  const circleDragmoveFunc = evt => lineCircleMove(evt.evt, true, {"objId": evt.target.parent.index, "innerIndex": evt.target.index})
   const stopDragLineWrapper = (e) => {
     stopDragLine(e, () => {
       setDraggingLine(false)
@@ -38,14 +41,13 @@ function SilkEnd({ points, dragmoveFunc, setDraggingLine }) {
         setDraggingLine(true)
         addEventListener('mouseup', stopDragLineWrapper)
       }}
-      onDragMove={dragmoveFunc}>
+      onDragMove={circleDragmoveFunc}>
     </reactKonva.Circle>
   )
 }
 export { SilkEnd as SilkEnd }
 
-function Silk({ points, lineCircleMove, setDraggingLine, objId }) {
-  const circleDragmoveFunc = evt => lineCircleMove(evt.evt, true, {"layerIndex": evt.target.parent.index, "innerIndex": evt.target.index})
+function Silk({ points, setDraggingLine, objId }) {
   const lineDragmoveFunc = evt => {
     const line = evt.target
     const lineGroup = line.parent.children
@@ -53,8 +55,11 @@ function Silk({ points, lineCircleMove, setDraggingLine, objId }) {
     const start = lineGroup[1]
     const end = lineGroup[2]
     const lineTransform = line.getAbsoluteTransform()
-    const newStart = lineTransform.point({x: points[0], y: points[1]})
-    const newEnd = lineTransform.point({x: points[2], y: points[3]})
+    console.log(lineTransform.m)
+    const newStart = lineTransform.point({x: points[2], y: points[3]})
+    const newEnd = lineTransform.point({x: points[0], y: points[1]})
+    console.log("start", newStart)
+    console.log("end", newEnd)
     start.setX(newStart.x)
     start.setY(newStart.y)
     end.setX(newEnd.x)
@@ -68,14 +73,6 @@ function Silk({ points, lineCircleMove, setDraggingLine, objId }) {
   return (
     <reactKonva.Group
       objId={objId}>
-      <SilkEnd
-        points={points}
-        circleDragmoveFunc={circleDragmoveFunc}
-        setDraggingLine={setDraggingLine}></SilkEnd>
-      <SilkEnd
-        points={points}
-        circleDragmoveFunc={circleDragmoveFunc}
-        setDraggingLine={setDraggingLine}></SilkEnd>
       <reactKonva.Line
         points={[points[0].x, points[0].y, points[1].x, points[1].y]}
         stroke='black'
@@ -84,12 +81,19 @@ function Silk({ points, lineCircleMove, setDraggingLine, objId }) {
         draggable={true}
         onDragMove={lineDragmoveFunc}
         onDragEnd={lineDragendFunc}></reactKonva.Line>
+      <SilkEnd
+        points={points}
+        setDraggingLine={setDraggingLine}></SilkEnd>
+      <SilkEnd
+        points={points}
+        lineCircleMove={lineCircleMove}
+        setDraggingLine={setDraggingLine}></SilkEnd>
     </reactKonva.Group>
   )
 }
 export { Silk as Silk }
 
-function Bud({ x, y, objId }) {
+function Bud({ x, y, objId, setHoverBudBorder }) {
   const radius = 40
   const strokeWidth = 40
   const lines = getHexagonLines(hexagonPoints(radius, x, y))
@@ -110,6 +114,9 @@ function Bud({ x, y, objId }) {
           ctx.lineTo(line[1].x-2*x, line[1].y-2*y)
           ctx.lineTo(hitLine[1].x-2*x, hitLine[1].y-2*y)
           ctx.fillStrokeShape(shape)
+        }}
+        onMouseOver={(e) => {
+          setHoverBudBorder(true)
         }}>
   
       </reactKonva.Shape>
@@ -150,7 +157,10 @@ function Bud({ x, y, objId }) {
         </reactKonva.Shape>
         <reactKonva.Group
           x={x}
-          y={y}>
+          y={y}
+          onMouseLeave={(e) => {
+            setHoverBudBorder(false)
+          }}>
           {hitAreas}
         </reactKonva.Group>
     </reactKonva.Group>
