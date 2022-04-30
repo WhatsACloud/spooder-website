@@ -253,9 +253,8 @@ const snapLine = (selected) => {
   const bud = attachedTo.children[0]
   const budX = bud.getX() 
   const budY = bud.getY() 
-  console.log(budX, budY)
-  const offset = {x: budX - lineCircle.getX(), y: budY - lineCircle.getY()}
-  console.log(attachedTo)
+  const offset = {x: budX - highlighter.getX(), y: budY - highlighter.getY()}
+  console.log(lineCircle.getX(), lineCircle.getY())
   const newAttachedSilkToBud = attachedTo.getAttr('attachedSilkObjId')
   newAttachedSilkToBud.push({"objId": selected.objId, "offset": offset, "innerIndex": selected.innerIndex})
   attachedTo.setAttr('attachedSilkObjId', newAttachedSilkToBud)
