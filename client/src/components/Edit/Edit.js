@@ -19,12 +19,10 @@ Konva.hitOnDragEnabled = true
 const gridLink = "http://phrogz.net/tmp/grid.gif"
 
 /*
+how thingy works:
+update objs state with data, UpdateObjs component updates the stuff to render, drawCanvas renders it onto the canvas
 
 TO DO
-finish the complete elimination of the mainLayer react state
-change konva to react-konva
-change normal functions to () => {} syntax and react functions to function syntax
-change all stage variables to Konva.stages[0] and remove mainLayer react state
 add saving ability
 */
 
