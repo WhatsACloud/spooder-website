@@ -1,7 +1,12 @@
 import Konva from 'konva'
 
+const getStage = () => {
+  return Konva.stages[0] 
+}
+export { getStage as getStage }
+
 const getKonvaObjs = () => {
-  return Konva.stages[0].children[0].children
+  return getStage().children[0].children
 }
 export { getKonvaObjs as getKonvaObjs }
 
@@ -238,3 +243,22 @@ const stopDragLine = (e, lineCircle) => { // todo: remove lineCircle, add mouseu
   }
 }
 export { stopDragLine as stopDragLine }
+
+const snapLine = (selected) => {
+  const stage = getStage()
+  const highlighter = stage.find('.highlighter')[0]
+  const line = getObjById(selected.objId)
+  const lineCircle = line.children[selected.innerIndex]
+  const attachedTo = getObjById(highlighter.getAttr('attachedObjId'))
+  const bud = attachedTo.children[0]
+  const budX = bud.getX() 
+  const budY = bud.getY() 
+  console.log(budX, budY)
+  const offset = {x: budX - lineCircle.getX(), y: budY - lineCircle.getY()}
+  console.log(attachedTo)
+  const newAttachedSilkToBud = attachedTo.getAttr('attachedSilkObjId')
+  newAttachedSilkToBud.push({"objId": selected.objId, "offset": offset, "innerIndex": selected.innerIndex})
+  attachedTo.setAttr('attachedSilkObjId', newAttachedSilkToBud)
+  updateLinePos(lineCircle, highlighter.getX(), highlighter.getY())
+}
+export { snapLine as snapLine }

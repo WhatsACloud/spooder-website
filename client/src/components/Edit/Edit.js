@@ -5,7 +5,7 @@ import styles from './edit.module'
 
 import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
-import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs } from './HelperFuncs'
+import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine } from './HelperFuncs'
 import * as OtherElements from './OtherElements'
 import * as Shapes from './Shapes'
 
@@ -28,13 +28,12 @@ change all stage variables to Konva.stages[0] and remove mainLayer react state
 add saving ability
 */
 
-function UpdateBudBorderEvt({ draggingLine, hoverBudBorder }) {
+function UpdateBudBorderEvt({ draggingLine, hoverBudBorder, setHoverBudBorder }) {
   useEffect(() => {
-    const stage = Konva.stages[0]
+    const stage = getStage() 
     if (!stage) return
     const buds = stage.find('.bud')
-    const highlighter = stage.find('.highlighter')[0]
-    if (draggingLine && hoverBudBorder) {
+    if (draggingLine) {
       for (const budIndex in buds) { // to change this cause performance issues
         const bud = buds[budIndex]
         const hitGroup = bud.children[1]
@@ -43,15 +42,19 @@ function UpdateBudBorderEvt({ draggingLine, hoverBudBorder }) {
           const hitArea = hitAreas[hitAreaIndex]
           hitArea.on('mousemove', snapToPreview)
         }
-        hitGroup.on('mouseenter', (evt) => { // TODO: stop listening and unlistening to events
-          const stage = evt.target.parent.parent.parent.parent
+        hitGroup.on('mouseover', (evt) => {
+          const stage = getStage()
           const highlighter = stage.find('.highlighter')[0]
           highlighter.show()
+          highlighter.setAttr('attachedObjId', evt.target.parent.parent.getAttr('objId'))
+          setHoverBudBorder(true)
         })
-        hitGroup.on('mouseleave', (evt) => {
-          const stage = evt.target.parent.parent.parent.parent
+        hitGroup.on('mouseout', (evt) => {
+          const stage = getStage()
           const highlighter = stage.find('.highlighter')[0]
           highlighter.hide()
+          highlighter.setAttr('attachedObjId', null)
+          setHoverBudBorder(false)
         })
       }
     } else {
@@ -59,21 +62,24 @@ function UpdateBudBorderEvt({ draggingLine, hoverBudBorder }) {
         const bud = buds[budIndex]
         const hitGroup = bud.children[1]
         const hitAreas = hitGroup.children
+        hitGroup.off('mouseup')
         for (const hitAreaIndex in hitAreas) {
           const hitArea = hitAreas[hitAreaIndex]
           hitArea.off('mousemove')
         }
-        hitGroup.off('mouseenter')
-        hitGroup.off('mouseleave')
+        hitGroup.off('mouseover')
+        hitGroup.off('mouseout')
+        const stage = getStage()
+        const highlighter = stage.find('.highlighter')[0]
+        highlighter.hide()
       }
     }
 
-  }, [ draggingLine, hoverBudBorder ])
+  }, [ draggingLine ])
   return <></>
 }
 
-const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate, hoverBudBorder, setDraggingLine, nextObjId, setNextObjId }) => { // still a functional component
-  const [ selected, setSelected ] = useState()
+const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate, hoverBudBorder, setDraggingLine, nextObjId, setNextObjId, selected, setSelected }) => { // still a functional component
   // Object.keys().map((name) => { // ill deal with this later
   useEffect(() => {
     let lineCircle
@@ -87,9 +93,14 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
     const stopDragLineWrapper = e => stopDragLine(e, lineCircle)
     const dragLineWrapper = e => lineCircleMove(e, draggingLine, selected)
     const dropLine = () => {
+      console.log('dropped line')
+      const line = getObjById(selected.objId)
+      line.moveToTop()
+      if (hoverBudBorder) snapLine(selected) 
       setDraggingLine(false)
       setSelected()
     }
+    console.log(draggingLine)
     if (toggleCanDragLine) {
       document.addEventListener('mousedown', startDragLineWrapper)
     } else {
@@ -97,12 +108,12 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
     }
     if (toggleCanDragLine) {
       document.addEventListener('mousemove', dragLineWrapper)
-      document.addEventListener('mouseup', dropLine)
     } else {
       document.removeEventListener('mousemove', dragLineWrapper)
-      document.removeEventListener('mouseup', dropLine)
     }
-    console.log("dragging line", draggingLine, "hover bud border", hoverBudBorder)
+    if (draggingLine) {
+      document.addEventListener('mouseup', dropLine)
+    }
     if (draggingLine && hoverBudBorder) {
       document.addEventListener('mouseup', stopDragLineWrapper)
     } else {
@@ -176,7 +187,7 @@ function DrawCanvas({ rendered, setObjs, toggleCanDragLine }) {
 
 
 
-function UpdateObjs({ objsToUpdate, objs, setDraggingLine, setObjs, setRendered, rendered, setHoverBudBorder }) { // to add some updating of positions AND maybe index in the object itself to be specific
+function UpdateObjs({ objsToUpdate, objs, setDraggingLine, setObjs, setRendered, rendered, setHoverBudBorder, setSelected }) { // to add some updating of positions AND maybe index in the object itself to be specific
   useEffect(() => {
     console.log('how')
     const newRendered = [...rendered]
@@ -199,6 +210,7 @@ function UpdateObjs({ objsToUpdate, objs, setDraggingLine, setObjs, setRendered,
             lineCircleMove={lineCircleMove}
             key={newRendered.length}
             setDraggingLine={setDraggingLine}
+            setSelected={setSelected}
             objId={obj.objId}></Shapes.Silk>
         )
       } else {
@@ -224,6 +236,7 @@ function Edit() {
   const [ rendered, setRendered ] = useState([])
   const [ nextObjId, setNextObjId ] = useState(spoodawebData.length)
   const [ draggingLine, setDraggingLine ] = useState(false)
+  const [ selected, setSelected ] = useState()
   useEffect(() => {
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
@@ -242,11 +255,13 @@ function Edit() {
       rendered={rendered}
       setObjs={setObjs}
       setHoverBudBorder={setHoverBudBorder}
+      setSelected={setSelected}
       setDraggingLine={setDraggingLine}
       objs={objs}></UpdateObjs>
       <UpdateBudBorderEvt
         draggingLine={draggingLine}
-        hoverBudBorder={hoverBudBorder}></UpdateBudBorderEvt>
+        hoverBudBorder={hoverBudBorder}
+        setHoverBudBorder={setHoverBudBorder}></UpdateBudBorderEvt>
       <div className={styles.wrapper}>
         <LineDragUpdater
           toggleCanDragLine={toggleCanDragLine}
@@ -254,6 +269,8 @@ function Edit() {
           nextObjId={nextObjId}
           setDraggingLine={setDraggingLine}
           setNextObjId={setNextObjId}
+          setSelected={setSelected}
+          selected={selected}
           hoverBudBorder={hoverBudBorder}
           draggingLine={draggingLine}></LineDragUpdater>
         <OtherElements.ObjectDrawer

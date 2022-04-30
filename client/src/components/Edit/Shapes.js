@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
-import { getHexagonLines, hexagonPoints, drawHexagon, stopDragLine, getKonvaObjs } from './HelperFuncs'
+import { getHexagonLines, hexagonPoints, drawHexagon, stopDragLine, getKonvaObjs, getObjById, updateLinePos } from './HelperFuncs'
 
 function BudAnchorHighlighter() {
   return (
@@ -10,6 +10,7 @@ function BudAnchorHighlighter() {
       y={0}
       fill='grey'
       name='highlighter'
+      attachedObjId={null}
       visible={false}>
 
     </reactKonva.Circle>
@@ -17,9 +18,9 @@ function BudAnchorHighlighter() {
 }
 export { BudAnchorHighlighter as BudAnchorHighlighter }
 
-import { lineCircleMove } from './HelperFuncs'
+import { lineCircleMove, startDragLine } from './HelperFuncs'
 
-function SilkEnd({ points, setDraggingLine }) {
+function SilkEnd({ points, setDraggingLine, setSelected }) {
   const circleDragmoveFunc = evt => lineCircleMove(evt.evt, true, {"objId": evt.target.parent.getAttr('objId'), "innerIndex": evt.target.index}) 
   const stopDragLineWrapper = (e) => {
     document.removeEventListener('mouseup', stopDragLineWrapper)
@@ -34,9 +35,13 @@ function SilkEnd({ points, setDraggingLine }) {
       strokeWidth={4}
       hitStrokeWidth={30}
       draggable={true}
-      onMouseDown={() => {
+      onMouseDown={(e) => {
+        const objId = e.target.parent.getAttr('objId')
         setDraggingLine(true)
+        setSelected({"objId": objId, "innerIndex": e.target.index})
         document.addEventListener('mouseup', stopDragLineWrapper)
+        const line = e.target.parent
+        line.moveToBottom()
       }}
       onDragMove={circleDragmoveFunc}>
     </reactKonva.Circle>
@@ -44,7 +49,7 @@ function SilkEnd({ points, setDraggingLine }) {
 }
 export { SilkEnd as SilkEnd }
 
-function Silk({ points, setDraggingLine, objId }) {
+function Silk({ points, setDraggingLine, objId, setSelected }) {
   const lineDragmoveFunc = evt => {
     const line = evt.target
     const lineGroup = line.parent.children
@@ -55,8 +60,6 @@ function Silk({ points, setDraggingLine, objId }) {
     console.log(lineTransform.m)
     const newStart = lineTransform.point({x: points[2], y: points[3]})
     const newEnd = lineTransform.point({x: points[0], y: points[1]})
-    console.log("start", newStart)
-    console.log("end", newEnd)
     start.setX(newStart.x)
     start.setY(newStart.y)
     end.setX(newEnd.x)
@@ -80,10 +83,11 @@ function Silk({ points, setDraggingLine, objId }) {
         onDragEnd={lineDragendFunc}></reactKonva.Line>
       <SilkEnd
         points={points}
+        setSelected={setSelected}
         setDraggingLine={setDraggingLine}></SilkEnd>
       <SilkEnd
         points={points}
-        lineCircleMove={lineCircleMove}
+        setSelected={setSelected}
         setDraggingLine={setDraggingLine}></SilkEnd>
     </reactKonva.Group>
   )
@@ -102,7 +106,7 @@ function Bud({ x, y, objId, setHoverBudBorder }) {
         x={x}
         y={y}
         borderPoints={line}
-        fill='black'
+        fill='rgba(0, 0, 0, 0)'
         sceneFunc={(ctx, shape) => {
           const hitLine = hitLines[lineIndex]
           ctx.beginPath()
@@ -112,14 +116,27 @@ function Bud({ x, y, objId, setHoverBudBorder }) {
           ctx.lineTo(hitLine[1].x-2*x, hitLine[1].y-2*y)
           ctx.fillStrokeShape(shape)
         }}>
-  
       </reactKonva.Shape>
     )
   })
   return (
     <reactKonva.Group
       name='bud'
-      objId={objId}>
+      objId={objId}
+      attachedSilkObjId={[]}
+      onDragMove={(evt) => {
+        const bud = evt.target
+        const attachedObjIds = bud.parent.getAttr('attachedSilkObjId')
+        for (const { objId, offset, innerIndex } of attachedObjIds) {
+          const obj = getObjById(objId).children[innerIndex]
+          console.log(obj)
+          console.log(offset)
+          const budX = bud.getX() 
+          const budY = bud.getY() 
+          console.log(budX, budY)
+          updateLinePos(obj, budX - offset.x, budY - offset.y)
+        }
+      }}>
         <reactKonva.Shape
           x={x}
           y={y}
@@ -151,13 +168,7 @@ function Bud({ x, y, objId, setHoverBudBorder }) {
         </reactKonva.Shape>
         <reactKonva.Group
           x={x}
-          y={y}
-          onMouseLeave={(e) => {
-            setHoverBudBorder(false)
-          }}
-          onMouseEnter={(e) => {
-            setHoverBudBorder(true)
-          }}>
+          y={y}>
           {hitAreas}
         </reactKonva.Group>
     </reactKonva.Group>
