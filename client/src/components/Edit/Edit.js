@@ -5,7 +5,7 @@ import styles from './edit.module'
 
 import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
-import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine } from './HelperFuncs'
+import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine } from './HelperFuncs'
 import * as OtherElements from './OtherElements'
 import * as Shapes from './Shapes'
 
@@ -56,6 +56,7 @@ function UpdateBudBorderEvt({ draggingLine, hoverBudBorder, setHoverBudBorder })
         })
       }
     } else {
+      setHoverBudBorder(false)
       for (const budIndex in buds) {
         const bud = buds[budIndex]
         const hitGroup = bud.children[1]
@@ -77,6 +78,8 @@ function UpdateBudBorderEvt({ draggingLine, hoverBudBorder, setHoverBudBorder })
   return <></>
 }
 
+import { silkSample } from './spoodawebSampleData'
+
 const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate, hoverBudBorder, setDraggingLine, nextObjId, setNextObjId, selected, setSelected }) => { // still a functional component
   // Object.keys().map((name) => { // ill deal with this later
   useEffect(() => {
@@ -87,26 +90,51 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
         lineCircle = line.children[selected.innerIndex]
       }
     }
-    const startDragLineWrapper = e => startDragLine(e, setDraggingLine, setSelected, setObjsToUpdate, nextObjId, setNextObjId)
+    const startDragLineWrapper = e => {
+      const canvasMousePos = getCanvasMousePos(e.pageX, e.pageY)
+      if (!isInCanvas({x: e.pageX, y: e.pageY})) return
+      console.log('dragged line')
+      const line = {...silkSample}
+      line.positions = [canvasMousePos, canvasMousePos]
+      line.objId = nextObjId
+      setObjsToUpdate([line])
+      startDragLine(e, setDraggingLine, setSelected, nextObjId, 1, toggleCanDragLine)
+      setNextObjId(nextObjId+1)
+    }
     const stopDragLineWrapper = e => stopDragLine(e, lineCircle)
     const dragLineWrapper = e => lineCircleMove(e, draggingLine, selected)
-    const dropLine = () => {
+    const dropLine = (e) => {
       console.log('dropped line')
       const line = getObjById(selected.objId)
       line.moveToTop()
-      if (hoverBudBorder) snapLine(selected) 
+      if (!isInCanvas({x: e.pageX, y: e.pageY})) snapLineCircleToLine(selected) 
+      if (hoverBudBorder) {
+        console.log('attached line')
+        snapLine(selected)
+      } else { // detaches line
+        console.log('detachedLine')
+        const line = getObjById(selected.objId)
+        const lineCircle = line.children[selected.innerIndex]
+        const attachedTo = getObjById(lineCircle.getAttr('attachedToObjId'))
+        if (attachedTo) {
+          console.log(lineCircle.getAttr('attachedToObjId'))
+          const newObjs = [...attachedTo.getAttr('attachedSilkObjId')]
+          console.log("before", newObjs)
+          newObjs.splice(attachedTo, 1)
+          console.log("after", newObjs)
+          attachedTo.setAttr('attachedSilkObjId', newObjs)
+          lineCircle.setAttr('attachedToObjId', null)
+        }
+      }
       setDraggingLine(false)
       setSelected()
     }
-    console.log(draggingLine)
+    console.log(toggleCanDragLine)
     if (toggleCanDragLine) {
       document.addEventListener('mousedown', startDragLineWrapper)
-    } else {
-      document.removeEventListener('mousedown', startDragLineWrapper)
-    }
-    if (toggleCanDragLine) {
       document.addEventListener('mousemove', dragLineWrapper)
     } else {
+      document.removeEventListener('mousedown', startDragLineWrapper)
       document.removeEventListener('mousemove', dragLineWrapper)
     }
     if (draggingLine) {
@@ -185,7 +213,7 @@ function DrawCanvas({ rendered, setObjs, toggleCanDragLine }) {
 
 
 
-function UpdateObjs({ objsToUpdate, objs, setDraggingLine, setObjs, setRendered, rendered, setHoverBudBorder, setSelected }) { // to add some updating of positions AND maybe index in the object itself to be specific
+function UpdateObjs({ objsToUpdate, objs, setDraggingLine, setObjs, setRendered, rendered, setHoverBudBorder, setSelected, setToggleCanDragLine }) { // to add some updating of positions AND maybe index in the object itself to be specific
   useEffect(() => {
     console.log('how')
     const newRendered = [...rendered]
@@ -209,6 +237,7 @@ function UpdateObjs({ objsToUpdate, objs, setDraggingLine, setObjs, setRendered,
             key={newRendered.length}
             setDraggingLine={setDraggingLine}
             setSelected={setSelected}
+            setToggleCanDragLine={setToggleCanDragLine}
             objId={obj.objId}></Shapes.Silk>
         )
       } else {
@@ -255,6 +284,7 @@ function Edit() {
       setHoverBudBorder={setHoverBudBorder}
       setSelected={setSelected}
       setDraggingLine={setDraggingLine}
+      setToggleCanDragLine={setToggleCanDragLine}
       objs={objs}></UpdateObjs>
       <UpdateBudBorderEvt
         draggingLine={draggingLine}

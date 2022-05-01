@@ -20,7 +20,7 @@ export { BudAnchorHighlighter as BudAnchorHighlighter }
 
 import { lineCircleMove, startDragLine } from './HelperFuncs'
 
-function SilkEnd({ points, setDraggingLine, setSelected }) {
+function SilkEnd({ points, setDraggingLine, setSelected, setToggleCanDragLine }) {
   const circleDragmoveFunc = evt => lineCircleMove(evt.evt, true, {"objId": evt.target.parent.getAttr('objId'), "innerIndex": evt.target.index}) 
   const stopDragLineWrapper = (e) => {
     document.removeEventListener('mouseup', stopDragLineWrapper)
@@ -35,13 +35,13 @@ function SilkEnd({ points, setDraggingLine, setSelected }) {
       strokeWidth={4}
       hitStrokeWidth={30}
       draggable={true}
+      attachedToObjId={null}
       onMouseDown={(e) => {
         const objId = e.target.parent.getAttr('objId')
-        setDraggingLine(true)
-        setSelected({"objId": objId, "innerIndex": e.target.index})
         document.addEventListener('mouseup', stopDragLineWrapper)
-        const line = e.target.parent
-        line.moveToBottom()
+        console.log('object set drag line true')
+        setToggleCanDragLine(false)
+        startDragLine(e.evt, setDraggingLine, setSelected, objId, e.target.index, false)
       }}
       onDragMove={circleDragmoveFunc}>
     </reactKonva.Circle>
@@ -49,7 +49,7 @@ function SilkEnd({ points, setDraggingLine, setSelected }) {
 }
 export { SilkEnd as SilkEnd }
 
-function Silk({ points, setDraggingLine, objId, setSelected }) {
+function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLine }) {
   const lineDragmoveFunc = evt => {
     const line = evt.target
     const lineGroup = line.parent.children
@@ -57,7 +57,6 @@ function Silk({ points, setDraggingLine, objId, setSelected }) {
     const start = lineGroup[1]
     const end = lineGroup[2]
     const lineTransform = line.getAbsoluteTransform()
-    console.log(lineTransform.m)
     const newStart = lineTransform.point({x: points[2], y: points[3]})
     const newEnd = lineTransform.point({x: points[0], y: points[1]})
     start.setX(newStart.x)
@@ -84,10 +83,12 @@ function Silk({ points, setDraggingLine, objId, setSelected }) {
       <SilkEnd
         points={points}
         setSelected={setSelected}
+        setToggleCanDragLine={setToggleCanDragLine}
         setDraggingLine={setDraggingLine}></SilkEnd>
       <SilkEnd
         points={points}
         setSelected={setSelected}
+        setToggleCanDragLine={setToggleCanDragLine}
         setDraggingLine={setDraggingLine}></SilkEnd>
     </reactKonva.Group>
   )
@@ -127,13 +128,11 @@ function Bud({ x, y, objId, setHoverBudBorder }) {
       onDragMove={(evt) => {
         const bud = evt.target
         const attachedObjIds = bud.parent.getAttr('attachedSilkObjId')
+        console.log(attachedObjIds[0])
         for (const { objId, offset, innerIndex } of attachedObjIds) {
           const obj = getObjById(objId).children[innerIndex]
-          console.log(obj)
-          console.log(offset)
           const budX = bud.getX() 
           const budY = bud.getY() 
-          console.log(budX, budY)
           updateLinePos(obj, budX - offset.x, budY - offset.y)
         }
       }}>

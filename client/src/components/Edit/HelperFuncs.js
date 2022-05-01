@@ -187,7 +187,8 @@ const updateLinePos = (lineCircle, x, y) => {
 }
 export { updateLinePos as updateLinePos }
 
-const getObjById = (id) => {
+const getObjById = (id=null) => {
+  if (id === null) return false
   const objs = getKonvaObjs()
   for (const obj of objs) {
     if (obj.getAttr('objId') === id) {
@@ -213,18 +214,11 @@ import * as Shapes from './Shapes'
 import React from 'react'
 import { silkSample } from './spoodawebSampleData'
 
-const startDragLine = (e, setDraggingLine, setSelected, setObjsToUpdate, nextObjId, setNextObjId) => {
+const startDragLine = (e, setDraggingLine, setSelected, nextObjId, innerIndex, toggleCanDragLine) => {
   if (e.button === 0 && isInCanvas({x: e.pageX, y: e.pageY})) {
-    const canvasMousePos = getCanvasMousePos(e.pageX, e.pageY)
-    console.log('dragged line')
     setDraggingLine(true)
-    const line = {...silkSample}
-    line.positions = [canvasMousePos, canvasMousePos]
-    line.objId = nextObjId
-    setObjsToUpdate([line])
-    setSelected({"objId": nextObjId, "innerIndex": 1})
-    setNextObjId(nextObjId+1)
-    const renderedLine = getObjById(line.objId)
+    setSelected({"objId": nextObjId, "innerIndex": innerIndex})
+    const renderedLine = getObjById(nextObjId)
     renderedLine.moveToBottom()
   }
 }
@@ -250,14 +244,33 @@ const snapLine = (selected) => {
   const line = getObjById(selected.objId)
   const lineCircle = line.children[selected.innerIndex]
   const attachedTo = getObjById(highlighter.getAttr('attachedObjId'))
+  console.log(highlighter.getAttr('attachedObjId'))
   const bud = attachedTo.children[0]
   const budX = bud.getX() 
   const budY = bud.getY() 
   const offset = {x: budX - highlighter.getX(), y: budY - highlighter.getY()}
   console.log(lineCircle.getX(), lineCircle.getY())
+  lineCircle.setAttr('attachedToObjId', attachedTo.getAttr('objId'))
   const newAttachedSilkToBud = attachedTo.getAttr('attachedSilkObjId')
   newAttachedSilkToBud.push({"objId": selected.objId, "offset": offset, "innerIndex": selected.innerIndex})
   attachedTo.setAttr('attachedSilkObjId', newAttachedSilkToBud)
   updateLinePos(lineCircle, highlighter.getX(), highlighter.getY())
 }
 export { snapLine as snapLine }
+
+const snapLineCircleToLine = (selected) => { // pls fix ltr it doesnt work if innerIndex is 2
+  const stage = getStage()
+  const lineGroup = getObjById(selected.objId)
+  const line = lineGroup.children[0]
+  const lineCircle = lineGroup.children[selected.innerIndex]
+  console.log(selected)
+  console.log('snap')
+  if (selected.innerIndex === 1) {
+    lineCircle.setX(line.getPoints()[0])
+    lineCircle.setY(line.getPoints()[1])
+  } else if (selected.innerIndex === 2) {
+    lineCircle.setX(line.getPoints()[2])
+    lineCircle.setY(line.getPoints()[3])
+  }
+}
+export { snapLineCircleToLine as snapLineCircleToLine }
