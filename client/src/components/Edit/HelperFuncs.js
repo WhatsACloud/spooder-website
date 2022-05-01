@@ -6,7 +6,7 @@ const getStage = () => {
 export { getStage as getStage }
 
 const getKonvaObjs = () => {
-  return getStage().children[0].children
+  return getStage().children[1].children
 }
 export { getKonvaObjs as getKonvaObjs }
 

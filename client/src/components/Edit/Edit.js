@@ -8,6 +8,7 @@ import { mouseDown, mouseUp, mouseMove } from './Events'
 import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine } from './HelperFuncs'
 import * as OtherElements from './OtherElements'
 import * as Shapes from './Shapes'
+import { Background } from './Background'
 
 import spoodawebData from './TestingSpoodawebData'
 
@@ -93,7 +94,6 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
     const startDragLineWrapper = e => {
       const canvasMousePos = getCanvasMousePos(e.pageX, e.pageY)
       if (!isInCanvas({x: e.pageX, y: e.pageY})) return
-      console.log('dragged line')
       const line = {...silkSample}
       line.positions = [canvasMousePos, canvasMousePos]
       line.objId = nextObjId
@@ -104,24 +104,18 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
     const stopDragLineWrapper = e => stopDragLine(e, lineCircle)
     const dragLineWrapper = e => lineCircleMove(e, draggingLine, selected)
     const dropLine = (e) => {
-      console.log('dropped line')
       const line = getObjById(selected.objId)
       line.moveToTop()
       if (!isInCanvas({x: e.pageX, y: e.pageY})) snapLineCircleToLine(selected) 
       if (hoverBudBorder) {
-        console.log('attached line')
         snapLine(selected)
       } else { // detaches line
-        console.log('detachedLine')
         const line = getObjById(selected.objId)
         const lineCircle = line.children[selected.innerIndex]
         const attachedTo = getObjById(lineCircle.getAttr('attachedToObjId'))
         if (attachedTo) {
-          console.log(lineCircle.getAttr('attachedToObjId'))
           const newObjs = [...attachedTo.getAttr('attachedSilkObjId')]
-          console.log("before", newObjs)
           newObjs.splice(attachedTo, 1)
-          console.log("after", newObjs)
           attachedTo.setAttr('attachedSilkObjId', newObjs)
           lineCircle.setAttr('attachedToObjId', null)
         }
@@ -129,7 +123,6 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
       setDraggingLine(false)
       setSelected()
     }
-    console.log(toggleCanDragLine)
     if (toggleCanDragLine) {
       document.addEventListener('mousedown', startDragLineWrapper)
       document.addEventListener('mousemove', dragLineWrapper)
@@ -157,7 +150,7 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
   )
 })
 
-function MouseMoveDetector() {
+function MouseMoveDetector({}) {
   const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
   const [ mousePos, setMousePos ] = useState({
     x: null,
@@ -195,19 +188,23 @@ function DrawCanvas({ rendered, setObjs, toggleCanDragLine }) {
       mainLayer.add(bud)
     }
     */
-   console.log(rendered)
   }, [])
   return (
-    <ReactKonva.Stage
-      x={0}
-      y={0}
-      width={window.innerWidth + 2 * 2000}
-      height={window.innerHeight + 2 * 2000}>
-      <ReactKonva.Layer>
-        {rendered}
-        <Shapes.BudAnchorHighlighter></Shapes.BudAnchorHighlighter>
-      </ReactKonva.Layer>
-    </ReactKonva.Stage>
+    <>
+      <ReactKonva.Stage
+        x={0}
+        y={0}
+        width={window.innerWidth + 2 * 2000}
+        height={window.innerHeight + 2 * 2000}>
+        <ReactKonva.Layer>
+          <Background/>
+        </ReactKonva.Layer>
+        <ReactKonva.Layer>
+          {rendered}
+          <Shapes.BudAnchorHighlighter></Shapes.BudAnchorHighlighter>
+        </ReactKonva.Layer>
+      </ReactKonva.Stage>
+    </>
   )
 }
 
@@ -215,7 +212,6 @@ function DrawCanvas({ rendered, setObjs, toggleCanDragLine }) {
 
 function UpdateObjs({ objsToUpdate, objs, setDraggingLine, setObjs, setRendered, rendered, setHoverBudBorder, setSelected, setToggleCanDragLine }) { // to add some updating of positions AND maybe index in the object itself to be specific
   useEffect(() => {
-    console.log('how')
     const newRendered = [...rendered]
     for (const objId in objsToUpdate) {
       const obj = objsToUpdate[objId]
@@ -248,7 +244,6 @@ function UpdateObjs({ objsToUpdate, objs, setDraggingLine, setObjs, setRendered,
     const newObjs = [...objs]
     newObjs.push([...objsToUpdate])
     setObjs(newObjs)
-    console.log(Konva.stages[0])
   }, [ objsToUpdate ])
   return <></>
 }

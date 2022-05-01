@@ -39,7 +39,6 @@ function SilkEnd({ points, setDraggingLine, setSelected, setToggleCanDragLine })
       onMouseDown={(e) => {
         const objId = e.target.parent.getAttr('objId')
         document.addEventListener('mouseup', stopDragLineWrapper)
-        console.log('object set drag line true')
         setToggleCanDragLine(false)
         startDragLine(e.evt, setDraggingLine, setSelected, objId, e.target.index, false)
       }}
@@ -68,7 +67,6 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
     const line = evt.target
     const points = line.getPoints()
   }
-  console.log(objId)
   return (
     <reactKonva.Group
       objId={objId}>
@@ -128,7 +126,6 @@ function Bud({ x, y, objId, setHoverBudBorder }) {
       onDragMove={(evt) => {
         const bud = evt.target
         const attachedObjIds = bud.parent.getAttr('attachedSilkObjId')
-        console.log(attachedObjIds[0])
         for (const { objId, offset, innerIndex } of attachedObjIds) {
           const obj = getObjById(objId).children[innerIndex]
           const budX = bud.getX() 
