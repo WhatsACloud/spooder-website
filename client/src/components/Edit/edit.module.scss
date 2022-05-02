@@ -14,10 +14,15 @@ div.divCanvas {
   position: absolute;
   white-space: nowrap;
   overflow: scroll;
-  z-index: 2;
+  z-index: 3;
 }
 
 div.divBackground {
+  @include canvas;
+  z-index: 2;
+}
+
+div.divLightBack {
   @include canvas;
   z-index: 1;
 }

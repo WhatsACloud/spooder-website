@@ -307,9 +307,7 @@ function Edit() {
           setObjsToUpdate={setObjsToUpdate}
           toggleCanDragLine={toggleCanDragLine}></DrawCanvas>
         </div>
-        <div className={styles.divBackground} id='divBackground'>
-          <Background></Background>
-        </div>
+        <Background></Background>
       </div>
     </>
   )
