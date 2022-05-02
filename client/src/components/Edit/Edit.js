@@ -197,9 +197,6 @@ function DrawCanvas({ rendered, setObjs, toggleCanDragLine }) {
         width={window.innerWidth + 2 * 2000}
         height={window.innerHeight + 2 * 2000}>
         <ReactKonva.Layer>
-          <Background/>
-        </ReactKonva.Layer>
-        <ReactKonva.Layer>
           {rendered}
           <Shapes.BudAnchorHighlighter></Shapes.BudAnchorHighlighter>
         </ReactKonva.Layer>
@@ -309,6 +306,9 @@ function Edit() {
           rendered={rendered}
           setObjsToUpdate={setObjsToUpdate}
           toggleCanDragLine={toggleCanDragLine}></DrawCanvas>
+        </div>
+        <div className={styles.divBackground} id='divBackground'>
+          <Background></Background>
         </div>
       </div>
     </>
