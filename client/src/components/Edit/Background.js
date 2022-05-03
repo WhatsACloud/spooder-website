@@ -45,8 +45,8 @@ function drawHexagonGrid(ctx, width, height) {
   let lastX = -xDiff 
   let lastY = yDiff 
   const grd = backgroundGradient(ctx)
-  // ctx.fillStyle = grd
-  ctx.fillStyle = 'rgba(0, 0, 0, 0)'
+  ctx.fillStyle = grd
+  // ctx.fillStyle = 'rgba(0, 0, 0, 0)'
   ctx.strokeStyle = 'rgba(0, 0, 0, 0)'
   for (let colNum = 0; colNum < hexesPerCol; colNum++) {
     for (let rowNum = 0; rowNum < hexesPerRow; rowNum++) {
@@ -81,35 +81,46 @@ const draw = (lightBack, ctx) => {
   for (const light of lightsList) {
     const timeElapsed = 1/drawRate
     const distTravelled = timeElapsed * lightSpeed * 10
-    let direction = light.direction
-    let xChange = 0
-    let yChange = 0
-    switch (Number(direction)) {
-      case 1: // north
-        yChange = -lightSpeed
-        break
-      case 2: // east 
-        xChange = lightSpeed
-        break
-      case 3:
-        yChange = lightSpeed
-        break
-      case 4:
-        xChange = -lightSpeed
+    let angle = light.direction
+    while (angle > 90) {
+      angle -= 90
+    } 
+    const xChange = Math.cos(angle) * distTravelled
+    const yChange = Math.sin(angle) * distTravelled
+    if (light.isLeft) {
+      light.x -= xChange
+    } else {
+      light.x += xChange
     }
-    light.x += xChange
-    light.y += yChange
+    if (light.isUp) {
+      light.y -= yChange
+    } else {
+      light.y += yChange
+    }
     const x = light.x
     const y = light.y
+<<<<<<< HEAD
     const width = 200
     const length = 100
-    const gradient = ctx.createLinearGradient(x, y, x+width, y+length)
+    let gradient
+    if (light.direction === 1 || light.direction === 3) {
+      gradient = ctx.createLinearGradient(x, 0, x+width, 0)
+    } else if (light.direction === 2 || light.direction === 4) {
+      gradient = ctx.createLinearGradient(0, y, 0, y+length)
+    }
     gradient.addColorStop(0, 'rgba(0, 0, 0, 0)')
-    gradient.addColorStop(0.5, `rgba(255, 255, 255, ${light.opacity})`)
+    gradient.addColorStop(0.3, `rgba(255, 255, 255, ${light.opacity})`)
+    gradient.addColorStop(0.7, `rgba(255, 255, 255, ${light.opacity})`)
     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
     ctx.fillStyle = gradient
+=======
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, radius)
+    grd.addColorStop(0, `rgba(255, 255, 255, ${light.opacity})`)
+    grd.addColorStop(1, 'rgba(0, 0, 0, 0)')
+    ctx.fillStyle = grd
+>>>>>>> parent of 8cf1d63 (Update Background.js)
     ctx.beginPath()
-    ctx.rect(x, y, width, length)
+    ctx.arc(x, y, radius, 0, 2 * Math.PI)
     ctx.fill()
   }
 }
@@ -142,9 +153,10 @@ function Background() {
     const lightLoop = () => {
       const rndTimeOut = randRange(0, 2) 
       setTimeout(() => {
+        console.log(rndTimeOut)
         const x = randRange(0, hexagons.width, 0)
         const y = randRange(0, hexagons.height, 0)
-        const direction = randRange(1, 4, 0) 
+        const direction = randRange(0, 360, 0) 
         const directionIsUp = direction / 180 < 1
         const directionIsLeft = isDirectionLeft(direction) 
         let nearestBorderX = directionIsLeft ? 0 : width
@@ -156,10 +168,11 @@ function Background() {
         } else {
           ttl = Math.abs(x - nearestBorderX) / lightSpeed
         }
+        console.log(ttl)
         const light = {
           x: Number(x),
           y: Number(y),
-          direction: direction,
+          direction: Number(direction),
           ttl: ttl,
           isLeft: directionIsLeft,
           isUp: directionIsUp,
@@ -173,7 +186,6 @@ function Background() {
             if (light.opacity <= 0) {
               clearInterval(opacityInterval)
               lightsList.splice(lightIndex, 1)
-              return
             }
             light.opacity -= 0.1
           }, 100)
@@ -182,7 +194,6 @@ function Background() {
           const light = lightsList[lightIndex]
           if (!light || light.opacity >= 1) {
             clearInterval(opacityInterval)
-            return
           }
           light.opacity += 0.1
         }, 100)
