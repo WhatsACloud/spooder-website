@@ -96,26 +96,10 @@ const draw = (lightBack, ctx) => {
     }
     const x = light.x
     const y = light.y
-<<<<<<< HEAD
-    const width = 200
-    const length = 100
-    let gradient
-    if (light.direction === 1 || light.direction === 3) {
-      gradient = ctx.createLinearGradient(x, 0, x+width, 0)
-    } else if (light.direction === 2 || light.direction === 4) {
-      gradient = ctx.createLinearGradient(0, y, 0, y+length)
-    }
-    gradient.addColorStop(0, 'rgba(0, 0, 0, 0)')
-    gradient.addColorStop(0.3, `rgba(255, 255, 255, ${light.opacity})`)
-    gradient.addColorStop(0.7, `rgba(255, 255, 255, ${light.opacity})`)
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
-    ctx.fillStyle = gradient
-=======
     const grd = ctx.createRadialGradient(x, y, 0, x, y, radius)
     grd.addColorStop(0, `rgba(255, 255, 255, ${light.opacity})`)
     grd.addColorStop(1, 'rgba(0, 0, 0, 0)')
     ctx.fillStyle = grd
->>>>>>> parent of 8cf1d63 (Update Background.js)
     ctx.beginPath()
     ctx.arc(x, y, radius, 0, 2 * Math.PI)
     ctx.fill()
