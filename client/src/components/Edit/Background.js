@@ -71,7 +71,7 @@ function drawHexagonGrid(ctx, width, height) {
 }
 
 const lightSpeed = 20 // pixels per second
-const drawRate = 30 // per second
+const drawRate = 20 // per second
 
 const draw = (lightBack, ctx) => {
   const radius = 240 
@@ -81,7 +81,6 @@ const draw = (lightBack, ctx) => {
   for (const light of lightsList) {
     const timeElapsed = 1/drawRate
     const distTravelled = timeElapsed * lightSpeed * 10
-    console.log(distTravelled)
     let angle = light.direction
     while (angle > 90) {
       angle -= 90
@@ -101,7 +100,7 @@ const draw = (lightBack, ctx) => {
     const x = light.x
     const y = light.y
     const grd = ctx.createRadialGradient(x, y, 0, x, y, radius)
-    grd.addColorStop(0, 'white')
+    grd.addColorStop(0, `rgba(255, 255, 255, ${light.opacity})`)
     grd.addColorStop(1, 'rgba(0, 0, 0, 0)')
     ctx.fillStyle = grd
     ctx.beginPath()
@@ -160,13 +159,28 @@ function Background() {
           direction: direction,
           ttl: ttl,
           isLeft: directionIsLeft,
-          isUp: directionIsUp
+          isUp: directionIsUp,
+          opacity: 0
         } // imagine using degrees for angle couldnt be me
         const lightIndex = lightsList.length
         lightsList.push(light)
         setTimeout(() => {
-          lightsList.splice(lightIndex, 1)
+          const opacityInterval = setInterval(() => {
+            const light = lightsList[lightIndex]
+            if (light.opacity <= 0) {
+              clearInterval(opacityInterval)
+              lightsList.splice(lightIndex, 1)
+            }
+            light.opacity -= 0.1
+          }, 100)
         }, ttl * 1000)
+        const opacityInterval = setInterval(() => {
+          const light = lightsList[lightIndex]
+          if (!light || light.opacity >= 1) {
+            clearInterval(opacityInterval)
+          }
+          light.opacity += 0.1
+        }, 100)
         
         lightLoop()
       }, rndTimeOut * 1000)
