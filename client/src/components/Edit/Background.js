@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
-import { getStage, hexagonPoints, drawHexagon, getHexagonLines } from './HelperFuncs'
+import { getStage, hexagonPoints, drawHexagon, getHexagonLines, getCanvasMousePos } from './HelperFuncs'
 import styles from './edit.module'
 
 const hexagonLineColor = 'black'
@@ -8,15 +8,11 @@ const hexagonLineColor = 'black'
 const lightRadius = 50
 
 const lightsList = []
-
-const renderLight = (ctx, light) => {
-  console.log(light)
-
-}
+const rippleList = []
 
 const clear = (ctx) => {
   const lightBack = document.getElementById('lightBack')
-  ctx.clearRect(0, 0, lightBack.height, lightBack.width)
+  ctx.clearRect(0, 0, lightBack.height*2, lightBack.width*2)
 }
 
 const startPointX = window.innerWidth*0.8
@@ -77,6 +73,7 @@ const draw = (lightBack, ctx) => {
   const radius = 240 
   const grd = backgroundGradient(ctx)
   ctx.fillStyle = grd
+  // ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
   ctx.fillRect(0, 0, width, height)
   for (const light of lightsList) {
     const timeElapsed = 1/drawRate
@@ -107,6 +104,26 @@ const draw = (lightBack, ctx) => {
     ctx.arc(x, y, radius, 0, 2 * Math.PI)
     ctx.fill()
   }
+
+  const rippleWidth = 500 
+  for (const ripple of rippleList) {
+    const x = ripple.x
+    const y = ripple.y
+    let grd
+    if (ripple.radius > rippleWidth) {
+      grd = ctx.createRadialGradient(x, y, ripple.radius-rippleWidth, x, y, ripple.radius)
+    } else {
+      grd = ctx.createRadialGradient(x, y, 0, x, y, ripple.radius)
+    } 
+    grd.addColorStop(0, 'rgba(0, 0, 0, 0)')
+    grd.addColorStop(0.5, `rgba(255, 255, 255, ${ripple.opacity})`)
+    grd.addColorStop(1, 'rgba(0, 0, 0, 0)')
+    ctx.fillStyle = grd
+    ctx.beginPath()
+    ctx.arc(x, y, ripple.radius, 0, 2 * Math.PI)
+    ctx.fill()
+    ripple.radius += 180 
+  } 
 }
 
 const randRange = (min, max, prec=4) => {
@@ -167,17 +184,20 @@ function Background() {
         setTimeout(() => {
           const opacityInterval = setInterval(() => {
             const light = lightsList[lightIndex]
-            if (light.opacity <= 0) {
+            if (!light || light.opacity <= 0) {
+              console.log('cleared')  
               clearInterval(opacityInterval)
               lightsList.splice(lightIndex, 1)
+              return
             }
             light.opacity -= 0.1
           }, 100)
-        }, ttl * 1000)
+        }, ttl * 100)
         const opacityInterval = setInterval(() => {
           const light = lightsList[lightIndex]
           if (!light || light.opacity >= 1) {
             clearInterval(opacityInterval)
+            return
           }
           light.opacity += 0.1
         }, 100)
@@ -198,6 +218,35 @@ function Background() {
       }, 1000 / drawRate)
     }
     drawLoop()
+    document.addEventListener('mousedown', ({ pageX, pageY }) => {
+      const rippleIndex = rippleList.length
+      const { x, y } = getCanvasMousePos(pageX, pageY)
+      rippleList.push({
+        x: x,
+        y: y,
+        radius: 1,
+        opacity: 0
+      })
+      setTimeout(() => {
+        const opacityInterval = setInterval(() => {
+          const ripple = rippleList[rippleIndex]
+          if (!ripple || ripple.opacity <= 0) {
+            clearInterval(opacityInterval)
+            rippleList.splice(rippleIndex, 1)
+            return
+          }
+          ripple.opacity -= 0.1
+        }, 50)
+      }, 50)
+      const opacityInterval = setInterval(() => {
+        const ripple = rippleList[rippleIndex]
+        if (!ripple || ripple.opacity >= 0.7) {
+          clearInterval(opacityInterval)
+          return
+        }
+        ripple.opacity += 0.1
+      }, 50)
+    })
   }, [])
   return (
     <>
