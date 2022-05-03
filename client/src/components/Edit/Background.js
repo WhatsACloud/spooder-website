@@ -45,8 +45,8 @@ function drawHexagonGrid(ctx, width, height) {
   let lastX = -xDiff 
   let lastY = yDiff 
   const grd = backgroundGradient(ctx)
-  // ctx.fillStyle = grd
-  ctx.fillStyle = 'rgba(0, 0, 0, 0)'
+  ctx.fillStyle = grd
+  // ctx.fillStyle = 'rgba(0, 0, 0, 0)'
   ctx.strokeStyle = 'rgba(0, 0, 0, 0)'
   for (let colNum = 0; colNum < hexesPerCol; colNum++) {
     for (let rowNum = 0; rowNum < hexesPerRow; rowNum++) {
@@ -70,17 +70,15 @@ function drawHexagonGrid(ctx, width, height) {
   }
 }
 
+const lightSpeed = 20 // pixels per second
 const drawRate = 20 // per second
 
 const draw = (lightBack, ctx) => {
   const radius = 240 
   const grd = backgroundGradient(ctx)
   ctx.fillStyle = grd
-  // ctx.fillStyle = 'rgba(0, 0, 0, 0)' 
   ctx.fillRect(0, 0, width, height)
-  console.log(lightsList.length)
   for (const light of lightsList) {
-    const lightSpeed = light.speed
     const timeElapsed = 1/drawRate
     const distTravelled = timeElapsed * lightSpeed * 10
     let angle = light.direction
@@ -101,21 +99,12 @@ const draw = (lightBack, ctx) => {
     }
     const x = light.x
     const y = light.y
-    // const grd = ctx.createRadialGradient(x, y, 0, x, y, radius)
-    // grd.addColorStop(0, `rgba(255, 255, 255, ${light.opacity})`)
-    // grd.addColorStop(1, 'rgba(0, 0, 0, 0)')
-    // ctx.fillStyle = grd
-    // ctx.beginPath()
-    // ctx.arc(x, y, radius, 0, 2 * Math.PI)
-    // ctx.fill()
-    const length = 60
-    const width = 20
-    const grd = ctx.createLinearGradient(x, y, x+width, y+length)
-    grd.addColorStop(0, 'rgba(0, 0, 0, 0)')
-    grd.addColorStop(0.5, 'white')
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, radius)
+    grd.addColorStop(0, `rgba(255, 255, 255, ${light.opacity})`)
     grd.addColorStop(1, 'rgba(0, 0, 0, 0)')
-    ctx.fillStyle = `rgba(0, 0, ${light.opacity})`
-    ctx.rect(x, y, width, length)
+    ctx.fillStyle = grd
+    ctx.beginPath()
+    ctx.arc(x, y, radius, 0, 2 * Math.PI)
     ctx.fill()
   }
 }
@@ -148,27 +137,10 @@ function Background() {
     const lightLoop = () => {
       const rndTimeOut = randRange(0, 2) 
       setTimeout(() => {
-        let x
-        let y
-        // const direction = randRange(0, 360)
-        let direction = randRange(0, 4, 0)
-        direction *= 90
-        if (direction <= 90) {
-          x = randRange(hexagons.width/2, hexagons.width, 0)
-          y = randRange(hexagons.height/2, hexagons.height, 0)
-        } else if (direction > 90 && direction <= 180) {
-          x = randRange(0, hexagons.width/2, 0)
-          y = randRange(hexagons.height/2, hexagons.height, 0)
-        } else if (direction > 180 && direction <= 270) {
-          x = randRange(0, hexagons.width/2, 0)
-          y = randRange(0, hexagons.height/2, 0)
-        } else if (direction > 270 && direction <= 360) {
-          x = randRange(hexagons.width/2, hexagons.width, 0)
-          y = randRange(0, hexagons.height/2, 0)
-        }
-
-        const lightSpeed = 20 
-
+        console.log(rndTimeOut)
+        const x = randRange(0, hexagons.width, 0)
+        const y = randRange(0, hexagons.height, 0)
+        const direction = randRange(0, 360, 0) 
         const directionIsUp = direction / 180 < 1
         const directionIsLeft = isDirectionLeft(direction) 
         let nearestBorderX = directionIsLeft ? 0 : width
@@ -180,6 +152,7 @@ function Background() {
         } else {
           ttl = Math.abs(x - nearestBorderX) / lightSpeed
         }
+        console.log(ttl)
         const light = {
           x: Number(x),
           y: Number(y),
@@ -187,29 +160,23 @@ function Background() {
           ttl: ttl,
           isLeft: directionIsLeft,
           isUp: directionIsUp,
-          opacity: 0,
-          speed: lightSpeed
+          opacity: 0
         } // imagine using degrees for angle couldnt be me
         const lightIndex = lightsList.length
         lightsList.push(light)
         setTimeout(() => {
           const opacityInterval = setInterval(() => {
             const light = lightsList[lightIndex]
-            console.log('alkd;sfdaklsj;fdjks;alfkdjl;sf', lightIndex)
-            if (!light) clearInterval(opacityInterval)
             if (light.opacity <= 0) {
-              console.log(lightIndex)
-              lightsList.splice(lightIndex, 1)
               clearInterval(opacityInterval)
+              lightsList.splice(lightIndex, 1)
             }
             light.opacity -= 0.1
           }, 100)
-        }, ttl * 1)
+        }, ttl * 1000)
         const opacityInterval = setInterval(() => {
           const light = lightsList[lightIndex]
-          console.log('alkd;sfdaklsj;fdjks;alfkdjl;sf', lightIndex)
-          if (!light) clearInterval(opacityInterval)
-          if (light.opacity >= 1) {
+          if (!light || light.opacity >= 1) {
             clearInterval(opacityInterval)
           }
           light.opacity += 0.1
