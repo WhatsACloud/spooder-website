@@ -13,7 +13,6 @@ $canvas-width: 100% - $drawer-width;
 div.divCanvas {
   @include canvas;
   white-space: nowrap;
-  overflow: scroll;
   z-index: 3;
 }
 

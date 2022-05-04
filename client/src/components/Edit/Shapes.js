@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
-import { getHexagonLines, hexagonPoints, drawHexagon, stopDragLine, getKonvaObjs, getObjById, updateLinePos } from './HelperFuncs'
+import { getHexagonLines, hexagonPoints, drawHexagon, stopDragLine, getKonvaObjs, getObjById, updateLinePos, getCanvasMousePos, getRootPos } from './HelperFuncs'
 
 function BudAnchorHighlighter() {
   return (
@@ -69,6 +69,7 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
   }
   return (
     <reactKonva.Group
+      objType='silk'
       objId={objId}>
       <reactKonva.Line
         points={[points[0].x, points[0].y, points[1].x, points[1].y]}
@@ -93,7 +94,8 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
 }
 export { Silk as Silk }
 
-function Bud({ x, y, objId, setHoverBudBorder }) {
+function Bud({ x, y, objId }) {
+  const rootPos = getRootPos()
   const radius = 40
   const strokeWidth = 40
   const lines = getHexagonLines(hexagonPoints(radius, x, y))
@@ -121,7 +123,10 @@ function Bud({ x, y, objId, setHoverBudBorder }) {
   return (
     <reactKonva.Group
       name='bud'
+      objType='bud'
       objId={objId}
+      offsetRootPos={{x: x - rootPos.x, y: y - rootPos.y}}
+      lastMousePos={{x: 0, y: 0}}
       attachedSilkObjId={[]}
       onDragMove={(evt) => {
         const bud = evt.target
@@ -132,6 +137,25 @@ function Bud({ x, y, objId, setHoverBudBorder }) {
           const budY = bud.getY() 
           updateLinePos(obj, budX - offset.x, budY - offset.y)
         }
+      }}
+      onDragStart={evt => {
+        const bud = evt.target
+        bud.parent.setAttr('lastMousePos', {x: evt.evt.pageX, y: evt.evt.pageY})
+      }}
+      onDragEnd={evt => {
+        console.log(evt)
+        const obj = evt.target.parent
+        const bud = evt.target
+        const offsetRootPos = obj.getAttr('offsetRootPos')
+        const mousePos = {x: evt.evt.pageX, y: evt.evt.pageY}
+        const previousMousePos = obj.getAttr('lastMousePos')
+        console.log(offsetRootPos.x, mousePos.x, previousMousePos.x)
+        obj.setAttr('offsetRootPos', {x: offsetRootPos.x + mousePos.x - previousMousePos.x, y: offsetRootPos.y + mousePos.y - previousMousePos.y})
+        const rootPos = getRootPos()
+        const newOffsetRootPos = obj.getAttr('offsetRootPos')
+        // console.log(rootPos.x, newOffsetRootPos.x)
+        bud.setX(rootPos.x + newOffsetRootPos.x)
+        bud.setY(rootPos.y + newOffsetRootPos.y)
       }}>
         <reactKonva.Shape
           x={x}

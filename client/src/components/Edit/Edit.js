@@ -5,7 +5,7 @@ import styles from './edit.module'
 
 import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
-import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine } from './HelperFuncs'
+import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine, getRootPos, setRootPos } from './HelperFuncs'
 import * as OtherElements from './OtherElements'
 import * as Shapes from './Shapes'
 import { Background } from './Background'
@@ -21,7 +21,7 @@ const gridLink = "http://phrogz.net/tmp/grid.gif"
 
 /*
 how thingy works:
-update objs state with data, UpdateObjs component updates the stuff to render, drawCanvas renders it onto the canvas
+update objs state with data, AddNewObjs component updates the stuff to render, drawCanvas renders it onto the canvas
 
 TO DO
 add saving ability
@@ -179,17 +179,48 @@ function MouseMoveDetector({}) {
   return <></>
 }
 
+const scrollRight = (amt) => {
+  const rootPos = getRootPos()
+  setRootPos({x: rootPos.x - amt, y: rootPos.y})
+}
+
+const scrollDown = (amt) => {
+  const rootPos = getRootPos()
+  setRootPos({x: rootPos.x, y: rootPos.y - amt})
+}
+
 function DrawCanvas({ rendered, setObjs, toggleCanDragLine, canvasWidth, canvasHeight }) {
   useEffect(() => {
-    console.log(Konva.stages)
-  }, [ canvasWidth, canvasHeight, rendered ])
+    getStage().children[0].setAttr('rootPos', {
+      x: 0,
+      y: 0
+    })
+    const scrollAmt = 20
+    document.addEventListener('keydown', (e) => {
+      const key = e.key
+      switch (key) {
+        case 'ArrowUp':
+          scrollDown(-scrollAmt)
+          break
+        case 'ArrowDown':
+          scrollDown(scrollAmt)
+          break
+        case 'ArrowLeft':
+          scrollRight(-scrollAmt)
+          break
+        case 'ArrowRight':
+          scrollRight(scrollAmt)
+          break
+      }
+    })
+  }, [])
   return (
     <>
       <ReactKonva.Stage
         x={0}
         y={0}
-        width={canvasWidth}
-        height={canvasHeight}>
+        width={window.screen.width * 0.85}
+        height={window.screen.height * 0.95}>
         <ReactKonva.Layer>
           {rendered}
           <Shapes.BudAnchorHighlighter></Shapes.BudAnchorHighlighter>
@@ -217,9 +248,8 @@ const expandCanvas = (objPos, rootPos, canvasWidth, canvasHeight, setCanvasWidth
   }
   return true
 }
-export { expandCanvas as expandCanvas } // for unit testing
 
-function UpdateObjs({
+function AddNewObjs({
     objsToUpdate,
     objs,
     setDraggingLine,
@@ -229,20 +259,19 @@ function UpdateObjs({
     setHoverBudBorder,
     setSelected,
     setToggleCanDragLine,
-    setRootPos,
-    rootPos,
     canvasWidth,
     canvasHeight,
     setCanvasWidth,
-    setCanvasHeight
+    setCanvasHeight,
   }) { // to add some updating of positions AND maybe index in the object itself to be specific
   useEffect(() => {
     const newRendered = [...rendered]
+    const newObjs = {...objs}
     for (const objId in objsToUpdate) {
       const obj = objsToUpdate[objId]
-      let expand
+      let expand = false
       if (obj.type === 'bud') {
-        expand = expandCanvas(obj.position, rootPos, canvasWidth, canvasHeight, setCanvasWidth, setCanvasHeight)
+        // expand = expandCanvas(obj.position, rootPos, canvasWidth, canvasHeight, setCanvasWidth, setCanvasHeight)
         newRendered.push(
           <Shapes.Bud
             x={obj.position.x}
@@ -252,11 +281,12 @@ function UpdateObjs({
             setHoverBudBorder={setHoverBudBorder}
             ></Shapes.Bud>
         )
+        newObjs[obj.objId] = obj 
       } else if (obj.type === 'silk') {
-        for (const position of obj.positions) {
-          expand = expandCanvas(position, rootPos, canvasWidth, canvasHeight, setCanvasWidth, setCanvasHeight)
-          if (expand) break 
-        }
+        // for (const position of obj.positions) {
+        //   expand = expandCanvas(position, rootPos, canvasWidth, canvasHeight, setCanvasWidth, setCanvasHeight)
+        //   if (expand) break 
+        // }
         newRendered.push(
           <Shapes.Silk
             points={obj.positions}
@@ -267,16 +297,12 @@ function UpdateObjs({
             setToggleCanDragLine={setToggleCanDragLine}
             objId={obj.objId}></Shapes.Silk>
         )
+        newObjs[obj.objId] = obj 
       } else {
         console.warn('Error: object type not specified')
       }
-      if (expand) {
-        setRootPos({x: canvasWidth / 2, y: canvasHeight / 2})
-      }
     }
     setRendered(newRendered)
-    const newObjs = [...objs]
-    newObjs.push([...objsToUpdate])
     setObjs(newObjs)
   }, [ objsToUpdate ])
   return <></>
@@ -287,7 +313,7 @@ function Edit() {
   const [ dragging, setDragging ] = useState(false)
   const [ toggleCanDragLine, setToggleCanDragLine ] = useState(false)
   const [ hoverBudBorder, setHoverBudBorder ] = useState(false)
-  const [ objs, setObjs ] = useState([])
+  const [ objs, setObjs ] = useState({})
   const [ objsToUpdate, setObjsToUpdate ] = useState(spoodawebData)
   const [ rendered, setRendered ] = useState([])
   const [ nextObjId, setNextObjId ] = useState(spoodawebData.length)
@@ -295,10 +321,7 @@ function Edit() {
   const [ selected, setSelected ] = useState()
   const [ canvasWidth, setCanvasWidth ] = useState(window.screen.width + 2 * 2000)
   const [ canvasHeight, setCanvasHeight ] = useState(window.screen.height + 2 * 2000)
-  const [ rootPos, setRootPos ] = useState({
-    x: canvasWidth / 2,
-    y: canvasHeight / 2
-  })
+  
   useEffect(() => {
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
@@ -311,22 +334,20 @@ function Edit() {
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <MouseMoveDetector></MouseMoveDetector>
-      <UpdateObjs 
-      objsToUpdate={objsToUpdate}
-      setRendered={setRendered}
-      rendered={rendered}
-      setObjs={setObjs}
-      setHoverBudBorder={setHoverBudBorder}
-      setSelected={setSelected}
-      setDraggingLine={setDraggingLine}
-      setToggleCanDragLine={setToggleCanDragLine}
-      setRootPos={setRootPos}
-      setCanvasHeight={setCanvasHeight}
-      setCanvasWidth={setCanvasWidth}
-      rootPos={rootPos}
-      canvasHeight={canvasHeight}
-      canvasWidth={canvasWidth}
-      objs={objs}></UpdateObjs>
+      <AddNewObjs 
+        objsToUpdate={objsToUpdate}
+        setRendered={setRendered}
+        rendered={rendered}
+        setObjs={setObjs}
+        setHoverBudBorder={setHoverBudBorder}
+        setSelected={setSelected}
+        setDraggingLine={setDraggingLine}
+        setToggleCanDragLine={setToggleCanDragLine}
+        setCanvasHeight={setCanvasHeight}
+        setCanvasWidth={setCanvasWidth}
+        canvasHeight={canvasHeight}
+        canvasWidth={canvasWidth}
+        objs={objs}></AddNewObjs>
       <UpdateBudBorderEvt
         draggingLine={draggingLine}
         hoverBudBorder={hoverBudBorder}

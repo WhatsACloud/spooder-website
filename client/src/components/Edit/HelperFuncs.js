@@ -32,7 +32,7 @@ import { budSample } from './spoodawebSampleData'
 
 const setBud = (setObjsToUpdate, details) => { // { pronounciation, contexts, examples, links, position, type }
   const obj = {...budSample}
-  for (const name in details) { // todo: add jest, make a username generator in python
+  for (const name in details) {
     if (name in obj) {
       const detail = details[name]
       obj[name] = detail
@@ -41,6 +41,31 @@ const setBud = (setObjsToUpdate, details) => { // { pronounciation, contexts, ex
   setObjsToUpdate([obj])
 }
 export { setBud as setBud }
+
+const getRootPos = () => {
+  return getStage().children[0].getAttr('rootPos')
+}
+export { getRootPos as getRootPos }
+
+const setRootPos = (rootPos) => {
+  console.log(rootPos)
+  for (let obj of getKonvaObjs()) {
+    const type = obj.getAttr('objType')
+    let position
+    if (type === 'bud') {
+      const bud = obj.children[0]
+      bud.setX(obj.getAttr('offsetRootPos').x + rootPos.x)
+      bud.setY(obj.getAttr('offsetRootPos').y + rootPos.y)
+    } else if (type === 'silk') {
+      obj = obj.children[0]
+      position = obj.getPoints()
+    } else {
+      position = {x: obj.getX(), y: obj.getY()}
+    }
+  }
+  getStage().children[0].setAttr('rootPos', rootPos)
+}
+export { setRootPos as setRootPos }
 
 const isInCanvas = (mousePos) => {
   const startX = window.innerWidth * 0.15
