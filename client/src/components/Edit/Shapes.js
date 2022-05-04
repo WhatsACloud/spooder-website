@@ -70,7 +70,8 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
   return (
     <reactKonva.Group
       objType='silk'
-      objId={objId}>
+      objId={objId}
+      offsetRootPoses={points}>
       <reactKonva.Line
         points={[points[0].x, points[0].y, points[1].x, points[1].y]}
         stroke='black'

@@ -51,16 +51,20 @@ const setRootPos = (rootPos) => {
   console.log(rootPos)
   for (let obj of getKonvaObjs()) {
     const type = obj.getAttr('objType')
-    let position
     if (type === 'bud') {
       const bud = obj.children[0]
       bud.setX(obj.getAttr('offsetRootPos').x + rootPos.x)
       bud.setY(obj.getAttr('offsetRootPos').y + rootPos.y)
     } else if (type === 'silk') {
-      obj = obj.children[0]
-      position = obj.getPoints()
+      const silk = obj.children[0]
+      console.log(obj.getAttr('offsetRootPoses'))
+      silk.setPoints([
+        obj.getAttr('offsetRootPoses')[0].x + rootPos.x,
+        obj.getAttr('offsetRootPoses')[0].y + rootPos.y,
+        obj.getAttr('offsetRootPoses')[1].x + rootPos.x,
+        obj.getAttr('offsetRootPoses')[1].y + rootPos.y,
+      ])
     } else {
-      position = {x: obj.getX(), y: obj.getY()}
     }
   }
   getStage().children[0].setAttr('rootPos', rootPos)
