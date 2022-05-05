@@ -308,3 +308,15 @@ const snapLineCircleToLine = (selected) => { // pls fix ltr it doesnt work if in
   }
 }
 export { snapLineCircleToLine as snapLineCircleToLine }
+
+const updateObjs = (toAdd) => {
+  const layer = getStage().children[0]
+  const currentObjs = layer.getAttr('objs')
+  const newObjs = {...currentObjs, ...toAdd}
+  layer.setAttr('objs', newObjs)
+}
+export { updateObjs as updateObjs }
+
+const save = () => {
+  const objs = getKonvaObjs()
+} 

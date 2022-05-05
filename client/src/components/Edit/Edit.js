@@ -5,7 +5,7 @@ import styles from './edit.module'
 
 import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
-import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine, getRootPos, setRootPos } from './HelperFuncs'
+import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine, getRootPos, setRootPos, updateObjs } from './HelperFuncs'
 import * as OtherElements from './OtherElements'
 import * as Shapes from './Shapes'
 import { Background } from './Background'
@@ -111,13 +111,11 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
         snapLine(selected)
       } else { // detaches line
         const line = getObjById(selected.objId)
-        const oppositeIndex = Math.abs(selected.innerIndex-2)
         const offsetRootPoses = line.getAttr('offsetRootPoses')
         const mousePos = getCanvasMousePos(e.pageX, e.pageY)
         const rootPos = getRootPos()
         offsetRootPoses[selected.innerIndex-1] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
         line.setAttr('offsetRootPoses', offsetRootPoses)
-        console.log(offsetRootPoses[0], offsetRootPoses[1])
         const lineCircle = line.children[selected.innerIndex]
         const attachedTo = getObjById(lineCircle.getAttr('attachedToObjId'))
         if (attachedTo) {
@@ -196,12 +194,9 @@ const scrollDown = (amt) => {
   setRootPos({x: rootPos.x, y: rootPos.y - amt})
 }
 
-function DrawCanvas({ rendered, setObjs, toggleCanDragLine, canvasWidth, canvasHeight }) {
+function DrawCanvas({ rendered, toggleCanDragLine, canvasWidth, canvasHeight }) {
   useEffect(() => {
-    getStage().children[0].setAttr('rootPos', {
-      x: 0,
-      y: 0
-    })
+    setRootPos({x: 0, y: 0})
     const scrollAmt = 20
     document.addEventListener('keydown', (e) => {
       const key = e.key
@@ -237,43 +232,19 @@ function DrawCanvas({ rendered, setObjs, toggleCanDragLine, canvasWidth, canvasH
   )
 }
 
-const canvasBorderWidth = window.screen.width / 5 // if obj in this area the expand thingy
-const canvasBorderHeight = window.screen.height / 5
-
-const expandCanvas = (objPos, rootPos, canvasWidth, canvasHeight, setCanvasWidth, setCanvasHeight) => {
-  if (rootPos.y + objPos.y < (rootPos.y - canvasHeight / 2 + canvasBorderHeight)) {
-    setCanvasHeight(rootPos.y - objPos.y + canvasBorderHeight)
-  } else if (rootPos.x + objPos.x < (rootPos.x - canvasWidth / 2 + canvasBorderWidth)) {
-    setCanvasWidth(rootPos.x - objPos.x + canvasBorderWidth)
-  } else if (rootPos.y + objPos.y > (rootPos.y + canvasHeight / 2 - canvasBorderHeight)) {
-    setCanvasHeight(rootPos.y + objPos.y + canvasBorderHeight)
-  } else if (rootPos.x + objPos.x > (rootPos.x + canvasWidth / 2 - canvasBorderWidth)) {
-    setCanvasWidth(rootPos.x + objPos.x + canvasBorderWidth)
-  }
-  else {
-    return false
-  }
-  return true
-}
-
 function AddNewObjs({
     objsToUpdate,
-    objs,
     setDraggingLine,
-    setObjs,
     setRendered,
     rendered,
     setHoverBudBorder,
     setSelected,
     setToggleCanDragLine,
-    canvasWidth,
-    canvasHeight,
-    setCanvasWidth,
-    setCanvasHeight,
   }) { // to add some updating of positions AND maybe index in the object itself to be specific
   useEffect(() => {
     const newRendered = [...rendered]
-    const newObjs = {...objs}
+    console.log(objsToUpdate)
+    updateObjs(objsToUpdate)
     for (const objId in objsToUpdate) {
       const obj = objsToUpdate[objId]
       let expand = false
@@ -288,7 +259,6 @@ function AddNewObjs({
             setHoverBudBorder={setHoverBudBorder}
             ></Shapes.Bud>
         )
-        newObjs[obj.objId] = obj 
       } else if (obj.type === 'silk') {
         // for (const position of obj.positions) {
         //   expand = expandCanvas(position, rootPos, canvasWidth, canvasHeight, setCanvasWidth, setCanvasHeight)
@@ -304,23 +274,27 @@ function AddNewObjs({
             setToggleCanDragLine={setToggleCanDragLine}
             objId={obj.objId}></Shapes.Silk>
         )
-        newObjs[obj.objId] = obj 
       } else {
         console.warn('Error: object type not specified')
       }
     }
     setRendered(newRendered)
-    setObjs(newObjs)
   }, [ objsToUpdate ])
   return <></>
 }
 
-function Edit() {
+function Edit() { // TODO: change objs such that they are indexed by their objId and add saving
+  /* 
+  the objects list in the canvas is stored in the Konva main layer, as well as other data.
+  Yes, that contradicts react state's entire purpose, but when I switched from Konva to react-konva,
+  I realised that when you update the objects rendered, it just adds more objects to the canvas instead of updating them.
+  For these reasons (and that I don't want to waste more time changing back to Konva), global data is stored in the Konva main layer.
+  */
+
   const navigate = useNavigate()
   const [ dragging, setDragging ] = useState(false)
   const [ toggleCanDragLine, setToggleCanDragLine ] = useState(false)
   const [ hoverBudBorder, setHoverBudBorder ] = useState(false)
-  const [ objs, setObjs ] = useState({})
   const [ objsToUpdate, setObjsToUpdate ] = useState(spoodawebData)
   const [ rendered, setRendered ] = useState([])
   const [ nextObjId, setNextObjId ] = useState(spoodawebData.length)
@@ -330,13 +304,14 @@ function Edit() {
   const [ canvasHeight, setCanvasHeight ] = useState(window.screen.height + 2 * 2000)
   
   useEffect(() => {
+    getStage().children[0].setAttr('objs', {})
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
     return () => {
       document.removeEventListener('keydown', preventZoom)
       document.removeEventListener('wheel', preventZoomScroll)
     }
-  }, [ objs, rendered ])
+  }, [])
   return (
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
@@ -345,7 +320,6 @@ function Edit() {
         objsToUpdate={objsToUpdate}
         setRendered={setRendered}
         rendered={rendered}
-        setObjs={setObjs}
         setHoverBudBorder={setHoverBudBorder}
         setSelected={setSelected}
         setDraggingLine={setDraggingLine}
@@ -353,8 +327,7 @@ function Edit() {
         setCanvasHeight={setCanvasHeight}
         setCanvasWidth={setCanvasWidth}
         canvasHeight={canvasHeight}
-        canvasWidth={canvasWidth}
-        objs={objs}></AddNewObjs>
+        canvasWidth={canvasWidth}></AddNewObjs>
       <UpdateBudBorderEvt
         draggingLine={draggingLine}
         hoverBudBorder={hoverBudBorder}
