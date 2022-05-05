@@ -67,11 +67,20 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
     const line = evt.target
     const points = line.getPoints()
   }
+  const getOffsetRootPoses = () => {
+    const rootPos = getRootPos()
+    const offsetX = points[0].x - rootPos.x 
+    const offsetY = points[0].y - rootPos.y 
+    return [
+      {x: offsetX, y: offsetY},
+      {x: offsetX, y: offsetY}
+    ] 
+  } 
   return (
     <reactKonva.Group
       objType='silk'
       objId={objId}
-      offsetRootPoses={points}>
+      offsetRootPoses={getOffsetRootPoses()}>
       <reactKonva.Line
         points={[points[0].x, points[0].y, points[1].x, points[1].y]}
         stroke='black'

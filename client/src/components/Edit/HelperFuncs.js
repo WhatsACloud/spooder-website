@@ -48,7 +48,6 @@ const getRootPos = () => {
 export { getRootPos as getRootPos }
 
 const setRootPos = (rootPos) => {
-  console.log(rootPos)
   for (let obj of getKonvaObjs()) {
     const type = obj.getAttr('objType')
     if (type === 'bud') {
@@ -57,13 +56,19 @@ const setRootPos = (rootPos) => {
       bud.setY(obj.getAttr('offsetRootPos').y + rootPos.y)
     } else if (type === 'silk') {
       const silk = obj.children[0]
-      console.log(obj.getAttr('offsetRootPoses'))
+      console.log(obj.getAttr('offsetRootPoses')[0], obj.getAttr('offsetRootPoses')[1])
       silk.setPoints([
         obj.getAttr('offsetRootPoses')[0].x + rootPos.x,
         obj.getAttr('offsetRootPoses')[0].y + rootPos.y,
         obj.getAttr('offsetRootPoses')[1].x + rootPos.x,
         obj.getAttr('offsetRootPoses')[1].y + rootPos.y,
       ])
+      const silkEnds = [obj.children[1], obj.children[2]]
+      for (const index in silkEnds) {
+        const silkEnd = silkEnds[index]
+        silkEnd.setX(obj.getAttr('offsetRootPoses')[index].x + rootPos.x)
+        silkEnd.setY(obj.getAttr('offsetRootPoses')[index].y + rootPos.y)
+      }
     } else {
     }
   }

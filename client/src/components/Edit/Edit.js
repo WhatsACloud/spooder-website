@@ -111,6 +111,13 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
         snapLine(selected)
       } else { // detaches line
         const line = getObjById(selected.objId)
+        const oppositeIndex = Math.abs(selected.innerIndex-2)
+        const offsetRootPoses = line.getAttr('offsetRootPoses')
+        const mousePos = getCanvasMousePos(e.pageX, e.pageY)
+        const rootPos = getRootPos()
+        offsetRootPoses[selected.innerIndex-1] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
+        line.setAttr('offsetRootPoses', offsetRootPoses)
+        console.log(offsetRootPoses[0], offsetRootPoses[1])
         const lineCircle = line.children[selected.innerIndex]
         const attachedTo = getObjById(lineCircle.getAttr('attachedToObjId'))
         if (attachedTo) {
