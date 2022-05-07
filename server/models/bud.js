@@ -19,10 +19,10 @@ async function markForDeletion(objs, t) { // TO DO: add links thingy
 }
 
 async function markBudForDeletion(budId, transaction) {
-  const bud = await Bud.findOne({where: {id: budId}}, {transaction, transaction})
-  if (bud === null) throw error.create(`bud either does not exist or has been deleted`, {statusNo: 400})
-  if (bud.dataValues.deletedAt !== null) throw error.create(`bud either does not exist or has been deleted`, {statusNo: 400})
-  await bud.update({"deletedAt": Date.now()}, {transaction: transaction})
+  const obj = await Bud.findOne({where: {id: budId}}, {transaction, transaction})
+  if (obj === null) throw error.create(`obj either does not exist or has been deleted`, {statusNo: 400})
+  if (obj.dataValues.deletedAt !== null) throw error.create(`obj either does not exist or has been deleted`, {statusNo: 400})
+  await obj.update({"deletedAt": Date.now()}, {transaction: transaction})
   const budDetails = await BudDetails.findAll({where: {fk_bud_id: budId}}, {transaction: transaction})
   const budDetailsIdList = await markForDeletion(budDetails, transaction)
   for (const budDetailsNo in budDetailsIdList) {
@@ -70,23 +70,61 @@ async function createExample(contextId, example, transaction) {
   }, {transaction: transaction})
 }
 
-module.exports = {
+async function editBud(spoodawebId, word, transaction) {
+  const obj = await Bud.findOne({ where: { fk_spoodaweb_id: spoodawebId }})
+  await obj.update({
+    word: word
+  }, {transaction: transaction})
+  // const _bud = await Bud.update({
+  //   word: word
+  // }, 
+  // { where: { fk_spoodaweb_id: spoodawebId }},
+  // {transaction: transaction})
+  return obj
+}
+
+async function editBudDetails(budId, definitionName, pronounciation, transaction) {
+  const budDetails = budDetails.findOne({ where: { fk_bud_id: budId }})
+  budDetails.update({
+    fk_bud_id: budId,
+    definition: definitionName,
+    pronounciation: pronounciation
+  }, {transaction: transaction})
+  return budDetails
+}
+
+async function editContext(budDetailsId, context, transaction) {
+  const context = await Context.findOne({ where : { fk_bud_details_id: budDetailsId }})
+  context.update({
+    context: context
+  }, {transaction: transaction})
+  return context 
+}
+
+async function editExample(contextId, example, transaction) {
+  const example = await Example.findOne({ where: { fk_context_id: contextId }})
+  await Example.update({
+    example: example
+  }, {transaction: transaction})
+}
+
+module.exports = { // please add support for positions, budId
   async edit (req, res, next) {
     let transaction
     try {
       const userId = req.body.jwtTokenData.userId
       const data = req.body.spoodawebData
       transaction = await sequelize.transaction()
-      for (const budName in data) {
-        const bud = data[budName]
-        if (bud.type === "add") {
-          const _budId = await createBud(req.body.spoodawebId, budName, transaction)
+      for (const objId in data) {
+        const obj = data[objId]
+        console.log(obj)
+        if (obj.operation === "add") {
+          const _budId = await createBud(req.body.spoodawebId, obj.name, transaction)
           const budId = _budId.dataValues.id
-          for (const definitionName in bud.data) {
-            const definition = bud.data[definitionName]
+          for (const definitionName in obj.data) {
+            const definition = obj.data[definitionName]
             const _budDetailsId = await createBudDetails(budId, definitionName, definition.pronounciation, transaction)
             const budDetailsId = _budDetailsId.dataValues.id
-            console.log(definition)
             for (let i = 0; i < definition.contexts.length; i++) {
               const context = definition.contexts[i]
               const _contextId = await createContext(budDetailsId, context, transaction)
@@ -97,8 +135,24 @@ module.exports = {
               }
             }
           }
-        } else if (bud.type === "sub") {
-          await markBudForDeletion(bud.data.id, transaction)
+        } else if (obj.operation === "sub") {
+          await markBudForDeletion(objId, transaction)
+        } else if (obj.operation === "edit") {
+          const bud = await editBud(objId, obj.name, transaction)
+          for (const definitionName in obj.data) {
+            const definition = obj.data[definitionName]
+            const _budDetailsId = await editBudDetails(objId, definitionName, definition.pronounciation, transaction)
+            const budDetailsId = _budDetailsId.dataValues.id
+            for (let i = 0; i < definition.contexts.length; i++) {
+              const context = definition.contexts[i]
+              const _contextId = await editContext(budDetailsId, context, transaction)
+              const contextId = _contextId.dataValues.id
+              for (const exampleNo in definition.examples[i]) {
+                const example = definition.examples[i][exampleNo]
+                await editExample(contextId, example, transaction)
+              }
+            }
+          }
         }
       }
       await transaction.commit()

@@ -25,7 +25,6 @@ router.post(
   editSpoodawebModel.edit,
   edit.end,
   errorHandler
-  // NOTE TO SELF: PLEASE LOAD BUDS IN ORDER, DO NOT LOAD ALL AT ONCE OR COMPUTER WILL SELF DESTRUCT
 )
 
 const getSpoodawebs = require('../controllerFuncs/getSpoodawebs')

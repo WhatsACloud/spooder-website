@@ -5,7 +5,7 @@ import styles from './edit.module'
 
 import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
-import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine, getRootPos, setRootPos, addObjs, getNextObjId, setSilk, save, updateObj } from './HelperFuncs'
+import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine, getRootPos, setRootPos, addObjs, getNextObjId, setSilk, save, updateObj, getMainLayer } from './HelperFuncs'
 import * as OtherElements from './OtherElements'
 import * as Shapes from './Shapes'
 import { Background } from './Background'
@@ -293,9 +293,10 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   const [ canvasHeight, setCanvasHeight ] = useState(window.screen.height + 2 * 2000)
   
   useEffect(() => {
-    const mainLayer = getStage().children[0]
+    const mainLayer = getMainLayer()
     mainLayer.setAttr('objs', spoodawebData)
     mainLayer.setAttr('nextObjId', Object.keys(spoodawebData).length) // probably should be the next highest objId instead of this
+    mainLayer.setAttr('newObjs', {})
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
     return () => {

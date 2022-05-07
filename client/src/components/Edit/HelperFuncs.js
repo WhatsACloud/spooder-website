@@ -5,8 +5,13 @@ const getStage = () => {
 }
 export { getStage as getStage }
 
+const getMainLayer = () => {
+  return getStage().children[0]
+}
+export { getMainLayer as getMainLayer }
+
 const getKonvaObjs = () => {
-  return getStage().children[0].children
+  return getMainLayer().children
 }
 export { getKonvaObjs as getKonvaObjs }
 
@@ -29,16 +34,24 @@ const withinRect = (mousePos, startX, startY, endX, endY) => {
 }
 
 const setNextObjId = (amt) => {
-  const mainLayer = getStage().children[0]
+  const mainLayer = getMainLayer()
   mainLayer.setAttr('nextObjId', amt)
 }
 
 const getNextObjId = () => {
-  const mainLayer = getStage().children[0]
+  const mainLayer = getMainLayer()
   const currentNextObjId = mainLayer.getAttr('nextObjId')
   return currentNextObjId
 }
 export { getNextObjId as getNextObjId }
+
+const updateNewObjs = (objId, obj) => {
+  const mainLayer = getMainLayer()
+  const newObjs = mainLayer.getAttr('newObjs')
+  newObjs[objId] = obj
+  mainLayer.setAttr('newObjs', newObjs)
+}
+export { updateNewObjs as updateNewObjs }
 
 import { budSample } from './spoodawebSampleData'
 
@@ -52,6 +65,7 @@ const setBud = (setObjsToUpdate, details) => { // { pronounciation, contexts, ex
   }
   const nextObjId = getNextObjId()
   setObjsToUpdate({[nextObjId]: obj})
+  updateNewObjs(nextObjId, obj)
   setNextObjId(nextObjId+1)
 }
 export { setBud as setBud }
@@ -68,12 +82,13 @@ const setSilk = (setObjsToUpdate, details) => {
     }
   }
   setObjsToUpdate({[nextObjId]: line})
+  updateNewObjs(nextObjId, line)
   setNextObjId(nextObjId+1)
 }
 export { setSilk as setSilk }
 
 const getRootPos = () => {
-  return getStage().children[0].getAttr('rootPos')
+  return getMainLayer().getAttr('rootPos')
 }
 export { getRootPos as getRootPos }
 
@@ -101,7 +116,7 @@ const setRootPos = (rootPos) => {
     } else {
     }
   }
-  getStage().children[0].setAttr('rootPos', rootPos)
+  getMainLayer().setAttr('rootPos', rootPos)
 }
 export { setRootPos as setRootPos }
 
@@ -350,7 +365,7 @@ const snapLineCircleToLine = (selected) => { // pls fix ltr it doesnt work if in
 export { snapLineCircleToLine as snapLineCircleToLine }
 
 const addObjs = (toAdd) => {
-  const layer = getStage().children[0]
+  const layer = getMainLayer()
   const currentObjs = layer.getAttr('objs')
   const newObjs = {...currentObjs, ...toAdd}
   layer.setAttr('objs', newObjs)
@@ -358,10 +373,17 @@ const addObjs = (toAdd) => {
 export { addObjs as addObjs }
 
 const updateObj = (objId, attrs) => {
-  const obj = getStage().children[0].getAttr('objs')[objId]
+  const mainLayer = getMainLayer()
+  const obj = mainLayer.getAttr('objs')[objId]
+  const newObjs = mainLayer.getAttr('newObjs')
   Object.entries(attrs).forEach(([name, val]) => {
     obj[name] = val
   })
+  console.log(!(objId in Object.keys(newObjs)))
+  if (!(objId in Object.keys(newObjs))) {
+    obj.operation = 'edit'
+  }
+  updateNewObjs(objId, obj)
   const konvaObj = getObjById(objId) 
   if ('position' in attrs) {
     console.log(konvaObj)
@@ -379,22 +401,24 @@ const updateObj = (objId, attrs) => {
 export { updateObj as updateObj }
 
 const save = () => {
-  const objs = getStage().children[0].getAttr('objs') 
-  console.log(objs)
-  const rootPos = getRootPos()
-  Object.entries(objs).forEach(([objId, obj]) => {
-    const konvaObj = getObjById(objId)
-    if (obj.type === "bud") {
-      konvaObj.children[0].setX(obj.position.x + rootPos.x)
-      konvaObj.children[0].setY(obj.position.y + rootPos.y)
-    } else {
-      konvaObj.children[0].setPoints([
-        obj.positions[0].x + rootPos.x,
-        obj.positions[0].y + rootPos.y,
-        obj.positions[1].x + rootPos.x,
-        obj.positions[1].y + rootPos.y,
-      ])
-    }
-  })
+  const newObjs = getMainLayer().getAttr('newObjs') 
+  console.log(newObjs)
+  // below simulates the thing reloading
+
+  // const rootPos = getRootPos()
+  // Object.entries(objs).forEach(([objId, obj]) => {
+  //   const konvaObj = getObjById(objId)
+  //   if (obj.type === "bud") {
+  //     konvaObj.children[0].setX(obj.position.x + rootPos.x)
+  //     konvaObj.children[0].setY(obj.position.y + rootPos.y)
+  //   } else {
+  //     konvaObj.children[0].setPoints([
+  //       obj.positions[0].x + rootPos.x,
+  //       obj.positions[0].y + rootPos.y,
+  //       obj.positions[1].x + rootPos.x,
+  //       obj.positions[1].y + rootPos.y,
+  //     ])
+  //   }
+  // })
 } 
 export { save as save }

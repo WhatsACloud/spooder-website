@@ -5,10 +5,12 @@ const Spoodaweb = require('../databaseModels/spoodaweb')(sequelize, DataTypes)
 const errMsg = 'The data received is invalid. This is probably a client side error.'
 
 const required_att = [
+  "name",
   "pronounciation",
   "contexts",
   "examples",
-  "links"
+  "links",
+  "position"
 ]
 
 module.exports = {
@@ -22,12 +24,13 @@ module.exports = {
       if (data === undefined) return next(error.create(errMsg, {statusNo: 400}))
       for (const budName in data) {
         const bud = data[budName]
-        switch (bud.type) {
+        switch (bud.operation) {
           case undefined:
             return next(error.create(errMsg))
           case 'add':
             if (bud.data === undefined) return next(error.create(errMsg, {statusNo: 400}))
             for (const definitionName in bud.data) {
+              console.log(definitionName)
               required_att.forEach(att => {
                 if (bud.data[definitionName][att] === undefined) return next(error.create(errMsg, {debug: att, statusNo: 400}))
               })
