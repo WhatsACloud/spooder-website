@@ -6,11 +6,12 @@ const errMsg = 'The data received is invalid. This is probably a client side err
 
 const required_att = [
   "name",
-  "pronounciation",
+  "sounds",
   "contexts",
   "examples",
   "links",
-  "position"
+  "position",
+  "type"
 ]
 
 module.exports = {
@@ -28,13 +29,9 @@ module.exports = {
           case undefined:
             return next(error.create(errMsg))
           case 'add':
-            if (bud.data === undefined) return next(error.create(errMsg, {statusNo: 400}))
-            for (const definitionName in bud.data) {
-              console.log(definitionName)
-              required_att.forEach(att => {
-                if (bud.data[definitionName][att] === undefined) return next(error.create(errMsg, {debug: att, statusNo: 400}))
-              })
-            }
+            required_att.forEach(att => {
+              if (!(att in bud)) return next(error.create(errMsg, {debug: att, statusNo: 400}))
+            })
             break
           case 'sub':
             if (bud.data.id === undefined) return next(error.create(errMsg, {statusNo: 400}))

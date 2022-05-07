@@ -2,12 +2,12 @@ module.exports = (sequelize, DataTypes) => {
   const Examples = sequelize.define(
     'Examples',
     {
-      fk_context_id: {
+      fk_budDetails_id: {
           type: DataTypes.UUID,
           allowNull: false,
           foreignKey: true,
           references: {
-            model: 'Contexts',
+            model: 'BudDetails',
             key: 'id'
           }
       },
@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   )
   Examples.associate = (models) => {
-    Examples.belongsTo(models.Contexts)
+    Examples.belongsTo(models.BudDetails)
   }
   return Examples
 }

@@ -14,9 +14,13 @@ module.exports = (sequelize, DataTypes) => {
         definition: {
             type: DataTypes.STRING,
             allowNull: true
-          },
-        pronounciation: {
+        },
+        sound: {
           type: DataTypes.STRING,
+          allowNull: true
+        },
+        context: {
+          type: DataTypes.TEXT,
           allowNull: true
         },
         deletedAt: {
@@ -27,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
     )
     BudDetails.associate = (models) => {
       BudDetails.belongsTo(models.Bud)
-      BudDetails.hasMany(models.Contexts, {foreignKey: DataTypes.UUID})
+      BudDetails.hasMany(models.Examples, {foreignKey: DataTypes.UUID})
     }
     return BudDetails
   }

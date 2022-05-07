@@ -15,6 +15,26 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true
       },
+      sound: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      x: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      y: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      context: {
+        type: DataTypes.TEXT,
+        allowNull: true 
+      },
+      objId: {
+        type: DataTypes.UUID,
+        allowNull: false
+      },
       deletedAt: {
         type: DataTypes.DATE,
         allowNull: true

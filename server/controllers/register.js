@@ -11,8 +11,8 @@ router.post(
   '/',
   register.validatePassword,
   hash.hashNSalt,
-  token.generateAccessToken,
   userModel.create,
+  token.generateAccessToken,
   register.end, 
   error.errorHandler
 )
