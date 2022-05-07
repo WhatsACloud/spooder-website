@@ -143,12 +143,10 @@ module.exports = { // please add support for positions, budId
             const definition = obj.definitions[i]
             const _budDetailsId = await createBudDetails(budId, definition, obj.sounds[i], obj.contexts[i], transaction)
             const budDetailsId = _budDetailsId.dataValues.id
-            for (let exampleIndex = 0; exampleIndex < obj.examples.length; exampleIndex++) {
-              const examples = obj.examples[exampleIndex]
-              for (let innerExampleIndex = 0; innerExampleIndex < obj.contexts.length; innerExampleIndex++) {
-                const example = examples[innerExampleIndex]
-                await createExample(budDetailsId, example, transaction)
-              }
+            const examples = obj.examples[i]
+            for (const example of examples) {
+              console.log("example", example)
+              await createExample(budDetailsId, example, transaction)
             }
           }
         } else if (obj.operation === "sub") {
