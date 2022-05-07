@@ -28,6 +28,18 @@ const withinRect = (mousePos, startX, startY, endX, endY) => {
   return false
 }
 
+const setNextObjId = (amt) => {
+  const mainLayer = getStage().children[0]
+  mainLayer.setAttr('nextObjId', amt)
+}
+
+const getNextObjId = () => {
+  const mainLayer = getStage().children[0]
+  const currentNextObjId = mainLayer.getAttr('nextObjId')
+  return currentNextObjId
+}
+export { getNextObjId as getNextObjId }
+
 import { budSample } from './spoodawebSampleData'
 
 const setBud = (setObjsToUpdate, details) => { // { pronounciation, contexts, examples, links, position, type }
@@ -38,9 +50,27 @@ const setBud = (setObjsToUpdate, details) => { // { pronounciation, contexts, ex
       obj[name] = detail
     }
   }
-  setObjsToUpdate([obj])
+  const nextObjId = getNextObjId()
+  setObjsToUpdate({[nextObjId]: obj})
+  setNextObjId(nextObjId+1)
 }
 export { setBud as setBud }
+
+import { silkSample } from './spoodawebSampleData'
+
+const setSilk = (setObjsToUpdate, details) => {
+  const nextObjId = getNextObjId()
+  const line = {...silkSample}
+  for (const name in details) {
+    if (name in line) {
+      const detail = details[name]
+      line[name] = detail
+    }
+  }
+  setObjsToUpdate({[nextObjId]: line})
+  setNextObjId(nextObjId+1)
+}
+export { setSilk as setSilk }
 
 const getRootPos = () => {
   return getStage().children[0].getAttr('rootPos')
@@ -56,7 +86,6 @@ const setRootPos = (rootPos) => {
       bud.setY(obj.getAttr('offsetRootPos').y + rootPos.y)
     } else if (type === 'silk') {
       const silk = obj.children[0]
-      console.log(obj.getAttr('offsetRootPoses')[0], obj.getAttr('offsetRootPoses')[1])
       silk.setPoints([
         obj.getAttr('offsetRootPoses')[0].x + rootPos.x,
         obj.getAttr('offsetRootPoses')[0].y + rootPos.y,
@@ -225,7 +254,7 @@ const getObjById = (id=null) => {
   if (id === null) return false
   const objs = getKonvaObjs()
   for (const obj of objs) {
-    if (obj.getAttr('objId') === id) {
+    if (Number(obj.getAttr('objId')) === Number(id)) {
       return obj
     }
   }
@@ -246,13 +275,12 @@ export { lineCircleMove as lineCircleMove }
 
 import * as Shapes from './Shapes'
 import React from 'react'
-import { silkSample } from './spoodawebSampleData'
 
-const startDragLine = (e, setDraggingLine, setSelected, nextObjId, innerIndex, toggleCanDragLine) => {
+const startDragLine = (e, setDraggingLine, setSelected, objId, innerIndex, toggleCanDragLine) => {
   if (e.button === 0 && isInCanvas({x: e.pageX, y: e.pageY})) {
     setDraggingLine(true)
-    setSelected({"objId": nextObjId, "innerIndex": innerIndex})
-    const renderedLine = getObjById(nextObjId)
+    setSelected({"objId": objId, "innerIndex": innerIndex})
+    const renderedLine = getObjById(objId)
     renderedLine.moveToBottom()
   }
 }
@@ -312,8 +340,10 @@ export { snapLineCircleToLine as snapLineCircleToLine }
 const updateObjs = (toAdd) => {
   const layer = getStage().children[0]
   const currentObjs = layer.getAttr('objs')
+  console.log(currentObjs, toAdd)
   const newObjs = {...currentObjs, ...toAdd}
   layer.setAttr('objs', newObjs)
+  console.log(newObjs)
 }
 export { updateObjs as updateObjs }
 

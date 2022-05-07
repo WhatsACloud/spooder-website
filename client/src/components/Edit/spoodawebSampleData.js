@@ -5,8 +5,7 @@ const budSample = {
   "links": {},
   "position": {},
   "type": "bud", // bud silk
-  "operation": '', // add edit minus, default add,
-  "objId": null
+  "operation": '' // add edit minus, default add,
 }
 
 export { budSample as budSample }
@@ -15,8 +14,7 @@ const silkSample = {
   "positions": {},
   "rootPosIndex": null,
   "type": "silk",
-  "operation": '',
-  "objId": null
+  "operation": ''
 }
 
 export { silkSample as silkSample }

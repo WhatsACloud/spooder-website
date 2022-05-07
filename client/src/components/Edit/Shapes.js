@@ -105,6 +105,7 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
 export { Silk as Silk }
 
 function Bud({ x, y, objId }) {
+  console.log(objId)
   const rootPos = getRootPos()
   const radius = 40
   const strokeWidth = 40

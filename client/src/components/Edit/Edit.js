@@ -5,7 +5,7 @@ import styles from './edit.module'
 
 import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
-import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine, getRootPos, setRootPos, updateObjs } from './HelperFuncs'
+import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine, getRootPos, setRootPos, updateObjs, getNextObjId, setSilk } from './HelperFuncs'
 import * as OtherElements from './OtherElements'
 import * as Shapes from './Shapes'
 import { Background } from './Background'
@@ -79,8 +79,6 @@ function UpdateBudBorderEvt({ draggingLine, hoverBudBorder, setHoverBudBorder })
   return <></>
 }
 
-import { silkSample } from './spoodawebSampleData'
-
 const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate, hoverBudBorder, setDraggingLine, nextObjId, setNextObjId, selected, setSelected }) => { // still a functional component
   // Object.keys().map((name) => { // ill deal with this later
   useEffect(() => {
@@ -94,12 +92,9 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
     const startDragLineWrapper = e => {
       const canvasMousePos = getCanvasMousePos(e.pageX, e.pageY)
       if (!isInCanvas({x: e.pageX, y: e.pageY})) return
-      const line = {...silkSample}
-      line.positions = [canvasMousePos, canvasMousePos]
-      line.objId = nextObjId
-      setObjsToUpdate([line])
-      startDragLine(e, setDraggingLine, setSelected, nextObjId, 1, toggleCanDragLine)
-      setNextObjId(nextObjId+1)
+      const currentObjId = getNextObjId()
+      setSilk(setObjsToUpdate, {positions: [canvasMousePos, canvasMousePos]})
+      startDragLine(e, setDraggingLine, setSelected, currentObjId, 1, toggleCanDragLine)
     }
     const stopDragLineWrapper = e => stopDragLine(e, lineCircle)
     const dragLineWrapper = e => lineCircleMove(e, draggingLine, selected)
@@ -243,27 +238,19 @@ function AddNewObjs({
   }) { // to add some updating of positions AND maybe index in the object itself to be specific
   useEffect(() => {
     const newRendered = [...rendered]
-    console.log(objsToUpdate)
     updateObjs(objsToUpdate)
-    for (const objId in objsToUpdate) {
-      const obj = objsToUpdate[objId]
-      let expand = false
+    Object.entries(objsToUpdate).forEach(([objId, obj]) => {
       if (obj.type === 'bud') {
-        // expand = expandCanvas(obj.position, rootPos, canvasWidth, canvasHeight, setCanvasWidth, setCanvasHeight)
         newRendered.push(
           <Shapes.Bud
             x={obj.position.x}
             y={obj.position.y}
             key={newRendered.length}
-            objId={obj.objId}
+            objId={objId}
             setHoverBudBorder={setHoverBudBorder}
             ></Shapes.Bud>
         )
       } else if (obj.type === 'silk') {
-        // for (const position of obj.positions) {
-        //   expand = expandCanvas(position, rootPos, canvasWidth, canvasHeight, setCanvasWidth, setCanvasHeight)
-        //   if (expand) break 
-        // }
         newRendered.push(
           <Shapes.Silk
             points={obj.positions}
@@ -272,11 +259,13 @@ function AddNewObjs({
             setDraggingLine={setDraggingLine}
             setSelected={setSelected}
             setToggleCanDragLine={setToggleCanDragLine}
-            objId={obj.objId}></Shapes.Silk>
+            objId={objId}></Shapes.Silk>
         )
       } else {
         console.warn('Error: object type not specified')
       }
+    })
+    for (const objId in objsToUpdate) {
     }
     setRendered(newRendered)
   }, [ objsToUpdate ])
@@ -297,14 +286,15 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   const [ hoverBudBorder, setHoverBudBorder ] = useState(false)
   const [ objsToUpdate, setObjsToUpdate ] = useState(spoodawebData)
   const [ rendered, setRendered ] = useState([])
-  const [ nextObjId, setNextObjId ] = useState(spoodawebData.length)
   const [ draggingLine, setDraggingLine ] = useState(false)
   const [ selected, setSelected ] = useState()
   const [ canvasWidth, setCanvasWidth ] = useState(window.screen.width + 2 * 2000)
   const [ canvasHeight, setCanvasHeight ] = useState(window.screen.height + 2 * 2000)
   
   useEffect(() => {
-    getStage().children[0].setAttr('objs', {})
+    const mainLayer = getStage().children[0]
+    mainLayer.setAttr('objs', spoodawebData)
+    mainLayer.setAttr('nextObjId', Object.keys(spoodawebData).length) // probably should be the next highest objId instead of this
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
     return () => {
@@ -336,9 +326,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
         <LineDragUpdater
           toggleCanDragLine={toggleCanDragLine}
           setObjsToUpdate={setObjsToUpdate}
-          nextObjId={nextObjId}
           setDraggingLine={setDraggingLine}
-          setNextObjId={setNextObjId}
           setSelected={setSelected}
           selected={selected}
           hoverBudBorder={hoverBudBorder}
