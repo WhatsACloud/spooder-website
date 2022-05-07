@@ -4,6 +4,8 @@ import styles from './edit.module'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faObjectGroup, faLinesLeaning } from '@fortawesome/free-solid-svg-icons'
 
+import { save } from './HelperFuncs'
+
 function ObjectDrawer({ setDragging, toggleCanDragLine, setToggleCanDragLine }) {
   const items = {
     test: [
@@ -23,6 +25,9 @@ function ObjectDrawer({ setDragging, toggleCanDragLine, setToggleCanDragLine }) 
         <div className={styles.box}>
           <div className={styles.obj}>
             <p>test</p>
+            <button onClick={save}>
+              save
+            </button>
             <button className={styles.drawerButton} onMouseDown={() => setDragging(true)}>
               <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
             </button>

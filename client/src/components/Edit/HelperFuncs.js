@@ -250,6 +250,18 @@ const updateLinePos = (lineCircle, x, y) => {
 }
 export { updateLinePos as updateLinePos }
 
+const getLinePos = (lineGroup) => {
+  const line = lineGroup.children[0]
+  const lineTransform = line.getAbsoluteTransform()
+  lineTransform.m = [1, 0, 0, 1, 0, 0] // lol
+  const start = lineGroup.children[1]
+  const end = lineGroup.children[2]
+  const newStart = lineTransform.point({x: start.getX(), y: start.getY()})
+  const newEnd = lineTransform.point({x: end.getX(), y: end.getY()})
+  return [newStart, newEnd]
+}
+export { getLinePos as getLinePos}
+
 const getObjById = (id=null) => {
   if (id === null) return false
   const objs = getKonvaObjs()
@@ -337,7 +349,7 @@ const snapLineCircleToLine = (selected) => { // pls fix ltr it doesnt work if in
 }
 export { snapLineCircleToLine as snapLineCircleToLine }
 
-const updateObjs = (toAdd) => {
+const addObjs = (toAdd) => {
   const layer = getStage().children[0]
   const currentObjs = layer.getAttr('objs')
   console.log(currentObjs, toAdd)
@@ -345,8 +357,32 @@ const updateObjs = (toAdd) => {
   layer.setAttr('objs', newObjs)
   console.log(newObjs)
 }
-export { updateObjs as updateObjs }
+export { addObjs as addObjs }
+
+const updateObj = (objId, attrs) => {
+  const obj = getStage().children[0].getAttr('objs')[objId]
+  console.log(obj)
+  Object.entries(attrs).forEach(([name, val]) => {
+    console.log(name, val)
+    obj[name] = val
+  })
+  const konvaObj = getObjById(objId) 
+  console.log(konvaObj)
+  if ('positions' in attrs) {
+    console.log(attrs.positions)
+    const rootPos = getRootPos()
+    konvaObj.children[0].setPoints([
+      attrs.positions[0].x + rootPos.x,
+      attrs.positions[0].y + rootPos.y,
+      attrs.positions[1].x + rootPos.x,
+      attrs.positions[1].y + rootPos.y
+    ])
+  }
+}
+export { updateObj as updateObj }
 
 const save = () => {
-  const objs = getKonvaObjs()
+  const objs = getStage().children[0].getAttr('objs') 
+  console.log(objs)
 } 
+export { save as save }

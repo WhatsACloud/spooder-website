@@ -5,7 +5,7 @@ import styles from './edit.module'
 
 import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
-import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine, getRootPos, setRootPos, updateObjs, getNextObjId, setSilk } from './HelperFuncs'
+import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine, getRootPos, setRootPos, addObjs, getNextObjId, setSilk, save, updateObj } from './HelperFuncs'
 import * as OtherElements from './OtherElements'
 import * as Shapes from './Shapes'
 import { Background } from './Background'
@@ -119,6 +119,7 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
           attachedTo.setAttr('attachedSilkObjId', newObjs)
           lineCircle.setAttr('attachedToObjId', null)
         }
+        updateObj(selected.objId, {positions: offsetRootPoses})
       }
       setDraggingLine(false)
       setSelected()
@@ -238,7 +239,7 @@ function AddNewObjs({
   }) { // to add some updating of positions AND maybe index in the object itself to be specific
   useEffect(() => {
     const newRendered = [...rendered]
-    updateObjs(objsToUpdate)
+    addObjs(objsToUpdate)
     Object.entries(objsToUpdate).forEach(([objId, obj]) => {
       if (obj.type === 'bud') {
         newRendered.push(

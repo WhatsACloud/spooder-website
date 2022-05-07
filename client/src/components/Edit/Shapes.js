@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
-import { getHexagonLines, hexagonPoints, drawHexagon, stopDragLine, getKonvaObjs, getObjById, updateLinePos, getCanvasMousePos, getRootPos } from './HelperFuncs'
+import { getHexagonLines, hexagonPoints, drawHexagon, stopDragLine, getKonvaObjs, getObjById, updateLinePos, getCanvasMousePos, getRootPos, updateObj, getLinePos } from './HelperFuncs'
 
 function BudAnchorHighlighter() {
   return (
@@ -65,7 +65,19 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
   }
   const lineDragendFunc = evt => {
     const line = evt.target
-    const points = line.getPoints()
+    const lineGroup = evt.target.parent
+    const objId = lineGroup.getAttr('objId')
+    const points = getLinePos(lineGroup)
+    console.log(points[0], points[1])
+    console.log(line.getPoints())
+    const offsetRootPoses = lineGroup.getAttr('offsetRootPoses')
+    const rootPos = getRootPos()
+    const newOffsetRootPoses = [
+      {x: points[0].x - rootPos.x, y: points[0].y - rootPos.y},
+      {x: points[1].x - rootPos.x, y: points[1].y - rootPos.y},
+    ]
+    lineGroup.setAttr('offsetRootPoses', newOffsetRootPoses)
+    updateObj(objId, {positions: newOffsetRootPoses})
   }
   const getOffsetRootPoses = () => {
     const rootPos = getRootPos()
@@ -164,9 +176,9 @@ function Bud({ x, y, objId }) {
         obj.setAttr('offsetRootPos', {x: offsetRootPos.x + mousePos.x - previousMousePos.x, y: offsetRootPos.y + mousePos.y - previousMousePos.y})
         const rootPos = getRootPos()
         const newOffsetRootPos = obj.getAttr('offsetRootPos')
-        // console.log(rootPos.x, newOffsetRootPos.x)
         bud.setX(rootPos.x + newOffsetRootPos.x)
         bud.setY(rootPos.y + newOffsetRootPos.y)
+        updateObj(obj.getAttr('objId'), {position: {x: newOffsetRootPos.x, y: newOffsetRootPos.y}})
       }}>
         <reactKonva.Shape
           x={x}
