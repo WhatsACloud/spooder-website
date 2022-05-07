@@ -166,13 +166,11 @@ function Bud({ x, y, objId }) {
         bud.parent.setAttr('lastMousePos', {x: evt.evt.pageX, y: evt.evt.pageY})
       }}
       onDragEnd={evt => {
-        console.log(evt)
         const obj = evt.target.parent
         const bud = evt.target
         const offsetRootPos = obj.getAttr('offsetRootPos')
         const mousePos = {x: evt.evt.pageX, y: evt.evt.pageY}
         const previousMousePos = obj.getAttr('lastMousePos')
-        console.log(offsetRootPos.x, mousePos.x, previousMousePos.x)
         obj.setAttr('offsetRootPos', {x: offsetRootPos.x + mousePos.x - previousMousePos.x, y: offsetRootPos.y + mousePos.y - previousMousePos.y})
         const rootPos = getRootPos()
         const newOffsetRootPos = obj.getAttr('offsetRootPos')
