@@ -55,7 +55,8 @@ async function createBud(spoodawebId, word, objId, position, transaction) {
     word: word,
     x: position.x,
     y: position.y,
-    objId: objId
+    objId: objId,
+    type: "bud"
   }, {transaction: transaction})
   return _bud
 }
@@ -164,32 +165,35 @@ module.exports = { // please add support for positions, budId
     for (const dbObj of dbObjs) {
       const objData = dbObj.dataValues
       const objId = objData.objId
-      toResObjs[objId] = {
-        word: objData.word,
-        position: {
-          x: objData.x,
-          y: objData.y
-        },
-        sounds: [],
-        contexts: [],
-        definitions: [],
-        examples: []
-      }
-      const budDetails = await getBudDetails(objData.id)
-      for (const budDetail of budDetails) {
-        const budDetailData = budDetail.dataValues
-        const budDetailId = budDetailData.id
-        toResObjs[objId].sounds.push(budDetailData.sound)
-        toResObjs[objId].definitions.push(budDetailData.definition)
-        toResObjs[objId].contexts.push(budDetailData.context)
-        const examplesObj = []
-        const examples = await getExamples(budDetailId)
-        for (const example of examples) {
-          examplesObj.push(example.dataValues.example)
+      switch (objData.type) {
+        case "bud":
+          toResObjs[objId] = {
+            word: objData.word,
+            position: {
+              x: objData.x,
+              y: objData.y
+            },
+            sounds: [],
+            contexts: [],
+            definitions: [],
+            examples: []
+          }
+          const budDetails = await getBudDetails(objData.id)
+          for (const budDetail of budDetails) {
+            const budDetailData = budDetail.dataValues
+            const budDetailId = budDetailData.id
+            toResObjs[objId].sounds.push(budDetailData.sound)
+            toResObjs[objId].definitions.push(budDetailData.definition)
+            toResObjs[objId].contexts.push(budDetailData.context)
+            const examplesObj = []
+            const examples = await getExamples(budDetailId)
+            for (const example of examples) {
+              examplesObj.push(example.dataValues.example)
+            }
+            toResObjs[objId].examples.push(examplesObj)
+          }
         }
-        toResObjs[objId].examples.push(examplesObj)
       }
-    }
     req.body.spoodawebData = toResObjs
     next()
   },
@@ -253,73 +257,3 @@ module.exports = { // please add support for positions, budId
     }
   }
 }
-
-/*
-
-"0": {
-  "word": "毛泽东",
-  "position": {
-      "x": 80,
-      "y": 70
-  },
-  "sounds": [
-      "pronounciation test",
-      "asdf"
-  ],
-  "contexts": [
-      "this is a context for testing",
-      "this is the second context"
-  ],
-  "definitions": [
-      "some guy",
-      "testing"
-  ],
-  "examples": [
-      [
-          "does this link up with the context???",
-          "does this too?"
-      ],
-      [
-          "this should go to the second context"
-      ]
-  ]
-}
-
-"1": {
-  "name": "毛泽东",
-  "sounds": [
-      "pronounciation test",
-      "asdf"
-  ],
-  "contexts": [
-      "this is a context for testing",
-      "this is the second context"
-  ],
-  "definitions": [
-      "some guy",
-      "testing"
-  ],
-  "examples": [
-      [
-          "does this link up with the context???",
-          "does this too?"
-      ],
-      [
-          "this should go to the second context"
-      ]
-  ],
-  "links": {
-      "1": 0.1,
-      "2": 1,
-      "3": 0.65
-  },
-  "position": {
-  "x": 80,
-  "y": 70
-  },
-  "type": "bud",
-  "operation": "add"
-  }
-}
-
-*/

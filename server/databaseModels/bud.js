@@ -34,6 +34,10 @@ module.exports = (sequelize, DataTypes) => {
       deletedAt: {
         type: DataTypes.DATE,
         allowNull: true
+      },
+      type: {
+        type: DataTypes.STRING,
+        allowNull: false
       }
     }
   )
