@@ -27,10 +27,21 @@ router.post(
   errorHandler
 )
 
+const getSpoodawebObjs = require('../controllerFuncs/getSpoodawebObjs')
+
+router.post(
+  '/get/objects',
+  getSpoodawebObjs.validate,
+  jwtToken.authenticateToken,
+  editSpoodawebModel.get,
+  getSpoodawebObjs.end,
+  errorHandler
+)
+
 const getSpoodawebs = require('../controllerFuncs/getSpoodawebs')
 
 router.get(
-  '/get',
+  '/get/spoodawebs',
   jwtToken.authenticateToken,
   spoodawebModel.get,
   getSpoodawebs.end,

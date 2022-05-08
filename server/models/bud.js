@@ -1,4 +1,4 @@
-const { sequelize, DataTypes } = require('../database')
+const { sequelize, DataTypes, Op } = require('../database')
 const Bud = require('../databaseModels/bud')(sequelize, DataTypes)
 const BudDetails = require('../databaseModels/BudDetails/budDetails')(sequelize, DataTypes)
 const Example = require('../databaseModels/BudDetails/examples')(sequelize, DataTypes)
@@ -72,14 +72,6 @@ async function createBudDetails(budId, definition, sound, context, transaction) 
   return budDetails
 }
 
-async function createContext(budDetailsId, context, transaction) {
-  const _context = await Context.create({
-    fk_bud_details_id: budDetailsId,
-    context: context
-  }, {transaction: transaction})
-  return _context
-}
-
 async function createExample(budDetailsId, example, transaction) {
   await Example.create({
     fk_budDetails_id: budDetailsId,
@@ -124,7 +116,83 @@ async function editExample(contextId, example, transaction) {
   }, {transaction: transaction})
 }
 
+async function getObjsWithinRange(startPos, endPos) {
+  console.log(startPos, endPos)
+  const objs = await Bud.findAll({
+    where: {
+      x: {
+        [Op.and]: {
+          [Op.gt]: startPos[0],
+          [Op.lt]: endPos[0],
+        }
+      },
+      y: {
+        [Op.and]: {
+          [Op.gt]: startPos[1],
+          [Op.lt]: endPos[1],
+        }
+      }
+    }
+  }) 
+  return objs
+}
+
+async function getBudDetails(id) {
+  const budDetails = await BudDetails.findAll({
+    where: {
+      fk_bud_id: id
+    }
+  }) 
+  return budDetails
+}
+
+async function getExamples(id) {
+  const examples = Example.findAll({
+    where: {
+      fk_budDetails_id: id
+    }
+  })
+  return examples
+}
+
 module.exports = { // please add support for positions, budId
+  async get (req, res, next) {
+    const toResObjs = {}
+    const startPos = req.body.startPos
+    const endPos = req.body.endPos
+    const dbObjs = await getObjsWithinRange(startPos, endPos)
+    for (const dbObj of dbObjs) {
+      const objData = dbObj.dataValues
+      const objId = objData.objId
+      toResObjs[objId] = {
+        word: objData.word,
+        position: {
+          x: objData.x,
+          y: objData.y
+        },
+        sounds: [],
+        contexts: [],
+        definitions: [],
+        examples: []
+      }
+      const budDetails = await getBudDetails(objData.id)
+      for (const budDetail of budDetails) {
+        const budDetailData = budDetail.dataValues
+        const budDetailId = budDetailData.id
+        toResObjs[objId].sounds.push(budDetailData.sound)
+        toResObjs[objId].definitions.push(budDetailData.definition)
+        toResObjs[objId].contexts.push(budDetailData.context)
+        const examplesObj = []
+        const examples = await getExamples(budDetailId)
+        for (const example of examples) {
+          examplesObj.push(example.dataValues.example)
+        }
+        toResObjs[objId].examples.push(examplesObj)
+      }
+    }
+    req.body.spoodawebData = toResObjs
+    next()
+  },
   async edit (req, res, next) {
     let transaction
     try {
@@ -185,3 +253,73 @@ module.exports = { // please add support for positions, budId
     }
   }
 }
+
+/*
+
+"0": {
+  "word": "毛泽东",
+  "position": {
+      "x": 80,
+      "y": 70
+  },
+  "sounds": [
+      "pronounciation test",
+      "asdf"
+  ],
+  "contexts": [
+      "this is a context for testing",
+      "this is the second context"
+  ],
+  "definitions": [
+      "some guy",
+      "testing"
+  ],
+  "examples": [
+      [
+          "does this link up with the context???",
+          "does this too?"
+      ],
+      [
+          "this should go to the second context"
+      ]
+  ]
+}
+
+"1": {
+  "name": "毛泽东",
+  "sounds": [
+      "pronounciation test",
+      "asdf"
+  ],
+  "contexts": [
+      "this is a context for testing",
+      "this is the second context"
+  ],
+  "definitions": [
+      "some guy",
+      "testing"
+  ],
+  "examples": [
+      [
+          "does this link up with the context???",
+          "does this too?"
+      ],
+      [
+          "this should go to the second context"
+      ]
+  ],
+  "links": {
+      "1": 0.1,
+      "2": 1,
+      "3": 0.65
+  },
+  "position": {
+  "x": 80,
+  "y": 70
+  },
+  "type": "bud",
+  "operation": "add"
+  }
+}
+
+*/

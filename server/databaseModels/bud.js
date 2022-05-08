@@ -15,10 +15,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true
       },
-      sound: {
-        type: DataTypes.STRING,
-        allowNull: true
-      },
       x: {
         type: DataTypes.INTEGER,
         allowNull: false
