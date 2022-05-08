@@ -10,7 +10,9 @@ import * as OtherElements from './OtherElements'
 import * as Shapes from './Shapes'
 import { Background } from './Background'
 
-import spoodawebData from './TestingSpoodawebData'
+import api from '../../services/api'
+
+// import spoodawebData from './TestingSpoodawebData'
 
 import Konva from 'konva'
 import * as ReactKonva from 'react-konva'
@@ -238,37 +240,39 @@ function AddNewObjs({
     setToggleCanDragLine,
   }) { // to add some updating of positions AND maybe index in the object itself to be specific
   useEffect(() => {
-    const newRendered = [...rendered]
-    addObjs(objsToUpdate)
-    Object.entries(objsToUpdate).forEach(([objId, obj]) => {
-      if (obj.type === 'bud') {
-        newRendered.push(
-          <Shapes.Bud
-            x={obj.position.x}
-            y={obj.position.y}
-            key={newRendered.length}
-            objId={objId}
-            setHoverBudBorder={setHoverBudBorder}
-            ></Shapes.Bud>
-        )
-      } else if (obj.type === 'silk') {
-        newRendered.push(
-          <Shapes.Silk
-            points={obj.positions}
-            lineCircleMove={lineCircleMove}
-            key={newRendered.length}
-            setDraggingLine={setDraggingLine}
-            setSelected={setSelected}
-            setToggleCanDragLine={setToggleCanDragLine}
-            objId={objId}></Shapes.Silk>
-        )
-      } else {
-        console.warn('Error: object type not specified')
+    if (objsToUpdate) {
+      const newRendered = [...rendered]
+      addObjs(objsToUpdate)
+      Object.entries(objsToUpdate).forEach(([objId, obj]) => {
+        if (obj.type === 'bud') {
+          newRendered.push(
+            <Shapes.Bud
+              x={obj.position.x}
+              y={obj.position.y}
+              key={newRendered.length}
+              objId={objId}
+              setHoverBudBorder={setHoverBudBorder}
+              ></Shapes.Bud>
+          )
+        } else if (obj.type === 'silk') {
+          newRendered.push(
+            <Shapes.Silk
+              points={obj.positions}
+              lineCircleMove={lineCircleMove}
+              key={newRendered.length}
+              setDraggingLine={setDraggingLine}
+              setSelected={setSelected}
+              setToggleCanDragLine={setToggleCanDragLine}
+              objId={objId}></Shapes.Silk>
+          )
+        } else {
+          console.warn('Error: object type not specified')
+        }
+      })
+      for (const objId in objsToUpdate) {
       }
-    })
-    for (const objId in objsToUpdate) {
+      setRendered(newRendered)
     }
-    setRendered(newRendered)
   }, [ objsToUpdate ])
   return <></>
 }
@@ -280,19 +284,38 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   I realised that when you update the objects rendered, it just adds more objects to the canvas instead of updating them.
   For these reasons (and that I don't want to waste more time changing back to Konva), global data is stored in the Konva main layer.
   */
-
   const navigate = useNavigate()
   const [ dragging, setDragging ] = useState(false)
   const [ toggleCanDragLine, setToggleCanDragLine ] = useState(false)
   const [ hoverBudBorder, setHoverBudBorder ] = useState(false)
-  const [ objsToUpdate, setObjsToUpdate ] = useState(spoodawebData)
+  const [ objsToUpdate, setObjsToUpdate ] = useState()
   const [ rendered, setRendered ] = useState([])
   const [ draggingLine, setDraggingLine ] = useState(false)
   const [ selected, setSelected ] = useState()
   const [ canvasWidth, setCanvasWidth ] = useState(window.screen.width + 2 * 2000)
   const [ canvasHeight, setCanvasHeight ] = useState(window.screen.height + 2 * 2000)
   
-  useEffect(() => {
+  useEffect(async () => {
+    const rootPos = getRootPos()
+    const width = getStage().getAttr('width')
+    const height = getStage().getAttr('height')
+    console.log(getStage())
+    const urlString = window.location.href
+    let paramString = urlString.split('?')[1];
+    let queryString = new URLSearchParams(paramString);
+    console.log(queryString)
+    const objs = await api.post('/webs/get/objects', {
+      spoodawebId: null,
+      startPos: {
+        x: rootPos.x - width,
+        y: rootPos.y - height,
+      },
+      endPos: {
+        x: width * 2,
+        y: height * 2 
+      }
+    })
+    console.log(objs)
     const mainLayer = getMainLayer()
     mainLayer.setAttr('objs', spoodawebData)
     mainLayer.setAttr('nextObjId', Object.keys(spoodawebData).length) // probably should be the next highest objId instead of this

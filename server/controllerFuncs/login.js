@@ -44,12 +44,13 @@ module.exports = {
     }
   },
   async databaseHandler (req, res, next) {
+    console.log(req.body)
     console.log(!(req.body.error))
     if (!(req.body.error)) {
       const user = req.body.dbUser
       req.body.dbPassword = user.dataValues.password
       req.body.id = user.dataValues.id
-      req.body.username = user.dataValues.username
+      req.body.Username = user.dataValues.username
       next()
       return
     }

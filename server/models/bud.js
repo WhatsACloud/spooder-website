@@ -1,4 +1,6 @@
 const { sequelize, DataTypes, Op } = require('../database')
+const User = require('../databaseModels/user')(sequelize, DataTypes)
+const Spoodaweb = require('../databaseModels/spoodaweb')(sequelize, DataTypes)
 const Bud = require('../databaseModels/bud')(sequelize, DataTypes)
 const BudDetails = require('../databaseModels/BudDetails/budDetails')(sequelize, DataTypes)
 const Example = require('../databaseModels/BudDetails/examples')(sequelize, DataTypes)
@@ -117,7 +119,7 @@ async function editExample(contextId, example, transaction) {
   }, {transaction: transaction})
 }
 
-async function getObjsWithinRange(startPos, endPos) {
+async function getObjsWithinRange(spoodawebId, startPos, endPos) {
   console.log(startPos, endPos)
   const objs = await Bud.findAll({
     where: {
@@ -132,10 +134,29 @@ async function getObjsWithinRange(startPos, endPos) {
           [Op.gt]: startPos[1],
           [Op.lt]: endPos[1],
         }
-      }
+      },
+      fk_spoodaweb_id: spoodawebId
     }
   }) 
   return objs
+}
+
+async function getUser(id) {
+  const user = await User.findOne({
+    where: {
+      id: id
+    }
+  })
+  return user
+}
+
+async function getSpoodaweb(spoodawebId) {
+  const spoodaweb = await Spoodaweb.findOne({
+    where: {
+      id: spoodawebId
+    }
+  })
+  return spoodaweb
 }
 
 async function getBudDetails(id) {
@@ -161,7 +182,13 @@ module.exports = { // please add support for positions, budId
     const toResObjs = {}
     const startPos = req.body.startPos
     const endPos = req.body.endPos
-    const dbObjs = await getObjsWithinRange(startPos, endPos)
+    const user = (await getUser(req.body.jwtTokenData.userId))
+    if (!user) next(error.create('user does not exist'))
+    const userId = user.dataValues.id
+    const spoodaweb = await getSpoodaweb(req.body.spoodawebId)
+    if (!(userId === spoodaweb.dataValues.fk_user_id)) next(error.create('requested spoodaweb is not under user'))
+    const spoodawebId = spoodaweb.dataValues.id
+    const dbObjs = await getObjsWithinRange(spoodawebId, startPos, endPos)
     for (const dbObj of dbObjs) {
       const objData = dbObj.dataValues
       const objId = objData.objId

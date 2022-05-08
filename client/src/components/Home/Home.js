@@ -11,7 +11,7 @@ import Authorizer from '../Shared/Authorizer'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 
-import Layout from '../layout';
+
 
 const spoodawebSchema = object({
   title: string().required('Title is a required field')
@@ -19,7 +19,7 @@ const spoodawebSchema = object({
 
 async function GetSpoodawebPreviews(setSpoodawebPreviews) {
   try {
-    const webs = await api.get('/webs/get')
+    const webs = await api.get('/webs/get/spoodawebs')
     setSpoodawebPreviews(webs.data)
     console.log('api call!')
   } catch(err) {
