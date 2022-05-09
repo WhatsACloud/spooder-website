@@ -65,21 +65,36 @@ async function createBud(spoodawebId, word, objId, position, transaction) {
   return _bud
 }
 
-async function createAttachedTo(attachedToId, attachedTo, fk_bud_id, transaction) {
+async function createAttachedTo(attachedToId, id, fk_bud_id, transaction) {
   await AttachedTo.create({
     attachedToId: attachedToId,
-    attachedTo: attachedTo,
-    fk_bud_id: fk_bud_id
+    fk_bud_id: fk_bud_id,
+    arrID: id
   }, {transaction: transaction})
 }
 
-async function createBudDetails(budId, definition, sound, context, link, transaction) {
+async function editAttachedTo(budId, id, attachedToId, transaction) {
+  const _attachedTo = await AttachedTo.findOne({
+    where: {
+      fk_bud_id: budId,
+      arrID: id
+    }
+  })
+  if (_attachedTo === null) return null 
+  await _attachedTo.update({
+    attachedToId: attachedToId
+  }, {transaction: transaction})
+  return _attachedTo
+}
+
+async function createBudDetails(budId, id, definition, sound, context, link, transaction) {
   const budDetails = await BudDetails.create({
     fk_bud_id: budId,
     definition: definition,
     sound: sound,
     link: link,
-    context: context
+    context: context,
+    arrID: id
   }, {transaction: transaction})
   return budDetails
 }
@@ -115,13 +130,15 @@ async function editBud(spoodawebId, objId, word, transaction) {
   return bud 
 }
 
-async function editBudDetails(budId, definitionName, pronounciation, transaction) {
-  const budDetails = await BudDetails.findOne({ where: { fk_bud_id: budId }})
+async function editBudDetails(budId, id, definition, sound, link, context, transaction) {
+  const budDetails = await BudDetails.findOne({ where: { fk_bud_id: budId, arrID: id }})
   if (budDetails === null) return null 
-  budDetails.update({
+  await budDetails.update({
     fk_bud_id: budId,
-    definition: definitionName,
-    pronounciation: pronounciation
+    definition: definition,
+    sound: sound,
+    link: link,
+    context: context
   }, {transaction: transaction})
   return budDetails
 }
@@ -348,7 +365,7 @@ module.exports = { // please add support for positions, budId
                 const budId = _budId.dataValues.id
                 for (let i = 0; i < obj.definitions.length; i++) {
                   const definition = obj.definitions[i]
-                  const _budDetailsId = await createBudDetails(budId, definition.definition, definition.sound, definition.context, definition.link, transaction)
+                  const _budDetailsId = await createBudDetails(budId, i, definition.definition, definition.sound, definition.context, definition.link, transaction)
                   const budDetailsId = _budDetailsId.dataValues.id
                   const examples = definition.examples
                   for (const example of examples) {
@@ -356,8 +373,8 @@ module.exports = { // please add support for positions, budId
                   }
                 }
                 let i = 0
-                for (const [ attachedToId, attachedTo ] of Object.entries(obj.attachedTo)) {
-                  await createAttachedTo(attachedToId, attachedTo, budId, transaction)
+                for (const attachedToId of obj.attachedTo) {
+                  await createAttachedTo(attachedToId, i, budId, transaction)
                   i++
                 }
                 break
@@ -369,28 +386,23 @@ module.exports = { // please add support for positions, budId
           case "sub":
             await markBudForDeletion(objId, transaction)
           case "edit":
-            objId = clientObjId
-            const bud = await editBud(spoodawebId, objId, obj.name, transaction)
-            if (bud === null) throw error.create('bud does not exist')
-            const budId = bud.dataValues.id
-            // console.log(obj)
-            for (const definitionName of Object.keys(obj)) {
-              const definition = obj[definitionName]
-              // console.log(definition, definitionName)
-              const _budDetailsId = await editBudDetails(budId, definitionName, definition.pronounciation, transaction)
-              if (_budDetailsId === null) throw error.create('details does not exist')
-              const budDetailsId = _budDetailsId.dataValues.id
-              for (let i = 0; i < definition.contexts.length; i++) {
-                const context = definition.contexts[i]
-                const _contextId = await editContext(budDetailsId, context, transaction)
-                if (context === null) throw error.create('context does not exist')
-                const contextId = _contextId.dataValues.id
-                for (const exampleNo in definition.examples[i]) {
-                  const example = definition.examples[i][exampleNo]
-                  await editExample(contextId, example, transaction)
-                  if (example === null) throw error.create('example does not exist')
+            switch (obj.type) {
+              case "bud":
+                objId = clientObjId
+                const bud = await editBud(spoodawebId, objId, obj.name, transaction)
+                if (bud === null) throw error.create('bud does not exist')
+                const budId = bud.dataValues.id
+                for (const i in obj.definitions) {
+                  const definition = obj.definitions[i]
+                  const _budDetailsId = await editBudDetails(budId, i, definition.definition, definition.sound, definition.link, definition.context, transaction)
+                  if (_budDetailsId === null) throw error.create('details does not exist')
                 }
-              }
+                let i = 0
+                for (const attachedToId of obj.attachedTo) {
+                  await editAttachedTo(budId, i, attachedToId, transaction)
+                  i++
+                }
+                break
             }
         }
       }

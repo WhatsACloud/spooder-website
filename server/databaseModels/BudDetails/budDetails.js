@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
               key: 'id'
             }
         },
+        arrID: {
+          type: DataTypes.INTEGER,
+          allowNull: false
+        },
         definition: {
             type: DataTypes.STRING,
             allowNull: false 

@@ -11,11 +11,11 @@ module.exports = (sequelize, DataTypes) => {
             key: 'id'
           }
       },
-      attachedToId: {
+      arrID: {
         type: DataTypes.INTEGER,
-        allowNull: false 
+        allowNull: false
       },
-      attachedTo: {
+      attachedToId: {
         type: DataTypes.INTEGER,
         allowNull: false 
       },
