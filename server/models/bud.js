@@ -114,6 +114,25 @@ async function createSilk(spoodawebId, positions, strength, objId, attachedTo1, 
   return silk
 }
 
+async function editSilk(spoodawebId, positions, strength, objId, attachedTo1, attachedTo2, transaction) {
+  const silk = await Silk.findOne({
+    where: {
+     fk_spoodaweb_id: spoodawebId,
+     objId: objId 
+    }
+  })
+  await silk.update({
+    x1: positions[0].x,
+    y1: positions[0].y,
+    x2: positions[1].x,
+    y2: positions[1].y,
+    attachedTo1: attachedTo1,
+    attachedTo2: attachedTo2,
+    strength: strength
+  }, {transaction: transaction})
+  return silk
+}
+
 async function createExample(budDetailsId, example, transaction) {
   await Example.create({
     fk_budDetails_id: budDetailsId,
@@ -403,6 +422,9 @@ module.exports = { // please add support for positions, budId
                   i++
                 }
                 break
+              case "silk":
+                objId = clientObjId
+                const silk = await editSilk(spoodawebId, obj.positions, obj.strength, objId, obj.attachedTo1, obj.attachedTo2, transaction)
             }
         }
       }
