@@ -140,11 +140,13 @@ async function createExample(budDetailsId, example, transaction) {
   }, {transaction: transaction})
 }
 
-async function editBud(spoodawebId, objId, word, transaction) {
+async function editBud(spoodawebId, objId, word, position, transaction) {
   const bud = await Bud.findOne({ where: { fk_spoodaweb_id: spoodawebId, objId: objId }})
   if (bud === null) return null 
   await bud.update({
-    word: word
+    word: word,
+    x: position.x,
+    y: position.y
   }, {transaction: transaction})
   return bud 
 }
@@ -302,7 +304,7 @@ module.exports = { // please add support for positions, budId
             x: objData.x,
             y: objData.y
           },
-          attachedTo: {}, 
+          attachedTo: [], 
           type: "bud"
         }
         const budDetails = await getBudDetails(objData.id)
@@ -335,7 +337,7 @@ module.exports = { // please add support for positions, budId
         }) 
         for (const attachedTo of attachedTos) {
           const attachedToData = attachedTo.dataValues
-          toResObjs[objId].attachedTo[attachedToData.attachedToId] = attachedToData.attachedTo
+          toResObjs[objId].attachedTo.push(attachedToData.attachedToId)
         }
       }
       const dbSilkObjs = await getSilksWithinRange(spoodawebId, startPos, endPos)
@@ -408,7 +410,7 @@ module.exports = { // please add support for positions, budId
             switch (obj.type) {
               case "bud":
                 objId = clientObjId
-                const bud = await editBud(spoodawebId, objId, obj.name, transaction)
+                const bud = await editBud(spoodawebId, objId, obj.name, obj.position, transaction)
                 if (bud === null) throw error.create('bud does not exist')
                 const budId = bud.dataValues.id
                 for (const i in obj.definitions) {
