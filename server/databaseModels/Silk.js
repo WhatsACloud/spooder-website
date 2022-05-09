@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const Bud = sequelize.define(
-    'Bud',
+  const Silk = sequelize.define(
+    'Silk',
     {
       fk_spoodaweb_id: {
         type: DataTypes.UUID,
@@ -11,15 +11,31 @@ module.exports = (sequelize, DataTypes) => {
           key: 'id'
         }
       },
-      word: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      x: {
+      attachedTo1: {
         type: DataTypes.INTEGER,
         allowNull: false
       },
-      y: {
+      attachedTo2: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      strength: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      x1: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      y1: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      x2: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      y2: {
         type: DataTypes.INTEGER,
         allowNull: false
       },
@@ -33,9 +49,8 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
   )
-  Bud.associate = (models) => {
-    Bud.belongsTo(models.Spoodawebs)
-    Bud.hasMany(models.BudDetails, {foreignKey: DataTypes.UUID})
+  Silk.associate = (models) => {
+    Silk.belongsTo(models.Spoodawebs)
   }
-  return Bud
+  return Silk 
 }

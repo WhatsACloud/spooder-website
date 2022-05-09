@@ -2,6 +2,7 @@ const { sequelize, DataTypes, Op } = require('../database')
 const User = require('../databaseModels/user')(sequelize, DataTypes)
 const Spoodaweb = require('../databaseModels/spoodaweb')(sequelize, DataTypes)
 const Bud = require('../databaseModels/bud')(sequelize, DataTypes)
+const Silk = require('../databaseModels/Silk')(sequelize, DataTypes)
 const BudDetails = require('../databaseModels/BudDetails/budDetails')(sequelize, DataTypes)
 const Example = require('../databaseModels/BudDetails/examples')(sequelize, DataTypes)
 const AttachedTo = require('../databaseModels/BudDetails/AttachedTo')(sequelize, DataTypes)
@@ -83,6 +84,21 @@ async function createBudDetails(budId, definition, sound, context, link, transac
   }, {transaction: transaction})
   console.log(budDetails)
   return budDetails
+}
+
+async function createSilk(spoodawebId, positions, strength, objId, attachedTo1, attachedTo2, transaction) {
+  const silk = await Silk.create({
+    fk_spoodaweb_id: spoodawebId,
+    x1: positions[0].x,
+    y1: positions[0].y,
+    x2: positions[1].x,
+    y2: positions[1].y,
+    attachedTo1: attachedTo1,
+    attachedTo2: attachedTo2,
+    objId: objId,
+    strength: strength
+  }, {transaction: transaction})
+  return silk
 }
 
 async function createExample(budDetailsId, example, transaction) {
@@ -257,52 +273,61 @@ module.exports = { // please add support for positions, budId
       let objId = await getNextObjId(spoodawebId)
       for (const clientObjId in data) {
         const obj = data[clientObjId]
-        if (obj.operation === "add") {
-          const _budId = await createBud(req.body.spoodawebId, obj.name, objId, obj.position, transaction)
-          objId += 1
-          const budId = _budId.dataValues.id
-          for (let i = 0; i < obj.definitions.length; i++) {
-            const definition = obj.definitions[i]
-            const _budDetailsId = await createBudDetails(budId, definition.definition, definition.sound, definition.context, definition.link, transaction)
-            const budDetailsId = _budDetailsId.dataValues.id
-            const examples = definition.examples
-            for (const example of examples) {
-              console.log("example", example)
-              await createExample(budDetailsId, example, transaction)
+        switch (obj.operation) {
+          case "add":
+            switch (obj.type) {
+              case "bud":
+                const _budId = await createBud(req.body.spoodawebId, obj.name, objId, obj.position, transaction)
+                objId += 1
+                const budId = _budId.dataValues.id
+                for (let i = 0; i < obj.definitions.length; i++) {
+                  const definition = obj.definitions[i]
+                  const _budDetailsId = await createBudDetails(budId, definition.definition, definition.sound, definition.context, definition.link, transaction)
+                  const budDetailsId = _budDetailsId.dataValues.id
+                  const examples = definition.examples
+                  for (const example of examples) {
+                    console.log("example", example)
+                    await createExample(budDetailsId, example, transaction)
+                  }
+                }
+                let i = 0
+                for (const [ attachedToId, attachedTo ] of Object.entries(obj.attachedTo)) {
+                  console.log(attachedToId, attachedTo)
+                  await createAttachedTo(attachedToId, attachedTo, budId, transaction)
+                  i++
+                }
+                break
+              case "silk":
+                const silk = await createSilk(spoodawebId, obj.positions, obj.strength, objId, obj.attachedTo1, obj.attachedTo2, transaction) 
+                objId++
             }
-          }
-          let i = 0
-          for (const [ attachedToId, attachedTo ] of Object.entries(obj.attachedTo)) {
-            console.log(attachedToId, attachedTo)
-            await createAttachedTo(attachedToId, attachedTo, budId, transaction)
-            i++
-          }
-        } else if (obj.operation === "sub") {
-          await markBudForDeletion(objId, transaction)
-        } else if (obj.operation === "edit") {
-          objId = clientObjId
-          const bud = await editBud(spoodawebId, objId, obj.name, transaction)
-          if (bud === null) throw error.create('bud does not exist')
-          const budId = bud.dataValues.id
-          // console.log(obj)
-          for (const definitionName of Object.keys(obj)) {
-            const definition = obj[definitionName]
-            // console.log(definition, definitionName)
-            const _budDetailsId = await editBudDetails(budId, definitionName, definition.pronounciation, transaction)
-            if (_budDetailsId === null) throw error.create('details does not exist')
-            const budDetailsId = _budDetailsId.dataValues.id
-            for (let i = 0; i < definition.contexts.length; i++) {
-              const context = definition.contexts[i]
-              const _contextId = await editContext(budDetailsId, context, transaction)
-              if (context === null) throw error.create('context does not exist')
-              const contextId = _contextId.dataValues.id
-              for (const exampleNo in definition.examples[i]) {
-                const example = definition.examples[i][exampleNo]
-                await editExample(contextId, example, transaction)
-                if (example === null) throw error.create('example does not exist')
+            break
+          case "sub":
+            await markBudForDeletion(objId, transaction)
+          case "edit":
+            objId = clientObjId
+            const bud = await editBud(spoodawebId, objId, obj.name, transaction)
+            if (bud === null) throw error.create('bud does not exist')
+            const budId = bud.dataValues.id
+            // console.log(obj)
+            for (const definitionName of Object.keys(obj)) {
+              const definition = obj[definitionName]
+              // console.log(definition, definitionName)
+              const _budDetailsId = await editBudDetails(budId, definitionName, definition.pronounciation, transaction)
+              if (_budDetailsId === null) throw error.create('details does not exist')
+              const budDetailsId = _budDetailsId.dataValues.id
+              for (let i = 0; i < definition.contexts.length; i++) {
+                const context = definition.contexts[i]
+                const _contextId = await editContext(budDetailsId, context, transaction)
+                if (context === null) throw error.create('context does not exist')
+                const contextId = _contextId.dataValues.id
+                for (const exampleNo in definition.examples[i]) {
+                  const example = definition.examples[i][exampleNo]
+                  await editExample(contextId, example, transaction)
+                  if (example === null) throw error.create('example does not exist')
+                }
               }
             }
-          }
         }
       }
       await transaction.commit()

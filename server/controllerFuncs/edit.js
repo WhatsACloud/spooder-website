@@ -4,13 +4,6 @@ const Spoodaweb = require('../databaseModels/spoodaweb')(sequelize, DataTypes)
 
 const errMsg = 'The data received is invalid. This is probably a client side error.'
 
-const required_att = [
-  "name",
-  "definitions",
-  "position",
-  "type"
-]
-
 module.exports = {
   async validate (req, res, next) {
     try {
@@ -25,11 +18,6 @@ module.exports = {
         switch (bud.operation) {
           case undefined:
             return next(error.create(errMsg))
-          case 'add':
-            required_att.forEach(att => {
-              if (!(att in bud)) return next(error.create(errMsg, {debug: att, statusNo: 400}))
-            })
-            break
           case 'sub':
             if (bud.data.id === undefined) return next(error.create(errMsg, {statusNo: 400}))
             break
