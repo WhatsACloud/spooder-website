@@ -1,8 +1,13 @@
 const budSample = {
-  "pronounciation": "",
-  "contexts": [],
-  "examples": [],
-  "links": {},
+  "definitions": [
+    {
+      "sound": "",
+      "contexts": [],
+      "examples": [],
+      "link": {}
+    }
+  ],
+  "attachedTo": [],
   "position": {},
   "type": "bud", // bud silk
   "operation": 'add' // add edit minus, default add,
@@ -11,8 +16,10 @@ const budSample = {
 export { budSample as budSample }
 
 const silkSample = {
-  "positions": {},
-  "rootPosIndex": null,
+  "positions": [],
+  "strength": 0,
+  "attachedTo1": null,
+  "attachedTo2": null,
   "type": "silk",
   "operation": 'add'
 }

@@ -179,50 +179,57 @@ async function getExamples(id) {
 
 module.exports = { // please add support for positions, budId
   async get (req, res, next) {
-    const toResObjs = {}
-    const startPos = req.body.startPos
-    const endPos = req.body.endPos
-    const user = (await getUser(req.body.jwtTokenData.userId))
-    if (!user) next(error.create('user does not exist'))
-    const userId = user.dataValues.id
-    const spoodaweb = await getSpoodaweb(req.body.spoodawebId)
-    if (!(userId === spoodaweb.dataValues.fk_user_id)) next(error.create('requested spoodaweb is not under user'))
-    const spoodawebId = spoodaweb.dataValues.id
-    const dbObjs = await getObjsWithinRange(spoodawebId, startPos, endPos)
-    for (const dbObj of dbObjs) {
-      const objData = dbObj.dataValues
-      const objId = objData.objId
-      switch (objData.type) {
-        case "bud":
-          toResObjs[objId] = {
-            word: objData.word,
-            position: {
-              x: objData.x,
-              y: objData.y
-            },
-            sounds: [],
-            contexts: [],
-            definitions: [],
-            examples: []
-          }
-          const budDetails = await getBudDetails(objData.id)
-          for (const budDetail of budDetails) {
-            const budDetailData = budDetail.dataValues
-            const budDetailId = budDetailData.id
-            toResObjs[objId].sounds.push(budDetailData.sound)
-            toResObjs[objId].definitions.push(budDetailData.definition)
-            toResObjs[objId].contexts.push(budDetailData.context)
-            const examplesObj = []
-            const examples = await getExamples(budDetailId)
-            for (const example of examples) {
-              examplesObj.push(example.dataValues.example)
+    try {
+      const toResObjs = {}
+      const startPos = req.body.startPos
+      const endPos = req.body.endPos
+      const user = (await getUser(req.body.jwtTokenData.userId))
+      console.log(user)
+      if (!user) return error.create('user does not exist')
+      const userId = user.dataValues.id
+      const spoodaweb = await getSpoodaweb(req.body.spoodawebId)
+      if (spoodaweb === null) return error.create('spoodaweb does not exist')
+      if (!(userId === spoodaweb.dataValues.fk_user_id)) return error.create('requested spoodaweb is not under user')
+      const spoodawebId = spoodaweb.dataValues.id
+      const dbObjs = await getObjsWithinRange(spoodawebId, startPos, endPos)
+      for (const dbObj of dbObjs) {
+        const objData = dbObj.dataValues
+        const objId = objData.objId
+        switch (objData.type) {
+          case "bud":
+            toResObjs[objId] = {
+              word: objData.word,
+              position: {
+                x: objData.x,
+                y: objData.y
+              },
+              sounds: [],
+              contexts: [],
+              definitions: [],
+              examples: []
             }
-            toResObjs[objId].examples.push(examplesObj)
+            const budDetails = await getBudDetails(objData.id)
+            for (const budDetail of budDetails) {
+              const budDetailData = budDetail.dataValues
+              const budDetailId = budDetailData.id
+              toResObjs[objId].sounds.push(budDetailData.sound)
+              toResObjs[objId].definitions.push(budDetailData.definition)
+              toResObjs[objId].contexts.push(budDetailData.context)
+              const examplesObj = []
+              const examples = await getExamples(budDetailId)
+              for (const example of examples) {
+                examplesObj.push(example.dataValues.example)
+              }
+              toResObjs[objId].examples.push(examplesObj)
+            }
           }
         }
-      }
-    req.body.spoodawebData = toResObjs
-    next()
+      req.body.spoodawebData = toResObjs
+      next()
+    } catch (err) {
+      console.log('get spoodawebs err', err)
+      next(err)
+    }
   },
   async edit (req, res, next) {
     let transaction

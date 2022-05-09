@@ -299,13 +299,11 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
     const rootPos = getRootPos()
     const width = getStage().getAttr('width')
     const height = getStage().getAttr('height')
-    console.log(getStage())
-    const urlString = window.location.href
+    const urlString = window.location.search
     let paramString = urlString.split('?')[1];
     let queryString = new URLSearchParams(paramString);
-    console.log(queryString)
     const objs = await api.post('/webs/get/objects', {
-      spoodawebId: null,
+      spoodawebId: queryString.get('id'),
       startPos: {
         x: rootPos.x - width,
         y: rootPos.y - height,
@@ -316,8 +314,8 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
       }
     })
     console.log(objs)
+    const spoodawebData = objs.data.spoodawebData
     const mainLayer = getMainLayer()
-    mainLayer.setAttr('objs', spoodawebData)
     mainLayer.setAttr('nextObjId', Object.keys(spoodawebData).length) // probably should be the next highest objId instead of this
     mainLayer.setAttr('newObjs', {})
     document.addEventListener('keydown', preventZoom)
