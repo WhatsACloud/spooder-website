@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       word: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: false
       },
       x: {
         type: DataTypes.INTEGER,
@@ -22,10 +22,6 @@ module.exports = (sequelize, DataTypes) => {
       y: {
         type: DataTypes.INTEGER,
         allowNull: false
-      },
-      context: {
-        type: DataTypes.TEXT,
-        allowNull: true 
       },
       objId: {
         type: DataTypes.UUID,

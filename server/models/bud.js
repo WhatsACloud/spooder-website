@@ -4,6 +4,7 @@ const Spoodaweb = require('../databaseModels/spoodaweb')(sequelize, DataTypes)
 const Bud = require('../databaseModels/bud')(sequelize, DataTypes)
 const BudDetails = require('../databaseModels/BudDetails/budDetails')(sequelize, DataTypes)
 const Example = require('../databaseModels/BudDetails/examples')(sequelize, DataTypes)
+const AttachedTo = require('../databaseModels/BudDetails/AttachedTo')(sequelize, DataTypes)
 const error = require('../middleware/error')
 
 async function markForDeletion(objs, t) { // TO DO: add links thingy
@@ -63,12 +64,21 @@ async function createBud(spoodawebId, word, objId, position, transaction) {
   return _bud
 }
 
-async function createBudDetails(budId, definition, sound, context, transaction) {
+async function createAttachedTo(attachedToId, attachedTo, fk_bud_id, transaction) {
+  await AttachedTo.create({
+    attachedToId: attachedToId,
+    attachedTo: attachedTo,
+    fk_bud_id: fk_bud_id
+  }, {transaction: transaction})
+}
+
+async function createBudDetails(budId, definition, sound, context, link, transaction) {
   console.log(budId, definition, sound, context)
   const budDetails = await BudDetails.create({
     fk_bud_id: budId,
     definition: definition,
     sound: sound,
+    link: link,
     context: context
   }, {transaction: transaction})
   console.log(budDetails)
@@ -199,28 +209,34 @@ module.exports = { // please add support for positions, budId
           case "bud":
             toResObjs[objId] = {
               word: objData.word,
+              definitions: [],
               position: {
                 x: objData.x,
                 y: objData.y
               },
-              sounds: [],
-              contexts: [],
-              definitions: [],
-              examples: []
+              attachedTo: {}, 
+              type: "bud"
             }
             const budDetails = await getBudDetails(objData.id)
+            let i = 0
             for (const budDetail of budDetails) {
               const budDetailData = budDetail.dataValues
               const budDetailId = budDetailData.id
-              toResObjs[objId].sounds.push(budDetailData.sound)
-              toResObjs[objId].definitions.push(budDetailData.definition)
-              toResObjs[objId].contexts.push(budDetailData.context)
+              toResObjs[objId].definitions[i].sound.push(budDetailData.sound)
+              toResObjs[objId].definitions[i].definition.push(budDetailData.definition)
+              toResObjs[objId].definitions[i].context.push(budDetailData.context)
               const examplesObj = []
               const examples = await getExamples(budDetailId)
               for (const example of examples) {
                 examplesObj.push(example.dataValues.example)
               }
-              toResObjs[objId].examples.push(examplesObj)
+              toResObjs[objId].definitions[i].examples.push(examplesObj)
+              i++
+            }
+            const attachedTos = await getAttachedTos(objData.id)
+            for (const attachedTo of attachedTos) {
+              const attachedToData = attachedTo.dataValues
+              toResObjs.attachedTo[attachedToData.attachedToId] = attachedToData.attachedTo
             }
           }
         }
@@ -247,13 +263,19 @@ module.exports = { // please add support for positions, budId
           const budId = _budId.dataValues.id
           for (let i = 0; i < obj.definitions.length; i++) {
             const definition = obj.definitions[i]
-            const _budDetailsId = await createBudDetails(budId, definition, obj.sounds[i], obj.contexts[i], transaction)
+            const _budDetailsId = await createBudDetails(budId, definition.definition, definition.sound, definition.context, definition.link, transaction)
             const budDetailsId = _budDetailsId.dataValues.id
-            const examples = obj.examples[i]
+            const examples = definition.examples
             for (const example of examples) {
               console.log("example", example)
               await createExample(budDetailsId, example, transaction)
             }
+          }
+          let i = 0
+          for (const [ attachedToId, attachedTo ] of Object.entries(obj.attachedTo)) {
+            console.log(attachedToId, attachedTo)
+            await createAttachedTo(attachedToId, attachedTo, budId, transaction)
+            i++
           }
         } else if (obj.operation === "sub") {
           await markBudForDeletion(objId, transaction)

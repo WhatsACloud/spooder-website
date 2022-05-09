@@ -1,13 +1,14 @@
 const budSample = {
   "definitions": [
     {
+      "definition": "",
       "sound": "",
       "contexts": [],
       "examples": [],
       "link": {}
     }
   ],
-  "attachedTo": [],
+  "attachedTo": {},
   "position": {},
   "type": "bud", // bud silk
   "operation": 'add' // add edit minus, default add,

@@ -13,15 +13,19 @@ module.exports = (sequelize, DataTypes) => {
         },
         definition: {
             type: DataTypes.STRING,
-            allowNull: true
+            allowNull: false 
         },
         sound: {
           type: DataTypes.STRING,
-          allowNull: true
+          allowNull: false 
         },
         context: {
           type: DataTypes.TEXT,
-          allowNull: true
+          allowNull: false 
+        },
+        link: {
+          type: DataTypes.INTEGER,
+          allowNull: false
         },
         deletedAt: {
           type: DataTypes.DATE,

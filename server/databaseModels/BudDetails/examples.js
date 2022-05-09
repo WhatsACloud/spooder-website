@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       example: {
         type: DataTypes.TEXT,
-        allowNull: true
+        allowNull: false 
       },
       deletedAt: {
         type: DataTypes.DATE,
