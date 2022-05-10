@@ -5,7 +5,7 @@ import styles from './edit.module'
 
 import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
-import { stopDragLine, startDragLine, snapToPreview, lineCircleMove, getObjById, getKonvaObjs, getStage, updateLinePos, snapLine, getCanvasMousePos, isInCanvas, snapLineCircleToLine, getRootPos, setRootPos, addObjs, getNextObjId, setSilk, save, updateObj, getMainLayer } from './HelperFuncs'
+import * as utils from './utils'
 import * as OtherElements from './OtherElements'
 import * as Shapes from './Shapes'
 import { Background } from './Background'

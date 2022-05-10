@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
-import { getStage, hexagonPoints, drawHexagon, getHexagonLines, getCanvasMousePos } from './HelperFuncs'
+import * as utils from './utils'
 import styles from './edit.module'
 
 const hexagonLineColor = 'black'

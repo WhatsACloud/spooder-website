@@ -4,7 +4,7 @@ import styles from './edit.module'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faObjectGroup, faLinesLeaning } from '@fortawesome/free-solid-svg-icons'
 
-import { save } from './HelperFuncs'
+import * as utils from './utils'
 
 function ObjectDrawer({ setDragging, toggleCanDragLine, setToggleCanDragLine }) {
   const items = {
@@ -25,7 +25,7 @@ function ObjectDrawer({ setDragging, toggleCanDragLine, setToggleCanDragLine }) 
         <div className={styles.box}>
           <div className={styles.obj}>
             <p>test</p>
-            <button onClick={save}>
+            <button onClick={utils.save}>
               save
             </button>
             <button className={styles.drawerButton} onMouseDown={() => setDragging(true)}>
@@ -44,16 +44,15 @@ export { ObjectDrawer as ObjectDrawer }
 
 import Hexagon from 'react-svg-hexagon'
 import Konva from 'konva'
-import * as helperFuncs from './HelperFuncs'
 
 const drop = (e, setObjsToUpdate) => {
   // console.log(isMouseHoverCanvas)
   // if (!isMouseHoverCanvas) return
-  if (helperFuncs.isInCanvas({x: e.pageX, y: e.pageY})) {
+  if (utils.isInCanvas({x: e.pageX, y: e.pageY})) {
     console.log('placed!')
     // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
-    const canvasMousePos = helperFuncs.getCanvasMousePos(e.pageX, e.pageY)
-    helperFuncs.setBud(setObjsToUpdate, {position: canvasMousePos})
+    const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
+    utils.setBud(setObjsToUpdate, {position: canvasMousePos})
   }
 }
 
