@@ -7,8 +7,6 @@ import { loginSchema } from './userSchema'
 import { ErrorBox } from '../Shared/errorMsg'
 import Authorizer from '../Shared/Authorizer'
 
-const loginEndpoint = '/login'
-
 async function Login(errorStates, changeErrorState, changeServerErrorState, navigate, email, password) {
   try {
     const toSend = {
@@ -20,7 +18,7 @@ async function Login(errorStates, changeErrorState, changeServerErrorState, navi
       console.log(result)
       console.log('success!')
       assignError(null, null, errorStates, changeErrorState)
-      await userLoginHandler(loginEndpoint, toSend, changeServerErrorState, navigate)
+      await userLoginHandler('/login', toSend, changeServerErrorState, navigate)
     } catch(err) {
       console.log(err)
       const data = err.inner[0]

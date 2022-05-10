@@ -304,19 +304,19 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
     let queryString = new URLSearchParams(paramString);
     const objs = await api.post('/webs/get/objects', {
       spoodawebId: queryString.get('id'),
-      startPos: {
-        x: rootPos.x - width,
-        y: rootPos.y - height,
-      },
-      endPos: {
-        x: width * 2,
-        y: height * 2 
-      }
+      startPos: [
+        rootPos.x - width,
+        rootPos.y - height,
+      ],
+      endPos: [
+        width * 2,
+        height * 2 
+      ]
     })
-    console.log(objs)
     const spoodawebData = objs.data.spoodawebData
+    setObjsToUpdate(spoodawebData)
     const mainLayer = getMainLayer()
-    mainLayer.setAttr('nextObjId', Object.keys(spoodawebData).length) // probably should be the next highest objId instead of this
+    mainLayer.setAttr('nextObjId', objs.data.nextObjId) // probably should be the next highest objId instead of this
     mainLayer.setAttr('newObjs', {})
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })

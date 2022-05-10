@@ -13,11 +13,11 @@ module.exports = (sequelize, DataTypes) => {
       },
       attachedTo1: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true 
       },
       attachedTo2: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true 
       },
       strength: {
         type: DataTypes.INTEGER,

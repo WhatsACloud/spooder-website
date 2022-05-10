@@ -379,8 +379,8 @@ const updateObj = (objId, attrs) => {
   Object.entries(attrs).forEach(([name, val]) => {
     obj[name] = val
   })
-  console.log(!(objId in Object.keys(newObjs)))
-  if (!(objId in Object.keys(newObjs))) {
+  console.log(!(Object.keys(newObjs).includes(String(objId))))
+  if (!(Object.keys(newObjs).includes(String(objId)))) {
     obj.operation = 'edit'
   }
   updateNewObjs(objId, obj)
@@ -400,9 +400,26 @@ const updateObj = (objId, attrs) => {
 }
 export { updateObj as updateObj }
 
-const save = () => {
+import 'regenerator-runtime/runtime'
+import api from '../../services/api'
+
+const save = async () => {
   const newObjs = getMainLayer().getAttr('newObjs') 
   console.log(newObjs)
+  const urlString = window.location.search
+  let paramString = urlString.split('?')[1];
+  let queryString = new URLSearchParams(paramString);
+  try {
+    const req = {
+      spoodawebId: queryString.get('id'),
+      spoodawebData: newObjs
+    }
+    const result = await api.post('/webs/edit', req)
+    console.log(result)
+  } catch(err) {
+    err = err.response
+    console.log(err)
+  }
   // below simulates the thing reloading
 
   // const rootPos = getRootPos()

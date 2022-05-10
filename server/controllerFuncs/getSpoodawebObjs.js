@@ -10,6 +10,6 @@ module.exports = {
     }
   },
   end (req, res, next) {
-    res.status(201).send({spoodawebData: req.body.spoodawebData, result: true, message: 'spoodaweb successfully retrieved'})
+    res.status(201).send({spoodawebData: req.body.spoodawebData, nextObjId: req.body.nextObjId, result: true, message: 'spoodaweb successfully retrieved'})
   }
 }

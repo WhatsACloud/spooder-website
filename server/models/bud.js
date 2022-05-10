@@ -45,6 +45,8 @@ async function getNextObjId(spoodawebId) {
   let objId = await Bud.max("objId", { "where": {
     fk_spoodaweb_id: spoodawebId
   }})
+  objId = Number(objId)
+  console.log(objId)
   if (objId === null) {
     objId = 0
   } else {
@@ -294,6 +296,7 @@ module.exports = { // please add support for positions, budId
       if (!(userId === spoodaweb.dataValues.fk_user_id)) return error.create('requested spoodaweb is not under user')
       const spoodawebId = spoodaweb.dataValues.id
       const dbBudObjs = await getBudsWithinRange(spoodawebId, startPos, endPos)
+      console.log(dbBudObjs)
       for (const dbObj of dbBudObjs) {
         const objData = dbObj.dataValues
         const objId = objData.objId
@@ -314,9 +317,9 @@ module.exports = { // please add support for positions, budId
           const budDetailId = budDetailData.id
           console.log(toResObjs[objId])
           toResObjs[objId].definitions.push({
-            sound: null,
-            definition: null,
-            context: null,
+            sound: '',
+            definition: '',
+            context: '',
             examples: [] 
           })
           toResObjs[objId].definitions[i].sound = budDetailData.sound
@@ -341,7 +344,6 @@ module.exports = { // please add support for positions, budId
         }
       }
       const dbSilkObjs = await getSilksWithinRange(spoodawebId, startPos, endPos)
-      console.log(dbSilkObjs)
       for (const silk of dbSilkObjs) {
         const silkData = silk.dataValues
         const objId = silkData.objId
@@ -361,6 +363,7 @@ module.exports = { // please add support for positions, budId
         toResObjs[objId].attachedTo2 = silkData.attachedTo2
       }
       req.body.spoodawebData = toResObjs
+      req.body.nextObjId = await getNextObjId(spoodawebId)
       next()
     } catch (err) {
       console.log('get spoodawebs err', err)
@@ -400,6 +403,7 @@ module.exports = { // please add support for positions, budId
                 }
                 break
               case "silk":
+                console.log('silk')
                 const silk = await createSilk(spoodawebId, obj.positions, obj.strength, objId, obj.attachedTo1, obj.attachedTo2, transaction) 
                 objId++
             }
@@ -413,6 +417,7 @@ module.exports = { // please add support for positions, budId
                 const bud = await editBud(spoodawebId, objId, obj.name, obj.position, transaction)
                 if (bud === null) throw error.create('bud does not exist')
                 const budId = bud.dataValues.id
+                console.log(obj.definitions)
                 for (const i in obj.definitions) {
                   const definition = obj.definitions[i]
                   const _budDetailsId = await editBudDetails(budId, i, definition.definition, definition.sound, definition.link, definition.context, transaction)

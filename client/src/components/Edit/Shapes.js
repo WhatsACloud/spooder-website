@@ -28,8 +28,8 @@ function SilkEnd({ points, setDraggingLine, setSelected, setToggleCanDragLine })
   return (
     <reactKonva.Circle
       radius={5}
-      x={points[0].x}
-      y={points[0].y}
+      x={points.x}
+      y={points.y}
       fill='red'
       stroke='red'
       strokeWidth={4}
@@ -102,12 +102,12 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
         onDragMove={lineDragmoveFunc}
         onDragEnd={lineDragendFunc}></reactKonva.Line>
       <SilkEnd
-        points={points}
+        points={points[0]}
         setSelected={setSelected}
         setToggleCanDragLine={setToggleCanDragLine}
         setDraggingLine={setDraggingLine}></SilkEnd>
       <SilkEnd
-        points={points}
+        points={points[1]}
         setSelected={setSelected}
         setToggleCanDragLine={setToggleCanDragLine}
         setDraggingLine={setDraggingLine}></SilkEnd>
@@ -117,7 +117,6 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
 export { Silk as Silk }
 
 function Bud({ x, y, objId }) {
-  console.log(objId)
   const rootPos = getRootPos()
   const radius = 40
   const strokeWidth = 40
