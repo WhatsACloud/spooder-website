@@ -7,10 +7,11 @@ import { preventZoom, preventZoomScroll } from './PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from './Events'
 import * as utils from './utils'
 import * as OtherElements from './OtherElements'
-import * as Shapes from './Shapes'
 import { Background } from './Background'
 
 import api from '../../services/api'
+
+import * as SilkShapes from './Silk'
 
 // import spoodawebData from './TestingSpoodawebData'
 
