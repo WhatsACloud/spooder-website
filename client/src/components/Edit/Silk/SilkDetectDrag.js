@@ -2,13 +2,13 @@ import React, { useEffect, useState, memo } from 'react'
 import * as SilkUtils from './SilkUtils'
 import * as utils from '../utils'
 
-const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate, hoverBudBorder, setDraggingLine, nextObjId, setNextObjId, selected, setSelected }) => { // still a functional component
+const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate, hoverBudBorder, setDraggingLine, nextObjId, setNextObjId, selectedSilk, setSelectedSilk }) => { // still a functional component
   useEffect(() => {
     let lineCircle
-    if (selected) {
-      const line = utils.getObjById(selected.objId)
+    if (selectedSilk) {
+      const line = utils.getKonvaObjById(selectedSilk.objId)
       if (line) {
-        lineCircle = line.children[selected.innerIndex]
+        lineCircle = line.children[selectedSilk.innerIndex]
       }
     }
     const startDragLineWrapper = e => {
@@ -16,35 +16,35 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
       if (!utils.isInCanvas({x: e.pageX, y: e.pageY})) return
       const currentObjId = utils.getNextObjId()
       SilkUtils.setSilk(setObjsToUpdate, {positions: [canvasMousePos, canvasMousePos]})
-      SilkUtils.startDragLine(e, setDraggingLine, setSelected, currentObjId, 1, toggleCanDragLine)
+      SilkUtils.startDragLine(e, setDraggingLine, setSelectedSilk, currentObjId, 1, toggleCanDragLine)
     }
     const stopDragLineWrapper = e => SilkUtils.stopDragLine(e, lineCircle)
-    const dragLineWrapper = e => SilkUtils.lineCircleMove(e, draggingLine, selected)
+    const dragLineWrapper = e => SilkUtils.lineCircleMove(e, draggingLine, selectedSilk)
     const dropLine = (e) => {
-      const line = utils.getObjById(selected.objId)
+      const line = utils.getKonvaObjById(selectedSilk.objId)
       line.moveToTop()
-      if (!utils.isInCanvas({x: e.pageX, y: e.pageY})) SilkUtils.snapLineCircleToLine(selected) 
+      if (!utils.isInCanvas({x: e.pageX, y: e.pageY})) SilkUtils.snapLineCircleToLine(selectedSilk) 
       if (hoverBudBorder) {
-        SilkUtils.snapLine(selected)
+        SilkUtils.snapLine(selectedSilk)
       } else { // detaches line
-        const line = utils.getObjById(selected.objId)
+        const line = utils.getKonvaObjById(selectedSilk.objId)
         const offsetRootPoses = line.getAttr('offsetRootPoses')
         const mousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
         const rootPos = utils.getRootPos()
-        offsetRootPoses[selected.innerIndex-1] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
+        offsetRootPoses[selectedSilk.innerIndex-1] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
         line.setAttr('offsetRootPoses', offsetRootPoses)
-        const lineCircle = line.children[selected.innerIndex]
-        const attachedTo = utils.getObjById(lineCircle.getAttr('attachedToObjId'))
+        const lineCircle = line.children[selectedSilk.innerIndex]
+        const attachedTo = utils.getKonvaObjById(lineCircle.getAttr('attachedToObjId'))
         if (attachedTo) {
           const newObjs = [...attachedTo.getAttr('attachedSilkObjId')]
           newObjs.splice(attachedTo, 1)
           attachedTo.setAttr('attachedSilkObjId', newObjs)
           lineCircle.setAttr('attachedToObjId', null)
         }
-        utils.updateObj(selected.objId, {positions: offsetRootPoses})
+        utils.updateObj(selectedSilk.objId, {positions: offsetRootPoses})
       }
       setDraggingLine(false)
-      setSelected()
+      setSelectedSilk()
     }
     if (toggleCanDragLine) {
       document.addEventListener('mousedown', startDragLineWrapper)
@@ -67,7 +67,7 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
       document.removeEventListener('mouseup', stopDragLineWrapper)
       document.removeEventListener('mouseup', dropLine)
     }
-  }, [ toggleCanDragLine, draggingLine, selected, hoverBudBorder ])
+  }, [ toggleCanDragLine, draggingLine, selectedSilk, hoverBudBorder ])
   return (
     <></>
   )

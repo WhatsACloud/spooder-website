@@ -15,7 +15,7 @@ const scrollDown = (amt) => {
   utils.setRootPos({x: rootPos.x, y: rootPos.y - amt})
 }
 
-function DrawCanvas({ rendered, toggleCanDragLine, canvasWidth, canvasHeight }) {
+function DrawCanvas({ rendered }) {
   useEffect(() => {
     utils.setRootPos({x: 0, y: 0})
     const scrollAmt = 20

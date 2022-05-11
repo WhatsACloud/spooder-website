@@ -97,7 +97,7 @@ const isInCanvas = (mousePos) => {
 }
 export { isInCanvas as isInCanvas }
 
-const getObjById = (id=null) => {
+const getKonvaObjById = (id=null) => { // pls make it more efficient
   if (id === null) return false
   const objs = getKonvaObjs()
   for (const obj of objs) {
@@ -107,7 +107,14 @@ const getObjById = (id=null) => {
   }
   return false
 }
-export { getObjById as getObjById }
+export { getKonvaObjById as getKonvaObjById }
+
+const getObjById = (id=null) => {
+  if (id === null) return false
+  const objs = getMainLayer().getAttr('objs')
+  return objs[id]
+}
+export { getObjById }
 
 const addObjs = (toAdd) => {
   const layer = getMainLayer()
@@ -129,7 +136,7 @@ const updateObj = (objId, attrs) => {
     obj.operation = 'edit'
   }
   updateNewObjs(objId, obj)
-  const konvaObj = getObjById(objId) 
+  const konvaObj = getKonvaObjById(objId) 
   if ('position' in attrs) {
     console.log(konvaObj)
   }
@@ -169,7 +176,7 @@ const save = async () => {
 
   // const rootPos = getRootPos()
   // Object.entries(objs).forEach(([objId, obj]) => {
-  //   const konvaObj = getObjById(objId)
+  //   const konvaObj = getKonvaObjById(objId)
   //   if (obj.type === "bud") {
   //     konvaObj.children[0].setX(obj.position.x + rootPos.x)
   //     konvaObj.children[0].setY(obj.position.y + rootPos.y)

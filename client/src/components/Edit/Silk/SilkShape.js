@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
 import * as SilkUtils from './SilkUtils'
 import * as utils from '../utils'
+import { select } from '../Select'
 
-function SilkEnd({ points, setDraggingLine, setSelected, setToggleCanDragLine }) {
+function SilkEnd({ points, setDraggingLine, setSelectedSilk, setToggleCanDragLine, setSelectedObj }) {
   const circleDragmoveFunc = evt => SilkUtils.lineCircleMove(evt.evt, true, {"objId": evt.target.parent.getAttr('objId'), "innerIndex": evt.target.index}) 
   const stopDragLineWrapper = (e) => {
     document.removeEventListener('mouseup', stopDragLineWrapper)
@@ -19,19 +20,20 @@ function SilkEnd({ points, setDraggingLine, setSelected, setToggleCanDragLine })
       hitStrokeWidth={30}
       draggable={true}
       attachedToObjId={null}
-      onMouseDown={(e) => {
+      onDragStart={(e) => {
         const objId = e.target.parent.getAttr('objId')
         document.addEventListener('mouseup', stopDragLineWrapper)
         setToggleCanDragLine(false)
-        SilkUtils.startDragLine(e.evt, setDraggingLine, setSelected, objId, e.target.index, false)
+        SilkUtils.startDragLine(e.evt, setDraggingLine, setSelectedSilk, objId, e.target.index, false)
       }}
-      onDragMove={circleDragmoveFunc}>
+      onDragMove={circleDragmoveFunc}
+      onMouseDown={evt => {select(evt, setSelectedObj)}}>
     </reactKonva.Circle>
   )
 }
 export { SilkEnd as SilkEnd }
 
-function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLine }) {
+function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDragLine, setSelectedObj }) {
   const lineDragmoveFunc = evt => {
     const line = evt.target
     const lineGroup = line.parent.children
@@ -83,16 +85,19 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
         hitStrokeWidth={30}
         draggable={true}
         onDragMove={lineDragmoveFunc}
-        onDragEnd={lineDragendFunc}></reactKonva.Line>
+        onDragEnd={lineDragendFunc}
+        onMouseDown={evt => {select(evt, setSelectedObj)}}></reactKonva.Line>
       <SilkEnd
         points={points[0]}
-        setSelected={setSelected}
+        setSelectedSilk={setSelectedSilk}
         setToggleCanDragLine={setToggleCanDragLine}
+        setSelectedObj={setSelectedObj}
         setDraggingLine={setDraggingLine}></SilkEnd>
       <SilkEnd
         points={points[1]}
-        setSelected={setSelected}
+        setSelectedSilk={setSelectedSilk}
         setToggleCanDragLine={setToggleCanDragLine}
+        setSelectedObj={setSelectedObj}
         setDraggingLine={setDraggingLine}></SilkEnd>
     </reactKonva.Group>
   )

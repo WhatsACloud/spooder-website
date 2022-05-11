@@ -3,6 +3,7 @@ import * as reactKonva from 'react-konva'
 import * as utils from '../utils'
 import * as BudUtils from './BudUtils'
 import { updateLinePos } from '../Silk/SilkUtils'
+import { select } from '../Select'
 
 function BudAnchorHighlighter() {
   return (
@@ -20,7 +21,7 @@ function BudAnchorHighlighter() {
 }
 export { BudAnchorHighlighter as BudAnchorHighlighter }
 
-function Bud({ x, y, objId }) {
+function Bud({ x, y, objId, setSelectedObj }) {
   const rootPos = utils.getRootPos()
   const radius = 40
   const strokeWidth = 40
@@ -58,7 +59,7 @@ function Bud({ x, y, objId }) {
         const bud = evt.target
         const attachedObjIds = bud.parent.getAttr('attachedSilkObjId')
         for (const { objId, offset, innerIndex } of attachedObjIds) {
-          const obj = getObjById(objId).children[innerIndex]
+          const obj = getKonvaObjById(objId).children[innerIndex]
           const budX = bud.getX() 
           const budY = bud.getY() 
           updateLinePos(obj, budX - offset.x, budY - offset.y)
@@ -107,8 +108,8 @@ function Bud({ x, y, objId }) {
               hit.setX(x)
               hit.setY(y)
               hit.setAttr('borderPoints', lines[siblingIndex])
-            }
-          }}>
+          }}}
+          onMouseDown={evt => {select(evt, setSelectedObj)}}>
         </reactKonva.Shape>
         <reactKonva.Group
           x={x}

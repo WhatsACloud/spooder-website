@@ -19,11 +19,11 @@ const setSilk = (setObjsToUpdate, details) => {
 }
 export { setSilk as setSilk }
 
-const startDragLine = (e, setDraggingLine, setSelected, objId, innerIndex, toggleCanDragLine) => {
+const startDragLine = (e, setDraggingLine, setSelectedSilk, objId, innerIndex, toggleCanDragLine) => {
   if (e.button === 0 && utils.isInCanvas({x: e.pageX, y: e.pageY})) {
     setDraggingLine(true)
-    setSelected({"objId": objId, "innerIndex": innerIndex})
-    const renderedLine = utils.getObjById(objId)
+    setSelectedSilk({"objId": objId, "innerIndex": innerIndex})
+    const renderedLine = utils.getKonvaObjById(objId)
     renderedLine.moveToBottom()
   }
 }
@@ -43,12 +43,12 @@ const stopDragLine = (e, lineCircle) => { // todo: remove lineCircle, add mouseu
 }
 export { stopDragLine as stopDragLine }
 
-const snapLine = (selected) => {
+const snapLine = (selectedSilk) => {
   const stage = utils.getStage()
   const highlighter = stage.find('.highlighter')[0]
-  const line = utils.getObjById(selected.objId)
-  const lineCircle = line.children[selected.innerIndex]
-  const attachedTo = utils.getObjById(highlighter.getAttr('attachedObjId'))
+  const line = utils.getKonvaObjById(selectedSilk.objId)
+  const lineCircle = line.children[selectedSilk.innerIndex]
+  const attachedTo = utils.getKonvaObjById(highlighter.getAttr('attachedObjId'))
   console.log(highlighter.getAttr('attachedObjId'))
   const bud = attachedTo.children[0]
   const budX = bud.getX() 
@@ -57,35 +57,35 @@ const snapLine = (selected) => {
   console.log(lineCircle.getX(), lineCircle.getY())
   lineCircle.setAttr('attachedToObjId', attachedTo.getAttr('objId'))
   const newAttachedSilkToBud = attachedTo.getAttr('attachedSilkObjId')
-  newAttachedSilkToBud.push({"objId": selected.objId, "offset": offset, "innerIndex": selected.innerIndex})
+  newAttachedSilkToBud.push({"objId": selectedSilk.objId, "offset": offset, "innerIndex": selectedSilk.innerIndex})
   attachedTo.setAttr('attachedSilkObjId', newAttachedSilkToBud)
   updateLinePos(lineCircle, highlighter.getX(), highlighter.getY())
 }
 export { snapLine as snapLine }
 
-const snapLineCircleToLine = (selected) => { // pls fix ltr it doesnt work if innerIndex is 2
+const snapLineCircleToLine = (selectedSilk) => { // pls fix ltr it doesnt work if innerIndex is 2
   const stage = getStage()
-  const lineGroup = getObjById(selected.objId)
+  const lineGroup = getKonvaObjById(selectedSilk.objId)
   const line = lineGroup.children[0]
-  const lineCircle = lineGroup.children[selected.innerIndex]
-  console.log(selected)
+  const lineCircle = lineGroup.children[selectedSilk.innerIndex]
+  console.log(selectedSilk)
   console.log('snap')
-  if (selected.innerIndex === 1) {
+  if (selectedSilk.innerIndex === 1) {
     lineCircle.setX(line.getPoints()[0])
     lineCircle.setY(line.getPoints()[1])
-  } else if (selected.innerIndex === 2) {
+  } else if (selectedSilk.innerIndex === 2) {
     lineCircle.setX(line.getPoints()[2])
     lineCircle.setY(line.getPoints()[3])
   }
 }
 export { snapLineCircleToLine as snapLineCircleToLine }
 
-const lineCircleMove = (e, draggingLine, selected) => {
+const lineCircleMove = (e, draggingLine, selectedSilk) => {
   if (utils.isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
     const mousePos = {x: e.pageX, y: e.pageY}
     const canvasMousePos = utils.getCanvasMousePos(mousePos.x, mousePos.y)
-    const lineGroup = utils.getObjById(selected.objId).children
-    const start = lineGroup[selected.innerIndex]
+    const lineGroup = utils.getKonvaObjById(selectedSilk.objId).children
+    const start = lineGroup[selectedSilk.innerIndex]
     updateLinePos(start, canvasMousePos.x, canvasMousePos.y)
   }
 }

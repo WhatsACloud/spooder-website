@@ -18,6 +18,7 @@ import { UpdateBudBorderEvt } from '../Bud/UpdateBudBorder'
 import { DrawCanvas } from './DrawCanvas'
 
 import Konva from 'konva'
+import { BudView } from '../Select/BudView'
 
 Konva.hitOnDragEnabled = true
 
@@ -66,8 +67,10 @@ function AddNewObjs({
     setRendered,
     rendered,
     setHoverBudBorder,
-    setSelected,
+    setSelectedSilk,
     setToggleCanDragLine,
+    selectedObj,
+    setSelectedObj
   }) { // to add some updating of positions AND maybe index in the object itself to be specific
   useEffect(() => {
     if (objsToUpdate) {
@@ -81,6 +84,7 @@ function AddNewObjs({
               y={obj.position.y}
               key={newRendered.length}
               objId={objId}
+              setSelectedObj={setSelectedObj}
               setHoverBudBorder={setHoverBudBorder}
               ></BudShapes.Bud>
           )
@@ -90,7 +94,8 @@ function AddNewObjs({
               points={obj.positions}
               key={newRendered.length}
               setDraggingLine={setDraggingLine}
-              setSelected={setSelected}
+              setSelectedSilk={setSelectedSilk}
+              setSelectedObj={setSelectedObj}
               setToggleCanDragLine={setToggleCanDragLine}
               objId={objId}></SilkShapes.Silk>
           )
@@ -120,14 +125,16 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   const [ objsToUpdate, setObjsToUpdate ] = useState()
   const [ rendered, setRendered ] = useState([])
   const [ draggingLine, setDraggingLine ] = useState(false)
-  const [ selected, setSelected ] = useState()
-  const [ canvasWidth, setCanvasWidth ] = useState(window.screen.width + 2 * 2000)
-  const [ canvasHeight, setCanvasHeight ] = useState(window.screen.height + 2 * 2000)
+  const [ selectedSilk, setSelectedSilk ] = useState()
+  const [ selectedObj, setSelectedObj ] = useState()
   
   useEffect(async () => {
     const rootPos = utils.getRootPos()
     const width = utils.getStage().getAttr('width')
     const height = utils.getStage().getAttr('height')
+    utils.getStage().on('mousedown', evt => {
+      setSelectedObj()
+    })
     const urlString = window.location.search
     let paramString = urlString.split('?')[1];
     let queryString = new URLSearchParams(paramString);
@@ -163,13 +170,11 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
         setRendered={setRendered}
         rendered={rendered}
         setHoverBudBorder={setHoverBudBorder}
-        setSelected={setSelected}
+        setSelectedSilk={setSelectedSilk}
         setDraggingLine={setDraggingLine}
         setToggleCanDragLine={setToggleCanDragLine}
-        setCanvasHeight={setCanvasHeight}
-        setCanvasWidth={setCanvasWidth}
-        canvasHeight={canvasHeight}
-        canvasWidth={canvasWidth}></AddNewObjs>
+        selectedObj={selectedObj}
+        setSelectedObj={setSelectedObj}></AddNewObjs>
       <UpdateBudBorderEvt
         draggingLine={draggingLine}
         hoverBudBorder={hoverBudBorder}
@@ -179,8 +184,8 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
           toggleCanDragLine={toggleCanDragLine}
           setObjsToUpdate={setObjsToUpdate}
           setDraggingLine={setDraggingLine}
-          setSelected={setSelected}
-          selected={selected}
+          setSelectedSilk={setSelectedSilk}
+          selectedSilk={selectedSilk}
           hoverBudBorder={hoverBudBorder}
           draggingLine={draggingLine}></SilkShapes.LineDragUpdater>
         <OtherElements.ObjectDrawer
@@ -193,12 +198,10 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
           setObjsToUpdate={setObjsToUpdate}></OtherElements.FakeDraggableObj>
         <div className={styles.divCanvas} id='divCanvas'>
           <DrawCanvas
-          rendered={rendered}
-          setObjsToUpdate={setObjsToUpdate}
-          canvasWidth={canvasWidth}
-          canvasHeight={canvasHeight}
-          toggleCanDragLine={toggleCanDragLine}></DrawCanvas>
+          rendered={rendered}></DrawCanvas>
         </div>
+        <BudView
+          selectedObj={selectedObj}></BudView>
         {/* <Background></Background> */}
       </div>
     </>
