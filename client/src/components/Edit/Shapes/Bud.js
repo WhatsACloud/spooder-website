@@ -19,7 +19,7 @@ function BudAnchorHighlighter() {
 export { BudAnchorHighlighter as BudAnchorHighlighter }
 
 function Bud({ x, y, objId }) {
-  const rootPos = getRootPos()
+  const rootPos = utils.getRootPos()
   const radius = 40
   const strokeWidth = 40
   const lines = utils.getHexagonLines(hexagonPoints(radius, x, y))
@@ -73,7 +73,7 @@ function Bud({ x, y, objId }) {
         const mousePos = {x: evt.evt.pageX, y: evt.evt.pageY}
         const previousMousePos = obj.getAttr('lastMousePos')
         obj.setAttr('offsetRootPos', {x: offsetRootPos.x + mousePos.x - previousMousePos.x, y: offsetRootPos.y + mousePos.y - previousMousePos.y})
-        const rootPos = getRootPos()
+        const rootPos = utils.getRootPos()
         const newOffsetRootPos = obj.getAttr('offsetRootPos')
         bud.setX(rootPos.x + newOffsetRootPos.x)
         bud.setY(rootPos.y + newOffsetRootPos.y)

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
-
-import utils from '../utils'
+import * as SilkUtils from './SilkUtils'
+import * as utils from '../utils'
 
 function SilkEnd({ points, setDraggingLine, setSelected, setToggleCanDragLine }) {
   const circleDragmoveFunc = evt => lineCircleMove(evt.evt, true, {"objId": evt.target.parent.getAttr('objId'), "innerIndex": evt.target.index}) 
@@ -54,7 +54,7 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
     console.log(points[0], points[1])
     console.log(line.getPoints())
     const offsetRootPoses = lineGroup.getAttr('offsetRootPoses')
-    const rootPos = getRootPos()
+    const rootPos = utils.getRootPos()
     const newOffsetRootPoses = [
       {x: points[0].x - rootPos.x, y: points[0].y - rootPos.y},
       {x: points[1].x - rootPos.x, y: points[1].y - rootPos.y},
@@ -63,7 +63,7 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
     updateObj(objId, {positions: newOffsetRootPoses})
   }
   const getOffsetRootPoses = () => {
-    const rootPos = getRootPos()
+    const rootPos = utils.getRootPos()
     const offsetX = points[0].x - rootPos.x 
     const offsetY = points[0].y - rootPos.y 
     return [

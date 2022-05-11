@@ -81,78 +81,6 @@ function UpdateBudBorderEvt({ draggingLine, hoverBudBorder, setHoverBudBorder })
   return <></>
 }
 
-const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate, hoverBudBorder, setDraggingLine, nextObjId, setNextObjId, selected, setSelected }) => { // still a functional component
-  // Object.keys().map((name) => { // ill deal with this later
-  useEffect(() => {
-    let lineCircle
-    if (selected) {
-      const line = getObjById(selected.objId)
-      if (line) {
-        lineCircle = line.children[selected.innerIndex]
-      }
-    }
-    const startDragLineWrapper = e => {
-      const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
-      if (!isInCanvas({x: e.pageX, y: e.pageY})) return
-      const currentObjId = getNextObjId()
-      setSilk(setObjsToUpdate, {positions: [canvasMousePos, canvasMousePos]})
-      startDragLine(e, setDraggingLine, setSelected, currentObjId, 1, toggleCanDragLine)
-    }
-    const stopDragLineWrapper = e => stopDragLine(e, lineCircle)
-    const dragLineWrapper = e => lineCircleMove(e, draggingLine, selected)
-    const dropLine = (e) => {
-      const line = getObjById(selected.objId)
-      line.moveToTop()
-      if (!isInCanvas({x: e.pageX, y: e.pageY})) snapLineCircleToLine(selected) 
-      if (hoverBudBorder) {
-        snapLine(selected)
-      } else { // detaches line
-        const line = getObjById(selected.objId)
-        const offsetRootPoses = line.getAttr('offsetRootPoses')
-        const mousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
-        const rootPos = getRootPos()
-        offsetRootPoses[selected.innerIndex-1] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
-        line.setAttr('offsetRootPoses', offsetRootPoses)
-        const lineCircle = line.children[selected.innerIndex]
-        const attachedTo = getObjById(lineCircle.getAttr('attachedToObjId'))
-        if (attachedTo) {
-          const newObjs = [...attachedTo.getAttr('attachedSilkObjId')]
-          newObjs.splice(attachedTo, 1)
-          attachedTo.setAttr('attachedSilkObjId', newObjs)
-          lineCircle.setAttr('attachedToObjId', null)
-        }
-        updateObj(selected.objId, {positions: offsetRootPoses})
-      }
-      setDraggingLine(false)
-      setSelected()
-    }
-    if (toggleCanDragLine) {
-      document.addEventListener('mousedown', startDragLineWrapper)
-      document.addEventListener('mousemove', dragLineWrapper)
-    } else {
-      document.removeEventListener('mousedown', startDragLineWrapper)
-      document.removeEventListener('mousemove', dragLineWrapper)
-    }
-    if (draggingLine) {
-      document.addEventListener('mouseup', dropLine)
-    }
-    if (draggingLine && hoverBudBorder) {
-      document.addEventListener('mouseup', stopDragLineWrapper)
-    } else {
-      document.removeEventListener('mouseup', stopDragLineWrapper)
-    }
-    return () => {
-      document.removeEventListener('mousemove', dragLineWrapper)
-      document.removeEventListener('mousedown', startDragLineWrapper)
-      document.removeEventListener('mouseup', stopDragLineWrapper)
-      document.removeEventListener('mouseup', dropLine)
-    }
-  }, [ toggleCanDragLine, draggingLine, selected, hoverBudBorder ])
-  return (
-    <></>
-  )
-})
-
 function MouseMoveDetector({}) {
   const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
   const [ mousePos, setMousePos ] = useState({
@@ -183,12 +111,12 @@ function MouseMoveDetector({}) {
 }
 
 const scrollRight = (amt) => {
-  const rootPos = getRootPos()
+  const rootPos = utils.getRootPos()
   utils.setRootPos({x: rootPos.x - amt, y: rootPos.y})
 }
 
 const scrollDown = (amt) => {
-  const rootPos = getRootPos()
+  const rootPos = utils.getRootPos()
   utils.setRootPos({x: rootPos.x, y: rootPos.y - amt})
 }
 
@@ -242,7 +170,7 @@ function AddNewObjs({
   useEffect(() => {
     if (objsToUpdate) {
       const newRendered = [...rendered]
-      addObjs(objsToUpdate)
+      utils.addObjs(objsToUpdate)
       Object.entries(objsToUpdate).forEach(([objId, obj]) => {
         if (obj.type === 'bud') {
           newRendered.push(
@@ -258,7 +186,7 @@ function AddNewObjs({
           newRendered.push(
             <Shapes.Silk
               points={obj.positions}
-              lineCircleMove={lineCircleMove}
+              lineCircleMove={utils.lineCircleMove}
               key={newRendered.length}
               setDraggingLine={setDraggingLine}
               setSelected={setSelected}
@@ -296,7 +224,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   const [ canvasHeight, setCanvasHeight ] = useState(window.screen.height + 2 * 2000)
   
   useEffect(async () => {
-    const rootPos = getRootPos()
+    const rootPos = utils.getRootPos()
     const width = utils.getStage().getAttr('width')
     const height = utils.getStage().getAttr('height')
     const urlString = window.location.search
