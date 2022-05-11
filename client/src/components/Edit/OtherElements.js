@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faObjectGroup, faLinesLeaning } from '@fortawesome/free-solid-svg-icons'
 
 import * as utils from './utils'
+import * as BudUtils from './Bud/BudUtils'
 
 function ObjectDrawer({ setDragging, toggleCanDragLine, setToggleCanDragLine }) {
   const items = {
@@ -52,7 +53,7 @@ const drop = (e, setObjsToUpdate) => {
     console.log('placed!')
     // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
     const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
-    utils.setBud(setObjsToUpdate, {position: canvasMousePos})
+    BudUtils.setBud(setObjsToUpdate, {position: canvasMousePos})
   }
 }
 

@@ -18,16 +18,16 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
       SilkUtils.setSilk(setObjsToUpdate, {positions: [canvasMousePos, canvasMousePos]})
       SilkUtils.startDragLine(e, setDraggingLine, setSelected, currentObjId, 1, toggleCanDragLine)
     }
-    const stopDragLineWrapper = e => stopDragLine(e, lineCircle)
+    const stopDragLineWrapper = e => SilkUtils.stopDragLine(e, lineCircle)
     const dragLineWrapper = e => SilkUtils.lineCircleMove(e, draggingLine, selected)
     const dropLine = (e) => {
-      const line = getObjById(selected.objId)
+      const line = utils.getObjById(selected.objId)
       line.moveToTop()
-      if (!isInCanvas({x: e.pageX, y: e.pageY})) SilkUtils.snapLineCircleToLine(selected) 
+      if (!utils.isInCanvas({x: e.pageX, y: e.pageY})) SilkUtils.snapLineCircleToLine(selected) 
       if (hoverBudBorder) {
         SilkUtils.snapLine(selected)
       } else { // detaches line
-        const line = getObjById(selected.objId)
+        const line = utils.getObjById(selected.objId)
         const offsetRootPoses = line.getAttr('offsetRootPoses')
         const mousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
         const rootPos = utils.getRootPos()

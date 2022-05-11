@@ -42,6 +42,7 @@ export { setNextObjId as setNextObjId }
 const getNextObjId = () => {
   const mainLayer = getMainLayer()
   const currentNextObjId = mainLayer.getAttr('nextObjId')
+  console.log(currentNextObjId)
   return currentNextObjId
 }
 export { getNextObjId as getNextObjId }
@@ -53,23 +54,6 @@ const updateNewObjs = (objId, obj) => {
   mainLayer.setAttr('newObjs', newObjs)
 }
 export { updateNewObjs as updateNewObjs }
-
-import { budSample } from './spoodawebSampleData'
-
-const setBud = (setObjsToUpdate, details) => { // { pronounciation, contexts, examples, links, position, type }
-  const obj = {...budSample}
-  for (const name in details) {
-    if (name in obj) {
-      const detail = details[name]
-      obj[name] = detail
-    }
-  }
-  const nextObjId = getNextObjId()
-  setObjsToUpdate({[nextObjId]: obj})
-  updateNewObjs(nextObjId, obj)
-  setNextObjId(nextObjId+1)
-}
-export { setBud as setBud }
 
 const getRootPos = () => {
   return getMainLayer().getAttr('rootPos')
@@ -112,128 +96,6 @@ const isInCanvas = (mousePos) => {
   return withinRect(mousePos, startX, startY, endX, endY)
 }
 export { isInCanvas as isInCanvas }
-
-const getHexagonLines = (points) => {
-  const lines = []
-  let lastPoint = points[0]
-  for (let i = 1; i < 7; i++) {
-    let newPoint = points[i]
-    if (newPoint === undefined) {
-      newPoint = points[0]
-    }
-    lines.push([
-      lastPoint,
-      newPoint
-    ])
-    lastPoint = newPoint
-  }
-  return lines
-}
-export { getHexagonLines as getHexagonLines }
-
-const a = 2 * Math.PI / 6
-
-const hexagonPoints = (r, x, y) => {
-  const points = []
-  for (var i = 0; i < 6; i++) {
-    points.push({x: x + r * Math.cos(a * i), y: y + r * Math.sin(a * i)})
-  }
-  return points
-}
-export { hexagonPoints as hexagonPoints }
-
-const drawHexagon = (ctx, points) => {
-  ctx.beginPath()
-  for (var i = 0; i < 6; i++) {
-    const x = points[i].x
-    const y = points[i].y
-    ctx.lineTo(x, y)
-  }
-  ctx.closePath()
-}
-export { drawHexagon as drawHexagon }
-
-const snapToPreview = (evt) => {
-  const radius = 40
-  const mousePos = getCanvasMousePos(evt.evt.pageX, evt.evt.pageY)
-  const hitLinePoints = evt.target.getAttr('borderPoints')
-  const rise = hitLinePoints[1].y - hitLinePoints[0].y
-  const run = hitLinePoints[1].x - hitLinePoints[0].x
-  const gradient = rise / run
-  const highlighter = evt.target.parent.parent.parent.parent.find('.highlighter')[0]
-  const bud = evt.target.parent.parent.children[0]
-  const hitIndex = evt.target.index+1
-  let x
-  let y
-  if (hitIndex === 2 || hitIndex === 5) {
-    x = mousePos.x
-    y = evt.target.getAttr('borderPoints')[0].y
-  } else if (hitIndex === 3) {
-    x = (
-      Math.abs(evt.target.getY() - mousePos.y)
-      / gradient
-      + hitLinePoints[1].x
-    )
-    y = mousePos.y
-  } else if (hitIndex === 6) { // yandere dev moment
-    x = (
-      - (
-        Math.abs(evt.target.getY() - mousePos.y)
-        / gradient
-      )
-      + hitLinePoints[1].x
-    )
-    y = mousePos.y
-  } else if (hitIndex === 1) {
-    x = (
-      Math.abs(evt.target.getY() - mousePos.y)
-      / gradient
-      + hitLinePoints[1].x
-      + radius / 2
-    )
-    y = mousePos.y
-  } else if (hitIndex === 4) {
-    x = (
-      - (
-        Math.abs(evt.target.getY() - mousePos.y)
-        / gradient
-      )
-      + hitLinePoints[1].x
-      - radius / 2
-    )
-    y = mousePos.y
-  }
-  
-  if (x === undefined) {
-    console.log('a')
-  }
-  let xStartingPointIndex = 0
-  let yStartingPointIndex = 1
-  if (hitIndex > 3) {
-    xStartingPointIndex = 1
-    yStartingPointIndex = 0
-  }
-  if (hitIndex === 3) {
-    xStartingPointIndex = 0
-    yStartingPointIndex = 0
-  } else if (hitIndex === 6) {
-    xStartingPointIndex = 1
-    yStartingPointIndex = 1
-  }
-  if (x > hitLinePoints[xStartingPointIndex].x) {
-    x = hitLinePoints[xStartingPointIndex].x
-  } else if (x < hitLinePoints[Math.abs(xStartingPointIndex-1)].x) { // gets opposite point
-    x = hitLinePoints[Math.abs(xStartingPointIndex-1)].x
-  }
-  if (y > hitLinePoints[yStartingPointIndex].y) {
-    y = hitLinePoints[yStartingPointIndex].y
-  } else if (y < hitLinePoints[Math.abs(yStartingPointIndex-1)].y) {
-    y = hitLinePoints[Math.abs(yStartingPointIndex-1)].y
-  }
-  highlighter.setX(x)
-  highlighter.setY(y)
-}
-export { snapToPreview as snapToPreview }
 
 const getObjById = (id=null) => {
   if (id === null) return false

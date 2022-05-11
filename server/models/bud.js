@@ -42,9 +42,20 @@ async function markBudForDeletion(budId, transaction) {
 }
 
 async function getNextObjId(spoodawebId) {
-  let objId = await Bud.max("objId", { "where": {
+  let highestBudObjId = await Bud.max("objId", { "where": {
     fk_spoodaweb_id: spoodawebId
   }})
+  highestBudObjId = Number(highestBudObjId)
+  let highestSilkObjId = await Silk.max("objId", { "where": {
+    fk_spoodaweb_id: spoodawebId
+  }})
+  highestSilkObjId = Number(highestSilkObjId)
+  let objId
+  if (highestBudObjId >= highestSilkObjId) {
+    objId = highestBudObjId
+  } else {
+    objId = highestSilkObjId
+  }
   objId = Number(objId)
   console.log(objId)
   if (objId === null) {

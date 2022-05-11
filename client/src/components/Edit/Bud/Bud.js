@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
 import * as utils from '../utils'
+import * as BudUtils from './BudUtils'
 import { updateLinePos } from '../Silk/SilkUtils'
 
 function BudAnchorHighlighter() {
@@ -23,8 +24,8 @@ function Bud({ x, y, objId }) {
   const rootPos = utils.getRootPos()
   const radius = 40
   const strokeWidth = 40
-  const lines = utils.getHexagonLines(hexagonPoints(radius, x, y))
-  const hitLines = utils.getHexagonLines(hexagonPoints(radius+strokeWidth, x, y))
+  const lines = BudUtils.getHexagonLines(BudUtils.hexagonPoints(radius, x, y))
+  const hitLines = BudUtils.getHexagonLines(BudUtils.hexagonPoints(radius+strokeWidth, x, y))
   const hitAreas = lines.map((line, lineIndex) => {
     return (
       <reactKonva.Shape
@@ -78,7 +79,7 @@ function Bud({ x, y, objId }) {
         const newOffsetRootPos = obj.getAttr('offsetRootPos')
         bud.setX(rootPos.x + newOffsetRootPos.x)
         bud.setY(rootPos.y + newOffsetRootPos.y)
-        updateObj(obj.getAttr('objId'), {position: {x: newOffsetRootPos.x, y: newOffsetRootPos.y}})
+        utils.updateObj(obj.getAttr('objId'), {position: {x: newOffsetRootPos.x, y: newOffsetRootPos.y}})
       }}>
         <reactKonva.Shape
           x={x}
@@ -88,18 +89,18 @@ function Bud({ x, y, objId }) {
           stroke='black'
           strokeWidth={1}
           draggable={true}
-          points={hexagonPoints(radius, x, y)}
+          points={BudUtils.hexagonPoints(radius, x, y)}
           sceneFunc={(ctx, shape) => {
-            const points = hexagonPoints(shape.getAttr('radius'), 0, 0) // why is this not the same as points variable above???
-            drawHexagon(ctx, points)
+            const points = BudUtils.hexagonPoints(shape.getAttr('radius'), 0, 0) // why is this not the same as points variable above???
+            BudUtils.drawHexagon(ctx, points)
             ctx.fillStrokeShape(shape)
           }}
           onDragMove={(evt) => {
             const renderedBud = evt.target
             const x = renderedBud.getX()
             const y = renderedBud.getY()
-            renderedBud.setAttr('points', hexagonPoints(radius, x, y))
-            const lines = utils.getHexagonLines(renderedBud.getAttr('points'))
+            renderedBud.setAttr('points', BudUtils.hexagonPoints(radius, x, y))
+            const lines = BudUtils.getHexagonLines(renderedBud.getAttr('points'))
             const siblings = evt.target.parent.children[1].children
             for (const siblingIndex in siblings) {
               const hit = siblings[siblingIndex]

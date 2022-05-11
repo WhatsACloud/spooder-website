@@ -4,7 +4,7 @@ import * as SilkUtils from './SilkUtils'
 import * as utils from '../utils'
 
 function SilkEnd({ points, setDraggingLine, setSelected, setToggleCanDragLine }) {
-  const circleDragmoveFunc = evt => lineCircleMove(evt.evt, true, {"objId": evt.target.parent.getAttr('objId'), "innerIndex": evt.target.index}) 
+  const circleDragmoveFunc = evt => SilkUtils.lineCircleMove(evt.evt, true, {"objId": evt.target.parent.getAttr('objId'), "innerIndex": evt.target.index}) 
   const stopDragLineWrapper = (e) => {
     document.removeEventListener('mouseup', stopDragLineWrapper)
   }
@@ -23,7 +23,7 @@ function SilkEnd({ points, setDraggingLine, setSelected, setToggleCanDragLine })
         const objId = e.target.parent.getAttr('objId')
         document.addEventListener('mouseup', stopDragLineWrapper)
         setToggleCanDragLine(false)
-        startDragLine(e.evt, setDraggingLine, setSelected, objId, e.target.index, false)
+        SilkUtils.startDragLine(e.evt, setDraggingLine, setSelected, objId, e.target.index, false)
       }}
       onDragMove={circleDragmoveFunc}>
     </reactKonva.Circle>
@@ -50,7 +50,7 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
     const line = evt.target
     const lineGroup = evt.target.parent
     const objId = lineGroup.getAttr('objId')
-    const points = getLinePos(lineGroup)
+    const points = SilkUtils.getLinePos(lineGroup)
     console.log(points[0], points[1])
     console.log(line.getPoints())
     const offsetRootPoses = lineGroup.getAttr('offsetRootPoses')
@@ -60,7 +60,7 @@ function Silk({ points, setDraggingLine, objId, setSelected, setToggleCanDragLin
       {x: points[1].x - rootPos.x, y: points[1].y - rootPos.y},
     ]
     lineGroup.setAttr('offsetRootPoses', newOffsetRootPoses)
-    updateObj(objId, {positions: newOffsetRootPoses})
+    utils.updateObj(objId, {positions: newOffsetRootPoses})
   }
   const getOffsetRootPoses = () => {
     const rootPos = utils.getRootPos()

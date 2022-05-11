@@ -1,23 +1,23 @@
 import React, { memo, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Authorizer from '../Shared/Authorizer'
-import styles from './edit.module'
+import Authorizer from '../../Shared/Authorizer'
+import styles from '../edit.module'
 
-import { preventZoom, preventZoomScroll } from './PreventDefault'
-import { mouseDown, mouseUp, mouseMove } from './Events'
-import * as utils from './utils'
-import * as OtherElements from './OtherElements'
-import { Background } from './Background'
+import { preventZoom, preventZoomScroll } from '../PreventDefault'
+import { mouseDown, mouseUp, mouseMove } from '../Events'
+import * as OtherElements from '../OtherElements'
+import { Background } from '../Background'
 
-import api from '../../services/api'
+import api from '../../../services/api'
 
-import * as SilkShapes from './Silk'
-import * as BudShapes from './Bud'
+import * as SilkShapes from '../Silk'
+import * as BudShapes from '../Bud'
 
-// import spoodawebData from './TestingSpoodawebData'
+import * as utils from '../utils'
+import { UpdateBudBorderEvt } from '../Bud/UpdateBudBorder'
+import { DrawCanvas } from './DrawCanvas'
 
 import Konva from 'konva'
-import * as ReactKonva from 'react-konva'
 
 Konva.hitOnDragEnabled = true
 
@@ -31,59 +31,7 @@ TO DO
 add saving ability
 */
 
-function UpdateBudBorderEvt({ draggingLine, hoverBudBorder, setHoverBudBorder }) {
-  useEffect(() => {
-    const stage = utils.getStage() 
-    if (!stage) return
-    const buds = stage.find('.bud')
-    if (draggingLine) {
-      for (const budIndex in buds) { // to change this cause performance issues
-        const bud = buds[budIndex]
-        const hitGroup = bud.children[1]
-        const hitAreas = hitGroup.children
-        for (const hitAreaIndex in hitAreas) {
-          const hitArea = hitAreas[hitAreaIndex]
-          hitArea.on('mousemove', snapToPreview)
-        }
-        hitGroup.on('mouseover', (evt) => {
-          const stage = utils.getStage()
-          const highlighter = stage.find('.highlighter')[0]
-          highlighter.show()
-          highlighter.setAttr('attachedObjId', evt.target.parent.parent.getAttr('objId'))
-          setHoverBudBorder(true)
-        })
-        hitGroup.on('mouseout', (evt) => {
-          const stage = utils.getStage()
-          const highlighter = stage.find('.highlighter')[0]
-          highlighter.hide()
-          highlighter.setAttr('attachedObjId', null)
-          setHoverBudBorder(false)
-        })
-      }
-    } else {
-      setHoverBudBorder(false)
-      for (const budIndex in buds) {
-        const bud = buds[budIndex]
-        const hitGroup = bud.children[1]
-        const hitAreas = hitGroup.children
-        hitGroup.off('mouseup')
-        for (const hitAreaIndex in hitAreas) {
-          const hitArea = hitAreas[hitAreaIndex]
-          hitArea.off('mousemove')
-        }
-        hitGroup.off('mouseover')
-        hitGroup.off('mouseout')
-        const stage = utils.getStage()
-        const highlighter = stage.find('.highlighter')[0]
-        highlighter.hide()
-      }
-    }
-
-  }, [ draggingLine ])
-  return <></>
-}
-
-function MouseMoveDetector({}) {
+function MouseMoveDetector() {
   const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
   const [ mousePos, setMousePos ] = useState({
     x: null,
@@ -112,54 +60,6 @@ function MouseMoveDetector({}) {
   return <></>
 }
 
-const scrollRight = (amt) => {
-  const rootPos = utils.getRootPos()
-  utils.setRootPos({x: rootPos.x - amt, y: rootPos.y})
-}
-
-const scrollDown = (amt) => {
-  const rootPos = utils.getRootPos()
-  utils.setRootPos({x: rootPos.x, y: rootPos.y - amt})
-}
-
-function DrawCanvas({ rendered, toggleCanDragLine, canvasWidth, canvasHeight }) {
-  useEffect(() => {
-    utils.setRootPos({x: 0, y: 0})
-    const scrollAmt = 20
-    document.addEventListener('keydown', (e) => {
-      const key = e.key
-      switch (key) {
-        case 'ArrowUp':
-          scrollDown(-scrollAmt)
-          break
-        case 'ArrowDown':
-          scrollDown(scrollAmt)
-          break
-        case 'ArrowLeft':
-          scrollRight(-scrollAmt)
-          break
-        case 'ArrowRight':
-          scrollRight(scrollAmt)
-          break
-      }
-    })
-  }, [])
-  return (
-    <>
-      <ReactKonva.Stage
-        x={0}
-        y={0}
-        width={window.screen.width * 0.85}
-        height={window.screen.height * 0.95}>
-        <ReactKonva.Layer>
-          {rendered}
-          <BudShapes.BudAnchorHighlighter></BudShapes.BudAnchorHighlighter>
-        </ReactKonva.Layer>
-      </ReactKonva.Stage>
-    </>
-  )
-}
-
 function AddNewObjs({
     objsToUpdate,
     setDraggingLine,
@@ -176,13 +76,13 @@ function AddNewObjs({
       Object.entries(objsToUpdate).forEach(([objId, obj]) => {
         if (obj.type === 'bud') {
           newRendered.push(
-            <Shapes.Bud
+            <BudShapes.Bud
               x={obj.position.x}
               y={obj.position.y}
               key={newRendered.length}
               objId={objId}
               setHoverBudBorder={setHoverBudBorder}
-              ></Shapes.Bud>
+              ></BudShapes.Bud>
           )
         } else if (obj.type === 'silk') {
           newRendered.push(

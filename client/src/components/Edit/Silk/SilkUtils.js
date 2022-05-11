@@ -5,7 +5,7 @@ import React from 'react'
 import { silkSample } from '../spoodawebSampleData'
 
 const setSilk = (setObjsToUpdate, details) => {
-  const nextObjId = getNextObjId()
+  const nextObjId = utils.getNextObjId()
   const line = {...silkSample}
   for (const name in details) {
     if (name in line) {
@@ -14,7 +14,7 @@ const setSilk = (setObjsToUpdate, details) => {
     }
   }
   setObjsToUpdate({[nextObjId]: line})
-  updateNewObjs(nextObjId, line)
+  utils.updateNewObjs(nextObjId, line)
   utils.setNextObjId(nextObjId+1)
 }
 export { setSilk as setSilk }
@@ -23,7 +23,7 @@ const startDragLine = (e, setDraggingLine, setSelected, objId, innerIndex, toggl
   if (e.button === 0 && utils.isInCanvas({x: e.pageX, y: e.pageY})) {
     setDraggingLine(true)
     setSelected({"objId": objId, "innerIndex": innerIndex})
-    const renderedLine = getObjById(objId)
+    const renderedLine = utils.getObjById(objId)
     renderedLine.moveToBottom()
   }
 }
@@ -44,11 +44,11 @@ const stopDragLine = (e, lineCircle) => { // todo: remove lineCircle, add mouseu
 export { stopDragLine as stopDragLine }
 
 const snapLine = (selected) => {
-  const stage = getStage()
+  const stage = utils.getStage()
   const highlighter = stage.find('.highlighter')[0]
-  const line = getObjById(selected.objId)
+  const line = utils.getObjById(selected.objId)
   const lineCircle = line.children[selected.innerIndex]
-  const attachedTo = getObjById(highlighter.getAttr('attachedObjId'))
+  const attachedTo = utils.getObjById(highlighter.getAttr('attachedObjId'))
   console.log(highlighter.getAttr('attachedObjId'))
   const bud = attachedTo.children[0]
   const budX = bud.getX() 
@@ -81,10 +81,10 @@ const snapLineCircleToLine = (selected) => { // pls fix ltr it doesnt work if in
 export { snapLineCircleToLine as snapLineCircleToLine }
 
 const lineCircleMove = (e, draggingLine, selected) => {
-  if (isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
+  if (utils.isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
     const mousePos = {x: e.pageX, y: e.pageY}
-    const canvasMousePos = getCanvasMousePos(mousePos.x, mousePos.y)
-    const lineGroup = getObjById(selected.objId).children
+    const canvasMousePos = utils.getCanvasMousePos(mousePos.x, mousePos.y)
+    const lineGroup = utils.getObjById(selected.objId).children
     const start = lineGroup[selected.innerIndex]
     updateLinePos(start, canvasMousePos.x, canvasMousePos.y)
   }
