@@ -1,7 +1,8 @@
-import * as Shapes from './Shapes'
+import * as SilkShapes from './SilkShape'
+import * as utils from '../utils'
 import React from 'react'
 
-import { silkSample } from './spoodawebSampleData'
+import { silkSample } from '../spoodawebSampleData'
 
 const setSilk = (setObjsToUpdate, details) => {
   const nextObjId = getNextObjId()
@@ -14,9 +15,9 @@ const setSilk = (setObjsToUpdate, details) => {
   }
   setObjsToUpdate({[nextObjId]: line})
   updateNewObjs(nextObjId, line)
-  setNextObjId(nextObjId+1)
+  utils.setNextObjId(nextObjId+1)
 }
-export { setSilk as setsilk }
+export { setSilk as setSilk }
 
 const startDragLine = (e, setDraggingLine, setSelected, objId, innerIndex, toggleCanDragLine) => {
   if (e.button === 0 && utils.isInCanvas({x: e.pageX, y: e.pageY})) {
@@ -88,7 +89,7 @@ const lineCircleMove = (e, draggingLine, selected) => {
     updateLinePos(start, canvasMousePos.x, canvasMousePos.y)
   }
 }
-export { linecirclemove as linecirclemove }
+export { lineCircleMove as lineCircleMove }
 
 const updateLinePos = (lineCircle, x, y) => {
   lineCircle.setX(x)

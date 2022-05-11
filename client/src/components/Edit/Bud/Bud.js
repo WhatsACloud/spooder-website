@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
 import * as utils from '../utils'
+import { updateLinePos } from '../Silk/SilkUtils'
 
 function BudAnchorHighlighter() {
   return (
@@ -59,7 +60,7 @@ function Bud({ x, y, objId }) {
           const obj = getObjById(objId).children[innerIndex]
           const budX = bud.getX() 
           const budY = bud.getY() 
-          utils.updateLinePos(obj, budX - offset.x, budY - offset.y)
+          updateLinePos(obj, budX - offset.x, budY - offset.y)
         }
       }}
       onDragStart={evt => {

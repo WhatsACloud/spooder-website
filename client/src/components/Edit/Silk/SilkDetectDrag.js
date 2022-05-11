@@ -1,4 +1,4 @@
-import react, { useEffect, useState } from 'react'
+import React, { useEffect, useState, memo } from 'react'
 import * as SilkUtils from './SilkUtils'
 import * as utils from '../utils'
 

@@ -37,6 +37,7 @@ const setNextObjId = (amt) => {
   const mainLayer = getMainLayer()
   mainLayer.setAttr('nextObjId', amt)
 }
+export { setNextObjId as setNextObjId }
 
 const getNextObjId = () => {
   const mainLayer = getMainLayer()

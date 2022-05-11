@@ -12,6 +12,7 @@ import { Background } from './Background'
 import api from '../../services/api'
 
 import * as SilkShapes from './Silk'
+import * as BudShapes from './Bud'
 
 // import spoodawebData from './TestingSpoodawebData'
 
@@ -152,7 +153,7 @@ function DrawCanvas({ rendered, toggleCanDragLine, canvasWidth, canvasHeight }) 
         height={window.screen.height * 0.95}>
         <ReactKonva.Layer>
           {rendered}
-          <Shapes.BudAnchorHighlighter></Shapes.BudAnchorHighlighter>
+          <BudShapes.BudAnchorHighlighter></BudShapes.BudAnchorHighlighter>
         </ReactKonva.Layer>
       </ReactKonva.Stage>
     </>
@@ -185,14 +186,13 @@ function AddNewObjs({
           )
         } else if (obj.type === 'silk') {
           newRendered.push(
-            <Shapes.Silk
+            <SilkShapes.Silk
               points={obj.positions}
-              lineCircleMove={utils.lineCircleMove}
               key={newRendered.length}
               setDraggingLine={setDraggingLine}
               setSelected={setSelected}
               setToggleCanDragLine={setToggleCanDragLine}
-              objId={objId}></Shapes.Silk>
+              objId={objId}></SilkShapes.Silk>
           )
         } else {
           console.warn('Error: object type not specified')
@@ -275,14 +275,14 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
         hoverBudBorder={hoverBudBorder}
         setHoverBudBorder={setHoverBudBorder}></UpdateBudBorderEvt>
       <div className={styles.wrapper}>
-        <LineDragUpdater
+        <SilkShapes.LineDragUpdater
           toggleCanDragLine={toggleCanDragLine}
           setObjsToUpdate={setObjsToUpdate}
           setDraggingLine={setDraggingLine}
           setSelected={setSelected}
           selected={selected}
           hoverBudBorder={hoverBudBorder}
-          draggingLine={draggingLine}></LineDragUpdater>
+          draggingLine={draggingLine}></SilkShapes.LineDragUpdater>
         <OtherElements.ObjectDrawer
           setDragging={setDragging}
           toggleCanDragLine={toggleCanDragLine}
