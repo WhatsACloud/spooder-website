@@ -34,19 +34,19 @@ const withinRect = (mousePos, startX, startY, endX, endY) => {
 }
 
 const setNextObjId = (amt) => {
-  const mainLayer = getMainLayer()
+  const mainLayer = utils.getMainLayer()
   mainLayer.setAttr('nextObjId', amt)
 }
 
 const getNextObjId = () => {
-  const mainLayer = getMainLayer()
+  const mainLayer = utils.getMainLayer()
   const currentNextObjId = mainLayer.getAttr('nextObjId')
   return currentNextObjId
 }
 export { getNextObjId as getNextObjId }
 
 const updateNewObjs = (objId, obj) => {
-  const mainLayer = getMainLayer()
+  const mainLayer = utils.getMainLayer()
   const newObjs = mainLayer.getAttr('newObjs')
   newObjs[objId] = obj
   mainLayer.setAttr('newObjs', newObjs)
@@ -88,12 +88,12 @@ const setSilk = (setObjsToUpdate, details) => {
 export { setSilk as setSilk }
 
 const getRootPos = () => {
-  return getMainLayer().getAttr('rootPos')
+  return utils.getMainLayer().getAttr('rootPos')
 }
 export { getRootPos as getRootPos }
 
 const setRootPos = (rootPos) => {
-  for (let obj of getKonvaObjs()) {
+  for (let obj of utils.getKonvaObjs()) {
     const type = obj.getAttr('objType')
     if (type === 'bud') {
       const bud = obj.children[0]
@@ -279,7 +279,7 @@ export { getLinePos as getLinePos}
 
 const getObjById = (id=null) => {
   if (id === null) return false
-  const objs = getKonvaObjs()
+  const objs = utils.getKonvaObjs()
   for (const obj of objs) {
     if (Number(obj.getAttr('objId')) === Number(id)) {
       return obj
@@ -328,7 +328,7 @@ const stopDragLine = (e, lineCircle) => { // todo: remove lineCircle, add mouseu
 export { stopDragLine as stopDragLine }
 
 const snapLine = (selected) => {
-  const stage = getStage()
+  const stage = utils.getStage()
   const highlighter = stage.find('.highlighter')[0]
   const line = getObjById(selected.objId)
   const lineCircle = line.children[selected.innerIndex]
@@ -348,7 +348,7 @@ const snapLine = (selected) => {
 export { snapLine as snapLine }
 
 const snapLineCircleToLine = (selected) => { // pls fix ltr it doesnt work if innerIndex is 2
-  const stage = getStage()
+  const stage = utils.getStage()
   const lineGroup = getObjById(selected.objId)
   const line = lineGroup.children[0]
   const lineCircle = lineGroup.children[selected.innerIndex]
@@ -365,7 +365,7 @@ const snapLineCircleToLine = (selected) => { // pls fix ltr it doesnt work if in
 export { snapLineCircleToLine as snapLineCircleToLine }
 
 const addObjs = (toAdd) => {
-  const layer = getMainLayer()
+  const layer = utils.getMainLayer()
   const currentObjs = layer.getAttr('objs')
   const newObjs = {...currentObjs, ...toAdd}
   layer.setAttr('objs', newObjs)
@@ -373,7 +373,7 @@ const addObjs = (toAdd) => {
 export { addObjs as addObjs }
 
 const updateObj = (objId, attrs) => {
-  const mainLayer = getMainLayer()
+  const mainLayer = utils.getMainLayer()
   const obj = mainLayer.getAttr('objs')[objId]
   const newObjs = mainLayer.getAttr('newObjs')
   Object.entries(attrs).forEach(([name, val]) => {
@@ -404,7 +404,7 @@ import 'regenerator-runtime/runtime'
 import api from '../../services/api'
 
 const save = async () => {
-  const newObjs = getMainLayer().getAttr('newObjs') 
+  const newObjs = utils.getMainLayer().getAttr('newObjs') 
   console.log(newObjs)
   const urlString = window.location.search
   let paramString = urlString.split('?')[1];

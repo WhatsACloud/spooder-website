@@ -31,7 +31,7 @@ add saving ability
 
 function UpdateBudBorderEvt({ draggingLine, hoverBudBorder, setHoverBudBorder }) {
   useEffect(() => {
-    const stage = getStage() 
+    const stage = utils.getStage() 
     if (!stage) return
     const buds = stage.find('.bud')
     if (draggingLine) {
@@ -44,14 +44,14 @@ function UpdateBudBorderEvt({ draggingLine, hoverBudBorder, setHoverBudBorder })
           hitArea.on('mousemove', snapToPreview)
         }
         hitGroup.on('mouseover', (evt) => {
-          const stage = getStage()
+          const stage = utils.getStage()
           const highlighter = stage.find('.highlighter')[0]
           highlighter.show()
           highlighter.setAttr('attachedObjId', evt.target.parent.parent.getAttr('objId'))
           setHoverBudBorder(true)
         })
         hitGroup.on('mouseout', (evt) => {
-          const stage = getStage()
+          const stage = utils.getStage()
           const highlighter = stage.find('.highlighter')[0]
           highlighter.hide()
           highlighter.setAttr('attachedObjId', null)
@@ -71,7 +71,7 @@ function UpdateBudBorderEvt({ draggingLine, hoverBudBorder, setHoverBudBorder })
         }
         hitGroup.off('mouseover')
         hitGroup.off('mouseout')
-        const stage = getStage()
+        const stage = utils.getStage()
         const highlighter = stage.find('.highlighter')[0]
         highlighter.hide()
       }
@@ -92,7 +92,7 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
       }
     }
     const startDragLineWrapper = e => {
-      const canvasMousePos = getCanvasMousePos(e.pageX, e.pageY)
+      const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
       if (!isInCanvas({x: e.pageX, y: e.pageY})) return
       const currentObjId = getNextObjId()
       setSilk(setObjsToUpdate, {positions: [canvasMousePos, canvasMousePos]})
@@ -109,7 +109,7 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
       } else { // detaches line
         const line = getObjById(selected.objId)
         const offsetRootPoses = line.getAttr('offsetRootPoses')
-        const mousePos = getCanvasMousePos(e.pageX, e.pageY)
+        const mousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
         const rootPos = getRootPos()
         offsetRootPoses[selected.innerIndex-1] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
         line.setAttr('offsetRootPoses', offsetRootPoses)
@@ -184,17 +184,17 @@ function MouseMoveDetector({}) {
 
 const scrollRight = (amt) => {
   const rootPos = getRootPos()
-  setRootPos({x: rootPos.x - amt, y: rootPos.y})
+  utils.setRootPos({x: rootPos.x - amt, y: rootPos.y})
 }
 
 const scrollDown = (amt) => {
   const rootPos = getRootPos()
-  setRootPos({x: rootPos.x, y: rootPos.y - amt})
+  utils.setRootPos({x: rootPos.x, y: rootPos.y - amt})
 }
 
 function DrawCanvas({ rendered, toggleCanDragLine, canvasWidth, canvasHeight }) {
   useEffect(() => {
-    setRootPos({x: 0, y: 0})
+    utils.setRootPos({x: 0, y: 0})
     const scrollAmt = 20
     document.addEventListener('keydown', (e) => {
       const key = e.key
@@ -297,8 +297,8 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   
   useEffect(async () => {
     const rootPos = getRootPos()
-    const width = getStage().getAttr('width')
-    const height = getStage().getAttr('height')
+    const width = utils.getStage().getAttr('width')
+    const height = utils.getStage().getAttr('height')
     const urlString = window.location.search
     let paramString = urlString.split('?')[1];
     let queryString = new URLSearchParams(paramString);
@@ -315,7 +315,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
     })
     const spoodawebData = objs.data.spoodawebData
     setObjsToUpdate(spoodawebData)
-    const mainLayer = getMainLayer()
+    const mainLayer = utils.getMainLayer()
     mainLayer.setAttr('nextObjId', objs.data.nextObjId) // probably should be the next highest objId instead of this
     mainLayer.setAttr('newObjs', {})
     document.addEventListener('keydown', preventZoom)

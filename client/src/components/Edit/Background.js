@@ -220,7 +220,7 @@ function Background() {
     drawLoop()
     document.addEventListener('mousedown', ({ pageX, pageY }) => {
       const rippleIndex = rippleList.length
-      const { x, y } = getCanvasMousePos(pageX, pageY)
+      const { x, y } = utils.getCanvasMousePos(pageX, pageY)
       rippleList.push({
         x: x,
         y: y,
