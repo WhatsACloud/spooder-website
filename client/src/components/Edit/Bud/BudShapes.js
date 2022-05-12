@@ -109,7 +109,7 @@ function Bud({ x, y, objId, setSelectedObj }) {
               hit.setY(y)
               hit.setAttr('borderPoints', lines[siblingIndex])
           }}}
-          onMouseDown={evt => {select(evt, setSelectedObj)}}>
+          onClick={evt => {select(evt, setSelectedObj)}}>
         </reactKonva.Shape>
         <reactKonva.Group
           x={x}

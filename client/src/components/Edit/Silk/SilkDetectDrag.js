@@ -31,7 +31,10 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
         const offsetRootPoses = line.getAttr('offsetRootPoses')
         const mousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
         const rootPos = utils.getRootPos()
+        console.log(selectedSilk.innerIndex, Math.abs(selectedSilk.innerIndex-2)+1)
+        console.log({...offsetRootPoses}, mousePos)
         offsetRootPoses[selectedSilk.innerIndex-1] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
+        console.log(offsetRootPoses)
         line.setAttr('offsetRootPoses', offsetRootPoses)
         const lineCircle = line.children[selectedSilk.innerIndex]
         const attachedTo = utils.getKonvaObjById(lineCircle.getAttr('attachedToObjId'))

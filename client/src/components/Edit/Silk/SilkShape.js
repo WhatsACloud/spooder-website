@@ -27,7 +27,7 @@ function SilkEnd({ points, setDraggingLine, setSelectedSilk, setToggleCanDragLin
         SilkUtils.startDragLine(e.evt, setDraggingLine, setSelectedSilk, objId, e.target.index, false)
       }}
       onDragMove={circleDragmoveFunc}
-      onMouseDown={evt => {select(evt, setSelectedObj)}}>
+      onClick={evt => {select(evt, setSelectedObj)}}>
     </reactKonva.Circle>
   )
 }
@@ -66,11 +66,13 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
   }
   const getOffsetRootPoses = () => {
     const rootPos = utils.getRootPos()
-    const offsetX = points[0].x - rootPos.x 
-    const offsetY = points[0].y - rootPos.y 
+    const offsetX1 = points[0].x - rootPos.x 
+    const offsetY1 = points[0].y - rootPos.y 
+    const offsetX2 = points[1].x - rootPos.x 
+    const offsetY2 = points[1].y - rootPos.y 
     return [
-      {x: offsetX, y: offsetY},
-      {x: offsetX, y: offsetY}
+      {x: offsetX1, y: offsetY1},
+      {x: offsetX2, y: offsetY2}
     ] 
   } 
   return (
@@ -86,7 +88,7 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
         draggable={true}
         onDragMove={lineDragmoveFunc}
         onDragEnd={lineDragendFunc}
-        onMouseDown={evt => {select(evt, setSelectedObj)}}></reactKonva.Line>
+        onClick={evt => {select(evt, setSelectedObj)}}></reactKonva.Line>
       <SilkEnd
         points={points[0]}
         setSelectedSilk={setSelectedSilk}

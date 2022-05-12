@@ -71,7 +71,7 @@ const handleInputChange = (e, type, renderData, setRenderData, id, definitionNo=
 }
 
 function BudView({ selectedObj }) {
-  selectedObj = true
+  const [ canRender, setCanRender ] = useState(false)
   const [ definitionNo, setDefinitionNo ] = useState(0)
   const [ totalDefinitionNo, setTotalDefinitionNo ] = useState()
   const [ renderedExamples, setRenderedExamples ] = useState()
@@ -80,12 +80,12 @@ function BudView({ selectedObj }) {
     return (e) => handleInputChange(e, type, renderData, setRenderData, selectedObj, definitionNo)
   }
   useEffect(() => {
-    console.log(selectedObj)
     if (!selectedObj) setRenderData()
-    // const obj = utils.getObjById(selectedObj)
-    const obj = budSample
-    setTotalDefinitionNo(obj.definitions.length-1)
-    if (obj) {
+    const obj = utils.getObjById(selectedObj)
+    // const obj = budSample
+    if (obj && obj.type === 'bud') {
+      setCanRender(true)
+      setTotalDefinitionNo(obj.definitions.length-1)
       const currentDefinitionObj = obj.definitions[definitionNo]
       const data = {
         word: obj.word || null,
@@ -127,7 +127,7 @@ function BudView({ selectedObj }) {
     setDefinitionNo(definitionNo+1)
   }
   return (
-    <div className={selectedObj ? styles.BudView : styles.none} id='BudView'>
+    <div className={canRender ? styles.BudView : styles.none} id='BudView'>
       <BudAttr
         id='word'
         data={renderData ? renderData.word: ''}
