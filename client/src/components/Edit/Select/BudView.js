@@ -29,6 +29,16 @@ const budSample = {
         "example 2"
       ],
       "link": 0.2 
+    },
+    {
+      "definition": "definition 2",
+      "sound": "sound 2",
+      "context": "context 2",
+      "examples": [
+        "example 3",
+        "example 4"
+      ],
+      "link": 0.69 
     }
   ],
   "attachedTo": [],
@@ -41,10 +51,8 @@ const handleInputChange = (e, type, renderData, setRenderData, id, definitionNo=
   const newData = renderData
   const val = e.target.value
   const objs = utils.getObjs()
-  console.log(newData, type, val)
   newData[type] = val
   const obj = objs[id]
-  console.log(obj.word)
   switch (type) {
     case "word":
       obj.word = val
@@ -63,14 +71,20 @@ const handleInputChange = (e, type, renderData, setRenderData, id, definitionNo=
 }
 
 function BudView({ selectedObj }) {
+  selectedObj = true
   const [ definitionNo, setDefinitionNo ] = useState(0)
+  const [ totalDefinitionNo, setTotalDefinitionNo ] = useState()
   const [ renderedExamples, setRenderedExamples ] = useState()
   const [ renderData, setRenderData ] = useState()
+  const handleInputChangeWrapper = (type) => {
+    return (e) => handleInputChange(e, type, renderData, setRenderData, selectedObj, definitionNo)
+  }
   useEffect(() => {
     console.log(selectedObj)
     if (!selectedObj) setRenderData()
-    const obj = utils.getObjById(selectedObj)
-    // const obj = budSample
+    // const obj = utils.getObjById(selectedObj)
+    const obj = budSample
+    setTotalDefinitionNo(obj.definitions.length-1)
     if (obj) {
       const currentDefinitionObj = obj.definitions[definitionNo]
       const data = {
@@ -81,11 +95,36 @@ function BudView({ selectedObj }) {
         link: currentDefinitionObj.link
       }
       setRenderData(data)
+      const examples = currentDefinitionObj.examples 
+      const examplesRender = examples.map((example) => {
+        return (
+          <>
+            <textarea
+              placeholder='insert example'
+              value={example}
+              onChange={handleInputChangeWrapper('example')}
+              className={styles.example}></textarea>
+          </>
+        )
+      })
+      setRenderedExamples(examplesRender)
     }
-  }, [ selectedObj ])
-  console.log(renderData)
-  const handleInputChangeWrapper = (type) => {
-    return (e) => handleInputChange(e, type, renderData, setRenderData, selectedObj, definitionNo)
+  }, [ selectedObj, definitionNo ])
+  const subDefinitionNo = () => {
+    console.log('sub')
+    console.log(definitionNo, totalDefinitionNo)
+    if (definitionNo-1 < 0) {
+      setDefinitionNo(totalDefinitionNo)
+      return
+    }
+    setDefinitionNo(definitionNo-1)
+  }
+  const addDefinitionNo = () => {
+    if (definitionNo+1 > totalDefinitionNo) {
+      setDefinitionNo(0)
+      return
+    }
+    setDefinitionNo(definitionNo+1)
   }
   return (
     <div className={selectedObj ? styles.BudView : styles.none} id='BudView'>
@@ -94,12 +133,17 @@ function BudView({ selectedObj }) {
         data={renderData ? renderData.word: ''}
         onChange={handleInputChangeWrapper('word')}
         placeholder='insert word'></BudAttr>
-      <BudAttr
-        id='definition'
-        data={renderData ? renderData.definition: ''}
-        onChange={handleInputChangeWrapper('definition')}
-        placeholder='definition'
-        style={styles.definition}></BudAttr>
+      <div
+        className={styles.divWord}>
+        <button onClick={subDefinitionNo}>a</button>
+        <BudAttr
+          id='definition'
+          data={renderData ? renderData.definition: ''}
+          onChange={handleInputChangeWrapper('definition')}
+          placeholder='definition'
+          style={styles.definition}></BudAttr>
+        <button onClick={addDefinitionNo}>a</button>
+      </div>
       <BudAttr
         id='sound'
         data={renderData ? renderData.sound: ''}

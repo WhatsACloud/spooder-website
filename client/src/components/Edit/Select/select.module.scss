@@ -57,10 +57,18 @@ div.BudView {
       }
     }
     &.examplesBox {
-      &.examples {
-
+      background-color: aqua;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      textarea.example {
+        @include inputBox;
+        width: 80%;
       }
-      
+    }
+    &.divWord {
+      display: flex;
+      flex-direction: row;
     }
   }
 }
