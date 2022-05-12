@@ -15,6 +15,11 @@ const getKonvaObjs = () => {
 }
 export { getKonvaObjs as getKonvaObjs }
 
+const getObjs = () => {
+  return getMainLayer().getAttr('objs')
+}
+export { getObjs }
+
 const getCanvasMousePos = (x, y) => {
   return {x: x - window.innerWidth * 0.15 + divCanvas.scrollLeft, y: y - 40 + divCanvas.scrollTop}
 }
@@ -111,7 +116,7 @@ export { getKonvaObjById as getKonvaObjById }
 
 const getObjById = (id=null) => {
   if (id === null) return false
-  const objs = getMainLayer().getAttr('objs')
+  const objs = getObjs() 
   return objs[id]
 }
 export { getObjById }

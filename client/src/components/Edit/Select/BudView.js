@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react'
 import styles from './select.module'
 import * as utils from '../utils'
 
-function BudAttr({ id, placeholder, style, data }) {
+function BudAttr({ id, placeholder, style, data, onChange }) {
   return (
     <div
       className={styles.attrBox}
       id={id}>
       <input
         value={data}
+        onChange={onChange}
         className={style || styles.normal}
         placeholder={placeholder}>
       </input>
@@ -36,37 +37,73 @@ const budSample = {
   "operation": 'add' // add edit minus, default add,
 }
 
+const handleInputChange = (e, type, renderData, setRenderData, id, definitionNo=0) => {
+  const newData = renderData
+  const val = e.target.value
+  const objs = utils.getObjs()
+  console.log(newData, type, val)
+  newData[type] = val
+  const obj = objs[id]
+  console.log(obj.word)
+  switch (type) {
+    case "word":
+      obj.word = val
+      break
+    case "definition":
+      obj.definitions[definitionNo].definition = val
+      break
+    case "sound":
+      obj.definitions[definitionNo].sound = val
+      break
+    case "context":
+      obj.definitions[definitionNo].context = val
+      break
+  }
+  setRenderData(newData)
+}
+
 function BudView({ selectedObj }) {
-  const [ obj, setObj ] = useState(budSample)
   const [ definitionNo, setDefinitionNo ] = useState(0)
   const [ renderedExamples, setRenderedExamples ] = useState()
   const [ renderData, setRenderData ] = useState()
   useEffect(() => {
-    const actualObj = utils.getObjById(selectedObj)
-    setObj(budSample)
-    console.log(actualObj)
-    const currentDefinitionObj = obj.definitions[definitionNo]
-    const data = {
-      word: obj.name,
-      definition: currentDefinitionObj.definition,
-      sound: currentDefinitionObj.sound,
-      context: currentDefinitionObj.context,
-      link: currentDefinitionObj.link
+    console.log(selectedObj)
+    if (!selectedObj) setRenderData()
+    const obj = utils.getObjById(selectedObj)
+    // const obj = budSample
+    if (obj) {
+      const currentDefinitionObj = obj.definitions[definitionNo]
+      const data = {
+        word: obj.word || null,
+        definition: currentDefinitionObj.definition || null,
+        sound: currentDefinitionObj.sound || null,
+        context: currentDefinitionObj.context || null,
+        link: currentDefinitionObj.link
+      }
+      setRenderData(data)
     }
-    setRenderData(data)
   }, [ selectedObj ])
+  console.log(renderData)
+  const handleInputChangeWrapper = (type) => {
+    return (e) => handleInputChange(e, type, renderData, setRenderData, selectedObj, definitionNo)
+  }
   return (
-    <div className={obj ? styles.BudView : styles.none} id='BudView'>
+    <div className={selectedObj ? styles.BudView : styles.none} id='BudView'>
       <BudAttr
         id='word'
-        data={renderData ? renderData.word: null}
+        data={renderData ? renderData.word: ''}
+        onChange={handleInputChangeWrapper('word')}
         placeholder='insert word'></BudAttr>
       <BudAttr
         id='definition'
+        data={renderData ? renderData.definition: ''}
+        onChange={handleInputChangeWrapper('definition')}
         placeholder='definition'
         style={styles.definition}></BudAttr>
       <BudAttr
         id='sound'
+        data={renderData ? renderData.sound: ''}
+        onChange={handleInputChangeWrapper('sound')}
         placeholder='sound'
         style={styles.sound}></BudAttr>
       <div
@@ -74,6 +111,8 @@ function BudView({ selectedObj }) {
         className={styles.attrBox}>
         <textarea
           placeholder='context'
+          value={renderData ? renderData.context: ''}
+          onChange={handleInputChangeWrapper('context')}
           className={styles.context}></textarea>
       </div>
       <div
