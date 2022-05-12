@@ -86,6 +86,11 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
         strokeWidth={1}
         hitStrokeWidth={30}
         draggable={true}
+        onDragStart={evt => {
+          const silkGroup = evt.target.parent.children
+          SilkUtils.removeAttachment(silkGroup[1])
+          SilkUtils.removeAttachment(silkGroup[2])
+        }}
         onDragMove={lineDragmoveFunc}
         onDragEnd={lineDragendFunc}
         onClick={evt => {select(evt, setSelectedObj)}}></reactKonva.Line>

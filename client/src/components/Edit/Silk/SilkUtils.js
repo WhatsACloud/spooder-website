@@ -116,3 +116,16 @@ const getLinePos = (lineGroup) => {
   return [newStart, newEnd]
 }
 export { getLinePos as getLinePos}
+
+const removeAttachment = (lineCircle) => {
+  const attachedTo = utils.getKonvaObjById(lineCircle.getAttr('attachedToObjId'))
+  if (attachedTo) {
+    const newObjs = [...attachedTo.getAttr('attachedSilkObjId')]
+    newObjs.splice(attachedTo, 1)
+    attachedTo.setAttr('attachedSilkObjId', newObjs)
+    lineCircle.setAttr('attachedToObjId', null)
+    return true
+  }
+  return false
+}
+export { removeAttachment }

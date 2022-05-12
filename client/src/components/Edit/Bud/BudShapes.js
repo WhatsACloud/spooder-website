@@ -59,7 +59,7 @@ function Bud({ x, y, objId, setSelectedObj }) {
         const bud = evt.target
         const attachedObjIds = bud.parent.getAttr('attachedSilkObjId')
         for (const { objId, offset, innerIndex } of attachedObjIds) {
-          const obj = getKonvaObjById(objId).children[innerIndex]
+          const obj = utils.getKonvaObjById(objId).children[innerIndex]
           const budX = bud.getX() 
           const budY = bud.getY() 
           updateLinePos(obj, budX - offset.x, budY - offset.y)

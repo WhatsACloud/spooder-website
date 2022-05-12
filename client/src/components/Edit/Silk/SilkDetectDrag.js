@@ -37,13 +37,7 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
         console.log(offsetRootPoses)
         line.setAttr('offsetRootPoses', offsetRootPoses)
         const lineCircle = line.children[selectedSilk.innerIndex]
-        const attachedTo = utils.getKonvaObjById(lineCircle.getAttr('attachedToObjId'))
-        if (attachedTo) {
-          const newObjs = [...attachedTo.getAttr('attachedSilkObjId')]
-          newObjs.splice(attachedTo, 1)
-          attachedTo.setAttr('attachedSilkObjId', newObjs)
-          lineCircle.setAttr('attachedToObjId', null)
-        }
+        SilkUtils.removeAttachment(lineCircle)
         utils.updateObj(selectedSilk.objId, {positions: offsetRootPoses})
       }
       setDraggingLine(false)
