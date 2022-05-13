@@ -131,6 +131,9 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   const [ selectedSilk, setSelectedSilk ] = useState()
   const [ selectedObj, setSelectedObj ] = useState()
   const [ inSettings, setInSettings ] = useState(false)
+  const [ settings, setSettings ] = useState({
+    Background: true 
+  })
   
   useEffect(async () => {
     const rootPos = utils.getRootPos()
@@ -185,7 +188,9 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
         setHoverBudBorder={setHoverBudBorder}></UpdateBudBorderEvt>
       <Settings
         inSettings={inSettings}
-        setInSettings={setInSettings}></Settings>
+        setInSettings={setInSettings}
+        settings={settings}
+        setSettings={setSettings}></Settings>
       <TaskBar
         setInSettings={setInSettings}></TaskBar>
       <div className={styles.wrapper}>
@@ -211,7 +216,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
         </div>
         <BudView
           selectedObj={selectedObj}></BudView>
-        {/* <Background></Background> */}
+        <Background canRender={settings.Background}></Background>
       </div>
     </>
   )

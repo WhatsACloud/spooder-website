@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
+
 import * as utils from './utils'
+import * as BudUtils from './Bud/BudUtils'
+
 import styles from './edit.module'
 
 const hexagonLineColor = 'black'
@@ -59,7 +62,7 @@ function drawHexagonGrid(ctx, width, height) {
         lastX = -xDiff
         lastY = yDiff + 2 * yDiff * (colNum + 1)
       }
-      drawHexagon(ctx, hexagonPoints(hexagonWidth/2-gapWidth, x, y))
+      BudUtils.drawHexagon(ctx, BudUtils.hexagonPoints(hexagonWidth/2-gapWidth, x, y))
       ctx.fill()
       ctx.stroke()
     }
@@ -143,7 +146,7 @@ const isDirectionLeft = (direction) => {
   return false
 }
 
-function Background() {
+function Background({ canRender }) {
   // const firstColor = '#75e6ff'
   useEffect(() => {
     const hexagons = document.getElementById('hexagons') 
@@ -250,7 +253,7 @@ function Background() {
   }, [])
   return (
     <>
-      <div className={styles.divBackground} id='divHexagons'>
+      <div className={canRender ? styles.divBackground : styles.none} id='divHexagons'>
         <canvas
           id='hexagons'
           x={0}
@@ -258,7 +261,7 @@ function Background() {
           width={width}
           height={height}></canvas>
       </div>
-      <div className={styles.divLightBack} id='divLightBack'>
+      <div className={canRender ? styles.divLightBack : styles.none} id='divLightBack'>
         <canvas
           id='lightBack'
           x={0}
