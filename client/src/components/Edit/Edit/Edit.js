@@ -16,6 +16,8 @@ import * as BudShapes from '../Bud'
 import * as utils from '../utils'
 import { UpdateBudBorderEvt } from '../Bud/UpdateBudBorder'
 import { DrawCanvas } from './DrawCanvas'
+import { TaskBar } from '../TaskBar'
+import { Settings } from '../Settings'
 
 import Konva from 'konva'
 import { BudView } from '../Select/BudView'
@@ -128,6 +130,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   const [ draggingLine, setDraggingLine ] = useState(false)
   const [ selectedSilk, setSelectedSilk ] = useState()
   const [ selectedObj, setSelectedObj ] = useState()
+  const [ inSettings, setInSettings ] = useState(false)
   
   useEffect(async () => {
     const rootPos = utils.getRootPos()
@@ -180,6 +183,11 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
         draggingLine={draggingLine}
         hoverBudBorder={hoverBudBorder}
         setHoverBudBorder={setHoverBudBorder}></UpdateBudBorderEvt>
+      <Settings
+        inSettings={inSettings}
+        setInSettings={setInSettings}></Settings>
+      <TaskBar
+        setInSettings={setInSettings}></TaskBar>
       <div className={styles.wrapper}>
         <SilkShapes.LineDragUpdater
           toggleCanDragLine={toggleCanDragLine}
