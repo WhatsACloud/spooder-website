@@ -76,12 +76,13 @@ function AddNewObjs({
     if (objsToUpdate) {
       const newRendered = [...rendered]
       utils.addObjs(objsToUpdate)
+      const rootPos = utils.getRootPos()
       Object.entries(objsToUpdate).forEach(([objId, obj]) => {
         if (obj.type === 'bud') {
           newRendered.push(
             <BudShapes.Bud
-              x={obj.position.x}
-              y={obj.position.y}
+              x={obj.position.x + rootPos.x}
+              y={obj.position.y + rootPos.y}
               key={newRendered.length}
               objId={objId}
               setSelectedObj={setSelectedObj}

@@ -55,6 +55,13 @@ export { getNextObjId as getNextObjId }
 const updateNewObjs = (objId, obj) => {
   const mainLayer = getMainLayer()
   const newObjs = mainLayer.getAttr('newObjs')
+  console.log(!(Object.keys(newObjs).includes(String(objId))))
+  if (!(Object.keys(newObjs).includes(String(objId)))) {
+    obj.operation = 'add'
+  } else {
+    obj.operation = 'edit'
+  }
+  const rootPos = getRootPos()
   newObjs[objId] = obj
   mainLayer.setAttr('newObjs', newObjs)
 }
@@ -136,10 +143,6 @@ const updateObj = (objId, attrs) => {
   Object.entries(attrs).forEach(([name, val]) => {
     obj[name] = val
   })
-  console.log(!(Object.keys(newObjs).includes(String(objId))))
-  if (!(Object.keys(newObjs).includes(String(objId)))) {
-    obj.operation = 'edit'
-  }
   updateNewObjs(objId, obj)
   const konvaObj = getKonvaObjById(objId) 
   if ('position' in attrs) {

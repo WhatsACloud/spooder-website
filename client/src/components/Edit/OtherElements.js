@@ -53,6 +53,10 @@ const drop = (e, setObjsToUpdate) => {
     console.log('placed!')
     // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
     const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
+    const rootPos = utils.getRootPos()
+    canvasMousePos.x -= rootPos.x
+    canvasMousePos.y -= rootPos.y
+    console.log(canvasMousePos)
     BudUtils.setBud(setObjsToUpdate, {position: canvasMousePos})
   }
 }

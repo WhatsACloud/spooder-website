@@ -50,22 +50,13 @@ const budSample = {
 const handleInputChange = (e, type, renderData, setRenderData, id, definitionNo=0) => {
   const newData = renderData
   const val = e.target.value
-  const objs = utils.getObjs()
   newData[type] = val
-  const obj = objs[id]
-  switch (type) {
-    case "word":
-      obj.word = val
-      break
-    case "definition":
-      obj.definitions[definitionNo].definition = val
-      break
-    case "sound":
-      obj.definitions[definitionNo].sound = val
-      break
-    case "context":
-      obj.definitions[definitionNo].context = val
-      break
+  const obj = utils.getObjById(id)
+  if (type === "word") {
+    utils.updateObj(id, {word: val})
+  } else {
+    obj.definitions[definitionNo][type] = val
+    utils.updateNewObjs(id, obj)
   }
   setRenderData(newData)
 }
@@ -80,12 +71,14 @@ function BudView({ selectedObj }) {
     return (e) => handleInputChange(e, type, renderData, setRenderData, selectedObj, definitionNo)
   }
   useEffect(() => {
-    if (!selectedObj) setRenderData()
+    // selectedObj = 6
+    if (!selectedObj) setRenderData(); setCanRender(false)
     const obj = utils.getObjById(selectedObj)
     // const obj = budSample
     if (obj && obj.type === 'bud') {
       setCanRender(true)
       setTotalDefinitionNo(obj.definitions.length-1)
+      console.log(obj, selectedObj)
       const currentDefinitionObj = obj.definitions[definitionNo]
       const data = {
         word: obj.word || null,

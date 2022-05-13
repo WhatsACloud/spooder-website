@@ -66,7 +66,34 @@ async function getNextObjId(spoodawebId) {
   return objId
 }
 
+async function findBud(spoodawebId, objId) {
+  const possibleDbBud = await Bud.findAll({
+    where: {
+      fk_spoodaweb_id: spoodawebId,
+      objId: objId
+    }
+  })
+  console.log(possibleDbBud.length)
+  if (possibleDbBud === null) return false
+  if (possibleDbBud.length > 1) {
+    const dbBuds = [...possibleDbBud]
+    console.log(dbBuds)
+    dbBuds.shift()
+    for (const dbBud of dbBuds) {
+      dbBud.update({
+        objId: await getNextObjId(spoodawebId)
+      })
+    }
+    console.log(possibleDbBud)
+    return possibleDbBud[0] 
+  }
+  return possibleDbBud[0]
+}
+
 async function createBud(spoodawebId, word, objId, position, transaction) {
+  const possibleDbBud = findBud(spoodawebId, objId)
+  console.log(possibleDbBud)
+  if (possibleDbBud === null) return false
   const _bud = await Bud.create({
     fk_spoodaweb_id: spoodawebId,
     word: word,
@@ -154,6 +181,8 @@ async function createExample(budDetailsId, example, transaction) {
 }
 
 async function editBud(spoodawebId, objId, word, position, transaction) {
+  const possibleDbBud = await findBud(spoodawebId, objId)
+  if (possibleDbBud === false) return false 
   const bud = await Bud.findOne({ where: { fk_spoodaweb_id: spoodawebId, objId: objId }})
   if (bud === null) return null 
   await bud.update({
@@ -396,6 +425,7 @@ module.exports = { // please add support for positions, budId
             switch (obj.type) {
               case "bud":
                 const _budId = await createBud(req.body.spoodawebId, obj.name, objId, obj.position, transaction)
+                if (_budId === false) error.create(`object ${objId} (bud) already exists within database.`)
                 objId += 1
                 const budId = _budId.dataValues.id
                 for (let i = 0; i < obj.definitions.length; i++) {
@@ -425,8 +455,12 @@ module.exports = { // please add support for positions, budId
             switch (obj.type) {
               case "bud":
                 objId = clientObjId
-                const bud = await editBud(spoodawebId, objId, obj.name, obj.position, transaction)
+                const bud = await editBud(spoodawebId, objId, obj.word, obj.position, transaction)
                 if (bud === null) throw error.create('bud does not exist')
+                if (bud === false) {
+                  console.log('whyyylkdsdfksadfkslfkjelfjf')
+                }
+                console.log(bud)
                 const budId = bud.dataValues.id
                 console.log(obj.definitions)
                 for (const i in obj.definitions) {
