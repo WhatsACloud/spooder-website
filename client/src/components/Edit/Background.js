@@ -146,7 +146,39 @@ const isDirectionLeft = (direction) => {
   return false
 }
 
+const mouseDownEvt = ({ pageX, pageY }) => {
+  const rippleIndex = rippleList.length
+  const { x, y } = utils.getCanvasMousePos(pageX, pageY)
+  rippleList.push({
+    x: x,
+    y: y,
+    radius: 1,
+    opacity: 0
+  })
+  setTimeout(() => {
+    const opacityInterval = setInterval(() => {
+      const ripple = rippleList[rippleIndex]
+      if (!ripple || ripple.opacity <= 0) {
+        clearInterval(opacityInterval)
+        rippleList.splice(rippleIndex, 1)
+        return
+      }
+      ripple.opacity -= 0.1
+    }, 50)
+  }, 50)
+  const opacityInterval = setInterval(() => {
+    const ripple = rippleList[rippleIndex]
+    if (!ripple || ripple.opacity >= 0.7) {
+      clearInterval(opacityInterval)
+      return
+    }
+    ripple.opacity += 0.1
+  }, 50)
+}
+
 function Background({ canRender }) {
+  const [ lightLoopInterval, setLightLoopInterval ] = useState()
+  const [ drawLoopInterval, setDrawLoopInterval ] = useState()
   // const firstColor = '#75e6ff'
   useEffect(() => {
     const hexagons = document.getElementById('hexagons') 
@@ -154,103 +186,83 @@ function Background({ canRender }) {
     drawHexagonGrid(hexagonCtx, hexagons.offsetWidth, hexagons.offsetHeight)
     const lightBack = document.getElementById('lightBack')
     const lightBackCtx = lightBack.getContext('2d')
-    const lightLoop = () => {
-      const rndTimeOut = randRange(0, 2) 
-      setTimeout(() => {
-        console.log(rndTimeOut)
-        const x = randRange(0, hexagons.width, 0)
-        const y = randRange(0, hexagons.height, 0)
-        const direction = randRange(0, 360, 0) 
-        const directionIsUp = direction / 180 < 1
-        const directionIsLeft = isDirectionLeft(direction) 
-        let nearestBorderX = directionIsLeft ? 0 : width
-        let nearestBorderY = directionIsUp ? 0 : height
-        const Ynearest = nearestBorderX - nearestBorderY < 0
-        let ttl
-        if (Ynearest) {
-          ttl = Math.abs(y - nearestBorderY) / lightSpeed
-        } else {
-          ttl = Math.abs(x - nearestBorderX) / lightSpeed
-        }
-        console.log(ttl)
-        const light = {
-          x: Number(x),
-          y: Number(y),
-          direction: Number(direction),
-          ttl: ttl,
-          isLeft: directionIsLeft,
-          isUp: directionIsUp,
-          opacity: 0
-        } // imagine using degrees for angle couldnt be me
-        const lightIndex = lightsList.length
-        lightsList.push(light)
-        setTimeout(() => {
+    if (canRender) {
+      const lightLoop = () => {
+        const rndTimeOut = randRange(0, 2) 
+        const interval = setInterval(() => {
+          console.log(rndTimeOut)
+          const x = randRange(0, hexagons.width, 0)
+          const y = randRange(0, hexagons.height, 0)
+          const direction = randRange(0, 360, 0) 
+          const directionIsUp = direction / 180 < 1
+          const directionIsLeft = isDirectionLeft(direction) 
+          let nearestBorderX = directionIsLeft ? 0 : width
+          let nearestBorderY = directionIsUp ? 0 : height
+          const Ynearest = nearestBorderX - nearestBorderY < 0
+          let ttl
+          if (Ynearest) {
+            ttl = Math.abs(y - nearestBorderY) / lightSpeed
+          } else {
+            ttl = Math.abs(x - nearestBorderX) / lightSpeed
+          }
+          console.log(ttl)
+          const light = {
+            x: Number(x),
+            y: Number(y),
+            direction: Number(direction),
+            ttl: ttl,
+            isLeft: directionIsLeft,
+            isUp: directionIsUp,
+            opacity: 0
+          } // imagine using degrees for angle couldnt be me
+          const lightIndex = lightsList.length
+          lightsList.push(light)
+          setTimeout(() => {
+            const opacityInterval = setInterval(() => {
+              const light = lightsList[lightIndex]
+              if (!light || light.opacity <= 0) {
+                console.log('cleared')  
+                clearInterval(opacityInterval)
+                lightsList.splice(lightIndex, 1)
+                return
+              }
+              light.opacity -= 0.1
+            }, 100)
+          }, ttl * 100)
           const opacityInterval = setInterval(() => {
             const light = lightsList[lightIndex]
-            if (!light || light.opacity <= 0) {
-              console.log('cleared')  
+            if (!light || light.opacity >= 1) {
               clearInterval(opacityInterval)
-              lightsList.splice(lightIndex, 1)
               return
             }
-            light.opacity -= 0.1
+            light.opacity += 0.1
           }, 100)
-        }, ttl * 100)
-        const opacityInterval = setInterval(() => {
-          const light = lightsList[lightIndex]
-          if (!light || light.opacity >= 1) {
-            clearInterval(opacityInterval)
-            return
+        }, rndTimeOut * 1000)
+        return interval
+      }
+      setLightLoopInterval(lightLoop())
+      const grd = backgroundGradient(lightBackCtx)
+      lightBackCtx.fillStyle = grd
+      lightBackCtx.fillRect(0, 0, width, height)
+      const drawLoop = () => {
+        return setInterval(() => {
+          if (lightsList.length > 0) {
+            requestAnimationFrame(() => {clear(lightBackCtx); draw(lightBack, lightBackCtx)})
           }
-          light.opacity += 0.1
-        }, 100)
-        
-        lightLoop()
-      }, rndTimeOut * 1000)
+        }, 1000 / drawRate)
+      }
+      setDrawLoopInterval(drawLoop())
+      document.addEventListener('mousedown', mouseDownEvt)
+    } else {
+      if (lightLoopInterval) {
+        clearInterval(lightLoopInterval)
+      }
+      if (drawLoopInterval) {
+        clearInterval(drawLoopInterval)
+      }
+      document.removeEventListener('mousedown', mouseDownEvt)
     }
-    lightLoop()
-    const grd = backgroundGradient(lightBackCtx)
-    lightBackCtx.fillStyle = grd
-    lightBackCtx.fillRect(0, 0, width, height)
-    const drawLoop = () => {
-      setTimeout(() => {
-        if (lightsList.length > 0) {
-          requestAnimationFrame(() => {clear(lightBackCtx); draw(lightBack, lightBackCtx)})
-        }
-        drawLoop()
-      }, 1000 / drawRate)
-    }
-    drawLoop()
-    document.addEventListener('mousedown', ({ pageX, pageY }) => {
-      const rippleIndex = rippleList.length
-      const { x, y } = utils.getCanvasMousePos(pageX, pageY)
-      rippleList.push({
-        x: x,
-        y: y,
-        radius: 1,
-        opacity: 0
-      })
-      setTimeout(() => {
-        const opacityInterval = setInterval(() => {
-          const ripple = rippleList[rippleIndex]
-          if (!ripple || ripple.opacity <= 0) {
-            clearInterval(opacityInterval)
-            rippleList.splice(rippleIndex, 1)
-            return
-          }
-          ripple.opacity -= 0.1
-        }, 50)
-      }, 50)
-      const opacityInterval = setInterval(() => {
-        const ripple = rippleList[rippleIndex]
-        if (!ripple || ripple.opacity >= 0.7) {
-          clearInterval(opacityInterval)
-          return
-        }
-        ripple.opacity += 0.1
-      }, 50)
-    })
-  }, [])
+  }, [canRender])
   return (
     <>
       <div className={canRender ? styles.divBackground : styles.none} id='divHexagons'>
