@@ -15,7 +15,7 @@ const setBud = (setObjsToUpdate, details) => { // { pronounciation, contexts, ex
   utils.setNextObjId(nextObjId+1)
   console.log(utils.getObjs())
 }
-export { setBud as setBud }
+export { setBud }
 
 const getHexagonLines = (points) => {
   const lines = []

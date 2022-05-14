@@ -19,9 +19,10 @@ const setSilk = (setObjsToUpdate, details) => {
 }
 export { setSilk as setSilk }
 
-const startDragLine = (e, setDraggingLine, setSelectedSilk, objId, innerIndex, toggleCanDragLine) => {
+const startDragLine = (e, setSelectedSilk, objId, innerIndex, toggleCanDragLine) => {
+  console.log(e.button === 0, utils.isInCanvas({x: e.pageX, y: e.pageY}))
   if (e.button === 0 && utils.isInCanvas({x: e.pageX, y: e.pageY})) {
-    setDraggingLine(true)
+    console.log('kill me')
     setSelectedSilk({"objId": objId, "innerIndex": innerIndex})
     const renderedLine = utils.getKonvaObjById(objId)
     renderedLine.moveToBottom()

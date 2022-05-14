@@ -59,7 +59,6 @@ export { setNextObjId as setNextObjId }
 const getNextObjId = () => {
   const mainLayer = getMainLayer()
   const currentNextObjId = mainLayer.getAttr('nextObjId')
-  console.log(currentNextObjId)
   return currentNextObjId
 }
 export { getNextObjId as getNextObjId }

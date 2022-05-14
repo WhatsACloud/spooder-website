@@ -66,12 +66,14 @@ function MouseMoveDetector() {
 function AddNewObjs({
     objsToUpdate,
     setDraggingLine,
+    setObjsToUpdate,
     setRendered,
     rendered,
     setHoverBudBorder,
     setSelectedSilk,
     setToggleCanDragLine,
     selectedObj,
+    setDragging,
     setSelectedObj
   }) { // to add some updating of positions AND maybe index in the object itself to be specific
   useEffect(() => {
@@ -87,6 +89,9 @@ function AddNewObjs({
               y={obj.position.y + rootPos.y}
               key={newRendered.length}
               objId={objId}
+              setObjsToUpdate={setObjsToUpdate}
+              setDraggingLine={setDraggingLine}
+              setDragging={setDragging}
               setSelectedObj={setSelectedObj}
               setHoverBudBorder={setHoverBudBorder}
               ></BudShapes.Bud>
@@ -114,6 +119,15 @@ function AddNewObjs({
   return <></>
 }
 
+function UpdateModes(modes) {
+  // basically when reactState modes changes then this updates the one in Konva
+  useEffect(() => {
+    const mainLayer = utils.getMainLayer()
+    mainLayer.setAttr('modes', modes)
+  }, [modes])
+  return <></>
+}
+
 function Edit() { // TODO: change objs such that they are indexed by their objId and add saving
   /* 
   the objects list in the canvas is stored in the Konva main layer, as well as other data.
@@ -134,7 +148,9 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   const [ settings, setSettings ] = useState({
     Background: false
   })
-  
+  const [ modes, setModes ] = useState({
+    autoDrag: false
+  })
   useEffect(async () => {
     const rootPos = utils.getRootPos()
     const width = utils.getStage().getAttr('width')
@@ -170,6 +186,8 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
     const mainLayer = utils.getMainLayer()
     mainLayer.setAttr('nextObjId', objs.data.nextObjId) // probably should be the next highest objId instead of this
     mainLayer.setAttr('newObjs', {})
+    mainLayer.setAttr('modes', modes)
+    mainLayer.setAttr('addedObj', false)
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
     return () => {
@@ -181,13 +199,17 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <MouseMoveDetector></MouseMoveDetector>
-      <AddNewObjs 
+      <UpdateModes
+        modes={modes}></UpdateModes>
+      <AddNewObjs
         objsToUpdate={objsToUpdate}
+        setObjsToUpdate={setObjsToUpdate}
         setRendered={setRendered}
         rendered={rendered}
         setHoverBudBorder={setHoverBudBorder}
         setSelectedSilk={setSelectedSilk}
         setDraggingLine={setDraggingLine}
+        setDragging={setDragging}
         setToggleCanDragLine={setToggleCanDragLine}
         selectedObj={selectedObj}
         setSelectedObj={setSelectedObj}></AddNewObjs>
@@ -201,7 +223,9 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
         settings={settings}
         setSettings={setSettings}></Settings>
       <TaskBar
-        setInSettings={setInSettings}></TaskBar>
+        setInSettings={setInSettings}
+        setModes={setModes}
+        modes={modes}></TaskBar>
       <div className={styles.wrapper}>
         <SilkShapes.LineDragUpdater
           toggleCanDragLine={toggleCanDragLine}

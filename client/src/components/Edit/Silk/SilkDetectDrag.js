@@ -11,12 +11,21 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
         lineCircle = line.children[selectedSilk.innerIndex]
       }
     }
-    const startDragLineWrapper = e => {
-      const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
-      if (!utils.isInCanvas({x: e.pageX, y: e.pageY})) return
+    const startDragging = (e, canvasMousePos) => {
+      if (!utils.isInCanvas(canvasMousePos)) return
       const currentObjId = utils.getNextObjId()
       SilkUtils.setSilk(setObjsToUpdate, {positions: [canvasMousePos, canvasMousePos]})
-      SilkUtils.startDragLine(e, setDraggingLine, setSelectedSilk, currentObjId, 1, toggleCanDragLine)
+      SilkUtils.startDragLine(e, setSelectedSilk, currentObjId, 1, toggleCanDragLine)
+    }
+    const startDragLineWrapper = (e) => {
+      setDraggingLine(true)
+      const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
+      startDragging(e, canvasMousePos)
+    }
+    console.log(draggingLine)
+    const autoDrag = utils.getMainLayer().getAttr('modes').modes.autoDrag
+    if (draggingLine && autoDrag) {
+      startDragging({button: 0, pageX: 500, pageY: 500}, {x: 0, y: 0})
     }
     const stopDragLineWrapper = e => SilkUtils.stopDragLine(e, lineCircle)
     const dragLineWrapper = e => SilkUtils.lineCircleMove(e, draggingLine, selectedSilk)

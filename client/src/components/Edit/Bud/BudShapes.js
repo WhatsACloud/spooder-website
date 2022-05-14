@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
 import * as utils from '../utils'
 import * as BudUtils from './BudUtils'
-import { updateLinePos } from '../Silk/SilkUtils'
+import { setSilk, updateLinePos } from '../Silk/SilkUtils'
 import { select } from '../Select'
 
 function BudAnchorHighlighter() {
@@ -21,7 +21,7 @@ function BudAnchorHighlighter() {
 }
 export { BudAnchorHighlighter as BudAnchorHighlighter }
 
-function Bud({ x, y, objId, setSelectedObj }) {
+function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setDraggingLine }) {
   const rootPos = utils.getRootPos()
   const radius = 40
   const strokeWidth = 40
@@ -48,6 +48,20 @@ function Bud({ x, y, objId, setSelectedObj }) {
       </reactKonva.Shape>
     )
   })
+  const normalDragMoveEvt = (evt) => {
+    const bud = evt.target
+    const attachedObjIds = bud.parent.getAttr('attachedSilkObjId')
+    for (const { objId, offset, innerIndex } of attachedObjIds) {
+      const obj = utils.getKonvaObjById(objId).children[innerIndex]
+      const budX = bud.getX() 
+      const budY = bud.getY() 
+      updateLinePos(obj, budX - offset.x, budY - offset.y)
+    }
+    BudUtils.updateBudHitGroups(bud, bud.parent.children[1].children)
+  }
+  const mouseMoveEvt = evt => {
+    console.log(evt)
+  }
   return (
     <reactKonva.Group
       name='bud'
@@ -55,35 +69,7 @@ function Bud({ x, y, objId, setSelectedObj }) {
       objId={objId}
       offsetRootPos={{x: x - rootPos.x, y: y - rootPos.y}}
       lastMousePos={{x: 0, y: 0}}
-      attachedSilkObjId={[]}
-      onDragMove={(evt) => {
-        const bud = evt.target
-        const attachedObjIds = bud.parent.getAttr('attachedSilkObjId')
-        for (const { objId, offset, innerIndex } of attachedObjIds) {
-          const obj = utils.getKonvaObjById(objId).children[innerIndex]
-          const budX = bud.getX() 
-          const budY = bud.getY() 
-          updateLinePos(obj, budX - offset.x, budY - offset.y)
-        }
-      }}
-      onDragStart={evt => {
-        const bud = evt.target
-        bud.parent.setAttr('lastMousePos', {x: evt.evt.pageX, y: evt.evt.pageY})
-      }}
-      onDragEnd={evt => {
-        const obj = evt.target.parent
-        const bud = evt.target
-        const offsetRootPos = obj.getAttr('offsetRootPos')
-        const mousePos = {x: evt.evt.pageX, y: evt.evt.pageY}
-        const previousMousePos = obj.getAttr('lastMousePos')
-        obj.setAttr('offsetRootPos', {x: offsetRootPos.x + mousePos.x - previousMousePos.x, y: offsetRootPos.y + mousePos.y - previousMousePos.y})
-        const rootPos = utils.getRootPos()
-        const newOffsetRootPos = obj.getAttr('offsetRootPos')
-        bud.setX(rootPos.x + newOffsetRootPos.x)
-        bud.setY(rootPos.y + newOffsetRootPos.y)
-        BudUtils.updateBudHitGroups(bud, obj.children[1].children)
-        utils.updateObj(obj.getAttr('objId'), {position: {x: newOffsetRootPos.x, y: newOffsetRootPos.y}})
-      }}>
+      attachedSilkObjId={[]}>
         <reactKonva.Shape
           x={x}
           y={y}
@@ -91,6 +77,69 @@ function Bud({ x, y, objId, setSelectedObj }) {
           fill='#00D2FF'
           stroke='black'
           strokeWidth={1}
+          onDragMove={normalDragMoveEvt}
+          onDragStart={evt => {
+            const bud = evt.target
+            bud.parent.setAttr('lastMousePos', {x: evt.evt.pageX, y: evt.evt.pageY})
+          }}
+          onMouseDown={evt => {
+            const mainLayer = utils.getMainLayer()
+            const modes = mainLayer.getAttr('modes').modes
+            if (modes.autoDrag) {
+              document.addEventListener('mousemove', mouseMoveEvt)
+              setDragging(true)
+              setDraggingLine(true)
+            }
+            const mouseUpEvt = evt => {
+              document.removeEventListener('mousemove', mouseMoveEvt)
+              document.removeEventListener('mouseup', mouseUpEvt)
+              const mainLayer = utils.getMainLayer()
+              mainLayer.setAttr('addedObj', false)
+              const interval = setInterval(() => {
+                console.log(mainLayer.getAttr('addedObj'))
+                if (mainLayer.getAttr('addedObj')) {
+                  clearInterval(interval)
+                  const newBudObjId = utils.getNextObjId()-1
+                  const newBud = utils.getKonvaObjById(newBudObjId)
+                  const currentBud = utils.getKonvaObjById(objId)
+                  // setSilk(setObjsToUpdate, {
+                  //   positions: [
+                  //     {x: currentBud.getX(), y: currentBud.getY()},
+                  //     {x: newBud.getX(), y: newBud.getY()}
+                  //   ], 
+                  //   attachedTo1: objId,
+                  //   attachedTo2: newBudObjId
+                  // })
+                  console.log(newBud)
+                }
+              }, 500)
+            }
+            document.addEventListener('mouseup', mouseUpEvt)
+          }}
+          onDragEnd={evt => {
+            const obj = evt.target.parent
+            const bud = evt.target
+            const offsetRootPos = obj.getAttr('offsetRootPos')
+            const mousePos = {x: evt.evt.pageX, y: evt.evt.pageY}
+            const previousMousePos = obj.getAttr('lastMousePos')
+            obj.setAttr('offsetRootPos', {x: offsetRootPos.x + mousePos.x - previousMousePos.x, y: offsetRootPos.y + mousePos.y - previousMousePos.y})
+            const rootPos = utils.getRootPos()
+            const newOffsetRootPos = obj.getAttr('offsetRootPos')
+            bud.setX(rootPos.x + newOffsetRootPos.x)
+            bud.setY(rootPos.y + newOffsetRootPos.y)
+            BudUtils.updateBudHitGroups(bud, obj.children[1].children)
+            utils.updateObj(obj.getAttr('objId'), {position: {x: newOffsetRootPos.x, y: newOffsetRootPos.y}})
+          }}
+          onMouseEnter={evt => {
+            const mainLayer = utils.getMainLayer()
+            const modes = mainLayer.getAttr('modes').modes
+            const bud = evt.target
+            if (modes.autoDrag) {
+              bud.setDraggable(false)
+            } else {
+              bud.setDraggable(true)
+            }
+          }}
           draggable={true}
           points={BudUtils.hexagonPoints(radius, x, y)}
           sceneFunc={(ctx, shape) => {
@@ -98,9 +147,6 @@ function Bud({ x, y, objId, setSelectedObj }) {
             BudUtils.drawHexagon(ctx, points)
             ctx.fillStrokeShape(shape)
           }}
-          onDragMove={(evt) => 
-            BudUtils.updateBudHitGroups(evt.target, evt.target.parent.children[1].children)
-          }
           onClick={evt => {select(evt, setSelectedObj)}}>
         </reactKonva.Shape>
         <reactKonva.Group
