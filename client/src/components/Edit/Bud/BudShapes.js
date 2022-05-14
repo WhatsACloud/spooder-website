@@ -95,6 +95,39 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
               document.removeEventListener('mousemove', mouseMoveEvt)
               document.removeEventListener('mouseup', mouseUpEvt)
               const mainLayer = utils.getMainLayer()
+              const interval = setInterval(() => {
+                if (mainLayer.getAttr('addedObj')) {
+                  clearInterval(interval)
+                  const newBudId = utils.getNextObjId()-1
+                  const newBud = utils.getKonvaObjById(newBudId)
+                  const currentBud = utils.getKonvaObjById(objId)
+                  const silkId = newBudId-1
+                  const silk = utils.getKonvaObjById(silkId)
+                  console.log(newBud, currentBud, silk)
+                  newBud.setAttr(
+                    'attachedSilkObjId',
+                    [...newBud.getAttr('attachedSilkObjId'),
+                      {
+                        objId: silkId,
+                        offset: {x: 0, y: 0}, 
+                        innerIndex: 1
+                      }
+                    ]
+                  )
+                  currentBud.setAttr(
+                    'attachedSilkObjId',
+                    [...currentBud.getAttr('attachedSilkObjId'),
+                      {
+                        objId: silkId,
+                        offset: {x: 0, y: 0}, 
+                        innerIndex: 2
+                      }
+                    ]
+                  )
+                  silk.children[1].setAttr('attachedToObjId', newBudId)
+                  silk.children[2].setAttr('attachedToObjId', objId)
+                }
+              }, 1000)
             }
             document.addEventListener('mouseup', mouseUpEvt)
             mainLayer.setAttr('addedObj', false)
