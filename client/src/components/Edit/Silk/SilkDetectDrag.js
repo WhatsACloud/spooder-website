@@ -25,12 +25,13 @@ const LineDragUpdater = memo(({
     }
     const startDragging = (e, canvasMousePos) => {
       if (!utils.isInCanvas(canvasMousePos)) return
+      setDraggingLine(true)
       const currentObjId = utils.getNextObjId()
       SilkUtils.setSilk(setObjsToUpdate, {positions: [canvasMousePos, canvasMousePos]})
       SilkUtils.startDragLine(e, setSelectedSilk, currentObjId, 1, toggleCanDragLine)
     }
     const startDragLineWrapper = (e) => {
-      setDraggingLine(true)
+      console.log('started')
       const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
       startDragging(e, canvasMousePos)
     }
@@ -63,8 +64,11 @@ const LineDragUpdater = memo(({
         utils.updateObj(selectedSilk.objId, {positions: offsetRootPoses})
       }
       setDraggingLine(false)
+      console.log('ended')
       setSelectedSilk()
     }
+    console.log(draggingLine)
+    console.log(toggleCanDragLine)
     if (toggleCanDragLine) {
       document.addEventListener('mousedown', startDragLineWrapper)
     } else {

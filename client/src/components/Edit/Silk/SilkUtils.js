@@ -85,12 +85,10 @@ const snapLineCircleToLine = (selectedSilk) => { // pls fix ltr it doesnt work i
 export { snapLineCircleToLine as snapLineCircleToLine }
 
 const lineCircleMove = (e, draggingLine, selectedSilk) => {
-  console.log(utils.isInCanvas({x: e.pageX, y: e.pageY}), draggingLine)
   if (utils.isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
     const mousePos = {x: e.pageX, y: e.pageY}
     const canvasMousePos = utils.getCanvasMousePos(mousePos.x, mousePos.y)
     const lineGroup = utils.getKonvaObjById(selectedSilk.objId).children
-    console.log(lineGroup, selectedSilk)
     const start = lineGroup[selectedSilk.innerIndex]
     updateLinePos(start, canvasMousePos.x, canvasMousePos.y)
   }

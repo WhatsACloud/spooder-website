@@ -24,7 +24,7 @@ function SilkEnd({ points, setDraggingLine, setSelectedSilk, setToggleCanDragLin
         const objId = e.target.parent.getAttr('objId')
         document.addEventListener('mouseup', stopDragLineWrapper)
         setToggleCanDragLine(false)
-        SilkUtils.startDragLine(e.evt, setDraggingLine, setSelectedSilk, objId, e.target.index, false)
+        SilkUtils.startDragLine(e.evt, setSelectedSilk, objId, e.target.index, false)
       }}
       onDragMove={circleDragmoveFunc}
       onClick={evt => {select(evt, setSelectedObj)}}>
