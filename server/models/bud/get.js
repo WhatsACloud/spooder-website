@@ -1,12 +1,16 @@
 const { sequelize, DataTypes, Op } = require('../../database')
 
 const error = require('../../middleware/error')
+const Utils = require('./Utils')
 
 const User = require('../../databaseModels/user')(sequelize, DataTypes)
 const Spoodaweb = require('../../databaseModels/spoodaweb')(sequelize, DataTypes)
 
+const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
 const BudDetails = require('../../databaseModels/BudDetails/budDetails')(sequelize, DataTypes)
 const Example = require('../../databaseModels/BudDetails/examples')(sequelize, DataTypes)
+const AttachedTo = require('../../databaseModels/BudDetails/AttachedTo')(sequelize, DataTypes)
+const Silk = require('../../databaseModels/Silk')(sequelize, DataTypes)
 
 async function getBudsWithinRange(spoodawebId, startPos, endPos) {
   console.log(startPos, endPos)
@@ -181,7 +185,7 @@ async function get (req, res, next) {
       toResObjs[objId].attachedTo2 = silkData.attachedTo2
     }
     req.body.spoodawebData = toResObjs
-    req.body.nextObjId = await getNextObjId(spoodawebId)
+    req.body.nextObjId = await Utils.getNextObjId(spoodawebId)
     next()
   } catch (err) {
     console.log('get spoodawebs err', err)

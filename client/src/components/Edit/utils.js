@@ -21,9 +21,21 @@ const getObjs = () => {
 export { getObjs }
 
 const getCanvasMousePos = (x, y) => {
-  return {x: x - window.innerWidth * 0.15 + divCanvas.scrollLeft, y: y - 40 + divCanvas.scrollTop}
+  return {
+    x: (
+      x
+      - window.innerWidth * 0.15
+      + divCanvas.scrollLeft
+    ),
+    y: (
+      y
+      - 40
+      + divCanvas.scrollTop
+      - window.innerHeight * 0.1
+    )
+  }
 }
-export { getCanvasMousePos as getCanvasMousePos }
+export { getCanvasMousePos }
 
 const withinRect = (mousePos, startX, startY, endX, endY) => {
   const x = mousePos.x
@@ -55,6 +67,7 @@ export { getNextObjId as getNextObjId }
 const updateNewObjs = (objId, obj) => {
   const mainLayer = getMainLayer()
   const newObjs = mainLayer.getAttr('newObjs')
+  console.log(mainLayer)
   console.log(!(Object.keys(newObjs).includes(String(objId))))
   if (!(Object.keys(newObjs).includes(String(objId)))) {
     obj.operation = 'add'
@@ -72,6 +85,8 @@ const getRootPos = () => {
 }
 export { getRootPos as getRootPos }
 
+import * as BudUtils from './Bud/BudUtils'
+
 const setRootPos = (rootPos) => {
   for (let obj of getKonvaObjs()) {
     const type = obj.getAttr('objType')
@@ -79,6 +94,8 @@ const setRootPos = (rootPos) => {
       const bud = obj.children[0]
       bud.setX(obj.getAttr('offsetRootPos').x + rootPos.x)
       bud.setY(obj.getAttr('offsetRootPos').y + rootPos.y)
+      const budHitAreas = obj.children[1].children
+      BudUtils.updateBudHitGroups(bud, budHitAreas)
     } else if (type === 'silk') {
       const silk = obj.children[0]
       silk.setPoints([

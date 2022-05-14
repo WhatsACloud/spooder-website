@@ -57,6 +57,21 @@ const drawHexagon = (ctx, points) => {
 }
 export { drawHexagon as drawHexagon }
 
+const updateBudHitGroups = (renderedBud, hitAreas) => {
+  const x = renderedBud.getX()
+  const y = renderedBud.getY()
+  const radius = renderedBud.getAttr('radius')
+  renderedBud.setAttr('points', hexagonPoints(radius, x, y))
+  const lines = getHexagonLines(renderedBud.getAttr('points'))
+  for (const hitAreaIndex in hitAreas) {
+    const hit = hitAreas[hitAreaIndex]
+    hit.setX(x)
+    hit.setY(y)
+    hit.setAttr('borderPoints', lines[hitAreaIndex])
+  }
+}
+export { updateBudHitGroups }
+
 const snapToPreview = (evt) => {
   const radius = 40
   const mousePos = utils.getCanvasMousePos(evt.evt.pageX, evt.evt.pageY)
@@ -138,3 +153,19 @@ const snapToPreview = (evt) => {
   highlighter.setY(y)
 }
 export { snapToPreview as snapToPreview }
+
+const drop = (e, setObjsToUpdate) => {
+  // console.log(isMouseHoverCanvas)
+  // if (!isMouseHoverCanvas) return
+  if (utils.isInCanvas({x: e.pageX, y: e.pageY})) {
+    console.log('placed!')
+    // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
+    const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
+    const rootPos = utils.getRootPos()
+    canvasMousePos.x -= rootPos.x
+    canvasMousePos.y -= rootPos.y
+    console.log(canvasMousePos, rootPos)
+    setBud(setObjsToUpdate, {position: canvasMousePos})
+  }
+}
+export { drop }

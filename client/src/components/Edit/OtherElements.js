@@ -46,26 +46,11 @@ export { ObjectDrawer as ObjectDrawer }
 import Hexagon from 'react-svg-hexagon'
 import Konva from 'konva'
 
-const drop = (e, setObjsToUpdate) => {
-  // console.log(isMouseHoverCanvas)
-  // if (!isMouseHoverCanvas) return
-  if (utils.isInCanvas({x: e.pageX, y: e.pageY})) {
-    console.log('placed!')
-    // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
-    const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
-    const rootPos = utils.getRootPos()
-    canvasMousePos.x -= rootPos.x
-    canvasMousePos.y -= rootPos.y
-    console.log(canvasMousePos)
-    BudUtils.setBud(setObjsToUpdate, {position: canvasMousePos})
-  }
-}
-
 function FakeDraggableObj({ dragging, setDragging, setObjsToUpdate }) {
   useEffect(() => {
     if (!Konva.stages[0]) return
     const dropWrapper = (e) => {
-      drop(e, setObjsToUpdate)
+      BudUtils.drop(e, setObjsToUpdate)
       setDragging(false)
     }
     const moveWrapper = (e) => {

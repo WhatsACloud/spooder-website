@@ -1,9 +1,15 @@
 @import '../../../scss/standard.module.scss';
 
-div {
+div.taskBar {
+  width: 100%;
+  height: 10vh;
   button {
-    &.button {
+    &.settingsBtn {
       @include std-button;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      border-radius: 50%;
+      font-size: 200%;
     }
   }
 }

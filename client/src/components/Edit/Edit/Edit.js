@@ -132,7 +132,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   const [ selectedObj, setSelectedObj ] = useState()
   const [ inSettings, setInSettings ] = useState(false)
   const [ settings, setSettings ] = useState({
-    Background: true 
+    Background: false
   })
   
   useEffect(async () => {
@@ -145,17 +145,26 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
     const urlString = window.location.search
     let paramString = urlString.split('?')[1];
     let queryString = new URLSearchParams(paramString);
-    const objs = await api.post('/webs/get/objects', {
-      spoodawebId: queryString.get('id'),
-      startPos: [
-        rootPos.x - width,
-        rootPos.y - height,
-      ],
-      endPos: [
-        width * 2,
-        height * 2 
-      ]
-    })
+    let objs = {
+      data: {
+        spoodawebData: {}
+      }
+    }
+    try {
+      objs = await api.post('/webs/get/objects', {
+        spoodawebId: queryString.get('id'),
+        startPos: [
+          rootPos.x - width,
+          rootPos.y - height,
+        ],
+        endPos: [
+          width * 2,
+          height * 2 
+        ]
+      })
+    } catch(err) {
+      console.log('Unable to retrieve objects.')
+    }
     const spoodawebData = objs.data.spoodawebData
     setObjsToUpdate(spoodawebData)
     const mainLayer = utils.getMainLayer()

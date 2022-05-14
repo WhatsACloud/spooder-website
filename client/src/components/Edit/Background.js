@@ -190,7 +190,6 @@ function Background({ canRender }) {
       const lightLoop = () => {
         const rndTimeOut = randRange(0, 2) 
         const interval = setInterval(() => {
-          console.log(rndTimeOut)
           const x = randRange(0, hexagons.width, 0)
           const y = randRange(0, hexagons.height, 0)
           const direction = randRange(0, 360, 0) 
@@ -205,7 +204,6 @@ function Background({ canRender }) {
           } else {
             ttl = Math.abs(x - nearestBorderX) / lightSpeed
           }
-          console.log(ttl)
           const light = {
             x: Number(x),
             y: Number(y),
@@ -221,7 +219,6 @@ function Background({ canRender }) {
             const opacityInterval = setInterval(() => {
               const light = lightsList[lightIndex]
               if (!light || light.opacity <= 0) {
-                console.log('cleared')  
                 clearInterval(opacityInterval)
                 lightsList.splice(lightIndex, 1)
                 return

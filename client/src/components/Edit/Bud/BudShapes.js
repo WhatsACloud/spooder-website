@@ -34,7 +34,8 @@ function Bud({ x, y, objId, setSelectedObj }) {
         x={x}
         y={y}
         borderPoints={line}
-        fill='rgba(0, 0, 0, 0)'
+        // fill='rgba(0, 0, 0, 0)'
+        fill='black'
         sceneFunc={(ctx, shape) => {
           const hitLine = hitLines[lineIndex]
           ctx.beginPath()
@@ -80,6 +81,7 @@ function Bud({ x, y, objId, setSelectedObj }) {
         const newOffsetRootPos = obj.getAttr('offsetRootPos')
         bud.setX(rootPos.x + newOffsetRootPos.x)
         bud.setY(rootPos.y + newOffsetRootPos.y)
+        BudUtils.updateBudHitGroups(bud, obj.children[1].children)
         utils.updateObj(obj.getAttr('objId'), {position: {x: newOffsetRootPos.x, y: newOffsetRootPos.y}})
       }}>
         <reactKonva.Shape
@@ -96,19 +98,9 @@ function Bud({ x, y, objId, setSelectedObj }) {
             BudUtils.drawHexagon(ctx, points)
             ctx.fillStrokeShape(shape)
           }}
-          onDragMove={(evt) => {
-            const renderedBud = evt.target
-            const x = renderedBud.getX()
-            const y = renderedBud.getY()
-            renderedBud.setAttr('points', BudUtils.hexagonPoints(radius, x, y))
-            const lines = BudUtils.getHexagonLines(renderedBud.getAttr('points'))
-            const siblings = evt.target.parent.children[1].children
-            for (const siblingIndex in siblings) {
-              const hit = siblings[siblingIndex]
-              hit.setX(x)
-              hit.setY(y)
-              hit.setAttr('borderPoints', lines[siblingIndex])
-          }}}
+          onDragMove={(evt) => 
+            BudUtils.updateBudHitGroups(evt.target, evt.target.parent.children[1].children)
+          }
           onClick={evt => {select(evt, setSelectedObj)}}>
         </reactKonva.Shape>
         <reactKonva.Group
