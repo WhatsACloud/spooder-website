@@ -5,6 +5,7 @@ const BudDetails = require('../../databaseModels/BudDetails/budDetails')(sequeli
 const Example = require('../../databaseModels/BudDetails/examples')(sequelize, DataTypes)
 const AttachedTo = require('../../databaseModels/BudDetails/AttachedTo')(sequelize, DataTypes)
 const error = require('../../middleware/error')
+const Utils = require('./Utils')
 
 async function markForDeletion(objs, t) { // TO DO: add links thingy
   if (objs === null) throw error.create(`obj either does not exist or has been deleted`, {statusNo: 400})
@@ -135,6 +136,7 @@ async function editSilk(spoodawebId, positions, strength, objId, attachedTo1, at
      objId: objId 
     }
   })
+  if (silk === null) return false
   await silk.update({
     x1: positions[0].x,
     y1: positions[0].y,
@@ -188,7 +190,7 @@ module.exports = { // please add support for positions, budId
       const data = req.body.spoodawebData
       const spoodawebId = req.body.spoodawebId
       transaction = await sequelize.transaction()
-      let objId = await getNextObjId(spoodawebId)
+      let objId = await Utils.getNextObjId(spoodawebId)
       for (const clientObjId in data) {
         const obj = data[clientObjId]
         switch (obj.operation) {
@@ -248,6 +250,7 @@ module.exports = { // please add support for positions, budId
               case "silk":
                 objId = clientObjId
                 const silk = await editSilk(spoodawebId, obj.positions, obj.strength, objId, obj.attachedTo1, obj.attachedTo2, transaction)
+                if (!silk) throw error.create('The silk you are editing does not exist within the database.')
             }
         }
       }

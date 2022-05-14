@@ -1,3 +1,4 @@
+const { sequelize, DataTypes, Op } = require('../../database')
 const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
 const Silk = require('../../databaseModels/Silk')(sequelize, DataTypes)
 
