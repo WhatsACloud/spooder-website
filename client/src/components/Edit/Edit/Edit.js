@@ -14,7 +14,6 @@ import * as SilkShapes from '../Silk'
 import * as BudShapes from '../Bud'
 
 import * as utils from '../utils'
-import { UpdateBudBorderEvt } from '../Bud/UpdateBudBorder'
 import { DrawCanvas } from './DrawCanvas'
 import { TaskBar } from '../TaskBar'
 import { Settings } from '../Settings'
@@ -70,7 +69,7 @@ function AddNewObjs({
     setTriggerDragLine,
     setRendered,
     rendered,
-    setHoverBudBorder,
+    setHoverBud,
     setSelectedSilk,
     setToggleCanDragLine,
     selectedObj,
@@ -90,11 +89,11 @@ function AddNewObjs({
               y={obj.position.y + rootPos.y}
               key={newRendered.length}
               objId={objId}
+              setHoverBud={setHoverBud}
               setObjsToUpdate={setObjsToUpdate}
               setTriggerDragLine={setTriggerDragLine}
               setDragging={setDragging}
               setSelectedObj={setSelectedObj}
-              setHoverBudBorder={setHoverBudBorder}
               ></BudShapes.Bud>
           )
         } else if (obj.type === 'silk') {
@@ -140,7 +139,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   const navigate = useNavigate()
   const [ dragging, setDragging ] = useState(false)
   const [ toggleCanDragLine, setToggleCanDragLine ] = useState(false)
-  const [ hoverBudBorder, setHoverBudBorder ] = useState(false)
+  const [ hoverBud, setHoverBud ] = useState(false)
   const [ objsToUpdate, setObjsToUpdate ] = useState()
   const [ rendered, setRendered ] = useState([])
   const [ draggingLine, setDraggingLine ] = useState(false)
@@ -192,6 +191,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
     mainLayer.setAttr('modes', modes)
     mainLayer.setAttr('addedObj', false)
     mainLayer.setAttr('triggerDragLine', false)
+    mainLayer.setAttr('draggingLine', false)
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
     return () => {
@@ -211,17 +211,13 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
         setRendered={setRendered}
         rendered={rendered}
         setTriggerDragLine={setTriggerDragLine}
-        setHoverBudBorder={setHoverBudBorder}
+        setHoverBud={setHoverBud}
         setSelectedSilk={setSelectedSilk}
         setDraggingLine={setDraggingLine}
         setDragging={setDragging}
         setToggleCanDragLine={setToggleCanDragLine}
         selectedObj={selectedObj}
         setSelectedObj={setSelectedObj}></AddNewObjs>
-      <UpdateBudBorderEvt
-        draggingLine={draggingLine}
-        hoverBudBorder={hoverBudBorder}
-        setHoverBudBorder={setHoverBudBorder}></UpdateBudBorderEvt>
       <Settings
         inSettings={inSettings}
         setInSettings={setInSettings}
@@ -236,9 +232,9 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
           toggleCanDragLine={toggleCanDragLine}
           setObjsToUpdate={setObjsToUpdate}
           setDraggingLine={setDraggingLine}
+          hoverBud={hoverBud}
           setSelectedSilk={setSelectedSilk}
           selectedSilk={selectedSilk}
-          hoverBudBorder={hoverBudBorder}
           setTriggerDragLine={setTriggerDragLine}
           triggerDragLine={triggerDragLine}
           draggingLine={draggingLine}></SilkShapes.LineDragUpdater>

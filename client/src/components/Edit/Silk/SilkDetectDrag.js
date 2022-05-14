@@ -6,7 +6,7 @@ const LineDragUpdater = memo(({
   toggleCanDragLine,
   draggingLine,
   setObjsToUpdate,
-  hoverBudBorder,
+  hoverBud,
   setDraggingLine,
   nextObjId,
   setNextObjId,
@@ -31,7 +31,6 @@ const LineDragUpdater = memo(({
       SilkUtils.startDragLine(e, setSelectedSilk, currentObjId, 1, toggleCanDragLine)
     }
     const startDragLineWrapper = (e) => {
-      console.log('started')
       const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
       startDragging(e, canvasMousePos)
     }
@@ -45,9 +44,9 @@ const LineDragUpdater = memo(({
     const dragLineWrapper = e => SilkUtils.lineCircleMove(e, draggingLine, selectedSilk)
     const dropLine = (e) => {
       const line = utils.getKonvaObjById(selectedSilk.objId)
-      line.moveToTop()
+      line.moveToBottom()
       if (!utils.isInCanvas({x: e.pageX, y: e.pageY})) SilkUtils.snapLineCircleToLine(selectedSilk) 
-      if (hoverBudBorder) {
+      if (hoverBud) {
         SilkUtils.snapLine(selectedSilk)
       } else { // detaches line
         const line = utils.getKonvaObjById(selectedSilk.objId)
@@ -67,8 +66,7 @@ const LineDragUpdater = memo(({
       console.log('ended')
       setSelectedSilk()
     }
-    console.log(draggingLine)
-    console.log(toggleCanDragLine)
+    utils.getMainLayer().setAttr('draggingLine', draggingLine)
     if (toggleCanDragLine) {
       document.addEventListener('mousedown', startDragLineWrapper)
     } else {
@@ -81,7 +79,7 @@ const LineDragUpdater = memo(({
       document.removeEventListener('mousemove', dragLineWrapper)
       document.removeEventListener('mouseup', dropLine)
     }
-    if (draggingLine && hoverBudBorder) {
+    if (draggingLine && hoverBud) {
       document.addEventListener('mouseup', stopDragLineWrapper)
     } else {
       document.removeEventListener('mouseup', stopDragLineWrapper)
@@ -92,7 +90,7 @@ const LineDragUpdater = memo(({
       document.removeEventListener('mouseup', stopDragLineWrapper)
       document.removeEventListener('mouseup', dropLine)
     }
-  }, [ toggleCanDragLine, draggingLine, selectedSilk, hoverBudBorder, triggerDragLine ])
+  }, [ toggleCanDragLine, draggingLine, selectedSilk, hoverBud, triggerDragLine ])
   return (
     <></>
   )

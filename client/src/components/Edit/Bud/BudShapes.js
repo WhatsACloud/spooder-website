@@ -21,33 +21,9 @@ function BudAnchorHighlighter() {
 }
 export { BudAnchorHighlighter as BudAnchorHighlighter }
 
-function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTriggerDragLine }) {
+function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTriggerDragLine, setHoverBud }) {
   const rootPos = utils.getRootPos()
   const radius = 40
-  const strokeWidth = 40
-  const lines = BudUtils.getHexagonLines(BudUtils.hexagonPoints(radius, x, y))
-  const hitLines = BudUtils.getHexagonLines(BudUtils.hexagonPoints(radius+strokeWidth, x, y))
-  const hitAreas = lines.map((line, lineIndex) => {
-    return (
-      <reactKonva.Shape
-        key={lineIndex}
-        x={x}
-        y={y}
-        borderPoints={line}
-        // fill='rgba(0, 0, 0, 0)'
-        fill='black'
-        sceneFunc={(ctx, shape) => {
-          const hitLine = hitLines[lineIndex]
-          ctx.beginPath()
-          ctx.lineTo(hitLine[0].x-2*x, hitLine[0].y-2*y)
-          ctx.lineTo(line[0].x-2*x, line[0].y-2*y)
-          ctx.lineTo(line[1].x-2*x, line[1].y-2*y)
-          ctx.lineTo(hitLine[1].x-2*x, hitLine[1].y-2*y)
-          ctx.fillStrokeShape(shape)
-        }}>
-      </reactKonva.Shape>
-    )
-  })
   const normalDragMoveEvt = (evt) => {
     const bud = evt.target
     const attachedObjIds = bud.parent.getAttr('attachedSilkObjId')
@@ -57,7 +33,6 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
       const budY = bud.getY() 
       updateLinePos(obj, budX - offset.x, budY - offset.y)
     }
-    BudUtils.updateBudHitGroups(bud, bud.parent.children[1].children)
   }
   const mouseMoveEvt = e => {
     const silkObjId = utils.getNextObjId()-1
@@ -143,7 +118,6 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
             const newOffsetRootPos = obj.getAttr('offsetRootPos')
             bud.setX(rootPos.x + newOffsetRootPos.x)
             bud.setY(rootPos.y + newOffsetRootPos.y)
-            BudUtils.updateBudHitGroups(bud, obj.children[1].children)
             utils.updateObj(obj.getAttr('objId'), {position: {x: newOffsetRootPos.x, y: newOffsetRootPos.y}})
           }}
           onMouseEnter={evt => {
@@ -155,6 +129,22 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
             } else {
               bud.setDraggable(true)
             }
+            if (mainLayer.getAttr('draggingLine')) {
+              setHoverBud(true)
+              const highlighter = utils.getStage().find('.highlighter')[0]
+              highlighter.setVisible(true)
+              highlighter.setAttr('attachedObjId', bud.parent.getAttr('objId'))
+              highlighter.setX(bud.getX())
+              highlighter.setY(bud.getY())
+            }
+          }}
+          onMouseLeave={evt => {
+            setHoverBud(false)
+            const highlighter = utils.getStage().find('.highlighter')[0]
+            highlighter.setVisible(false)
+            highlighter.setAttr('attachedObjId', null)
+            highlighter.setX(-1)
+            highlighter.setY(-1)
           }}
           draggable={true}
           points={BudUtils.hexagonPoints(radius, x, y)}
@@ -165,11 +155,6 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
           }}
           onClick={evt => {select(evt, setSelectedObj)}}>
         </reactKonva.Shape>
-        <reactKonva.Group
-          x={x}
-          y={y}>
-          {hitAreas}
-        </reactKonva.Group>
     </reactKonva.Group>
   )
 }

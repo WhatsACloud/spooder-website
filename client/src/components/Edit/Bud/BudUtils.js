@@ -57,21 +57,6 @@ const drawHexagon = (ctx, points) => {
 }
 export { drawHexagon as drawHexagon }
 
-const updateBudHitGroups = (renderedBud, hitAreas) => {
-  const x = renderedBud.getX()
-  const y = renderedBud.getY()
-  const radius = renderedBud.getAttr('radius')
-  renderedBud.setAttr('points', hexagonPoints(radius, x, y))
-  const lines = getHexagonLines(renderedBud.getAttr('points'))
-  for (const hitAreaIndex in hitAreas) {
-    const hit = hitAreas[hitAreaIndex]
-    hit.setX(x)
-    hit.setY(y)
-    hit.setAttr('borderPoints', lines[hitAreaIndex])
-  }
-}
-export { updateBudHitGroups }
-
 const snapToPreview = (evt) => {
   const radius = 40
   const mousePos = utils.getCanvasMousePos(evt.evt.pageX, evt.evt.pageY)
@@ -79,7 +64,7 @@ const snapToPreview = (evt) => {
   const rise = hitLinePoints[1].y - hitLinePoints[0].y
   const run = hitLinePoints[1].x - hitLinePoints[0].x
   const gradient = rise / run
-  const highlighter = evt.target.parent.parent.parent.parent.find('.highlighter')[0]
+  const highlighter = utils.getStage().find('.highlighter')[0]
   const bud = evt.target.parent.parent.children[0]
   const hitIndex = evt.target.index+1
   let x

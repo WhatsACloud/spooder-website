@@ -91,8 +91,6 @@ const setRootPos = (rootPos) => {
       const bud = obj.children[0]
       bud.setX(obj.getAttr('offsetRootPos').x + rootPos.x)
       bud.setY(obj.getAttr('offsetRootPos').y + rootPos.y)
-      const budHitAreas = obj.children[1].children
-      BudUtils.updateBudHitGroups(bud, budHitAreas)
     } else if (type === 'silk') {
       const silk = obj.children[0]
       silk.setPoints([
