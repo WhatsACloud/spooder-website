@@ -27,11 +27,11 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
   const normalDragMoveEvt = (evt) => {
     const bud = evt.target
     const attachedObjIds = bud.parent.getAttr('attachedSilkObjId')
-    for (const { objId, offset, innerIndex } of attachedObjIds) {
+    for (const { objId, innerIndex } of attachedObjIds) {
       const obj = utils.getKonvaObjById(objId).children[innerIndex]
       const budX = bud.getX() 
       const budY = bud.getY() 
-      updateLinePos(obj, budX - offset.x, budY - offset.y)
+      updateLinePos(obj, budX, budY)
     }
   }
   const mouseMoveEvt = e => {
@@ -84,7 +84,6 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
                     [...newBud.getAttr('attachedSilkObjId'),
                       {
                         objId: silkId,
-                        offset: {x: 0, y: 0}, 
                         innerIndex: 1
                       }
                     ]
@@ -94,7 +93,6 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
                     [...currentBud.getAttr('attachedSilkObjId'),
                       {
                         objId: silkId,
-                        offset: {x: 0, y: 0}, 
                         innerIndex: 2
                       }
                     ]
