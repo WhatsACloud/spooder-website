@@ -20,12 +20,15 @@ const setSilk = (setObjsToUpdate, details) => {
 export { setSilk as setSilk }
 
 const startDragLine = (e, setSelectedSilk, objId, innerIndex, toggleCanDragLine) => {
-  console.log(e.button === 0, utils.isInCanvas({x: e.pageX, y: e.pageY}))
   if (e.button === 0 && utils.isInCanvas({x: e.pageX, y: e.pageY})) {
-    console.log('kill me')
     setSelectedSilk({"objId": objId, "innerIndex": innerIndex})
-    const renderedLine = utils.getKonvaObjById(objId)
-    renderedLine.moveToBottom()
+    const interval = setInterval(() => {
+      const renderedLine = utils.getKonvaObjById(objId)
+      if (renderedLine) {
+        renderedLine.moveToBottom()
+        clearInterval(interval)
+      }
+    }, 500)
   }
 }
 export { startDragLine as startDragLine }
@@ -82,10 +85,12 @@ const snapLineCircleToLine = (selectedSilk) => { // pls fix ltr it doesnt work i
 export { snapLineCircleToLine as snapLineCircleToLine }
 
 const lineCircleMove = (e, draggingLine, selectedSilk) => {
+  console.log(utils.isInCanvas({x: e.pageX, y: e.pageY}), draggingLine)
   if (utils.isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
     const mousePos = {x: e.pageX, y: e.pageY}
     const canvasMousePos = utils.getCanvasMousePos(mousePos.x, mousePos.y)
     const lineGroup = utils.getKonvaObjById(selectedSilk.objId).children
+    console.log(lineGroup, selectedSilk)
     const start = lineGroup[selectedSilk.innerIndex]
     updateLinePos(start, canvasMousePos.x, canvasMousePos.y)
   }

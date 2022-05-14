@@ -67,6 +67,7 @@ function AddNewObjs({
     objsToUpdate,
     setDraggingLine,
     setObjsToUpdate,
+    setTriggerDragLine,
     setRendered,
     rendered,
     setHoverBudBorder,
@@ -90,7 +91,7 @@ function AddNewObjs({
               key={newRendered.length}
               objId={objId}
               setObjsToUpdate={setObjsToUpdate}
-              setDraggingLine={setDraggingLine}
+              setTriggerDragLine={setTriggerDragLine}
               setDragging={setDragging}
               setSelectedObj={setSelectedObj}
               setHoverBudBorder={setHoverBudBorder}
@@ -101,6 +102,7 @@ function AddNewObjs({
             <SilkShapes.Silk
               points={obj.positions}
               key={newRendered.length}
+              setTriggerDragLine={setTriggerDragLine}
               setDraggingLine={setDraggingLine}
               setSelectedSilk={setSelectedSilk}
               setSelectedObj={setSelectedObj}
@@ -119,7 +121,7 @@ function AddNewObjs({
   return <></>
 }
 
-function UpdateModes(modes) {
+function UpdateModes(modes) { // pls fix this later
   // basically when reactState modes changes then this updates the one in Konva
   useEffect(() => {
     const mainLayer = utils.getMainLayer()
@@ -142,6 +144,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   const [ objsToUpdate, setObjsToUpdate ] = useState()
   const [ rendered, setRendered ] = useState([])
   const [ draggingLine, setDraggingLine ] = useState(false)
+  const [ triggerDragLine, setTriggerDragLine ] = useState(false)
   const [ selectedSilk, setSelectedSilk ] = useState()
   const [ selectedObj, setSelectedObj ] = useState()
   const [ inSettings, setInSettings ] = useState(false)
@@ -188,6 +191,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
     mainLayer.setAttr('newObjs', {})
     mainLayer.setAttr('modes', modes)
     mainLayer.setAttr('addedObj', false)
+    mainLayer.setAttr('triggerDragLine', false)
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
     return () => {
@@ -206,6 +210,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
         setObjsToUpdate={setObjsToUpdate}
         setRendered={setRendered}
         rendered={rendered}
+        setTriggerDragLine={setTriggerDragLine}
         setHoverBudBorder={setHoverBudBorder}
         setSelectedSilk={setSelectedSilk}
         setDraggingLine={setDraggingLine}
@@ -234,6 +239,8 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
           setSelectedSilk={setSelectedSilk}
           selectedSilk={selectedSilk}
           hoverBudBorder={hoverBudBorder}
+          setTriggerDragLine={setTriggerDragLine}
+          triggerDragLine={triggerDragLine}
           draggingLine={draggingLine}></SilkShapes.LineDragUpdater>
         <OtherElements.ObjectDrawer
           setDragging={setDragging}

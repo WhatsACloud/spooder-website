@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
 import * as utils from '../utils'
 import * as BudUtils from './BudUtils'
-import { setSilk, updateLinePos } from '../Silk/SilkUtils'
+import { lineCircleMove, updateLinePos } from '../Silk/SilkUtils'
 import { select } from '../Select'
 
 function BudAnchorHighlighter() {
@@ -21,7 +21,7 @@ function BudAnchorHighlighter() {
 }
 export { BudAnchorHighlighter as BudAnchorHighlighter }
 
-function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setDraggingLine }) {
+function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTriggerDragLine }) {
   const rootPos = utils.getRootPos()
   const radius = 40
   const strokeWidth = 40
@@ -59,8 +59,9 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setDra
     }
     BudUtils.updateBudHitGroups(bud, bud.parent.children[1].children)
   }
-  const mouseMoveEvt = evt => {
-    console.log(evt)
+  const mouseMoveEvt = e => {
+    const silkObjId = utils.getNextObjId()-1
+    lineCircleMove(e, true, {objId: silkObjId, innerIndex: 1})
   }
   return (
     <reactKonva.Group
@@ -88,33 +89,15 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setDra
             if (modes.autoDrag) {
               document.addEventListener('mousemove', mouseMoveEvt)
               setDragging(true)
-              setDraggingLine(true)
+              setTriggerDragLine(evt.target)
             }
             const mouseUpEvt = evt => {
               document.removeEventListener('mousemove', mouseMoveEvt)
               document.removeEventListener('mouseup', mouseUpEvt)
               const mainLayer = utils.getMainLayer()
-              mainLayer.setAttr('addedObj', false)
-              const interval = setInterval(() => {
-                console.log(mainLayer.getAttr('addedObj'))
-                if (mainLayer.getAttr('addedObj')) {
-                  clearInterval(interval)
-                  const newBudObjId = utils.getNextObjId()-1
-                  const newBud = utils.getKonvaObjById(newBudObjId)
-                  const currentBud = utils.getKonvaObjById(objId)
-                  // setSilk(setObjsToUpdate, {
-                  //   positions: [
-                  //     {x: currentBud.getX(), y: currentBud.getY()},
-                  //     {x: newBud.getX(), y: newBud.getY()}
-                  //   ], 
-                  //   attachedTo1: objId,
-                  //   attachedTo2: newBudObjId
-                  // })
-                  console.log(newBud)
-                }
-              }, 500)
             }
             document.addEventListener('mouseup', mouseUpEvt)
+            mainLayer.setAttr('addedObj', false)
           }}
           onDragEnd={evt => {
             const obj = evt.target.parent

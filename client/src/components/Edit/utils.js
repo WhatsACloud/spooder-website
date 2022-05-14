@@ -66,8 +66,6 @@ export { getNextObjId as getNextObjId }
 const updateNewObjs = (objId, obj) => {
   const mainLayer = getMainLayer()
   const newObjs = mainLayer.getAttr('newObjs')
-  console.log(mainLayer)
-  console.log(!(Object.keys(newObjs).includes(String(objId))))
   if (!(Object.keys(newObjs).includes(String(objId)))) {
     obj.operation = 'add'
   } else {

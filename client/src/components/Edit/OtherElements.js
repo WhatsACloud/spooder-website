@@ -54,6 +54,7 @@ function FakeDraggableObj({ dragging, setDragging, setObjsToUpdate }) {
       setDragging(false)
       const mainLayer = utils.getMainLayer()
       mainLayer.setAttr('addedObj', true)
+      console.log(mainLayer)
     }
     const moveWrapper = (e) => {
       const draggable = document.getElementById('fakeDraggableObj')

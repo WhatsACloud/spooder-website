@@ -2,7 +2,19 @@ import React, { useEffect, useState, memo } from 'react'
 import * as SilkUtils from './SilkUtils'
 import * as utils from '../utils'
 
-const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate, hoverBudBorder, setDraggingLine, nextObjId, setNextObjId, selectedSilk, setSelectedSilk }) => { // still a functional component
+const LineDragUpdater = memo(({
+  toggleCanDragLine,
+  draggingLine,
+  setObjsToUpdate,
+  hoverBudBorder,
+  setDraggingLine,
+  nextObjId,
+  setNextObjId,
+  selectedSilk,
+  setSelectedSilk,
+  setTriggerDragLine,
+  triggerDragLine
+  }) => { // still a functional component
   useEffect(() => {
     let lineCircle
     if (selectedSilk) {
@@ -22,10 +34,11 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
       const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
       startDragging(e, canvasMousePos)
     }
-    console.log(draggingLine)
-    const autoDrag = utils.getMainLayer().getAttr('modes').modes.autoDrag
-    if (draggingLine && autoDrag) {
-      startDragging({button: 0, pageX: 500, pageY: 500}, {x: 0, y: 0})
+    if (triggerDragLine) {
+      console.log(triggerDragLine)
+      const budPos = {x: triggerDragLine.getX(), y: triggerDragLine.getY()}
+      startDragging({button: 0, pageX: budPos.x, pageY: budPos.y}, budPos)
+      setTriggerDragLine(false)
     }
     const stopDragLineWrapper = e => SilkUtils.stopDragLine(e, lineCircle)
     const dragLineWrapper = e => SilkUtils.lineCircleMove(e, draggingLine, selectedSilk)
@@ -54,13 +67,15 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
     }
     if (toggleCanDragLine) {
       document.addEventListener('mousedown', startDragLineWrapper)
-      document.addEventListener('mousemove', dragLineWrapper)
     } else {
       document.removeEventListener('mousedown', startDragLineWrapper)
-      document.removeEventListener('mousemove', dragLineWrapper)
     }
     if (draggingLine) {
+      document.addEventListener('mousemove', dragLineWrapper)
       document.addEventListener('mouseup', dropLine)
+    } else {
+      document.removeEventListener('mousemove', dragLineWrapper)
+      document.removeEventListener('mouseup', dropLine)
     }
     if (draggingLine && hoverBudBorder) {
       document.addEventListener('mouseup', stopDragLineWrapper)
@@ -73,7 +88,7 @@ const LineDragUpdater = memo(({ toggleCanDragLine, draggingLine, setObjsToUpdate
       document.removeEventListener('mouseup', stopDragLineWrapper)
       document.removeEventListener('mouseup', dropLine)
     }
-  }, [ toggleCanDragLine, draggingLine, selectedSilk, hoverBudBorder ])
+  }, [ toggleCanDragLine, draggingLine, selectedSilk, hoverBudBorder, triggerDragLine ])
   return (
     <></>
   )
