@@ -21,7 +21,8 @@ export { setSilk as setSilk }
 
 const startDragLine = (e, setSelectedSilk, objId, innerIndex, toggleCanDragLine) => {
   if (e.button === 0 && utils.isInCanvas({x: e.pageX, y: e.pageY})) {
-    setSelectedSilk({"objId": objId, "innerIndex": innerIndex})
+    const newSelectedSilk = {"objId": objId, "innerIndex": innerIndex}
+    setSelectedSilk(newSelectedSilk)
     const interval = setInterval(() => {
       const renderedLine = utils.getKonvaObjById(objId)
       if (renderedLine) {
@@ -60,9 +61,14 @@ const snapLine = (selectedSilk) => {
   console.log(lineCircle.getX(), lineCircle.getY())
   lineCircle.setAttr('attachedToObjId', attachedTo.getAttr('objId'))
   const newAttachedSilkToBud = attachedTo.getAttr('attachedSilkObjId')
-  newAttachedSilkToBud.push({"objId": selectedSilk.objId, "innerIndex": selectedSilk.innerIndex})
+  if (!newAttachedSilkToBud[selectedSilk.objId]) {
+    newAttachedSilkToBud[selectedSilk.objId] = selectedSilk.innerIndex
+  }
   attachedTo.setAttr('attachedSilkObjId', newAttachedSilkToBud)
   updateLinePos(lineCircle, highlighter.getX(), highlighter.getY())
+  const offsetRootPoses = line.getAttr('offsetRootPoses')
+  const rootPos = utils.getRootPos()
+  offsetRootPoses[Math.abs(selectedSilk.innerIndex-2)] = {x: highlighter.getX() - rootPos.x, y: highlighter.getY() - rootPos.y}
 }
 export { snapLine as snapLine }
 
@@ -123,8 +129,8 @@ export { getLinePos as getLinePos}
 const removeAttachment = (lineCircle) => {
   const attachedTo = utils.getKonvaObjById(lineCircle.getAttr('attachedToObjId'))
   if (attachedTo) {
-    const newObjs = [...attachedTo.getAttr('attachedSilkObjId')]
-    newObjs.splice(attachedTo, 1)
+    const newObjs = {...attachedTo.getAttr('attachedSilkObjId')}
+    delete newObjs[Number(lineCircle.parent.getAttr('objId'))]
     attachedTo.setAttr('attachedSilkObjId', newObjs)
     lineCircle.setAttr('attachedToObjId', null)
     return true

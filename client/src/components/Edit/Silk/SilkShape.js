@@ -24,6 +24,7 @@ function SilkEnd({ points, setDraggingLine, setSelectedSilk, setToggleCanDragLin
         const objId = e.target.parent.getAttr('objId')
         document.addEventListener('mouseup', stopDragLineWrapper)
         setToggleCanDragLine(false)
+        setDraggingLine(true)
         SilkUtils.startDragLine(e.evt, setSelectedSilk, objId, e.target.index, false)
       }}
       onDragMove={circleDragmoveFunc}
@@ -98,12 +99,14 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
         points={points[0]}
         setSelectedSilk={setSelectedSilk}
         setToggleCanDragLine={setToggleCanDragLine}
+        objId={objId}
         setSelectedObj={setSelectedObj}
         setDraggingLine={setDraggingLine}></SilkEnd>
       <SilkEnd
         points={points[1]}
         setSelectedSilk={setSelectedSilk}
         setToggleCanDragLine={setToggleCanDragLine}
+        objId={objId}
         setSelectedObj={setSelectedObj}
         setDraggingLine={setDraggingLine}></SilkEnd>
     </reactKonva.Group>

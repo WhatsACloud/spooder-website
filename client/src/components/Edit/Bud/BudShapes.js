@@ -27,7 +27,7 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
   const normalDragMoveEvt = (evt) => {
     const bud = evt.target
     const attachedObjIds = bud.parent.getAttr('attachedSilkObjId')
-    for (const { objId, innerIndex } of attachedObjIds) {
+    for (const [ objId, innerIndex ] of Object.entries(attachedObjIds)) {
       const obj = utils.getKonvaObjById(objId).children[innerIndex]
       const budX = bud.getX() 
       const budY = bud.getY() 
@@ -45,7 +45,7 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
       objId={objId}
       offsetRootPos={{x: x - rootPos.x, y: y - rootPos.y}}
       lastMousePos={{x: 0, y: 0}}
-      attachedSilkObjId={[]}>
+      attachedSilkObjId={{}}>
         <reactKonva.Shape
           x={x}
           y={y}
@@ -81,21 +81,15 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
                   console.log(newBud, currentBud, silk)
                   newBud.setAttr(
                     'attachedSilkObjId',
-                    [...newBud.getAttr('attachedSilkObjId'),
-                      {
-                        objId: silkId,
-                        innerIndex: 1
-                      }
-                    ]
+                    {...newBud.getAttr('attachedSilkObjId'),
+                      [silkId]: 1
+                    }
                   )
                   currentBud.setAttr(
                     'attachedSilkObjId',
-                    [...currentBud.getAttr('attachedSilkObjId'),
-                      {
-                        objId: silkId,
-                        innerIndex: 2
-                      }
-                    ]
+                    {...currentBud.getAttr('attachedSilkObjId'),
+                      [silkId]: 2
+                    }
                   )
                   silk.children[1].setAttr('attachedToObjId', newBudId)
                   silk.children[2].setAttr('attachedToObjId', objId)
@@ -116,7 +110,13 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
             const newOffsetRootPos = obj.getAttr('offsetRootPos')
             bud.setX(rootPos.x + newOffsetRootPos.x)
             bud.setY(rootPos.y + newOffsetRootPos.y)
-            utils.updateObj(obj.getAttr('objId'), {position: {x: newOffsetRootPos.x, y: newOffsetRootPos.y}})
+            const attachedObjIds = obj.getAttr('attachedSilkObjId')
+            for (const [ objId, innerIndex ] of Object.entries(attachedObjIds)) {
+              const line = utils.getKonvaObjById(objId)
+              const offsetRootPoses = line.getAttr('offsetRootPoses')
+              offsetRootPoses[0] = {x: newOffsetRootPos.x - rootPos.x, y: newOffsetRootPos.y - rootPos.y}
+              utils.updateObj(obj.getAttr('objId'), {position: {x: newOffsetRootPos.x, y: newOffsetRootPos.y}})
+            }
           }}
           onMouseEnter={evt => {
             const mainLayer = utils.getMainLayer()
