@@ -8,6 +8,8 @@ import { ErrorBox } from '../Shared/errorMsg'
 import { object, string, ref } from 'yup'
 import Authorizer from '../Shared/Authorizer'
 
+import { SearchBar } from '../Edit/TaskBar/Search'
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 
@@ -214,6 +216,8 @@ const Home = () => { // to fix constant rerenders
         <FontAwesomeIcon icon={faPlus} className={styles.plusIcon}></FontAwesomeIcon>
         create
       </button>
+      <SearchBar
+        ></SearchBar>
       <Prompt
         prompted={prompted}
         titleErrorState={titleErrorState}
