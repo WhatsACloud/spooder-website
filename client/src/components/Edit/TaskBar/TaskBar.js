@@ -6,7 +6,7 @@ import { faGear, faFileLines } from '@fortawesome/free-solid-svg-icons'
 
 import { SearchBar } from './Search'
 
-function TaskBar({ setInSettings, setModes, modes }) {
+function TaskBar({ setInSettings, setModes, modes, setSelectedObj }) {
   return (
     <div className={styles.taskBar}>
       <button
@@ -23,7 +23,8 @@ function TaskBar({ setInSettings, setModes, modes }) {
         }}>
         <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
       </button>
-      <SearchBar></SearchBar>
+      <SearchBar
+        setSelectedObj={setSelectedObj}></SearchBar>
     </div>
   )
 }

@@ -226,6 +226,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
       <TaskBar
         setInSettings={setInSettings}
         setModes={setModes}
+        setSelectedObj={setSelectedObj}
         modes={modes}></TaskBar>
       <div className={styles.wrapper}>
         <SilkShapes.LineDragUpdater
