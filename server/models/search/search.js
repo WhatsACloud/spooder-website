@@ -1,55 +1,58 @@
 const searchUtils = require('./searchUtils')
+const { search } = require('fast-fuzzy')
 
-const SearchForString = (queryString, array) => {
-  const result = []
-  for (const [ index, element ] of array.entries()) {
-    if (queryString === element) {
-      result.push(index)
-    }
-  }
+const SearchForString = (queryString, string) => {
+  if (queryString === "") return false
+  const equal = queryString === string
+  const fuzzy = search(queryString, [string]) 
+  result = equal || fuzzy.length
   return result
 }
 
-const addToFound = (foundBuds, foundBudsObjId, searchResults, buds) => {
-  if (searchResults.length > 0) {
-    for (const index of searchResults) {
-      const objId = buds[index].dataValues.objId
-      if (!(foundBudsObjId.includes(objId))) {
-        foundBuds.push(buds[index])
-        foundBudsObjId.push(objId)
-      }
-    }
+const addToFound = ((foundBuds, objId) => {
+  if (!(foundBuds.includes(objId))) {
+    foundBuds.push(objId)
   }
-}
+})
 
-const parseArray = [
-  searchUtils.getBudWords
+const definitionsParse = [
+  "definition",
+  "sound",
+  "context"
 ]
 
-const search = async (req, res, next) => {
+const Search = async (req, res, next) => {
   const spoodawebId = req.body.spoodawebId
   switch (req.body.queryType) {
     case "text":
       const rawQueryStrings = req.body.queryString.split(" ")
       const queryStrings = [... new Set(rawQueryStrings)]
       const allBuds = await searchUtils.getEntireBud(spoodawebId)
-      const budWords = []
-      const buds = []
-      for (const [ objId, obj ] of Object.entries(allBuds)) {
-        budWords.push(obj.bud.dataValues.word)
-        buds.push(obj.bud)
-      }
       const foundBuds = []
-      const foundBudsObjId = []
       for (const queryString of queryStrings) {
-        if (budWords.includes(queryString)) {
-          const searchResults = SearchForString(queryString, budWords)
-          addToFound(foundBuds, foundBudsObjId, searchResults, buds)
+        for (const [ objId, bud ] of Object.entries(allBuds)) {
+          const budWord = bud.word
+          const result = SearchForString(queryString, budWord)
+          if (result) addToFound(foundBuds, objId)
+          for (const definition of bud.definitions) {
+            for (const toParse of definitionsParse) {
+              const result = SearchForString(queryString, definition[toParse])
+              if (result) addToFound(foundBuds, objId)
+            }
+            for (const example of definition.examples) {
+              const result = SearchForString(queryString, example)
+              if (result) addToFound(foundBuds, objId)
+            }
+          }
         }
       }
-      console.log(foundBuds, foundBudsObjId)
+      const buds = []
+      for (const foundBud of foundBuds) {
+        buds.push(allBuds[foundBud])
+      }
+      req.body.buds = buds
       break
   }
   next()
 }
-module.exports.search = search
+module.exports.search = Search

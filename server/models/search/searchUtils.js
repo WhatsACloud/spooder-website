@@ -7,10 +7,18 @@ const BudDetails = require('../../databaseModels/BudDetails/budDetails')(sequeli
 const Example = require('../../databaseModels/BudDetails/examples')(sequelize, DataTypes)
 const AttachedTo = require('../../databaseModels/BudDetails/AttachedTo')(sequelize, DataTypes)
 
-const getBudWords = () => {
-
+const dbBudToData = (dbBud) => {
+  const newBud = {
+    "word": dbBud.dataValues.word,
+    "definitions": [],
+    "attachedTo": [],
+    "position": {},
+    "type": "bud", // bud silk
+    "operation": 'add', // add edit minus, default add
+    "id": dbBud.dataValues.id
+  }
+  return newBud
 }
-module.exports.getBudWords = getBudWords
 
 const getEntireBud = async (spoodawebId) => {
   const _buds = await Bud.findAll({where: {
@@ -18,31 +26,39 @@ const getEntireBud = async (spoodawebId) => {
   }})
   const buds = {}
   for (const bud of _buds) {
-    buds[bud.dataValues.objId] = {
-      bud: bud,
-      budDetails: [],
-      examples: [],
-      attachedTo: []
-    }
+    buds[bud.dataValues.objId] = dbBudToData(bud) 
   }
-  for (const [objId, budObj] of Object.entries(buds)) {
-    const bud = budObj.bud
+  for (const [objId, bud] of Object.entries(buds)) {
     const _attachedTo = await AttachedTo.findAll({where: {
-      fk_bud_id: bud.dataValues.id
+      fk_bud_id: bud.id
     }})
     const _budDetails = await BudDetails.findAll({where: {
-      fk_bud_id: bud.dataValues.id
+      fk_bud_id: bud.id
     }})
-    for (const budDetail of _budDetails) {
+    for (const [ definitionId, budDetail ] of _budDetails.entries()) {
+      buds[objId].definitions[definitionId] = {
+        "definition": "",
+        "sound": "",
+        "context": "",
+        "examples": [],
+        "link": 0 
+      }
+      buds[objId].definitions[definitionId].definition = budDetail.dataValues.definition
+      buds[objId].definitions[definitionId].sound = budDetail.dataValues.sound
+      buds[objId].definitions[definitionId].context = budDetail.dataValues.context
+      buds[objId].definitions[definitionId].link = budDetail.dataValues.link
       const _examples = await Example.findAll({
         where: {
           fk_budDetails_id: budDetail.dataValues.id
         }
       })
-      buds[objId].examples.push(..._examples)
+      for (const example of _examples) {
+        buds[objId].definitions[definitionId].examples.push(example.dataValues.example)
+      }
     }
-    buds[objId].attachedTo.push(..._attachedTo)
-    buds[objId].budDetails.push(..._budDetails)
+    for (const [ attachedToId, attachedTo ] of _attachedTo.entries()) {
+      buds[objId].attachedTo.push(attachedTo.dataValues.attachedToId)
+    }
   }
   return buds
 }
