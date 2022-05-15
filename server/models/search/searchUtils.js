@@ -7,18 +7,6 @@ const BudDetails = require('../../databaseModels/BudDetails/budDetails')(sequeli
 const Example = require('../../databaseModels/BudDetails/examples')(sequelize, DataTypes)
 const AttachedTo = require('../../databaseModels/BudDetails/AttachedTo')(sequelize, DataTypes)
 
-const getBudWords = async (spoodawebId) => {
-  const buds = await Bud.findAll({where: {
-    fk_spoodaweb_id: spoodawebId
-  }})
-  const words = buds.map(bud => bud.dataValues.word)
-  return {
-    budWords: words,
-    buds: buds
-  }
-}
-module.exports.getBudWords = getBudWords
-
 const getEntireBud = async (spoodawebId) => {
   const _buds = await Bud.findAll({where: {
     fk_spoodaweb_id: spoodawebId
@@ -32,7 +20,8 @@ const getEntireBud = async (spoodawebId) => {
       attachedTo: []
     }
   }
-  for (const [objId, bud] of Object.entries(buds)) {
+  for (const [objId, budObj] of Object.entries(buds)) {
+    const bud = budObj.bud
     const _attachedTo = await AttachedTo.findAll({where: {
       fk_bud_id: bud.dataValues.id
     }})
@@ -50,6 +39,7 @@ const getEntireBud = async (spoodawebId) => {
     buds[objId].attachedTo.push(..._attachedTo)
     buds[objId].budDetails.push(..._budDetails)
   }
-  console.log(buds)
+  console.log(buds, "buds")
   return buds
 }
+module.exports.getEntireBud = getEntireBud

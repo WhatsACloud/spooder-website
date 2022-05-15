@@ -13,7 +13,8 @@ const search = async (req, res, next) => {
     case "text":
       const rawQueryStrings = req.body.queryString.split(" ")
       const queryStrings = [... new Set(rawQueryStrings)]
-      const { budWords, buds } = await searchUtils.getBudWords(spoodawebId)
+      const allBuds = await searchUtils.getEntireBud(spoodawebId)
+      const budWords = allBuds.map(obj => obj.bud.dataValues.word)
       const foundBuds = []
       const foundBudsObjId = []
       for (const queryString of queryStrings) {
@@ -30,7 +31,6 @@ const search = async (req, res, next) => {
           }
         }
       }
-      console.log(foundBuds)
       break
   }
   next()
