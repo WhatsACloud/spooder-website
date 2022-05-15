@@ -7,6 +7,11 @@ const BudDetails = require('../../databaseModels/BudDetails/budDetails')(sequeli
 const Example = require('../../databaseModels/BudDetails/examples')(sequelize, DataTypes)
 const AttachedTo = require('../../databaseModels/BudDetails/AttachedTo')(sequelize, DataTypes)
 
+const getBudWords = () => {
+
+}
+module.exports.getBudWords = getBudWords
+
 const getEntireBud = async (spoodawebId) => {
   const _buds = await Bud.findAll({where: {
     fk_spoodaweb_id: spoodawebId
@@ -39,7 +44,6 @@ const getEntireBud = async (spoodawebId) => {
     buds[objId].attachedTo.push(..._attachedTo)
     buds[objId].budDetails.push(..._budDetails)
   }
-  console.log(buds, "buds")
   return buds
 }
 module.exports.getEntireBud = getEntireBud
