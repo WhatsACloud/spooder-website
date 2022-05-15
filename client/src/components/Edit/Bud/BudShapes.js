@@ -115,7 +115,7 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
               const line = utils.getKonvaObjById(objId)
               const offsetRootPoses = line.getAttr('offsetRootPoses')
               offsetRootPoses[innerIndex] = {x: newOffsetRootPos.x - rootPos.x, y: newOffsetRootPos.y - rootPos.y}
-              utils.updateObj(obj.getAttr('objId'), {position: {x: newOffsetRootPos.x, y: newOffsetRootPos.y}})
+              utils.updateObj(objId, {positions: offsetRootPoses})
             }
           }}
           onMouseEnter={evt => {

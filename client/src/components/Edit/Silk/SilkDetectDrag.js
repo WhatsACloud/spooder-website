@@ -50,19 +50,16 @@ const LineDragUpdater = memo(({
         const offsetRootPoses = line.getAttr('offsetRootPoses')
         const mousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
         const rootPos = utils.getRootPos()
-        console.log(selectedSilk.innerIndex)
-        console.log({...offsetRootPoses}, mousePos)
         // const oppositePointPos = offsetRootPoses[Math.abs(selectedSilk.innerIndex-2)]
-        offsetRootPoses[Math.abs(selectedSilk.innerIndex-2)] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
+        offsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
         // offsetRootPoses[selectedSilk.innerIndex-1] = oppositePointPos
-        console.log(offsetRootPoses)
         line.setAttr('offsetRootPoses', offsetRootPoses)
         const lineCircle = line.children[selectedSilk.innerIndex]
         SilkUtils.removeAttachment(lineCircle)
+        console.log(offsetRootPoses)
         utils.updateObj(selectedSilk.objId, {positions: offsetRootPoses})
       }
       setDraggingLine(false)
-      console.log('ended')
       setSelectedSilk()
     }
     utils.getMainLayer().setAttr('draggingLine', draggingLine)

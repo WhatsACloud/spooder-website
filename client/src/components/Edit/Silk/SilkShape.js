@@ -54,8 +54,6 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
     const lineGroup = evt.target.parent
     const objId = lineGroup.getAttr('objId')
     const points = SilkUtils.getLinePos(lineGroup)
-    console.log(points[0], points[1])
-    console.log(line.getPoints())
     const offsetRootPoses = lineGroup.getAttr('offsetRootPoses')
     const rootPos = utils.getRootPos()
     const newOffsetRootPoses = [
@@ -88,9 +86,22 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
         hitStrokeWidth={30}
         draggable={true}
         onDragStart={evt => {
-          const silkGroup = evt.target.parent.children
-          SilkUtils.removeAttachment(silkGroup[1])
-          SilkUtils.removeAttachment(silkGroup[2])
+          const silkGroup = evt.target.parent
+          SilkUtils.removeAttachment(silkGroup.children[1])
+          SilkUtils.removeAttachment(silkGroup.children[2])
+          const points = evt.target.getPoints()
+          const rootPos = utils.getRootPos()
+          const offsetRootPoses = [
+            {
+              x: points[0]-rootPos.x,
+              y: points[1]-rootPos.y
+            },
+            {
+              x: points[2]-rootPos.x,
+              y: points[3]-rootPos.y
+            }
+          ]
+          utils.updateObj(silkGroup.getAttr('objId'), {positions: offsetRootPoses})
         }}
         onDragMove={lineDragmoveFunc}
         onDragEnd={lineDragendFunc}

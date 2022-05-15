@@ -162,6 +162,7 @@ const updateObj = (objId, attrs) => {
   }
   if ('positions' in attrs) {
     const rootPos = getRootPos()
+    console.log(attrs.positions[0], attrs.positions[1])
     konvaObj.children[0].setPoints([
       attrs.positions[0].x + rootPos.x,
       attrs.positions[0].y + rootPos.y,
