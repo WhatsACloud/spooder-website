@@ -4,10 +4,9 @@ import styles from './taskBar.module'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGear, faFileLines } from '@fortawesome/free-solid-svg-icons'
 
+import { SearchBar } from './Search'
+
 function TaskBar({ setInSettings, setModes, modes }) {
-  useEffect(() => {
-    console.log(modes)
-  }, [modes])
   return (
     <div className={styles.taskBar}>
       <button
@@ -24,6 +23,7 @@ function TaskBar({ setInSettings, setModes, modes }) {
         }}>
         <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
       </button>
+      <SearchBar></SearchBar>
     </div>
   )
 }
