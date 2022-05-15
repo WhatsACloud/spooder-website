@@ -6,7 +6,12 @@ function SearchBar() {
   const [ focused, setFocused ] = useState(false)
   const [ searchResults, setSearchResults ] = useState()
   useEffect(() => {
-
+    const timeout = setTimeout(() => {
+      console.log(searchVal)
+    }, 800)
+    return () => {
+      clearTimeout(timeout)
+    }
   }, [ searchVal ])
   return (
     <div id='divSearchBar' className={styles.divSearchBar}>
