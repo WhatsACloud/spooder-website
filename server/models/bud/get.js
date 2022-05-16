@@ -122,67 +122,71 @@ async function get (req, res, next) {
     for (const dbObj of dbBudObjs) {
       const objData = dbObj.dataValues
       const objId = objData.objId
-      toResObjs[objId] = {
-        word: objData.word,
-        definitions: [],
-        position: {
-          x: objData.x,
-          y: objData.y
-        },
-        attachedTo: [], 
-        type: "bud"
-      }
-      const budDetails = await getBudDetails(objData.id)
-      let i = 0
-      for (const budDetail of budDetails) {
-        const budDetailData = budDetail.dataValues
-        const budDetailId = budDetailData.id
-        console.log(toResObjs[objId])
-        toResObjs[objId].definitions.push({
-          sound: '',
-          definition: '',
-          context: '',
-          examples: [] 
-        })
-        toResObjs[objId].definitions[i].sound = budDetailData.sound
-        toResObjs[objId].definitions[i].definition = budDetailData.definition
-        toResObjs[objId].definitions[i].context = budDetailData.context
-        const examplesObj = []
-        const examples = await getExamples(budDetailId)
-        for (const example of examples) {
-          examplesObj.push(example.dataValues.example)
+      if (typeof objId === 'number') {
+        toResObjs[objId] = {
+          word: objData.word,
+          definitions: [],
+          position: {
+            x: objData.x,
+            y: objData.y
+          },
+          attachedTo: [], 
+          type: "bud"
         }
-        toResObjs[objId].definitions[i].examples.push(examplesObj)
-        i++
-      }
-      const attachedTos = await AttachedTo.findAll({
-        where: {
-          fk_bud_id: objData.id
+        const budDetails = await getBudDetails(objData.id)
+        let i = 0
+        for (const budDetail of budDetails) {
+          const budDetailData = budDetail.dataValues
+          const budDetailId = budDetailData.id
+          console.log(toResObjs[objId])
+          toResObjs[objId].definitions.push({
+            sound: '',
+            definition: '',
+            context: '',
+            examples: [] 
+          })
+          toResObjs[objId].definitions[i].sound = budDetailData.sound
+          toResObjs[objId].definitions[i].definition = budDetailData.definition
+          toResObjs[objId].definitions[i].context = budDetailData.context
+          const examplesObj = []
+          const examples = await getExamples(budDetailId)
+          for (const example of examples) {
+            examplesObj.push(example.dataValues.example)
+          }
+          toResObjs[objId].definitions[i].examples.push(...examplesObj)
+          i++
         }
-      }) 
-      for (const attachedTo of attachedTos) {
-        const attachedToData = attachedTo.dataValues
-        toResObjs[objId].attachedTo.push(attachedToData.attachedToId)
+        const attachedTos = await AttachedTo.findAll({
+          where: {
+            fk_bud_id: objData.id
+          }
+        }) 
+        for (const attachedTo of attachedTos) {
+          const attachedToData = attachedTo.dataValues
+          toResObjs[objId].attachedTo.push(attachedToData.attachedToId)
+        }
       }
     }
     const dbSilkObjs = await getSilksWithinRange(spoodawebId, startPos, endPos)
     for (const silk of dbSilkObjs) {
       const silkData = silk.dataValues
       const objId = silkData.objId
-      toResObjs[objId] = {
-        "positions": [],
-        "strength": null,
-        "attachedTo1": null,
-        "attachedTo2": null,
-        "type": "silk"
+      if (typeof objId === 'number') {
+        toResObjs[objId] = {
+          "positions": [],
+          "strength": null,
+          "attachedTo1": null,
+          "attachedTo2": null,
+          "type": "silk"
+        }
+        toResObjs[objId].positions = [
+          {x: silkData.x1, y: silkData.y1},
+          {x: silkData.x2, y: silkData.y2}
+        ]
+        toResObjs[objId].strength = silkData.strength
+        toResObjs[objId].attachedTo1 = silkData.attachedTo1
+        toResObjs[objId].attachedTo2 = silkData.attachedTo2
       }
-      toResObjs[objId].positions = [
-        {x: silkData.x1, y: silkData.y1},
-        {x: silkData.x2, y: silkData.y2}
-      ]
-      toResObjs[objId].strength = silkData.strength
-      toResObjs[objId].attachedTo1 = silkData.attachedTo1
-      toResObjs[objId].attachedTo2 = silkData.attachedTo2
     }
     req.body.spoodawebData = toResObjs
     req.body.nextObjId = await Utils.getNextObjId(spoodawebId)

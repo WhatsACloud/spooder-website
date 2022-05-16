@@ -45,6 +45,7 @@ const LineDragUpdater = memo(({
       line.moveToBottom()
       if (!utils.isInCanvas({x: e.pageX, y: e.pageY})) SilkUtils.snapLineCircleToLine(selectedSilk) 
       if (hoverBud) {
+        console.log(selectedSilk.innerIndex)
         SilkUtils.snapLine(selectedSilk)
       } else { // detaches line
         const offsetRootPoses = line.getAttr('offsetRootPoses')
@@ -52,11 +53,12 @@ const LineDragUpdater = memo(({
         const rootPos = utils.getRootPos()
         // const oppositePointPos = offsetRootPoses[Math.abs(selectedSilk.innerIndex-2)]
         offsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
+        console.log(Math.abs(selectedSilk.innerIndex-1))
         // offsetRootPoses[selectedSilk.innerIndex-1] = oppositePointPos
         line.setAttr('offsetRootPoses', offsetRootPoses)
         const lineCircle = line.children[selectedSilk.innerIndex]
         SilkUtils.removeAttachment(lineCircle)
-        console.log(offsetRootPoses)
+        console.log(selectedSilk.innerIndex)
         utils.updateObj(selectedSilk.objId, {positions: offsetRootPoses})
       }
       setDraggingLine(false)

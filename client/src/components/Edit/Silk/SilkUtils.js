@@ -68,7 +68,10 @@ const snapLine = (selectedSilk) => {
   updateLinePos(lineCircle, highlighter.getX(), highlighter.getY())
   const offsetRootPoses = line.getAttr('offsetRootPoses')
   const rootPos = utils.getRootPos()
-  offsetRootPoses[Math.abs(selectedSilk.innerIndex-2)] = {x: highlighter.getX() - rootPos.x, y: highlighter.getY() - rootPos.y}
+  offsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: highlighter.getX() - rootPos.x, y: highlighter.getY() - rootPos.y}
+  line.setAttr('offsetRootPoses', offsetRootPoses)
+  // console.log(line)  
+  utils.updateObj(selectedSilk.objId, {positions: offsetRootPoses})
 }
 export { snapLine as snapLine }
 

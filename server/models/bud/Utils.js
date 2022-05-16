@@ -12,13 +12,14 @@ async function getNextObjId(spoodawebId) {
   }})
   highestSilkObjId = Number(highestSilkObjId)
   let objId
+  console.log(highestBudObjId, highestSilkObjId)
   if (isNaN(highestSilkObjId) || highestBudObjId >= highestSilkObjId) {
     objId = highestBudObjId
   } else {
     objId = highestSilkObjId
   }
   objId = Number(objId)
-  console.log(objId)
+  console.log(objId, "what the heck")
   if (objId === null || isNaN(objId)) {
     objId = 0
   } else {

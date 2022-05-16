@@ -66,16 +66,12 @@ export { getNextObjId as getNextObjId }
 const updateNewObjs = (objId, obj) => {
   const mainLayer = getMainLayer()
   const newObjs = mainLayer.getAttr('newObjs')
-  if (!(Object.keys(newObjs).includes(String(objId)))) {
-    obj.operation = 'add'
-  } else {
-    obj.operation = 'edit'
-  }
+  obj.operation = 'edit'
   const rootPos = getRootPos()
   newObjs[objId] = obj
   mainLayer.setAttr('newObjs', newObjs)
 }
-export { updateNewObjs as updateNewObjs }
+export { updateNewObjs }
 
 const getRootPos = () => {
   return getMainLayer().getAttr('rootPos')

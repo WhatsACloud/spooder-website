@@ -113,7 +113,7 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
             for (const [ objId, innerIndex ] of Object.entries(attachedObjIds)) {
               const line = utils.getKonvaObjById(objId)
               const offsetRootPoses = line.getAttr('offsetRootPoses')
-              offsetRootPoses[innerIndex] = {x: newOffsetRootPos.x - rootPos.x, y: newOffsetRootPos.y - rootPos.y}
+              offsetRootPoses[innerIndex-1] = {x: newOffsetRootPos.x - rootPos.x, y: newOffsetRootPos.y - rootPos.y}
               utils.updateObj(objId, {positions: offsetRootPoses})
             }
           }}

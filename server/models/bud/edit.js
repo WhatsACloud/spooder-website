@@ -182,7 +182,6 @@ async function editBudDetails(budId, id, definition, sound, link, context, trans
 }
 
 async function editExamples(budDetailsId, newExamples, transaction) {
-  console.log(budDetailsId)
   const examples = await Example.findAll({ where: { fk_budDetails_id: budDetailsId }})
   if (examples === null || examples.length === 0) return null
   for (let index = 0; index < newExamples.length; index++) {
@@ -219,12 +218,11 @@ const addBud = async (spoodawebId, obj, objId, transaction) => {
   }
 }
 
-const completeEditBud = async (spoodawebId, clientObjId, obj, transaction) => {
+const completeEditBud = async (spoodawebId, clientObjId, objId, obj, transaction) => {
   console.log("why are you doing this", obj)
   const bud = await editBud(spoodawebId, clientObjId, obj.word, obj.position, transaction)
   if (bud === false) {
     console.log('whyyylkdsdfksadfkslfkjelfjf')
-    await addBud(spoodawebId, obj, await Utils.getNextObjId(spoodawebId), transaction)
     return false
   }
   console.log(bud)
@@ -235,6 +233,7 @@ const completeEditBud = async (spoodawebId, clientObjId, obj, transaction) => {
     const _budDetailsId = await editBudDetails(budId, i, definition.definition, definition.sound, definition.link, definition.context, transaction)
     // to add the one for examples
     if (_budDetailsId === null) throw error.create('details does not exist')
+    console.log(definition)
     await editExamples(_budDetailsId.dataValues.id, definition.examples, transaction)
   }
   let i = 0
@@ -252,6 +251,7 @@ module.exports = { // please add support for positions, budId
       const data = req.body.spoodawebData
       const spoodawebId = req.body.spoodawebId
       transaction = await sequelize.transaction()
+      let objId = await Utils.getNextObjId(spoodawebId)
       for (const clientObjId in data) {
         const obj = data[clientObjId]
         switch (obj.operation) {
@@ -260,12 +260,17 @@ module.exports = { // please add support for positions, budId
           case "edit":
             switch (obj.type) {
               case "bud":
-                await completeEditBud(spoodawebId, clientObjId, obj, transaction)
+                const bud = await completeEditBud(spoodawebId, clientObjId, objId, obj, transaction)
+                if (bud === false) {
+                  await addBud(spoodawebId, obj, objId, transaction)
+                  objId++
+                }
                 break
               case "silk":
                 const silk = await editSilk(spoodawebId, obj.positions, obj.strength, clientObjId, obj.attachedTo1, obj.attachedTo2, transaction)
                 if (!silk) {
-                  await createSilk(spoodawebId, obj.positions, obj.strength, await Utils.getNextObjId(spoodawebId), obj.attachedTo1, obj.attachedTo2, transaction) 
+                  await createSilk(spoodawebId, obj.positions, obj.strength, objId, obj.attachedTo1, obj.attachedTo2, transaction) 
+                  objId++
                 }
             }
         }
