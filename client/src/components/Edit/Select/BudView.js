@@ -89,7 +89,6 @@ function BudView({ selectedObj }) {
     return (e) => handleInputChange(e, type, renderData, setRenderData, selectedObj, definitionNo)
   }
   useEffect(() => {
-    console.log(renderData)
     // selectedObj = 6
     if (!selectedObj) setRenderData(originalRenderData); setCanRender(false)
     const obj = utils.getObjById(selectedObj)

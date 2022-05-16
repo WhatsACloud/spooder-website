@@ -143,11 +143,13 @@ async function get (req, res, next) {
             sound: '',
             definition: '',
             context: '',
-            examples: [] 
+            examples: [],
+            link: null
           })
           toResObjs[objId].definitions[i].sound = budDetailData.sound
           toResObjs[objId].definitions[i].definition = budDetailData.definition
           toResObjs[objId].definitions[i].context = budDetailData.context
+          toResObjs[objId].definitions[i].link = budDetailData.link
           const examplesObj = []
           const examples = await getExamples(budDetailId)
           for (const example of examples) {

@@ -6,8 +6,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGear, faFileLines } from '@fortawesome/free-solid-svg-icons'
 
 import { SearchBar, SearchResult } from './Search'
+import { Train } from './Train'
 
-function TaskBar({ setInSettings, setModes, modes, setSelectedObj }) {
+function TaskBar({ setInSettings, setModes, modes, setSelectedObj, selectedObj, setFocus }) {
   const [ searchVal, setSearchVal ] = useState('')
   const [ renderedSearchResults, setRenderedSearchResults ] = useState()
   useEffect(() => {
@@ -63,6 +64,10 @@ function TaskBar({ setInSettings, setModes, modes, setSelectedObj }) {
         setSearchVal={setSearchVal}>
         {renderedSearchResults}
       </SearchBar>
+      <Train
+        selectedObj={selectedObj}
+        setSelectedObj={setSelectedObj}
+        setFocus={setFocus}></Train>
     </div>
   )
 }

@@ -22,13 +22,12 @@
 }
 
 div.BudView {
-  display: flex;
   $minWidth: 600px;
   $leftMargin: calc(100% - #{$minWidth});
   display: flex;
   position: absolute;
   margin-left: $leftMargin;
-  z-index: 1000;
+  z-index: 5;
   box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   height: 100vh;
   min-width: $minWidth;

@@ -132,6 +132,23 @@ function UpdateModes(modes) { // pls fix this later
   return <></>
 }
 
+function FocusOnObj({ focus }) {
+  useEffect(() => {
+    const obj = utils.getObjById(focus)
+    if (obj) {
+      const position = obj.position
+      const divCanvas = document.getElementById('divCanvas')
+      const toBeRootPos = {
+        x: position.x - divCanvas.clientWidth,
+        y: position.y - divCanvas.clientHeight,
+      }
+      console.log(toBeRootPos)
+      utils.setRootPos(toBeRootPos)
+    }
+  }, [ focus ])
+  return <></>
+}
+
 function Edit() { // TODO: change objs such that they are indexed by their objId and add saving
   /* 
   the objects list in the canvas is stored in the Konva main layer, as well as other data.
@@ -150,6 +167,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   const [ selectedSilk, setSelectedSilk ] = useState()
   const [ selectedObj, setSelectedObj ] = useState()
   const [ inSettings, setInSettings ] = useState(false)
+  const [ focus, setFocus ] = useState()
   const [ settings, setSettings ] = useState({
     Background: false
   })
@@ -230,7 +248,11 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
         setInSettings={setInSettings}
         setModes={setModes}
         setSelectedObj={setSelectedObj}
+        selectedObj={selectedObj}
+        setFocus={setFocus}
         modes={modes}></TaskBar>
+      <FocusOnObj
+        focus={focus}></FocusOnObj>
       <div className={styles.wrapper}>
         <SilkShapes.LineDragUpdater
           toggleCanDragLine={toggleCanDragLine}
@@ -252,7 +274,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
           setObjsToUpdate={setObjsToUpdate}></OtherElements.FakeDraggableObj>
         <div className={styles.divCanvas} id='divCanvas'>
           <DrawCanvas
-          rendered={rendered}></DrawCanvas>
+            rendered={rendered}></DrawCanvas>
         </div>
         <BudView
           selectedObj={selectedObj}></BudView>
