@@ -42,15 +42,15 @@ async function markBudForDeletion(budId, transaction) {
 
 
 async function findBud(spoodawebId, objId) {
+  console.log(objId, "kill me")
   const possibleDbBud = await Bud.findAll({
     where: {
       fk_spoodaweb_id: spoodawebId,
       objId: objId
     }
   })
-  console.log(possibleDbBud.length)
   if (possibleDbBud === null) return false
-  if (possibleDbBud.length > 1) {
+  if (possibleDbBud.length > 0) {
     const dbBuds = [...possibleDbBud]
     console.log(dbBuds)
     dbBuds.shift()
@@ -62,13 +62,13 @@ async function findBud(spoodawebId, objId) {
     console.log(possibleDbBud)
     return possibleDbBud[0] 
   }
-  return possibleDbBud[0]
+  return false
 }
 
 async function createBud(spoodawebId, word, objId, position, transaction) {
-  const possibleDbBud = findBud(spoodawebId, objId)
+  const possibleDbBud = await findBud(spoodawebId, objId)
   console.log(possibleDbBud)
-  if (possibleDbBud === null) return false
+  if (possibleDbBud !== false) return false
   const _bud = await Bud.create({
     fk_spoodaweb_id: spoodawebId,
     word: word,
@@ -173,13 +173,75 @@ async function editBudDetails(budId, id, definition, sound, link, context, trans
   const budDetails = await BudDetails.findOne({ where: { fk_bud_id: budId, arrID: id }})
   if (budDetails === null) return null 
   await budDetails.update({
-    fk_bud_id: budId,
     definition: definition,
     sound: sound,
     link: link,
     context: context
   }, {transaction: transaction})
   return budDetails
+}
+
+async function editExamples(budDetailsId, newExamples, transaction) {
+  console.log(budDetailsId)
+  const examples = await Example.findAll({ where: { fk_budDetails_id: budDetailsId }})
+  if (examples === null || examples.length === 0) return null
+  for (let index = 0; index < newExamples.length; index++) {
+    const example = examples[index]
+    const newExample = newExamples[index]
+    if (example !== undefined) {
+      await example.update({
+        example: newExample
+      }, {transaction: transaction})
+    } else {
+      await createExample(budDetailsId, newExample, transaction)
+    }
+  }
+}
+
+const addBud = async (spoodawebId, obj, objId, transaction) => {
+  const _budId = await createBud(spoodawebId, obj.word, objId, obj.position, transaction)
+  if (_budId === false) throw error.create(`object ${objId-1} (bud) already exists within database.`)
+  objId += 1
+  const budId = _budId.dataValues.id
+  for (let i = 0; i < obj.definitions.length; i++) {
+    const definition = obj.definitions[i]
+    const _budDetailsId = await createBudDetails(budId, i, definition.definition, definition.sound, definition.context, definition.link, transaction)
+    const budDetailsId = _budDetailsId.dataValues.id
+    const examples = definition.examples
+    for (const example of examples) {
+      await createExample(budDetailsId, example, transaction)
+    }
+  }
+  let i = 0
+  for (const attachedToId of obj.attachedTo) {
+    await createAttachedTo(attachedToId, i, budId, transaction)
+    i++
+  }
+}
+
+const completeEditBud = async (spoodawebId, clientObjId, obj, transaction) => {
+  console.log("why are you doing this", obj)
+  const bud = await editBud(spoodawebId, clientObjId, obj.word, obj.position, transaction)
+  if (bud === false) {
+    console.log('whyyylkdsdfksadfkslfkjelfjf')
+    await addBud(spoodawebId, obj, await Utils.getNextObjId(spoodawebId), transaction)
+    return false
+  }
+  console.log(bud)
+  const budId = bud.dataValues.id
+  console.log(obj.definitions)
+  for (const i in obj.definitions) {
+    const definition = obj.definitions[i]
+    const _budDetailsId = await editBudDetails(budId, i, definition.definition, definition.sound, definition.link, definition.context, transaction)
+    // to add the one for examples
+    if (_budDetailsId === null) throw error.create('details does not exist')
+    await editExamples(_budDetailsId.dataValues.id, definition.examples, transaction)
+  }
+  let i = 0
+  for (const attachedToId of obj.attachedTo) {
+    await editAttachedTo(budId, i, attachedToId, transaction)
+    i++
+  }
 }
 
 module.exports = { // please add support for positions, budId
@@ -190,67 +252,21 @@ module.exports = { // please add support for positions, budId
       const data = req.body.spoodawebData
       const spoodawebId = req.body.spoodawebId
       transaction = await sequelize.transaction()
-      let objId = await Utils.getNextObjId(spoodawebId)
       for (const clientObjId in data) {
         const obj = data[clientObjId]
         switch (obj.operation) {
-          case "add":
-            switch (obj.type) {
-              case "bud":
-                const _budId = await createBud(req.body.spoodawebId, obj.name, objId, obj.position, transaction)
-                if (_budId === false) error.create(`object ${objId} (bud) already exists within database.`)
-                objId += 1
-                const budId = _budId.dataValues.id
-                for (let i = 0; i < obj.definitions.length; i++) {
-                  const definition = obj.definitions[i]
-                  const _budDetailsId = await createBudDetails(budId, i, definition.definition, definition.sound, definition.context, definition.link, transaction)
-                  const budDetailsId = _budDetailsId.dataValues.id
-                  const examples = definition.examples
-                  for (const example of examples) {
-                    await createExample(budDetailsId, example, transaction)
-                  }
-                }
-                let i = 0
-                for (const attachedToId of obj.attachedTo) {
-                  await createAttachedTo(attachedToId, i, budId, transaction)
-                  i++
-                }
-                break
-              case "silk":
-                console.log('silk')
-                const silk = await createSilk(spoodawebId, obj.positions, obj.strength, objId, obj.attachedTo1, obj.attachedTo2, transaction) 
-                objId++
-            }
-            break
           case "sub":
-            await markBudForDeletion(objId, transaction)
+            await markBudForDeletion(clientObjId, transaction)
           case "edit":
             switch (obj.type) {
               case "bud":
-                objId = clientObjId
-                const bud = await editBud(spoodawebId, objId, obj.word, obj.position, transaction)
-                if (bud === null) throw error.create('bud does not exist')
-                if (bud === false) {
-                  console.log('whyyylkdsdfksadfkslfkjelfjf')
-                }
-                console.log(bud)
-                const budId = bud.dataValues.id
-                console.log(obj.definitions)
-                for (const i in obj.definitions) {
-                  const definition = obj.definitions[i]
-                  const _budDetailsId = await editBudDetails(budId, i, definition.definition, definition.sound, definition.link, definition.context, transaction)
-                  if (_budDetailsId === null) throw error.create('details does not exist')
-                }
-                let i = 0
-                for (const attachedToId of obj.attachedTo) {
-                  await editAttachedTo(budId, i, attachedToId, transaction)
-                  i++
-                }
+                await completeEditBud(spoodawebId, clientObjId, obj, transaction)
                 break
               case "silk":
-                objId = clientObjId
-                const silk = await editSilk(spoodawebId, obj.positions, obj.strength, objId, obj.attachedTo1, obj.attachedTo2, transaction)
-                if (!silk) throw error.create('The silk you are editing does not exist within the database.')
+                const silk = await editSilk(spoodawebId, obj.positions, obj.strength, clientObjId, obj.attachedTo1, obj.attachedTo2, transaction)
+                if (!silk) {
+                  await createSilk(spoodawebId, obj.positions, obj.strength, await Utils.getNextObjId(spoodawebId), obj.attachedTo1, obj.attachedTo2, transaction) 
+                }
             }
         }
       }

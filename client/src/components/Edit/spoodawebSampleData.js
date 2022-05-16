@@ -1,5 +1,5 @@
 const budSample = {
-  "name": "",
+  "word": "",
   "definitions": [
     {
       "definition": "",

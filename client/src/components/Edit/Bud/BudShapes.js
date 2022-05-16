@@ -108,8 +108,7 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
             obj.setAttr('offsetRootPos', {x: offsetRootPos.x + mousePos.x - previousMousePos.x, y: offsetRootPos.y + mousePos.y - previousMousePos.y})
             const rootPos = utils.getRootPos()
             const newOffsetRootPos = obj.getAttr('offsetRootPos')
-            bud.setX(rootPos.x + newOffsetRootPos.x)
-            bud.setY(rootPos.y + newOffsetRootPos.y)
+            utils.updateObj(bud.parent.getAttr('objId'), {position: newOffsetRootPos})
             const attachedObjIds = obj.getAttr('attachedSilkObjId')
             for (const [ objId, innerIndex ] of Object.entries(attachedObjIds)) {
               const line = utils.getKonvaObjById(objId)
