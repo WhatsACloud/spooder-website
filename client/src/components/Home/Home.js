@@ -9,6 +9,7 @@ import { object, string, ref } from 'yup'
 import Authorizer from '../Shared/Authorizer'
 
 import { SearchBar } from '../Edit/TaskBar/Search'
+import { SpoodawebSearchBar } from './SpoodawebSearchBar'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
@@ -17,11 +18,10 @@ const spoodawebSchema = object({
   title: string().required('Title is a required field')
 })
 
-async function GetSpoodawebPreviews(setSpoodawebPreviews) {
+async function getSpoodawebPreviews() {
   try {
     const webs = await api.get('/webs/get/spoodawebs')
-    setSpoodawebPreviews(webs.data)
-    console.log('api call!')
+    return webs.data
   } catch(err) {
     console.log(err)
   }
@@ -32,11 +32,7 @@ const loading = () => {
   return <p>loading</p>
 }
 
-function SpoodawebPreviews({ navigate }) {
-  const [ spoodawebPreviews, setSpoodawebPreviews ] = useState()
-  useEffect(() => {
-    GetSpoodawebPreviews(setSpoodawebPreviews)
-  }, [])
+function SpoodawebPreviews({ navigate, spoodawebPreviews }) {
   return (
     <ul className={`spoodawebPreviews ${styles.spoodawebPreviews}`}>{
       spoodawebPreviews?.map(spoodaweb => (
@@ -55,7 +51,7 @@ function SpoodawebPreviews({ navigate }) {
   )
 }
 
-function RenderSpoodawebPreviews({ navigate }) {
+function RenderSpoodawebPreviews({ navigate, spoodawebPreviews }) {
   /*
   const spoodawebs = {
     'testing': {
@@ -71,7 +67,9 @@ function RenderSpoodawebPreviews({ navigate }) {
   return (
     <>
       <Suspense fallback={loading}>
-        <SpoodawebPreviews navigate={navigate}></SpoodawebPreviews>
+        <SpoodawebPreviews
+          navigate={navigate}
+          spoodawebPreviews={spoodawebPreviews}></SpoodawebPreviews>
       </Suspense>
     </>
   )
@@ -183,11 +181,22 @@ const Prompt = ({ prompted, titleErrorState, changeTitleErrorState, navigate }) 
   )
 }
 
+function GetSpoodawebPreviews({ setOriginalSpoodawebPreviews }) {
+  useEffect(async () => {
+    const webs = await getSpoodawebPreviews()
+    console.log(webs)
+    setOriginalSpoodawebPreviews(webs)
+  }, [])
+  return <></>
+}
+
 const Home = () => { // to fix constant rerenders
   const [ anchorPoint, setAnchorPoint ] = useState({ x: 0, y: 0})
   const [ show, setShow ] = useState(false) // directly affect whether component can display or not
   const [ prompted, setPrompted ] = useState(false)
   const [ titleErrorState, changeTitleErrorState ] = useState('')
+  const [ spoodawebPreviews, setSpoodawebPreviews ] = useState()
+  const [ originalSpoodawebPreviews, setOriginalSpoodawebPreviews ] = useState()
   const navigate = useNavigate()
   
   const handleContextMenuWrapper = e => {
@@ -212,18 +221,25 @@ const Home = () => { // to fix constant rerenders
       <Authorizer requireAuth={true} navigate={navigate}></Authorizer>
       <div className={prompted ? styles.blankScreen : styles.none}></div>
       <ContextMenu x={anchorPoint.x} y={anchorPoint.y} show={show}></ContextMenu>
-      <button className={styles.createSpoodawebButton} onClick={() => {setPrompted(!prompted)}}>
-        <FontAwesomeIcon icon={faPlus} className={styles.plusIcon}></FontAwesomeIcon>
-        create
-      </button>
-      <SearchBar
-        ></SearchBar>
+      <GetSpoodawebPreviews
+        setOriginalSpoodawebPreviews={setOriginalSpoodawebPreviews}></GetSpoodawebPreviews>
+      <div className={styles.homeTaskBar}>
+        <button className={styles.createSpoodawebButton} onClick={() => {setPrompted(!prompted)}}>
+          <FontAwesomeIcon icon={faPlus} className={styles.plusIcon}></FontAwesomeIcon>
+          create
+        </button>
+        <SpoodawebSearchBar
+          originalSpoodawebPreviews={originalSpoodawebPreviews}
+          setSpoodawebPreviews={setSpoodawebPreviews}></SpoodawebSearchBar>
+      </div>
       <Prompt
         prompted={prompted}
         titleErrorState={titleErrorState}
         changeTitleErrorState={changeTitleErrorState}
         navigate={navigate}></Prompt>
-      <RenderSpoodawebPreviews navigate={navigate}></RenderSpoodawebPreviews>
+      <RenderSpoodawebPreviews
+        navigate={navigate}
+        spoodawebPreviews={spoodawebPreviews}></RenderSpoodawebPreviews>
     </>
   );
 };

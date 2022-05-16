@@ -71,22 +71,26 @@ div.contextMenu {
   }
 }
 
-button.createSpoodawebButton {
-  @include std-button(1);
-  background-color: $lightgreen1;
-  transition: background-color 0.2s;
-  font-size: 20px;
-  padding-right: 15px;
-  &:hover {
-    background-color: $lightgreen2;
-    .plusIcon {
-      transform: rotate(90deg);
+div.homeTaskBar {
+  display: flex;
+  flex-direction: row;
+  button.createSpoodawebButton {
+    @include std-button(1);
+    background-color: $lightgreen1;
+    transition: background-color 0.2s;
+    font-size: 20px;
+    padding-right: 15px;
+    &:hover {
+      background-color: $lightgreen2;
+      .plusIcon {
+        transform: rotate(90deg);
+      }
     }
-  }
-  .plusIcon {
-    margin-right: 10px;
-    margin-left: 10px;
-    transition: transform 0.2s;
+    .plusIcon {
+      margin-right: 10px;
+      margin-left: 10px;
+      transition: transform 0.2s;
+    }
   }
 }
 

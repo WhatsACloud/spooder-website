@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import styles from './taskBar.module'
+import api from '../../../services/api'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGear, faFileLines } from '@fortawesome/free-solid-svg-icons'
 
-import { SearchBar } from './Search'
+import { SearchBar, SearchResult } from './Search'
 
-const searchBarFunc = () => {
+function TaskBar({ setInSettings, setModes, modes, setSelectedObj }) {
+  const [ searchVal, setSearchVal ] = useState('')
+  const [ renderedSearchResults, setRenderedSearchResults ] = useState()
+  useEffect(() => {
     const timeout = setTimeout(async () => {
       console.log(searchVal)
       const urlString = window.location.search
@@ -18,19 +22,18 @@ const searchBarFunc = () => {
         queryString: searchVal
       })
       const found = result.data.buds
-      setSearchResults(found)
       const toRender = Object.keys(found).map((objId, index) => 
         <>
-          <button
+          <SearchResult
             key={index}
-            className={styles.searchFind}
             onMouseDown={e => {
-              setSelectedObj(objId)
-            }}>
-            <p className={styles.searchFindName}>{found[objId].word}</p>
-            <p className={styles.searchFindType}>{found[objId].found[0]}</p>
-            <p className={styles.searchFindString}>{found[objId].found[1]}</p>
-          </button>
+               setSelectedObj(objId)
+            }}
+            text={{
+              name: found[objId].word,
+              type: found[objId].found[0],
+              string: found[objId].found[1]
+            }}></SearchResult>
         </>
       )
       setRenderedSearchResults(toRender)
@@ -38,9 +41,7 @@ const searchBarFunc = () => {
     return () => {
       clearTimeout(timeout)
     }
-  }
-
-function TaskBar({ setInSettings, setModes, modes, setSelectedObj }) {
+  }, [ searchVal ])
   return (
     <div className={styles.taskBar}>
       <button
@@ -58,7 +59,10 @@ function TaskBar({ setInSettings, setModes, modes, setSelectedObj }) {
         <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
       </button>
       <SearchBar
-        setSelectedObj={setSelectedObj}></SearchBar>
+        searchVal={searchVal}
+        setSearchVal={setSearchVal}>
+        {renderedSearchResults}
+      </SearchBar>
     </div>
   )
 }

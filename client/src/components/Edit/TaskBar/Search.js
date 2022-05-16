@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from 'react'
 import styles from './taskBar.module'
-import api from '../../../services/api'
 
-function SearchBar({ setSelectedObj }) {
-  const [ searchVal, setSearchVal ] = useState('')
+function SearchResult({ onMouseDown, text }) {
+  return (
+    <>
+      <button
+        className={styles.searchFind}
+        onMouseDown={onMouseDown}>
+        <p className={styles.searchFindName}>{text.name || ''}</p>
+        <p className={styles.searchFindType}>{text.type || ''}</p>
+        <p className={styles.searchFindString}>{text.string || ''}</p>
+      </button>
+    </>
+  )
+}
+export { SearchResult }
+
+function SearchBar({ setSearchVal, searchVal, children }) {
   const [ focused, setFocused ] = useState(false)
-  const [ searchResults, setSearchResults ] = useState()
-  const [ renderedSearchResults, setRenderedSearchResults ] = useState()
-  useEffect(, [ searchVal ])
   return (
     <div id='divSearchBar' className={styles.divSearchBar}>
       <input
@@ -24,8 +34,8 @@ function SearchBar({ setSelectedObj }) {
         placeholder='Search'></input>
       <div
         id='searchResults'
-        className={focused ? styles.searchResults : styles.none}>
-          {renderedSearchResults}
+        className={focused && children ? styles.searchResults : styles.none}>
+          {children}
         </div>
     </div>
   )
