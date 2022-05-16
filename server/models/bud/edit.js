@@ -80,26 +80,29 @@ async function createBud(spoodawebId, word, objId, position, transaction) {
   return _bud
 }
 
-async function createAttachedTo(attachedToId, id, fk_bud_id, transaction) {
+async function createAttachedTo(attachedToId, innerIndex, fk_bud_id, transaction) {
   await AttachedTo.create({
     attachedToId: attachedToId,
     fk_bud_id: fk_bud_id,
-    arrID: id
+    innerIndex: innerIndex
   }, {transaction: transaction})
 }
 
-async function editAttachedTo(budId, id, attachedToId, transaction) {
-  const _attachedTo = await AttachedTo.findOne({
+async function editAttachedTo(budId, attachedTo, transaction) {
+  const _attachedTos = await AttachedTo.findAll({
     where: {
-      fk_bud_id: budId,
-      arrID: id
+      fk_bud_id: budId
     }
   })
-  if (_attachedTo === null) return null 
-  await _attachedTo.update({
-    attachedToId: attachedToId
-  }, {transaction: transaction})
-  return _attachedTo
+  for (_attachedTo of _attachedTos) {
+    _attachedTo.destroy()
+  }
+  for (const attachedToId of Object.keys(attachedTo)) {
+    const innerIndex = attachedTo[attachedToId]
+    console.log(attachedToId, 'attachedToId')
+    await createAttachedTo(attachedToId, innerIndex, budId, transaction)
+  }
+  return _attachedTos
 }
 
 async function createBudDetails(budId, id, definition, sound, context, link, transaction) {
@@ -171,7 +174,10 @@ async function editBud(spoodawebId, objId, word, position, transaction) {
 
 async function editBudDetails(budId, id, definition, sound, link, context, transaction) {
   const budDetails = await BudDetails.findOne({ where: { fk_bud_id: budId, arrID: id }})
-  if (budDetails === null) return null 
+  if (budDetails === null) {
+    createBudDetails(budId, id, definition, sound, context, link, transaction)
+    return
+  } 
   await budDetails.update({
     definition: definition,
     sound: sound,
@@ -212,7 +218,8 @@ const addBud = async (spoodawebId, obj, objId, transaction) => {
     }
   }
   let i = 0
-  for (const attachedToId of obj.attachedTo) {
+  for (const attachedToId of Object.keys(obj.attachedTo)) {
+    const innerIndex = obj.attachedTo[attachedToId]
     await createAttachedTo(attachedToId, i, budId, transaction)
     i++
   }
@@ -231,16 +238,12 @@ const completeEditBud = async (spoodawebId, clientObjId, objId, obj, transaction
   for (const i in obj.definitions) {
     const definition = obj.definitions[i]
     const _budDetailsId = await editBudDetails(budId, i, definition.definition, definition.sound, definition.link, definition.context, transaction)
-    // to add the one for examples
     if (_budDetailsId === null) throw error.create('details does not exist')
     console.log(definition)
     await editExamples(_budDetailsId.dataValues.id, definition.examples, transaction)
   }
-  let i = 0
-  for (const attachedToId of obj.attachedTo) {
-    await editAttachedTo(budId, i, attachedToId, transaction)
-    i++
-  }
+  console.log(obj.attachedTo, 'attachedTo')
+  await editAttachedTo(budId, obj.attachedTo, transaction)
 }
 
 module.exports = { // please add support for positions, budId

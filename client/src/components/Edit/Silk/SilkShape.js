@@ -4,7 +4,7 @@ import * as SilkUtils from './SilkUtils'
 import * as utils from '../utils'
 import { select } from '../Select'
 
-function SilkEnd({ points, setDraggingLine, setSelectedSilk, setToggleCanDragLine, setSelectedObj }) {
+function SilkEnd({ points, setDraggingLine, setSelectedSilk, setToggleCanDragLine, setSelectedObj, attachedToObjId }) {
   const circleDragmoveFunc = evt => SilkUtils.lineCircleMove(evt.evt, true, {"objId": evt.target.parent.getAttr('objId'), "innerIndex": evt.target.index}) 
   const stopDragLineWrapper = (e) => {
     document.removeEventListener('mouseup', stopDragLineWrapper)
@@ -19,7 +19,7 @@ function SilkEnd({ points, setDraggingLine, setSelectedSilk, setToggleCanDragLin
       strokeWidth={4}
       hitStrokeWidth={30}
       draggable={true}
-      attachedToObjId={null}
+      attachedToObjId={attachedToObjId || null}
       onDragStart={(e) => {
         const objId = e.target.parent.getAttr('objId')
         document.addEventListener('mouseup', stopDragLineWrapper)
@@ -34,7 +34,7 @@ function SilkEnd({ points, setDraggingLine, setSelectedSilk, setToggleCanDragLin
 }
 export { SilkEnd as SilkEnd }
 
-function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDragLine, setSelectedObj }) {
+function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDragLine, setSelectedObj, attachedTo1, attachedTo2 }) {
   const lineDragmoveFunc = evt => {
     const line = evt.target
     const lineGroup = line.parent.children
@@ -111,12 +111,14 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
         setSelectedSilk={setSelectedSilk}
         setToggleCanDragLine={setToggleCanDragLine}
         objId={objId}
+        attachedToObjId={attachedTo1}
         setSelectedObj={setSelectedObj}
         setDraggingLine={setDraggingLine}></SilkEnd>
       <SilkEnd
         points={points[1]}
         setSelectedSilk={setSelectedSilk}
         setToggleCanDragLine={setToggleCanDragLine}
+        attachedToObjId={attachedTo2}
         objId={objId}
         setSelectedObj={setSelectedObj}
         setDraggingLine={setDraggingLine}></SilkEnd>

@@ -87,6 +87,7 @@ function AddNewObjs({
             <BudShapes.Bud
               x={obj.position.x + rootPos.x}
               y={obj.position.y + rootPos.y}
+              attachedSilkObjId={obj.attachedTo}
               key={newRendered.length}
               objId={objId}
               setHoverBud={setHoverBud}
@@ -101,6 +102,8 @@ function AddNewObjs({
             <SilkShapes.Silk
               points={obj.positions}
               key={newRendered.length}
+              attachedTo1={obj.attachedTo1}
+              attachedTo2={obj.attachedTo2}
               setTriggerDragLine={setTriggerDragLine}
               setDraggingLine={setDraggingLine}
               setSelectedSilk={setSelectedSilk}

@@ -55,9 +55,6 @@ const snapLine = (selectedSilk) => {
   const lineCircle = line.children[selectedSilk.innerIndex]
   const attachedTo = utils.getKonvaObjById(highlighter.getAttr('attachedObjId'))
   console.log(highlighter.getAttr('attachedObjId'))
-  const bud = attachedTo.children[0]
-  const budX = bud.getX() 
-  const budY = bud.getY() 
   console.log(lineCircle.getX(), lineCircle.getY())
   lineCircle.setAttr('attachedToObjId', attachedTo.getAttr('objId'))
   const newAttachedSilkToBud = attachedTo.getAttr('attachedSilkObjId')
@@ -70,8 +67,16 @@ const snapLine = (selectedSilk) => {
   const rootPos = utils.getRootPos()
   offsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: highlighter.getX() - rootPos.x, y: highlighter.getY() - rootPos.y}
   line.setAttr('offsetRootPoses', offsetRootPoses)
-  // console.log(line)  
-  utils.updateObj(selectedSilk.objId, {positions: offsetRootPoses})
+  utils.updateObj(selectedSilk.objId, {
+    positions: offsetRootPoses,
+    [`attachedTo${selectedSilk.innerIndex}`]: lineCircle.getAttr('attachedToObjId')
+  })
+  const bud = attachedTo
+  const budObjId = bud.getAttr('objId')
+  console.log(utils.getObjById(budObjId))
+  utils.updateObj(budObjId, {
+    attachedTo: {...utils.getObjById(budObjId).attachedTo, [line.getAttr('objId')]: selectedSilk.innerIndex}
+  })
 }
 export { snapLine as snapLine }
 

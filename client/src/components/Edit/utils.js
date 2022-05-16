@@ -142,7 +142,7 @@ const addObjs = (toAdd) => {
   const newObjs = {...currentObjs, ...toAdd}
   layer.setAttr('objs', newObjs)
 }
-export { addObjs as addObjs }
+export { addObjs }
 
 const updateObj = (objId, attrs) => {
   const mainLayer = getMainLayer()

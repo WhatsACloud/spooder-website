@@ -130,7 +130,7 @@ async function get (req, res, next) {
             x: objData.x,
             y: objData.y
           },
-          attachedTo: [], 
+          attachedTo: {}, 
           type: "bud"
         }
         const budDetails = await getBudDetails(objData.id)
@@ -163,7 +163,7 @@ async function get (req, res, next) {
         }) 
         for (const attachedTo of attachedTos) {
           const attachedToData = attachedTo.dataValues
-          toResObjs[objId].attachedTo.push(attachedToData.attachedToId)
+          toResObjs[objId].attachedTo[attachedToData.attachedToId] = attachedToData.innerIndex
         }
       }
     }

@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
             key: 'id'
           }
       },
-      arrID: {
+      innerIndex: {
         type: DataTypes.INTEGER,
         allowNull: false
       },

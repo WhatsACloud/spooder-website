@@ -21,7 +21,7 @@ function BudAnchorHighlighter() {
 }
 export { BudAnchorHighlighter as BudAnchorHighlighter }
 
-function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTriggerDragLine, setHoverBud }) {
+function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTriggerDragLine, setHoverBud, attachedSilkObjId }) {
   const rootPos = utils.getRootPos()
   const radius = 40
   const normalDragMoveEvt = (evt) => {
@@ -45,7 +45,7 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
       objId={objId}
       offsetRootPos={{x: x - rootPos.x, y: y - rootPos.y}}
       lastMousePos={{x: 0, y: 0}}
-      attachedSilkObjId={{}}>
+      attachedSilkObjId={attachedSilkObjId || {}}>
         <reactKonva.Shape
           x={x}
           y={y}
@@ -113,7 +113,7 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
             for (const [ objId, innerIndex ] of Object.entries(attachedObjIds)) {
               const line = utils.getKonvaObjById(objId)
               const offsetRootPoses = line.getAttr('offsetRootPoses')
-              offsetRootPoses[innerIndex-1] = {x: newOffsetRootPos.x - rootPos.x, y: newOffsetRootPos.y - rootPos.y}
+              offsetRootPoses[innerIndex-1] = {x: newOffsetRootPos.x, y: newOffsetRootPos.y}
               utils.updateObj(objId, {positions: offsetRootPoses})
             }
           }}
