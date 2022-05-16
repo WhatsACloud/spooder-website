@@ -1,3 +1,5 @@
+@import '../../../scss/standard.module.scss';
+
 .none {
   display: none;
 }
@@ -64,6 +66,13 @@ div.BudView {
       textarea.example {
         @include inputBox;
         width: 80%;
+      }
+      div.divNewExample {
+        display: flex;
+        flex-direction: row;
+      }
+      button.addExampleBtn {
+        @include std-button;
       }
     }
     &.divWord {

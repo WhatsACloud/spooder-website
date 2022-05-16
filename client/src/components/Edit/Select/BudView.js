@@ -8,6 +8,7 @@ function BudAttr({ id, placeholder, style, data, onChange }) {
       className={styles.attrBox}
       id={id}>
       <input
+        name={id}
         value={data}
         onChange={onChange}
         className={style || styles.normal}
@@ -48,8 +49,9 @@ const budSample = {
 }
 
 const handleInputChange = (e, type, renderData, setRenderData, id, definitionNo=0) => {
-  const newData = renderData
+  const newData = {...renderData}
   const val = e.target.value
+  console.log(newData, type, val)
   newData[type] = val
   const obj = utils.getObjById(id)
   if (type === "word") {
@@ -61,18 +63,35 @@ const handleInputChange = (e, type, renderData, setRenderData, id, definitionNo=
   setRenderData(newData)
 }
 
+const addExample = (setRenderData, renderData, objId, definitionNo) => {
+  const obj = utils.getObjById(objId)
+  obj.definitions[definitionNo].examples.push(renderData.newExample)
+  setRenderData({
+    ...renderData,
+    "newExample": ''
+  })
+}
+
 function BudView({ selectedObj }) {
   const [ canRender, setCanRender ] = useState(false)
   const [ definitionNo, setDefinitionNo ] = useState(0)
   const [ totalDefinitionNo, setTotalDefinitionNo ] = useState()
   const [ renderedExamples, setRenderedExamples ] = useState()
-  const [ renderData, setRenderData ] = useState()
+  const originalRenderData = {
+      word: '',
+      definition: '',
+      sound: '',
+      context: '',
+      newExample: ''
+    }
+  const [ renderData, setRenderData ] = useState(originalRenderData)
   const handleInputChangeWrapper = (type) => {
     return (e) => handleInputChange(e, type, renderData, setRenderData, selectedObj, definitionNo)
   }
   useEffect(() => {
+    console.log(renderData)
     // selectedObj = 6
-    if (!selectedObj) setRenderData(); setCanRender(false)
+    if (!selectedObj) setRenderData(originalRenderData); setCanRender(false)
     const obj = utils.getObjById(selectedObj)
     // const obj = budSample
     if (obj && obj.type === 'bud') {
@@ -81,19 +100,21 @@ function BudView({ selectedObj }) {
       console.log(obj, selectedObj)
       const currentDefinitionObj = obj.definitions[definitionNo]
       const data = {
-        word: obj.word || null,
-        definition: currentDefinitionObj.definition || null,
-        sound: currentDefinitionObj.sound || null,
-        context: currentDefinitionObj.context || null,
+        word: obj.word || '',
+        definition: currentDefinitionObj.definition || '',
+        sound: currentDefinitionObj.sound || '',
+        context: currentDefinitionObj.context || '',
         link: currentDefinitionObj.link
       }
       setRenderData(data)
       const examples = currentDefinitionObj.examples 
-      const examplesRender = examples.map((example) => {
+      const examplesRender = examples.map((example, index) => {
         return (
           <>
             <textarea
               placeholder='insert example'
+              key={index}
+              name={`example${index}`}
               value={example}
               onChange={handleInputChangeWrapper('example')}
               className={styles.example}></textarea>
@@ -123,7 +144,7 @@ function BudView({ selectedObj }) {
     <div className={canRender ? styles.BudView : styles.none} id='BudView'>
       <BudAttr
         id='word'
-        data={renderData ? renderData.word: ''}
+        data={renderData.word}
         onChange={handleInputChangeWrapper('word')}
         placeholder='insert word'></BudAttr>
       <div
@@ -131,7 +152,7 @@ function BudView({ selectedObj }) {
         <button onClick={subDefinitionNo}>a</button>
         <BudAttr
           id='definition'
-          data={renderData ? renderData.definition: ''}
+          data={renderData.definition}
           onChange={handleInputChangeWrapper('definition')}
           placeholder='definition'
           style={styles.definition}></BudAttr>
@@ -139,7 +160,7 @@ function BudView({ selectedObj }) {
       </div>
       <BudAttr
         id='sound'
-        data={renderData ? renderData.sound: ''}
+        data={renderData.sound}
         onChange={handleInputChangeWrapper('sound')}
         placeholder='sound'
         style={styles.sound}></BudAttr>
@@ -147,14 +168,28 @@ function BudView({ selectedObj }) {
         id='context'
         className={styles.attrBox}>
         <textarea
+          name='context'
           placeholder='context'
-          value={renderData ? renderData.context: ''}
+          value={renderData.context}
           onChange={handleInputChangeWrapper('context')}
           className={styles.context}></textarea>
       </div>
       <div
         id='examples'
         className={styles.examplesBox}>
+        <div className={styles.divNewExample}>
+          <textarea
+            placeholder='insert example'
+            name={`newExample`}
+            value={renderData.newExample}
+            onChange={handleInputChangeWrapper('newExample')}
+            className={styles.example}></textarea>
+          <button
+            className={styles.addExampleBtn}
+            onClick={() => addExample(setRenderData, renderData, selectedObj, definitionNo)}>
+              Add example
+            </button>
+        </div>
         {renderedExamples}
       </div>
     </div>
