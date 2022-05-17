@@ -2,28 +2,58 @@ import React, { useEffect, useState } from 'react'
 import styles from './taskBar.module'
 import * as utils from '../utils'
 
-const randomElementByStrength = (arr, strengthArrName) => {
-  // return arr[Math.floor((Math.random()*arr.length))]
-  const total = arr.reduce(
-    (currentTotal, element) => currentTotal + element[strengthArrName],
-    0
-  )
-  for (const element of arr) {
-    const strength = (1 - Number(element[strengthArrName])) / total
-    if (Math.random() < strength) {
-      return element
-    }
-  }
-}
-
 const randomIndex = (length) => {
   return Math.floor((Math.random()*length))
+}
+
+const randomIndexByStrength = (arr, strengthArrName, trainIterNo=null) => {
+  // return arr[Math.floor((Math.random()*arr.length))]
+  console.log(arr, strengthArrName)
+  let total = arr.reduce(
+    (currentTotal, element) => {
+      console.log(currentTotal, element[strengthArrName])
+      return currentTotal + element[strengthArrName]
+    },
+    0
+  )
+  if (total !== 0) {
+    for (let index = arr.length < 2 ? 0 : 1; index < arr.length; index++) {
+      const element = arr[index]
+      let strength
+      if (trainIterNo && (element.tst !== undefined)) {
+        strength = (
+          1
+          - (
+            Number(element[strengthArrName])
+            / (total ? total : 1)
+            / (10 - trainIterNo - element.tst)
+          )
+        )
+      } else {
+        strength = (
+          1
+          - (
+            Number(element[strengthArrName])
+            / (total ? total : 1)
+          )
+        )
+      }
+      console.log(arr, index, element[strengthArrName], strength, trainIterNo)
+      // console.log(strength, element, strengthArrName, arr)
+      strength = strength ? strength : 0.1
+      if (Math.random() < strength) {
+        return index
+      }
+    }
+  } else {
+    return randomIndex(arr.length)
+  }
+  return arr.length-1
 }
 
 const getOtherBudObjId = (silkObjId, objId) => {
   const silk = utils.getObjById(silkObjId)
   let budId = false
-  console.log(silk)
   if (silk.attachedTo1 !== objId) {
     budId = silk.attachedTo1
   } else {
@@ -33,6 +63,11 @@ const getOtherBudObjId = (silkObjId, objId) => {
 }
 
 function Train({ selectedObj, setSelectedObj, setFocus }) {
+  /*
+  tst stands for Time Since Tested, it is a number which is the
+  iteration count (of training) when it was tested. It is found in
+  silks, not buds.
+  */
   const [ currentObj, setCurrentObj ] = useState()
   const [ openedTrain, setOpenedTrain ] = useState(true)
   const [ startedTraining, setStartedTraining ] = useState(false)
@@ -40,6 +75,8 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
     given: '',
     tested: null
   })
+  const [ trainIterNo, setTrainIterNo ] = useState(0) // zero based index 
+  const [ definitionNo, setDefinitionNo ] = useState()
   const [ notTested, setNotTested ] = useState([])
   const [ answer, setAnswer ] = useState('')
   const [ answered, setAnswered ] = useState(false)
@@ -49,31 +86,64 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
   useEffect(() => {
     const multiChoiceAmt = 4
     if (answered) {
+      setFocus(currentObj)
       const obj = utils.getObjById(currentObj)
+      obj.definitions[definitionNo].link += 0.1
       const attachedToObjIds = Object.keys(obj.attachedTo) 
-      const attachedTo = attachedToObjIds[randomIndex(attachedToObjIds.length)]
+      const attachedTo = attachedToObjIds.splice(
+        randomIndexByStrength(attachedToObjIds.map(e => utils.getObjById(e)), "strength", trainIterNo),
+        1
+      )
+      console.log(attachedTo)
+      utils.getObjById(attachedTo).tst = 1
       let nextBudId = getOtherBudObjId(attachedTo, currentObj)
       if (!nextBudId) {
-        // nextBudId = 
+        console.log('nextBudId null')
+        const newNotTested = [...notTested]
+        const randomTestedIndex = randomIndexByStrength(notTested.map(e => utils.getObjById(e)), "strength", trainIterNo)
+        const tested = newNotTested.splice(
+          randomTestedIndex,
+          1
+        )
+        utils.getObjById(randomTestedIndex).strength += 0.1
+        setNotTested(newNotTested)
+        setCurrentObj(tested)
+      } else {
+        console.log('nextBudId')
+        if (nextBudId in notTested) {
+          console.log('nextBudId in notTested')
+          const newNotTested = [...notTested].filter(e => e !== objId)
+          setNotTested(newNotTested)
+        }
+        setCurrentObj(nextBudId)
       }
-      setCurrentObj(nextBudId)
+      const newNotTested = [...notTested]
+      for (const objId of attachedToObjIds) {
+        if (!(objId in newNotTested)) {
+          console.log(`pushed ${objId} into notTested`)
+          newNotTested.push(objId)
+        }
+      }
       setAnswered(false)
     }
-    if (startedTraining) {
+    if (startedTraining && !(answered)) {
       console.log(currentObj)
       const obj = utils.getObjById(currentObj)
-      const definition = randomElementByStrength(obj.definitions, "link")
+      const definitionIndex = randomIndexByStrength(obj.definitions, "link")
+      const definition = obj.definitions[definitionIndex]
+      console.log(definitionIndex)
+      setDefinitionNo(definitionIndex)
       const possibleGiven = [
         obj.word,
-        definition.definition,
-        definition.sound,
-        definition.context,
-        ...definition.examples
+        // definition.definition,
+        // definition.sound,
+        // definition.context,
+        // ...definition.examples
       ]
       const possibleTested = [
         [obj.word, "word"],
-        [definition.definition, "definition"],
-        [definition.sound, "sound"]
+        // [definition.definition, "definition"],
+        // [definition.sound, "sound"]
       ]
       const testedIndex = randomIndex(possibleTested.length) 
       const testedDataArr = possibleTested[testedIndex]
@@ -139,6 +209,7 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
         tested: renderedTested,
         type: tested[1]
       })
+      setTrainIterNo(trainIterNo+1)
     }
   }, [ answered, startedTraining, currentObj ])
   return (
