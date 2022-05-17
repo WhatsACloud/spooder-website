@@ -8,10 +8,8 @@ const randomIndex = (length) => {
 
 const randomIndexByStrength = (arr, strengthArrName, trainIterNo=null) => {
   // return arr[Math.floor((Math.random()*arr.length))]
-  console.log(arr, strengthArrName)
   let total = arr.reduce(
     (currentTotal, element) => {
-      console.log(currentTotal, element[strengthArrName])
       return currentTotal + element[strengthArrName]
     },
     0
@@ -38,8 +36,6 @@ const randomIndexByStrength = (arr, strengthArrName, trainIterNo=null) => {
           )
         )
       }
-      console.log(arr, index, element[strengthArrName], strength, trainIterNo)
-      // console.log(strength, element, strengthArrName, arr)
       strength = strength ? strength : 0.1
       if (Math.random() < strength) {
         return index
@@ -53,8 +49,9 @@ const randomIndexByStrength = (arr, strengthArrName, trainIterNo=null) => {
 
 const getOtherBudObjId = (silkObjId, objId) => {
   const silk = utils.getObjById(silkObjId)
+  console.log(silk, silkObjId, objId) basically it gets the wrong silk i think?
   let budId = false
-  if (silk.attachedTo1 !== objId) {
+  if (Number(silk.attachedTo1) !== Number(objId)) {
     budId = silk.attachedTo1
   } else {
     budId = silk.attachedTo2
@@ -88,30 +85,33 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
     if (answered) {
       setFocus(currentObj)
       const obj = utils.getObjById(currentObj)
-      obj.definitions[definitionNo].link += 0.1
+      const definition = obj.definitions[definitionNo]
+      if (definition.link < 1 && correct) {
+        definition.link += 0.1
+      }
       const attachedToObjIds = Object.keys(obj.attachedTo) 
       const attachedTo = attachedToObjIds.splice(
         randomIndexByStrength(attachedToObjIds.map(e => utils.getObjById(e)), "strength", trainIterNo),
         1
       )
-      console.log(attachedTo)
       utils.getObjById(attachedTo).tst = 1
-      let nextBudId = getOtherBudObjId(attachedTo, currentObj)
+      let nextBudId = getOtherBudObjId(attachedTo[0], currentObj)
+      console.log(nextBudId, attachedTo, currentObj)
       if (!nextBudId) {
-        console.log('nextBudId null')
         const newNotTested = [...notTested]
         const randomTestedIndex = randomIndexByStrength(notTested.map(e => utils.getObjById(e)), "strength", trainIterNo)
         const tested = newNotTested.splice(
           randomTestedIndex,
           1
         )
-        utils.getObjById(randomTestedIndex).strength += 0.1
+        const silk = utils.getObjById(randomTestedIndex)
+        if (silk.strength < 1 && correct) {
+          silk.strength += 0.1
+        }
         setNotTested(newNotTested)
         setCurrentObj(tested)
       } else {
-        console.log('nextBudId')
         if (nextBudId in notTested) {
-          console.log('nextBudId in notTested')
           const newNotTested = [...notTested].filter(e => e !== objId)
           setNotTested(newNotTested)
         }
@@ -120,18 +120,16 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
       const newNotTested = [...notTested]
       for (const objId of attachedToObjIds) {
         if (!(objId in newNotTested)) {
-          console.log(`pushed ${objId} into notTested`)
+          // console.log(`pushed ${objId} into notTested`)
           newNotTested.push(objId)
         }
       }
       setAnswered(false)
     }
     if (startedTraining && !(answered)) {
-      console.log(currentObj)
       const obj = utils.getObjById(currentObj)
       const definitionIndex = randomIndexByStrength(obj.definitions, "link")
       const definition = obj.definitions[definitionIndex]
-      console.log(definitionIndex)
       setDefinitionNo(definitionIndex)
       const possibleGiven = [
         obj.word,
@@ -160,7 +158,6 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
                   : budObj.definitions[randomIndex(budObj.definitions.length)][selectedType]
       )
       sameTypeList = sameTypeList.filter(type => type !== tested[0])
-      // console.log(sameTypeList, selectedType)
       if (isMultiChoice) {
         let putCorrect = false
         for (let index = 0; index < multiChoiceAmt; index++) {
