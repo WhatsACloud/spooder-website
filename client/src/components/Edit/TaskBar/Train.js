@@ -16,8 +16,20 @@ const randomElementByStrength = (arr, strengthArrName) => {
   }
 }
 
-const randomElement = (arr) => {
-  return arr[Math.floor((Math.random()*arr.length))]
+const randomIndex = (length) => {
+  return Math.floor((Math.random()*length))
+}
+
+const getOtherBudObjId = (silkObjId, objId) => {
+  const silk = utils.getObjById(silkObjId)
+  let budId = false
+  console.log(silk)
+  if (silk.attachedTo1 !== objId) {
+    budId = silk.attachedTo1
+  } else {
+    budId = silk.attachedTo2
+  }
+  return budId
 }
 
 function Train({ selectedObj, setSelectedObj, setFocus }) {
@@ -28,11 +40,27 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
     given: '',
     tested: null
   })
+  const [ notTested, setNotTested ] = useState([])
   const [ answer, setAnswer ] = useState('')
   const [ answered, setAnswered ] = useState(false)
+  const [ correct, setCorrect ] = useState(false)
+  const [ haveTested, setHaveTested ] = useState([])
+  const [ testTimes, setTestTimes ] = useState()
   useEffect(() => {
     const multiChoiceAmt = 4
+    if (answered) {
+      const obj = utils.getObjById(currentObj)
+      const attachedToObjIds = Object.keys(obj.attachedTo) 
+      const attachedTo = attachedToObjIds[randomIndex(attachedToObjIds.length)]
+      let nextBudId = getOtherBudObjId(attachedTo, currentObj)
+      if (!nextBudId) {
+        // nextBudId = 
+      }
+      setCurrentObj(nextBudId)
+      setAnswered(false)
+    }
     if (startedTraining) {
+      console.log(currentObj)
       const obj = utils.getObjById(currentObj)
       const definition = randomElementByStrength(obj.definitions, "link")
       const possibleGiven = [
@@ -47,41 +75,72 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
         [definition.definition, "definition"],
         [definition.sound, "sound"]
       ]
-      // const tested = randomElement(possibleTested)
+      const testedIndex = randomIndex(possibleTested.length) 
+      const testedDataArr = possibleTested[testedIndex]
+      const tested = [testedDataArr[0], testedDataArr[1]]
       // const isMultiChoice = Math.random() < 0.5
-      const tested = ['asdf', "word"]
+      // const tested = ['asdf', "word"]
       const isMultiChoice = true
-      let renderedTested
-      const multiChoiceStrings = Array(multiChoiceAmt).fill(tested[0])
+      let renderedTested = []
+      const multiChoiceStrings = []
+      const selectedType = testedDataArr[1]
+      const budObjs = utils.getMainLayer().getAttr('budObjs')
+      let sameTypeList = Object.values(budObjs).map( // ah yes very readable
+        budObj => budObj[selectedType] ? budObj[selectedType]
+                  : budObj.definitions[randomIndex(budObj.definitions.length)][selectedType]
+      )
+      sameTypeList = sameTypeList.filter(type => type !== tested[0])
+      // console.log(sameTypeList, selectedType)
       if (isMultiChoice) {
-        const multiChoices = Array.from(Array(multiChoiceAmt).keys())
-        renderedTested = multiChoices.map(index => 
-          <>
-            <button
-              className={styles.multiChoice}
-              key={index}
-              onClick={() => {
-                console.log(multiChoiceStrings, index, tested[0])
-                if (multiChoiceStrings[index] === tested[0]) {
-                  console.log('passed!')
-                } else {
-                  console.log('fail!')
-                }
-              }}>
-              {tested[0]}
-            </button>
-          </>
-        )
+        let putCorrect = false
+        for (let index = 0; index < multiChoiceAmt; index++) {
+          let isCorrect = false
+          if (!putCorrect) {
+            if (index >= multiChoiceAmt-1) {
+              isCorrect = true
+            } else {
+              isCorrect = Math.random() < 1 / (Math.random() * 1) // random percentage
+            }
+            if (isCorrect) {
+              putCorrect = true
+            }
+          }
+          const typeListIndex = randomIndex(sameTypeList.length)
+          let multiChoiceString
+          multiChoiceString = isCorrect ? tested[0] : sameTypeList[typeListIndex]
+          if (!isCorrect) {
+            sameTypeList.splice(typeListIndex, 1)
+          }
+          renderedTested.push(
+            <>
+              <button
+                className={styles.multiChoice}
+                key={index}
+                onClick={() => {
+                  if (isCorrect) {
+                    console.log('passed!')
+                    setCorrect(true)
+                  } else {
+                    console.log('fail!')
+                    setCorrect(false)
+                  }
+                  setAnswered(true)
+                }}>
+                {multiChoiceString}
+              </button>
+            </>
+          )
+        }
       } else {
         renderedTested = null
       }
       setTrainingCols({
-        given: randomElement(possibleGiven),
+        given: possibleGiven[randomIndex(possibleGiven.length)],
         tested: renderedTested,
         type: tested[1]
       })
     }
-  }, [ answered, startedTraining ])
+  }, [ answered, startedTraining, currentObj ])
   return (
     <div className={styles.trainWrapper}>
       <button
@@ -123,12 +182,15 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
             <button
               className={styles.inputCheckBtn}
               onClick={() => {
-                console.log(answer, tested)
-                if (answer === tested[0]) {
+                const tested = trainingCols.tested
+                if (answer === tested) {
                   console.log('passed!')
+                  setCorrect(true)
                 } else {
                   console.log('fail!')
+                  setCorrect(false)
                 }
+                setAnswered(true)
               }}>
               check
             </button>

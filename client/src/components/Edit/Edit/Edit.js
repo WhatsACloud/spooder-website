@@ -212,6 +212,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
     mainLayer.setAttr('newObjs', {})
     mainLayer.setAttr('modes', modes)
     mainLayer.setAttr('addedObj', false)
+    mainLayer.setAttr('budObjs', {})
     mainLayer.setAttr('triggerDragLine', false)
     mainLayer.setAttr('draggingLine', false)
     document.addEventListener('keydown', preventZoom)

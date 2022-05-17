@@ -141,6 +141,13 @@ const addObjs = (toAdd) => {
   const currentObjs = layer.getAttr('objs')
   const newObjs = {...currentObjs, ...toAdd}
   layer.setAttr('objs', newObjs)
+  const currentBudObjs = layer.getAttr('budObjs')
+  for (const [ objId, toAddObj ] of Object.entries(toAdd)) {
+    if (toAddObj.type === "bud") {
+      currentBudObjs[objId] = toAddObj
+    }
+  }
+  layer.setAttr('budObjs', currentBudObjs)
 }
 export { addObjs }
 
@@ -165,6 +172,9 @@ const updateObj = (objId, attrs) => {
       attrs.positions[1].x + rootPos.x,
       attrs.positions[1].y + rootPos.y
     ])
+  }
+  if ('attachedTo' in attrs) {
+    konvaObj.setAttr('attachedSilkObjId', attrs.attachedTo)
   }
 }
 export { updateObj as updateObj }

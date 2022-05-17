@@ -58,12 +58,6 @@ const handleInputChange = (e, type, renderData, setRenderData, id, definitionNo=
     utils.updateObj(id, {word: val})
   } else {
     obj.definitions[definitionNo][type] = val
-    for (const [ leObjId, leObj ] of Object.entries(utils.getObjs())) {
-      console.log(leObjId)
-      if (leObj.definitions) {
-        console.log(leObj.definitions[0])
-      }
-    }
     utils.updateNewObjs(id, obj)
   }
   setRenderData(newData)

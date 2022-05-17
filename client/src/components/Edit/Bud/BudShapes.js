@@ -79,20 +79,22 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
                   const silkId = newBudId-1
                   const silk = utils.getKonvaObjById(silkId)
                   console.log(newBud, currentBud, silk)
-                  newBud.setAttr(
-                    'attachedSilkObjId',
-                    {...newBud.getAttr('attachedSilkObjId'),
-                      [silkId]: 1
-                    }
-                  )
-                  currentBud.setAttr(
-                    'attachedSilkObjId',
-                    {...currentBud.getAttr('attachedSilkObjId'),
-                      [silkId]: 2
-                    }
-                  )
+                  const newBudAttachedSilk = {
+                    ...newBud.getAttr('attachedSilkObjId'),
+                    [silkId]: 1
+                  }
+                  const currentBudAttachedSilk = {
+                    ...currentBud.getAttr('attachedSilkObjId'),
+                    [silkId]: 2
+                  }
                   silk.children[1].setAttr('attachedToObjId', newBudId)
                   silk.children[2].setAttr('attachedToObjId', objId)
+                  utils.updateObj(newBudId, {attachedTo: newBudAttachedSilk})
+                  utils.updateObj(objId, {attachedTo: currentBudAttachedSilk})
+                  utils.updateObj(silkId, {
+                    attachedTo1: newBudId,
+                    attachedTo2: objId
+                  })
                 }
               }, 1000)
             }
