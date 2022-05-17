@@ -79,9 +79,10 @@ function AddNewObjs({
   useEffect(() => {
     if (objsToUpdate) {
       const newRendered = [...rendered]
-      utils.addObjs(objsToUpdate)
+      const newObjsToUpdate = JSON.parse(JSON.stringify(objsToUpdate))
+      utils.addObjs(newObjsToUpdate)
       const rootPos = utils.getRootPos()
-      Object.entries(objsToUpdate).forEach(([objId, obj]) => {
+      Object.entries(newObjsToUpdate).forEach(([objId, obj]) => {
         if (obj.type === 'bud') {
           newRendered.push(
             <BudShapes.Bud

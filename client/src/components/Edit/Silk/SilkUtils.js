@@ -81,8 +81,7 @@ const snapLine = (selectedSilk) => {
 export { snapLine as snapLine }
 
 const snapLineCircleToLine = (selectedSilk) => { // pls fix ltr it doesnt work if innerIndex is 2
-  const stage = getStage()
-  const lineGroup = getKonvaObjById(selectedSilk.objId)
+  const lineGroup = utils.getKonvaObjById(selectedSilk.objId)
   const line = lineGroup.children[0]
   const lineCircle = lineGroup.children[selectedSilk.innerIndex]
   console.log(selectedSilk)

@@ -58,6 +58,12 @@ const handleInputChange = (e, type, renderData, setRenderData, id, definitionNo=
     utils.updateObj(id, {word: val})
   } else {
     obj.definitions[definitionNo][type] = val
+    for (const [ leObjId, leObj ] of Object.entries(utils.getObjs())) {
+      console.log(leObjId)
+      if (leObj.definitions) {
+        console.log(leObj.definitions[0])
+      }
+    }
     utils.updateNewObjs(id, obj)
   }
   setRenderData(newData)
@@ -96,7 +102,8 @@ function BudView({ selectedObj }) {
     if (obj && obj.type === 'bud') {
       setCanRender(true)
       setTotalDefinitionNo(obj.definitions.length-1)
-      console.log(obj, selectedObj)
+      // console.log(obj, selectedObj)
+      // console.log(utils.getObjs())
       const currentDefinitionObj = obj.definitions[definitionNo]
       const data = {
         word: obj.word || '',
