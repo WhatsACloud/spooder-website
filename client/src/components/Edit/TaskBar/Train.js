@@ -6,8 +6,9 @@ const randomIndex = (length) => {
   return Math.floor((Math.random()*length))
 }
 
-const canTestGivenTst = (tst, trainIterNo) => {
-  console.log(tst, trainIterNo)
+const canTestGivenTst = (tst, trainIterNo, debug) => {
+  // console.log(tst, trainIterNo, debug)
+  console.log(tst, trainIterNo, debug)
   if (isNaN(tst) || isNaN(trainIterNo)) return false
   const diff = trainIterNo - tst
   let place = 1
@@ -18,15 +19,15 @@ const canTestGivenTst = (tst, trainIterNo) => {
   } else if (diff > 9) {
     place = 10
   }
-  return Math.random() < (Math.ceil(diff / place) * place * 10)
+  const random = Math.random()
+  return random < (Math.ceil(diff / place) / (place * 10))
 }
 
 const randomIndexByStrength = (arr, strengthArrName, trainIterNo=null) => {
   // return arr[Math.floor((Math.random()*arr.length))]
   let total = arr.reduce(
     (currentTotal, element) => {
-      console.log(element)
-      if (canTestGivenTst(element.tst, trainIterNo) || !element.tst) {
+      if (canTestGivenTst(element.tst, trainIterNo, "frick") || !element.tst) {
         return currentTotal + element[strengthArrName]
       }
       return currentTotal
@@ -113,10 +114,11 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
       const attachedToObjIds = Object.keys(obj.attachedTo) 
       console.log(utils.getObjById(attachedToObjIds[0]))
       if (attachedToObjIds.length < 2
-        && canTestGivenTst(utils.getObjById(attachedToObjIds[0]).tst, trainIterNo)
+        && !canTestGivenTst(utils.getObjById(attachedToObjIds[0]).tst, trainIterNo, "insert")
         && notTested.length > 0) {
         console.log('taking from notTested')
         const newNotTested = [...notTested]
+        console.log(notTested)
         const randomTestedIndex = randomIndexByStrength(notTested.map(e => utils.getObjById(e.silk)), "strength", trainIterNo)
         const tested = newNotTested.splice(
           randomTestedIndex,
@@ -151,6 +153,7 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
         for (const objId of attachedToObjIds) {
           if (!(objId in newNotTested)
             && canTestGivenTst(utils.getObjById(objId).tst, trainIterNo)) {
+            console.log(objId)
             newNotTested.push({"silk": objId, "bud": currentObj})
           }
         }
@@ -160,7 +163,6 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
       setAnswered(false)
     }
     if (startedTraining && !(answered)) {
-      console.log(utils.getObjs())
       const obj = utils.getObjById(currentObj)
       const definitionIndex = randomIndexByStrength(obj.definitions, "link")
       const definition = obj.definitions[definitionIndex]

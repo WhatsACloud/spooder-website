@@ -7,6 +7,7 @@ import { faGear, faFileLines } from '@fortawesome/free-solid-svg-icons'
 
 import { SearchBar, SearchResult } from './Search'
 import { Train } from './Train'
+import { Debugger } from './debug'
 
 function TaskBar({ setInSettings, setModes, modes, setSelectedObj, selectedObj, setFocus }) {
   const [ searchVal, setSearchVal ] = useState('')
@@ -64,6 +65,7 @@ function TaskBar({ setInSettings, setModes, modes, setSelectedObj, selectedObj, 
         setSearchVal={setSearchVal}>
         {renderedSearchResults}
       </SearchBar>
+      <Debugger></Debugger>
       <Train
         selectedObj={selectedObj}
         setSelectedObj={setSelectedObj}
