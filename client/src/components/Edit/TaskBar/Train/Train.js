@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import styles from './taskBar.module'
-import * as utils from '../utils'
+import styles from '../taskBar.module'
+import * as utils from '../../utils'
+
+import { TrainSettings, potentialGiven, potentialTested } from './TrainSettings'
 
 const randomIndex = (length) => {
   return Math.floor((Math.random()*length))
@@ -101,6 +103,8 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
   const [ answered, setAnswered ] = useState(false)
   const [ correct, setCorrect ] = useState(false)
   const [ haveTested, setHaveTested ] = useState([])
+  const [ toGive, setToGive ] = useState(potentialGiven)
+  const [ toTest, setToTest ] = useState(potentialTested)
   useEffect(() => {
     const multiChoiceAmt = 4
     if (answered) {
@@ -167,24 +171,42 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
       const definitionIndex = randomIndexByStrength(obj.definitions, "link")
       const definition = obj.definitions[definitionIndex]
       setDefinitionNo(definitionIndex)
-      const possibleGiven = [
-        obj.word,
-        // definition.definition,
-        // definition.sound,
-        // definition.context,
-        // ...definition.examples
-      ]
-      const possibleTested = [
-        [obj.word, "word"],
-        // [definition.definition, "definition"],
-        // [definition.sound, "sound"]
-      ]
+      const possibleGivenMap = {
+        word: obj.word,
+        definition: definition.definition,
+        sound: definition.sound,
+        context: definition.context,
+        examples: [...definition.examples]
+      }
+      const possibleTestedMap = {
+        word: [obj.word, "word"],
+        definition: [definition.definition, "definition"],
+        sound: [definition.sound, "sound"]
+      }
+      const possibleGiven = []
+      for (const type of Object.keys(possibleGivenMap)) {
+        for (const give of toGive) {
+          console.log(type, give)
+          if (type === give[0] && (give[1] === false)) {
+            possibleGiven.push(possibleGivenMap[type])
+          }
+        }
+      }
+      const possibleTested = []
+      for (const type of Object.keys(possibleTestedMap)) {
+        for (const test of toTest) {
+          if (type === test[0] && (test[1] === false)) {
+            possibleTested.push(possibleTestedMap[type])
+          }
+        }
+      }
+      console.log(possibleGiven)
       const testedIndex = randomIndex(possibleTested.length) 
       const testedDataArr = possibleTested[testedIndex]
       const tested = [testedDataArr[0], testedDataArr[1]]
-      // const isMultiChoice = Math.random() < 0.5
+      const isMultiChoice = Math.random() < 0.5
       // const tested = ['asdf', "word"]
-      const isMultiChoice = true
+      // const isMultiChoice = true
       let renderedTested = []
       const multiChoiceStrings = []
       const selectedType = testedDataArr[1]
@@ -244,32 +266,34 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
     }
   }, [ answered, startedTraining, currentObj ])
   return (
-    <div className={styles.trainWrapper}>
+    <div className={styles.trainWrapper} id='trainWrapper'>
       <button
         className={styles.trainSettingsBtn}
         onClick={() => {
           setOpenedTrain(true)
-          document.addEventListener('mousedown', e => {
+          const func = e => {
             setOpenedTrain(false)
-          })}}>
+            document.getElementById('divCanvas').removeEventListener('mousedown', func)
+          }
+          document.getElementById('divCanvas').addEventListener('mousedown', func)}}>
         train
       </button>
+      <TrainSettings
+        openedTrain={openedTrain}
+        setStartedTraining={setStartedTraining}
+        setFocus={setFocus}
+        setCurrentObj={setCurrentObj}
+        setSelectedObj={setSelectedObj}
+        selectedObj={selectedObj}
+        toGive={toGive}
+        setToGive={setToGive}
+        toTest={toTest}
+        setToTest={setToTest}
+        ></TrainSettings>
       <div
-        className={openedTrain ? styles.trainSettings : styles.none}>
-        <button
-          className={styles.trainBtn}
-          onMouseDown={() => {
-            setStartedTraining(true)
-            setFocus(selectedObj)
-            setCurrentObj(selectedObj)
-            setSelectedObj()
-          }}>
-          start
-        </button>
-      </div>
-      <div
-        className={startedTraining ? styles.divTraining : styles.none}>
-        <p>{trainingCols.given || 'what the heck'}</p>
+        className={startedTraining ? styles.divTraining : styles.none}
+        id='divTraining'>
+        <p>{trainingCols.given || ''}</p>
         <p>{trainingCols.type || ''}</p>
         <div className={styles.divTested}>
           {trainingCols.tested}

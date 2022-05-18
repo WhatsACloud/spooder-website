@@ -65,7 +65,7 @@ function TaskBar({ setInSettings, setModes, modes, setSelectedObj, selectedObj, 
         setSearchVal={setSearchVal}>
         {renderedSearchResults}
       </SearchBar>
-      <Debugger></Debugger>
+      {/* <Debugger></Debugger> */}
       <Train
         selectedObj={selectedObj}
         setSelectedObj={setSelectedObj}
