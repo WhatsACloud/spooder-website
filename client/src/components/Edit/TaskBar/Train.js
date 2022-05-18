@@ -6,25 +6,48 @@ const randomIndex = (length) => {
   return Math.floor((Math.random()*length))
 }
 
+const canTestGivenTst = (tst, trainIterNo) => {
+  console.log(tst, trainIterNo)
+  if (isNaN(tst) || isNaN(trainIterNo)) return false
+  const diff = trainIterNo - tst
+  let place = 1
+  if (diff > 999) {
+    place = 1000
+  } else if (diff > 99) {
+    place = 100
+  } else if (diff > 9) {
+    place = 10
+  }
+  return Math.random() < (Math.ceil(diff / place) * place * 10)
+}
+
 const randomIndexByStrength = (arr, strengthArrName, trainIterNo=null) => {
   // return arr[Math.floor((Math.random()*arr.length))]
   let total = arr.reduce(
     (currentTotal, element) => {
-      return currentTotal + element[strengthArrName]
+      console.log(element)
+      if (canTestGivenTst(element.tst, trainIterNo) || !element.tst) {
+        return currentTotal + element[strengthArrName]
+      }
+      return currentTotal
     },
     0
   )
-  if (total !== 0) {
-    for (let index = arr.length < 2 ? 0 : 1; index < arr.length; index++) {
+  if ((total !== 0) && (arr.length > 1)) {
+    for (let index = 1; index < arr.length; index++) {
       const element = arr[index]
       let strength
+      if (trainIterNo) {
+      } else {
+      }
+      // console.log(trainIterNo, element)
       if (trainIterNo && (element.tst !== undefined)) {
         strength = (
           1
           - (
             Number(element[strengthArrName])
             / (total ? total : 1)
-            / (10 - trainIterNo - element.tst)
+            / (10 + (trainIterNo - element.tst))
           )
         )
       } else {
@@ -47,14 +70,12 @@ const randomIndexByStrength = (arr, strengthArrName, trainIterNo=null) => {
   return arr.length-1
 }
 
-const getOtherBudObjId = (silkObjId, objId) => {
-  const silk = utils.getObjById(silkObjId)
-  console.log(silk, silkObjId, objId) basically it gets the wrong silk i think?
-  let budId = false
-  if (Number(silk.attachedTo1) !== Number(objId)) {
-    budId = silk.attachedTo1
-  } else {
+const getOtherBudObjId = (silk, objId) => {
+  let budId = null
+  if (Number(silk.attachedTo1) === Number(objId)) {
     budId = silk.attachedTo2
+  } else if (Number(silk.attachedTo2) === Number(objId)) {
+    budId = silk.attachedTo1
   }
   return budId
 }
@@ -79,7 +100,6 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
   const [ answered, setAnswered ] = useState(false)
   const [ correct, setCorrect ] = useState(false)
   const [ haveTested, setHaveTested ] = useState([])
-  const [ testTimes, setTestTimes ] = useState()
   useEffect(() => {
     const multiChoiceAmt = 4
     if (answered) {
@@ -89,44 +109,58 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
       if (definition.link < 1 && correct) {
         definition.link += 0.1
       }
+      console.log(currentObj, obj.word)
       const attachedToObjIds = Object.keys(obj.attachedTo) 
-      const attachedTo = attachedToObjIds.splice(
-        randomIndexByStrength(attachedToObjIds.map(e => utils.getObjById(e)), "strength", trainIterNo),
-        1
-      )
-      utils.getObjById(attachedTo).tst = 1
-      let nextBudId = getOtherBudObjId(attachedTo[0], currentObj)
-      console.log(nextBudId, attachedTo, currentObj)
-      if (!nextBudId) {
+      console.log(utils.getObjById(attachedToObjIds[0]))
+      if (attachedToObjIds.length < 2
+        && canTestGivenTst(utils.getObjById(attachedToObjIds[0]).tst, trainIterNo)
+        && notTested.length > 0) {
+        console.log('taking from notTested')
         const newNotTested = [...notTested]
-        const randomTestedIndex = randomIndexByStrength(notTested.map(e => utils.getObjById(e)), "strength", trainIterNo)
+        const randomTestedIndex = randomIndexByStrength(notTested.map(e => utils.getObjById(e.silk)), "strength", trainIterNo)
         const tested = newNotTested.splice(
           randomTestedIndex,
           1
-        )
-        const silk = utils.getObjById(randomTestedIndex)
+        )[0]
+        const silk = utils.getObjById(tested.silk)
         if (silk.strength < 1 && correct) {
           silk.strength += 0.1
         }
+        const toBeObj = getOtherBudObjId(silk, tested.bud)
+        // if (nextBudId in notTested) {
+        //   const newNotTested = [...notTested].filter(e => e !== objId)
+        //   setNotTested(newNotTested)
+        // }
         setNotTested(newNotTested)
-        setCurrentObj(tested)
+        setCurrentObj(toBeObj)
       } else {
-        if (nextBudId in notTested) {
-          const newNotTested = [...notTested].filter(e => e !== objId)
-          setNotTested(newNotTested)
+        console.log('taking from attachedTos')
+        const attachedTo = attachedToObjIds.splice(
+          randomIndexByStrength(attachedToObjIds.map(e => utils.getObjById(e)), "strength", trainIterNo),
+          1
+        )
+        const silk = utils.getObjById(attachedTo[0])
+        silk.tst = trainIterNo
+        if (silk.strength < 1 && correct) {
+          silk.strength += 0.1
         }
+        let nextBudId = getOtherBudObjId(silk, currentObj)
+        const leobj = utils.getObjById(nextBudId)
+        const definitionThing = leobj.definitions[definitionNo]
+        const newNotTested = [...notTested]
+        for (const objId of attachedToObjIds) {
+          if (!(objId in newNotTested)
+            && canTestGivenTst(utils.getObjById(objId).tst, trainIterNo)) {
+            newNotTested.push({"silk": objId, "bud": currentObj})
+          }
+        }
+        setNotTested(newNotTested)
         setCurrentObj(nextBudId)
-      }
-      const newNotTested = [...notTested]
-      for (const objId of attachedToObjIds) {
-        if (!(objId in newNotTested)) {
-          // console.log(`pushed ${objId} into notTested`)
-          newNotTested.push(objId)
-        }
       }
       setAnswered(false)
     }
     if (startedTraining && !(answered)) {
+      console.log(utils.getObjs())
       const obj = utils.getObjById(currentObj)
       const definitionIndex = randomIndexByStrength(obj.definitions, "link")
       const definition = obj.definitions[definitionIndex]
@@ -185,10 +219,8 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
                 key={index}
                 onClick={() => {
                   if (isCorrect) {
-                    console.log('passed!')
                     setCorrect(true)
                   } else {
-                    console.log('fail!')
                     setCorrect(false)
                   }
                   setAnswered(true)
@@ -252,10 +284,8 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
               onClick={() => {
                 const tested = trainingCols.tested
                 if (answer === tested) {
-                  console.log('passed!')
                   setCorrect(true)
                 } else {
-                  console.log('fail!')
                   setCorrect(false)
                 }
                 setAnswered(true)
