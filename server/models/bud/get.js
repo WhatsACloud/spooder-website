@@ -28,7 +28,10 @@ async function getBudsWithinRange(spoodawebId, startPos, endPos) {
           [Op.lt]: endPos[1],
         }
       },
-      fk_spoodaweb_id: spoodawebId
+      fk_spoodaweb_id: spoodawebId,
+      deletedAt: {
+        [Op.is]: null
+      }
     }
   }) 
   return objs
@@ -89,7 +92,10 @@ async function getSpoodaweb(spoodawebId) {
 async function getBudDetails(id) {
   const budDetails = await BudDetails.findAll({
     where: {
-      fk_bud_id: id
+      fk_bud_id: id,
+      deletedAt: {
+        [Op.is]: null
+      }
     }
   }) 
   return budDetails
@@ -98,7 +104,10 @@ async function getBudDetails(id) {
 async function getExamples(id) {
   const examples = Example.findAll({
     where: {
-      fk_budDetails_id: id
+      fk_budDetails_id: id,
+      deletedAt: {
+        [Op.is]: null
+      }
     }
   })
   return examples
@@ -125,7 +134,7 @@ async function get (req, res, next) {
       if (typeof objId === 'number') {
         toResObjs[objId] = {
           word: objData.word,
-          definitions: [],
+          definitions: {},
           position: {
             x: objData.x,
             y: objData.y
@@ -138,29 +147,31 @@ async function get (req, res, next) {
         for (const budDetail of budDetails) {
           const budDetailData = budDetail.dataValues
           const budDetailId = budDetailData.id
+          const budDetailArrId = budDetailData.arrID
           console.log(toResObjs[objId])
-          toResObjs[objId].definitions.push({
+          toResObjs[objId].definitions[budDetailArrId] = {
             sound: '',
             definition: '',
             context: '',
-            examples: [],
+            examples: {},
             link: null
-          })
-          toResObjs[objId].definitions[i].sound = budDetailData.sound
-          toResObjs[objId].definitions[i].definition = budDetailData.definition
-          toResObjs[objId].definitions[i].context = budDetailData.context
-          toResObjs[objId].definitions[i].link = budDetailData.link
-          const examplesObj = []
+          }
+          toResObjs[objId].definitions[budDetailArrId].sound = budDetailData.sound
+          toResObjs[objId].definitions[budDetailArrId].definition = budDetailData.definition
+          toResObjs[objId].definitions[budDetailArrId].context = budDetailData.context
+          toResObjs[objId].definitions[budDetailArrId].link = budDetailData.link
           const examples = await getExamples(budDetailId)
           for (const example of examples) {
-            examplesObj.push(example.dataValues.example)
+            const exampleData = example.dataValues
+            toResObjs[objId].definitions[budDetailArrId].examples[exampleData.arrID] = exampleData.example
           }
-          toResObjs[objId].definitions[i].examples.push(...examplesObj)
-          i++
         }
         const attachedTos = await AttachedTo.findAll({
           where: {
-            fk_bud_id: objData.id
+            fk_bud_id: objData.id,
+            deletedAt: {
+              [Op.is]: null
+            }
           }
         }) 
         for (const attachedTo of attachedTos) {
