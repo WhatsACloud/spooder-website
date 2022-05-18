@@ -7,17 +7,67 @@ const AttachedTo = require('../../databaseModels/BudDetails/AttachedTo')(sequeli
 const error = require('../../middleware/error')
 const Utils = require('./Utils')
 
-async function markForDeletion(objs, t) { // TO DO: add links thingy
-  if (objs === null) throw error.create(`obj either does not exist or has been deleted`, {statusNo: 400})
-  if (Array.isArray(objs)) {
-    let idList = []
-    for (objNo in objs) {
-      const obj = objs[objNo]
-      await obj.update({"deletedAt": Date.now()}, {transaction: t})
-      idList.push(obj.dataValues.id)
+async function findBud(spoodawebId, objId, transaction) {
+  const possibleDbBud = await Bud.findAll({
+    where: {
+      fk_spoodaweb_id: spoodawebId,
+      objId: objId
     }
-    return idList
+  })
+  console.log(possibleDbBud)
+  if (possibleDbBud === null) return false
+  if (possibleDbBud.length > 0) { // self correction system
+    const bud = possibleDbBud.shift()
+    for (const dbBud of possibleDbBud) {
+      dbBud.update({
+        objId: await getNextObjId(spoodawebId)
+      }, {transaction: transaction})
+    }
+    console.log(possibleDbBud)
+    return bud
   }
+  return false
+}
+
+async function findBudDetail(budId, budDetailId, t) {
+  const possibleDbBudDetail = await BudDetails.findAll({
+    where: {
+      fk_bud_id: budId,
+      arrID: budDetailId
+    },
+  }, {transaction: transaction})
+  if (possibleDbBudDetail === null) return false
+  if (possibleDbBudDetail.length > 0) { // self correction system
+    const toReturn = possibleDbBudDetail.shift()
+    for (const dbBud of possibleDbBudDetail) {
+      dbBud.update({
+        objId: await getNextObjId(spoodawebId)
+      }, {transaction: transaction})
+    }
+    console.log(possibleDbBudDetail)
+    return toReturn
+  }
+  return false
+}
+
+async function markForDeletion(obj, t) { // TO DO: add links thingy
+  if (obj === null) throw error.create(`obj either does not exist or has been deleted`, {statusNo: 400})
+  await obj.update({"deletedAt": Date.now()}, {transaction: t})
+}
+
+async function markBudDetailForDeletion(budId, budDetailId, transaction) {
+  const budDetails = await BudDetails.findOne({
+    where: {fk_bud_id: budId, arrID: budDetailId}})
+  console.log(budDetailId, budId, budDetailId)
+  await markForDeletion(budDetails, transaction)
+}
+
+async function markExampleForDeletion(budDetailId, exampleId, transaction) {
+  const example = await Example.findOne({
+    where: {fk_budDetails_id: budDetailId, arrID: exampleId}
+  })
+  console.log(example, budDetailId, exampleId)
+  await markForDeletion(example, transaction)
 }
 
 async function markBudForDeletion(budId, transaction) {
@@ -25,49 +75,10 @@ async function markBudForDeletion(budId, transaction) {
   if (obj === null) throw error.create(`obj either does not exist or has been deleted`, {statusNo: 400})
   if (obj.dataValues.deletedAt !== null) throw error.create(`obj either does not exist or has been deleted`, {statusNo: 400})
   await obj.update({"deletedAt": Date.now()}, {transaction: transaction})
-  const budDetails = await BudDetails.findAll({where: {fk_bud_id: budId}}, {transaction: transaction})
-  const budDetailsIdList = await markForDeletion(budDetails, transaction)
-  for (const budDetailsNo in budDetailsIdList) {
-    const budDetailsId = budDetailsIdList[budDetailsNo]
-    const context = await Context.findAll({where: {fk_bud_details_id: budDetailsId}}, {transaction: transaction})
-    console.log(context)
-    const contextIdList = await markForDeletion(context, transaction)
-    for (const contextIdNo in contextIdList) {
-      const contextId = contextIdList[contextIdNo]
-      const example = await Example.findAll({where: {fk_context_id: contextId}}, {transaction: transaction})
-      await markForDeletion(example, transaction)
-    }
-  }
-}
-
-
-async function findBud(spoodawebId, objId) {
-  console.log(objId, "kill me")
-  const possibleDbBud = await Bud.findAll({
-    where: {
-      fk_spoodaweb_id: spoodawebId,
-      objId: objId
-    }
-  })
-  if (possibleDbBud === null) return false
-  if (possibleDbBud.length > 0) {
-    const dbBuds = [...possibleDbBud]
-    console.log(dbBuds)
-    dbBuds.shift()
-    for (const dbBud of dbBuds) {
-      dbBud.update({
-        objId: await getNextObjId(spoodawebId)
-      })
-    }
-    console.log(possibleDbBud)
-    return possibleDbBud[0] 
-  }
-  return false
 }
 
 async function createBud(spoodawebId, word, objId, position, transaction) {
-  const possibleDbBud = await findBud(spoodawebId, objId)
-  console.log(possibleDbBud)
+  const possibleDbBud = await findBud(spoodawebId, objId, transaction)
   if (possibleDbBud !== false) return false
   const _bud = await Bud.create({
     fk_spoodaweb_id: spoodawebId,
@@ -94,13 +105,20 @@ async function editAttachedTo(budId, attachedTo, transaction) {
       fk_bud_id: budId
     }
   })
-  for (_attachedTo of _attachedTos) {
-    _attachedTo.destroy()
-  }
-  for (const attachedToId of Object.keys(attachedTo)) {
-    const innerIndex = attachedTo[attachedToId]
-    console.log(attachedToId, 'attachedToId')
-    await createAttachedTo(attachedToId, innerIndex, budId, transaction)
+  // for (_attachedTo of _attachedTos) {
+  //   await _attachedTo.destroy({transaction: transaction})
+  // }
+  for (const [ index, attachedToId ] of Object.keys(attachedTo).entries()) {
+    if (_attachedTos[index]) {
+      const innerIndex = attachedTo[attachedToId]
+      _attachedTos[index].update({
+        attachedToId: attachedToId,
+        innerIndex: innerIndex
+      })
+    } else {
+      const innerIndex = attachedTo[attachedToId]
+      await createAttachedTo(attachedToId, innerIndex, budId, transaction)
+    }
   }
   return _attachedTos
 }
@@ -152,15 +170,16 @@ async function editSilk(spoodawebId, positions, strength, objId, attachedTo1, at
   return silk
 }
 
-async function createExample(budDetailsId, example, transaction) {
+async function createExample(budDetailsId, example, arrID, transaction) {
   await Example.create({
     fk_budDetails_id: budDetailsId,
+    arrID: arrID,
     example: example
   }, {transaction: transaction})
 }
 
 async function editBud(spoodawebId, objId, word, position, transaction) {
-  const possibleDbBud = await findBud(spoodawebId, objId)
+  const possibleDbBud = await findBud(spoodawebId, objId, transaction)
   if (possibleDbBud === false) return false 
   const bud = await Bud.findOne({ where: { fk_spoodaweb_id: spoodawebId, objId: objId }})
   if (bud === null) return null 
@@ -175,8 +194,7 @@ async function editBud(spoodawebId, objId, word, position, transaction) {
 async function editBudDetails(budId, id, definition, sound, link, context, transaction) {
   const budDetails = await BudDetails.findOne({ where: { fk_bud_id: budId, arrID: id }})
   if (budDetails === null) {
-    createBudDetails(budId, id, definition, sound, context, link, transaction)
-    return
+    return await createBudDetails(budId, id, definition, sound, context, link, transaction)
   } 
   await budDetails.update({
     definition: definition,
@@ -189,16 +207,20 @@ async function editBudDetails(budId, id, definition, sound, link, context, trans
 
 async function editExamples(budDetailsId, newExamples, transaction) {
   const examples = await Example.findAll({ where: { fk_budDetails_id: budDetailsId }})
-  if (examples === null || examples.length === 0) return null
-  for (let index = 0; index < newExamples.length; index++) {
+  const examplesIds = Object.keys(newExamples)
+  console.log(examples, examplesIds)
+  if (examplesIds.length === 0) return null
+  for (const [ index, newExampleId ] of Object.entries(examplesIds)) {
     const example = examples[index]
-    const newExample = newExamples[index]
+    const newExample = newExamples[newExampleId]
+    console.log(newExampleId, example, newExample)
     if (example !== undefined) {
       await example.update({
-        example: newExample
+        example: newExample,
+        arrID: examplesIds[index]
       }, {transaction: transaction})
     } else {
-      await createExample(budDetailsId, newExample, transaction)
+      await createExample(budDetailsId, newExample, examplesIds[index], transaction)
     }
   }
 }
@@ -208,14 +230,13 @@ const addBud = async (spoodawebId, obj, objId, transaction) => {
   if (_budId === false) throw error.create(`object ${objId-1} (bud) already exists within database.`)
   objId += 1
   const budId = _budId.dataValues.id
-  for (let i = 0; i < obj.definitions.length; i++) {
-    const definition = obj.definitions[i]
-    const _budDetailsId = await createBudDetails(budId, i, definition.definition, definition.sound, definition.context, definition.link, transaction)
+  const definitionIds = Object.keys(obj.definitions)
+  for (const [ index, definitionId ] of Object.entries(definitionIds)) {
+    const definition = obj.definitions[definitionId]
+    const _budDetailsId = await createBudDetails(budId, definitionId, definition.definition, definition.sound, definition.context, definition.link, transaction)
     const budDetailsId = _budDetailsId.dataValues.id
     const examples = definition.examples
-    for (const example of examples) {
-      await createExample(budDetailsId, example, transaction)
-    }
+    await editExamples(budDetailsId, examples, transaction)
   }
   let i = 0
   for (const attachedToId of Object.keys(obj.attachedTo)) {
@@ -239,7 +260,7 @@ const completeEditBud = async (spoodawebId, clientObjId, objId, obj, transaction
     const definition = obj.definitions[i]
     const _budDetailsId = await editBudDetails(budId, i, definition.definition, definition.sound, definition.link, definition.context, transaction)
     if (_budDetailsId === null) throw error.create('details does not exist')
-    console.log(definition)
+    console.log(_budDetailsId)
     await editExamples(_budDetailsId.dataValues.id, definition.examples, transaction)
   }
   console.log(obj.attachedTo, 'attachedTo')
@@ -255,11 +276,27 @@ module.exports = { // please add support for positions, budId
       const spoodawebId = req.body.spoodawebId
       transaction = await sequelize.transaction()
       let objId = await Utils.getNextObjId(spoodawebId)
-      for (const clientObjId in data) {
-        const obj = data[clientObjId]
+      for (const [ clientObjId, obj ] of Object.entries(data)) {
         switch (obj.operation) {
           case "sub":
-            await markBudForDeletion(clientObjId, transaction)
+            if (obj.del === "bud") {
+              await markBudForDeletion(clientObjId, transaction)
+            } else if (obj.del === "other") {
+              const bud = await findBud(req.body.spoodawebId, clientObjId, transaction)
+              const budId = bud.dataValues.id
+              for (const definitionId of Object.keys(obj.definitions)) {
+                if (obj.definitions[definitionId] === null) {
+                  // console.log("budDetail", budId, definitionId)
+                  await markBudDetailForDeletion(budId, definitionId, transaction)
+                } else {
+                  const examples = obj.definitions[definitionId]
+                  for (const example of examples) {
+                    await markExampleForDeletion(definitionId, example, transaction)
+                  }
+                }
+              }
+            }
+            break
           case "edit":
             switch (obj.type) {
               case "bud":

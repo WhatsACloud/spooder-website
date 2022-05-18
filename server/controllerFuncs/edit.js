@@ -20,7 +20,6 @@ module.exports = {
           case undefined:
             return next(error.create(errMsg))
           case 'sub':
-            if (bud.data.id === undefined) return next(error.create(errMsg))
             break
         }
         next()
