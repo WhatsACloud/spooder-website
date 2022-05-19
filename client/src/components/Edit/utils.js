@@ -63,6 +63,18 @@ const getNextObjId = () => {
 }
 export { getNextObjId as getNextObjId }
 
+const getNextHighestAttr = (arr, attrName) => {
+  const attrs = []
+  for (const e of arr) {
+    attrs.push(e[attrName])
+  }
+  if (attrs.length > 0) {
+    const result = Math.max(...attrs)
+    if (!isNaN(result)) return result+1
+  } else return 0
+}
+export { getNextHighestAttr }
+
 const updateNewObjs = (objId, obj) => {
   const mainLayer = getMainLayer()
   const newObjs = mainLayer.getAttr('newObjs')

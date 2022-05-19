@@ -6,7 +6,8 @@ const budSample = {
       "sound": "",
       "context": "",
       "examples": [],
-      "link": 0 
+      "link": 0,
+      "arrID": 0
     }
   ],
   "attachedTo": [],
@@ -14,8 +15,7 @@ const budSample = {
   "type": "bud", // bud silk
   "operation": 'add' // add edit minus, default add,
 }
-
-export { budSample as budSample }
+export { budSample }
 
 const silkSample = {
   "positions": [],

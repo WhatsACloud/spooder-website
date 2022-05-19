@@ -2,6 +2,26 @@ import React, { useEffect, useState } from 'react'
 import styles from './select.module'
 import * as utils from '../utils'
 
+import { budSample } from '../spoodawebSampleData'
+
+const definitionSample = {
+  "definition": "",
+  "sound": "",
+  "context": "",
+  "examples": [],
+  "link": 0,
+  "arrID": null
+}
+
+const newDefinition = (objId) => {
+  const nextArrID = utils.getNextHighestAttr(utils.getObjById(objId).definitions, 'arrID')
+  const obj = utils.getObjById(objId)
+  const index = obj.definitions.length
+  obj.definitions.push({...budSample.definitions[0]})
+  console.log(obj.definitions)
+  obj.definitions[index].arrID = nextArrID
+}
+
 function BudAttr({ id, placeholder, style, data, onChange }) {
   return (
     <div
@@ -18,7 +38,7 @@ function BudAttr({ id, placeholder, style, data, onChange }) {
   ) 
 }
 
-const budSample = {
+const otherBudSample = {
   "name": "gay",
   "definitions": [
     {
@@ -65,7 +85,10 @@ const handleInputChange = (e, type, renderData, setRenderData, id, definitionNo=
 
 const addExample = (setRenderData, renderData, objId, definitionNo) => {
   const obj = utils.getObjById(objId)
-  obj.definitions[definitionNo].examples.push(renderData.newExample)
+  obj.definitions[definitionNo].examples.push({
+    text: renderData.newExample,
+    arrID: utils.getNextHighestAttr(obj.definitions, 'arrID')
+  })
   setRenderData({
     ...renderData,
     "newExample": ''
@@ -75,7 +98,6 @@ const addExample = (setRenderData, renderData, objId, definitionNo) => {
 function BudView({ selectedObj }) {
   const [ canRender, setCanRender ] = useState(false)
   const [ definitionNo, setDefinitionNo ] = useState(0)
-  const [ totalDefinitionNo, setTotalDefinitionNo ] = useState()
   const [ renderedExamples, setRenderedExamples ] = useState()
   const originalRenderData = {
     word: '',
@@ -85,6 +107,7 @@ function BudView({ selectedObj }) {
     newExample: ''
   }
   const [ renderData, setRenderData ] = useState(originalRenderData)
+  const [ triggerRerender, setTriggerRerender ] = useState(false)
   const handleInputChangeWrapper = (type) => {
     return (e) => handleInputChange(e, type, renderData, setRenderData, selectedObj, definitionNo)
   }
@@ -95,7 +118,6 @@ function BudView({ selectedObj }) {
     // const obj = budSample
     if (obj && obj.type === 'bud') {
       setCanRender(true)
-      setTotalDefinitionNo(obj.definitions.length-1)
       // console.log(obj, selectedObj)
       // console.log(utils.getObjs())
       const currentDefinitionObj = obj.definitions[definitionNo]
@@ -113,9 +135,9 @@ function BudView({ selectedObj }) {
           <>
             <textarea
               placeholder='insert example'
-              key={index}
+              key={example.arrID}
               name={`example${index}`}
-              value={example}
+              value={example.text}
               onChange={handleInputChangeWrapper('example')}
               className={styles.example}></textarea>
           </>
@@ -123,18 +145,18 @@ function BudView({ selectedObj }) {
       })
       setRenderedExamples(examplesRender)
     }
-  }, [ selectedObj, definitionNo ])
+  }, [ selectedObj, definitionNo, triggerRerender ])
   const subDefinitionNo = () => {
     console.log('sub')
-    console.log(definitionNo, totalDefinitionNo)
+    console.log(definitionNo)
     if (definitionNo-1 < 0) {
-      setDefinitionNo(totalDefinitionNo)
+      setDefinitionNo(utils.getObjById(selectedObj).definitions.length-1)
       return
     }
     setDefinitionNo(definitionNo-1)
   }
   const addDefinitionNo = () => {
-    if (definitionNo+1 > totalDefinitionNo) {
+    if (definitionNo+1 > utils.getObjById(selectedObj).definitions.length-1) {
       setDefinitionNo(0)
       return
     }
@@ -156,6 +178,7 @@ function BudView({ selectedObj }) {
           onChange={handleInputChangeWrapper('definition')}
           placeholder='definition'
           style={styles.definition}></BudAttr>
+        <button onClick={e => newDefinition(selectedObj)}>newDefinition</button>
         <button onClick={addDefinitionNo}>a</button>
       </div>
       <BudAttr
@@ -186,7 +209,10 @@ function BudView({ selectedObj }) {
             className={styles.example}></textarea>
           <button
             className={styles.addExampleBtn}
-            onClick={() => addExample(setRenderData, renderData, selectedObj, definitionNo)}>
+            onClick={() => {
+              addExample(setRenderData, renderData, selectedObj, definitionNo)
+              setTriggerRerender(!triggerRerender)
+            }}>
               Add example
             </button>
         </div>

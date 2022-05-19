@@ -29,8 +29,10 @@ const randomIndexByStrength = (arr, strengthArrName, trainIterNo=null) => {
   // return arr[Math.floor((Math.random()*arr.length))]
   let total = arr.reduce(
     (currentTotal, element) => {
-      if (canTestGivenTst(element.tst, trainIterNo, "frick") || !element.tst) {
-        return currentTotal + element[strengthArrName]
+      if (element) {
+        if (canTestGivenTst(element.tst, trainIterNo, "frick") || !element.tst) {
+          return currentTotal + element[strengthArrName]
+        }
       }
       return currentTotal
     },
@@ -141,6 +143,7 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
         setCurrentObj(toBeObj)
       } else {
         console.log('taking from attachedTos')
+        console.log(attachedToObjIds.map(e => utils.getObjById(e)))
         const attachedTo = attachedToObjIds.splice(
           randomIndexByStrength(attachedToObjIds.map(e => utils.getObjById(e)), "strength", trainIterNo),
           1
