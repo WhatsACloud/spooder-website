@@ -22,12 +22,12 @@
 }
 
 div.BudView {
-  $minWidth: 600px;
+  $minWidth: 60%;
   $leftMargin: calc(100% - #{$minWidth});
   display: flex;
   position: absolute;
   margin-left: $leftMargin;
-  z-index: 5;
+  z-index: 6;
   box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   height: 100vh;
   min-width: $minWidth;
@@ -77,6 +77,29 @@ div.BudView {
     &.divWord {
       display: flex;
       flex-direction: row;
+      div.outerBudMenuDiv {
+        z-index: 2;
+        position: absolute;
+        margin-top: 30px;
+        margin-left: 75%;
+        button.more {
+          $width: 40px;
+          @include std-button;
+          width: $width;
+          height: $width;
+        }
+        div.budMenu {
+          background-color: white;
+          box-shadow: 0 5px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+          border-radius: 7.5px;
+          button {
+            &.deleteBtn {
+              @include std-button;
+            }
+          }
+        }
+
+      }
     }
   }
 }

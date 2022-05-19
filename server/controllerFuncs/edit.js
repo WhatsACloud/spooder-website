@@ -7,25 +7,24 @@ const errMsg = 'The data received is invalid. This is probably a client side err
 module.exports = {
   async validate (req, res, next) {
     try {
-      if (!req.body.spoodawebId) return next(error.create(errMsg))
+      if (!req.body.spoodawebId) throw next(error.create(errMsg))
       const spoodaweb = await Spoodaweb.findOne({
         where: {id: req.body.spoodawebId}
       })
-      if (spoodaweb === null) return next(error.create('The spoodaweb you are editing does not exist within the database, or there is a client side error.'))
+      if (spoodaweb === null) throw next(error.create('The spoodaweb you are editing does not exist within the database, or there is a client side error.'))
       let data = req.body.spoodawebData
-      if (data === undefined) return next(error.create(errMsg))
+      if (data === undefined) throw next(error.create(errMsg))
       for (const budName in data) {
         const bud = data[budName]
         switch (bud.operation) {
           case undefined:
-            return next(error.create(errMsg))
+            throw next(error.create(errMsg))
           case 'sub':
             break
         }
         next()
       }
     } catch(err) {
-      
       next(err)
     }
   },

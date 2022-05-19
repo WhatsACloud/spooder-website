@@ -2,7 +2,12 @@ import React, { useEffect, useState } from 'react'
 import styles from './select.module'
 import * as utils from '../utils'
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEllipsis } from '@fortawesome/free-solid-svg-icons'
+
 import { budSample } from '../spoodawebSampleData'
+
+import { BackgroundClickDetector } from '../../BackgroundClickDetector'
 
 const definitionSample = {
   "definition": "",
@@ -95,6 +100,46 @@ const addExample = (setRenderData, renderData, objId, definitionNo) => {
   })
 }
 
+function MoreBtn({ budId, definitionNo }) {
+  const [ clicked, setClicked ] = useState(false)
+  return (
+    <>
+      <BackgroundClickDetector on={clicked} zIndex={1}></BackgroundClickDetector>
+      <div className={styles.outerBudMenuDiv}>
+        <button
+          className={styles.more}
+          onClick={e => {
+            setClicked(!clicked)
+            const func = e => {
+              setClicked(false)
+              document.getElementById('backClickDetect').removeEventListener("mousedown", func)
+            }
+            document.getElementById('backClickDetect').addEventListener("mousedown", func)
+          }}>
+          <FontAwesomeIcon icon={faEllipsis}/>
+        </button>
+        <div className={clicked ? styles.budMenu : styles.none}>
+          <button className={styles.deleteBtn}
+            onClick={e => {
+              const obj = JSON.parse(JSON.stringify(utils.getObjById(budId)))
+              obj.operation = 'sub'
+              obj.del = 'bud'
+              utils.updateNewObjs(budId, obj)
+            }}>delete bud</button>
+          <button className={styles.deleteBtn}
+            onClick={e => {
+              const obj = JSON.parse(JSON.stringify(utils.getObjById(budId)))
+              obj.operation = 'sub'
+              obj.del = 'other'
+              obj.definitions[definitionNo] = null
+              utils.updateNewObjs(budId, obj)
+            }}>delete definition</button>
+        </div>
+      </div>
+    </>
+  )
+}
+
 function BudView({ selectedObj }) {
   const [ canRender, setCanRender ] = useState(false)
   const [ definitionNo, setDefinitionNo ] = useState(0)
@@ -140,6 +185,14 @@ function BudView({ selectedObj }) {
               value={example.text}
               onChange={handleInputChangeWrapper('example')}
               className={styles.example}></textarea>
+            <button className={styles.deleteBtn}
+              onClick={e => {
+                const obj = JSON.parse(JSON.stringify(utils.getObjById(selectedObj)))
+                obj.operation = 'sub'
+                obj.del = 'other'
+                obj.definitions[definitionNo].examples.push(example.arrID)
+                utils.updateNewObjs(budId, obj)
+              }}>delete example</button>
           </>
         )
       })
@@ -163,62 +216,64 @@ function BudView({ selectedObj }) {
     setDefinitionNo(definitionNo+1)
   }
   return (
-    <div className={canRender ? styles.BudView : styles.none} id='BudView'>
-      <BudAttr
-        id='word'
-        data={renderData.word}
-        onChange={handleInputChangeWrapper('word')}
-        placeholder='insert word'></BudAttr>
-      <div
-        className={styles.divWord}>
-        <button onClick={subDefinitionNo}>a</button>
+    <>
+      <div className={canRender ? styles.BudView : styles.none} id='BudView'>
         <BudAttr
-          id='definition'
-          data={renderData.definition}
-          onChange={handleInputChangeWrapper('definition')}
-          placeholder='definition'
-          style={styles.definition}></BudAttr>
-        <button onClick={e => newDefinition(selectedObj)}>newDefinition</button>
-        <button onClick={addDefinitionNo}>a</button>
-      </div>
-      <BudAttr
-        id='sound'
-        data={renderData.sound}
-        onChange={handleInputChangeWrapper('sound')}
-        placeholder='sound'
-        style={styles.sound}></BudAttr>
-      <div
-        id='context'
-        className={styles.attrBox}>
-        <textarea
-          name='context'
-          placeholder='context'
-          value={renderData.context}
-          onChange={handleInputChangeWrapper('context')}
-          className={styles.context}></textarea>
-      </div>
-      <div
-        id='examples'
-        className={styles.examplesBox}>
-        <div className={styles.divNewExample}>
-          <textarea
-            placeholder='insert example'
-            name={`newExample`}
-            value={renderData.newExample}
-            onChange={handleInputChangeWrapper('newExample')}
-            className={styles.example}></textarea>
-          <button
-            className={styles.addExampleBtn}
-            onClick={() => {
-              addExample(setRenderData, renderData, selectedObj, definitionNo)
-              setTriggerRerender(!triggerRerender)
-            }}>
-              Add example
-            </button>
+          id='word'
+          data={renderData.word}
+          onChange={handleInputChangeWrapper('word')}
+          placeholder='insert word'></BudAttr>
+        <div className={styles.divWord}>
+          <button onClick={subDefinitionNo}>a</button>
+          <BudAttr
+            id='definition'
+            data={renderData.definition}
+            onChange={handleInputChangeWrapper('definition')}
+            placeholder='definition'
+            style={styles.definition}></BudAttr>
+          <MoreBtn budId={selectedObj} definitionNo={definitionNo}></MoreBtn>
+          {/* <button onClick={e => newDefinition(selectedObj)}>newDefinition</button> */}
+          <button onClick={addDefinitionNo}>a</button>
         </div>
-        {renderedExamples}
+        <BudAttr
+          id='sound'
+          data={renderData.sound}
+          onChange={handleInputChangeWrapper('sound')}
+          placeholder='sound'
+          style={styles.sound}></BudAttr>
+        <div
+          id='context'
+          className={styles.attrBox}>
+          <textarea
+            name='context'
+            placeholder='context'
+            value={renderData.context}
+            onChange={handleInputChangeWrapper('context')}
+            className={styles.context}></textarea>
+        </div>
+        <div
+          id='examples'
+          className={styles.examplesBox}>
+          <div className={styles.divNewExample}>
+            <textarea
+              placeholder='insert example'
+              name={`newExample`}
+              value={renderData.newExample}
+              onChange={handleInputChangeWrapper('newExample')}
+              className={styles.example}></textarea>
+            <button
+              className={styles.addExampleBtn}
+              onClick={() => {
+                addExample(setRenderData, renderData, selectedObj, definitionNo)
+                setTriggerRerender(!triggerRerender)
+              }}>
+                Add example
+              </button>
+          </div>
+          {renderedExamples}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 export { BudView }

@@ -20,7 +20,7 @@ const editSpoodawebModel = require('../models/bud')
 
 router.post(
   '/edit',
-  edit.validate,
+  // edit.validate,
   jwtToken.authenticateToken,
   editSpoodawebModel.edit,
   edit.end,

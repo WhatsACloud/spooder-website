@@ -19,7 +19,6 @@ async function getNextObjId(spoodawebId) {
     objId = highestSilkObjId
   }
   objId = Number(objId)
-  console.log(objId, "what the heck")
   if (objId === null || isNaN(objId)) {
     objId = 0
   } else {
