@@ -207,20 +207,17 @@ async function editBudDetails(budId, id, definition, sound, link, context, trans
 
 async function editExamples(budDetailsId, newExamples, transaction) {
   const examples = await Example.findAll({ where: { fk_budDetails_id: budDetailsId }})
-  const examplesIds = Object.keys(newExamples)
-  console.log(examples, examplesIds)
-  if (examplesIds.length === 0) return null
-  for (const [ index, newExampleId ] of Object.entries(examplesIds)) {
+  if (newExamples.length === 0) return null
+  for (const [ index, newExample ] of Object.entries(newExamples)) {
     const example = examples[index]
-    const newExample = newExamples[newExampleId]
-    console.log(newExampleId, example, newExample)
+    console.log(newExample.arrID, example, newExample)
     if (example !== undefined) {
       await example.update({
-        example: newExample,
-        arrID: examplesIds[index]
+        example: newExample.text,
+        arrID: newExample.arrID
       }, {transaction: transaction})
     } else {
-      await createExample(budDetailsId, newExample, examplesIds[index], transaction)
+      await createExample(budDetailsId, newExample.text, newExample.arrID, transaction)
     }
   }
 }
@@ -230,10 +227,9 @@ const addBud = async (spoodawebId, obj, objId, transaction) => {
   if (_budId === false) throw error.create(`object ${objId-1} (bud) already exists within database.`)
   objId += 1
   const budId = _budId.dataValues.id
-  const definitionIds = Object.keys(obj.definitions)
-  for (const [ index, definitionId ] of Object.entries(definitionIds)) {
-    const definition = obj.definitions[definitionId]
-    const _budDetailsId = await createBudDetails(budId, definitionId, definition.definition, definition.sound, definition.context, definition.link, transaction)
+  const definitionIds = obj.definitions
+  for (const definition of definitionIds) {
+    const _budDetailsId = await createBudDetails(budId, definition.arrID, definition.definition, definition.sound, definition.context, definition.link, transaction)
     const budDetailsId = _budDetailsId.dataValues.id
     const examples = definition.examples
     await editExamples(budDetailsId, examples, transaction)
@@ -247,23 +243,17 @@ const addBud = async (spoodawebId, obj, objId, transaction) => {
 }
 
 const completeEditBud = async (spoodawebId, clientObjId, objId, obj, transaction) => {
-  console.log("why are you doing this", obj)
   const bud = await editBud(spoodawebId, clientObjId, obj.word, obj.position, transaction)
   if (bud === false) {
-    console.log('whyyylkdsdfksadfkslfkjelfjf')
     return false
   }
-  console.log(bud)
   const budId = bud.dataValues.id
   console.log(obj.definitions)
-  for (const i in obj.definitions) {
-    const definition = obj.definitions[i]
-    const _budDetailsId = await editBudDetails(budId, i, definition.definition, definition.sound, definition.link, definition.context, transaction)
+  for (const definition of obj.definitions) {
+    const _budDetailsId = await editBudDetails(budId, definition.arrID, definition.definition, definition.sound, definition.link, definition.context, transaction)
     if (_budDetailsId === null) throw error.create('details does not exist')
-    console.log(_budDetailsId)
     await editExamples(_budDetailsId.dataValues.id, definition.examples, transaction)
   }
-  console.log(obj.attachedTo, 'attachedTo')
   await editAttachedTo(budId, obj.attachedTo, transaction)
 }
 

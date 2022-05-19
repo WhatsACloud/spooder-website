@@ -80,9 +80,11 @@ async function getUser(id) {
   return user
 }
 
-async function getSpoodaweb(spoodawebId) {
+async function getSpoodaweb(userId, spoodawebId) {
+  console.log('xue hua zhe piao piao', spoodawebId)
   const spoodaweb = await Spoodaweb.findOne({
     where: {
+      fk_user_id: userId,
       id: spoodawebId
     }
   })
@@ -120,11 +122,11 @@ async function get (req, res, next) {
     const startPos = req.body.startPos
     const endPos = req.body.endPos
     const user = (await getUser(req.body.jwtTokenData.userId))
-    if (!user) return error.create('user does not exist')
+    if (!user) throw error.create('user does not exist')
     const userId = user.dataValues.id
-    const spoodaweb = await getSpoodaweb(req.body.spoodawebId)
-    if (spoodaweb === null) return error.create('spoodaweb does not exist')
-    if (!(userId === spoodaweb.dataValues.fk_user_id)) return error.create('requested spoodaweb is not under user')
+    const spoodaweb = await getSpoodaweb(userId, req.body.spoodawebId)
+    if (spoodaweb === null) throw error.create('spoodaweb does not exist')
+    // if (!(userId === spoodaweb.dataValues.fk_user_id)) throw error.create('requested spoodaweb is not under user')
     const spoodawebId = spoodaweb.dataValues.id
     const dbBudObjs = await getBudsWithinRange(spoodawebId, startPos, endPos)
     console.log(dbBudObjs)
@@ -134,7 +136,7 @@ async function get (req, res, next) {
       if (typeof objId === 'number') {
         toResObjs[objId] = {
           word: objData.word,
-          definitions: {},
+          definitions: [],
           position: {
             x: objData.x,
             y: objData.y
@@ -143,27 +145,31 @@ async function get (req, res, next) {
           type: "bud"
         }
         const budDetails = await getBudDetails(objData.id)
-        let i = 0
         for (const budDetail of budDetails) {
           const budDetailData = budDetail.dataValues
           const budDetailId = budDetailData.id
-          const budDetailArrId = budDetailData.arrID
           console.log(toResObjs[objId])
-          toResObjs[objId].definitions[budDetailArrId] = {
+          toResObjs[objId].definitions.push({
             sound: '',
             definition: '',
             context: '',
-            examples: {},
-            link: null
-          }
-          toResObjs[objId].definitions[budDetailArrId].sound = budDetailData.sound
-          toResObjs[objId].definitions[budDetailArrId].definition = budDetailData.definition
-          toResObjs[objId].definitions[budDetailArrId].context = budDetailData.context
-          toResObjs[objId].definitions[budDetailArrId].link = budDetailData.link
+            examples: [],
+            link: null,
+            arrID: null
+          })
+          const index = toResObjs[objId].definitions.length-1
+          toResObjs[objId].definitions[index].sound = budDetailData.sound
+          toResObjs[objId].definitions[index].definition = budDetailData.definition
+          toResObjs[objId].definitions[index].context = budDetailData.context
+          toResObjs[objId].definitions[index].link = budDetailData.link
+          toResObjs[objId].definitions[index].arrID = budDetailData.arrID
           const examples = await getExamples(budDetailId)
-          for (const example of examples) {
+          for (const [ exampleIndex, example ] of Object.entries(examples)) {
             const exampleData = example.dataValues
-            toResObjs[objId].definitions[budDetailArrId].examples[exampleData.arrID] = exampleData.example
+            toResObjs[objId].definitions[index].examples.push({
+              text: exampleData.example,
+              arrID: exampleData.arrID
+            })
           }
         }
         const attachedTos = await AttachedTo.findAll({

@@ -78,12 +78,12 @@ function BudView({ selectedObj }) {
   const [ totalDefinitionNo, setTotalDefinitionNo ] = useState()
   const [ renderedExamples, setRenderedExamples ] = useState()
   const originalRenderData = {
-      word: '',
-      definition: '',
-      sound: '',
-      context: '',
-      newExample: ''
-    }
+    word: '',
+    definition: '',
+    sound: '',
+    context: '',
+    newExample: ''
+  }
   const [ renderData, setRenderData ] = useState(originalRenderData)
   const handleInputChangeWrapper = (type) => {
     return (e) => handleInputChange(e, type, renderData, setRenderData, selectedObj, definitionNo)

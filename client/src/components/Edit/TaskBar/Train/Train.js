@@ -90,7 +90,7 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
   silks, not buds.
   */
   const [ currentObj, setCurrentObj ] = useState()
-  const [ openedTrain, setOpenedTrain ] = useState(true)
+  const [ openedTrain, setOpenedTrain ] = useState(false)
   const [ startedTraining, setStartedTraining ] = useState(false)
   const [ trainingCols, setTrainingCols, ] = useState({
     given: '',
