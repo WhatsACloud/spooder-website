@@ -13,11 +13,12 @@ const setSilk = (setObjsToUpdate, details) => {
       line[name] = detail
     }
   }
+  line.initialised = true // used for the history, such that program identifies it as just added
   setObjsToUpdate({[nextObjId]: line})
   utils.updateNewObjs(nextObjId, line, true)
   utils.setNextObjId(nextObjId+1)
 }
-export { setSilk as setSilk }
+export { setSilk }
 
 const startDragLine = (e, setSelectedSilk, objId, innerIndex, toggleCanDragLine) => {
   if (e.button === 0 && utils.isInCanvas({x: e.pageX, y: e.pageY})) {

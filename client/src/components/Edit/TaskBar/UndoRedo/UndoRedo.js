@@ -20,8 +20,8 @@ const undo = () => {
   if (historyIndex >= 0) {
     const history = getHistory()
     const last = history[historyIndex]
-    last.undo()
     setHistoryIndex(historyIndex-1)
+    last.undo(undo)
   }
 }
 
@@ -30,8 +30,8 @@ const redo = () => {
   const history = getHistory()
   const last = history[historyIndex+1]
   if (last) {
-    last.redo()
     setHistoryIndex(historyIndex+1)
+    last.redo(redo)
   }
 }
 
