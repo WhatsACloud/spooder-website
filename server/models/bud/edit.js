@@ -70,8 +70,8 @@ async function markExampleForDeletion(budDetailId, exampleId, transaction) {
   await markForDeletion(example, transaction)
 }
 
-async function markBudForDeletion(budId, transaction) {
-  const obj = await Bud.findOne({where: {id: budId}}, {transaction, transaction})
+async function markBudForDeletion(spoodawebId, budId, transaction) {
+  const obj = await Bud.findOne({where: {fk_spoodaweb_id: spoodawebId, objId: budId}}, {transaction, transaction})
   if (obj === null) throw error.create(`obj either does not exist or has been deleted`, {statusNo: 400})
   if (obj.dataValues.deletedAt !== null) throw error.create(`obj either does not exist or has been deleted`, {statusNo: 400})
   await obj.update({"deletedAt": Date.now()}, {transaction: transaction})
@@ -250,21 +250,26 @@ const addBud = async (spoodawebId, obj, objId, transaction) => {
 }
 
 const completeEditBud = async (spoodawebId, clientObjId, objId, obj, transaction) => {
-  const bud = await editBud(spoodawebId, clientObjId, obj.word, obj.position, transaction)
-  if (bud === false) {
-    return false
-  }
-  const budId = bud.dataValues.id
-  for (const definition of obj.definitions) {
-    if (!definition.del) {
-      const _budDetailsId = await editBudDetails(budId, definition.arrID, definition.definition, definition.sound, definition.link, definition.context, transaction)
-      if (_budDetailsId === null) throw error.create('details does not exist')
-      await editExamples(_budDetailsId.dataValues.id, definition.examples, transaction)
-    } else {
-      await markBudDetailForDeletion(budId, definition.arrID, transaction)
+  if (!obj.del) {
+    const bud = await editBud(spoodawebId, clientObjId, obj.word, obj.position, transaction)
+    if (bud === false) {
+      return false
     }
+    const budId = bud.dataValues.id
+    for (const definition of obj.definitions) {
+      if (!definition.del) {
+        const _budDetailsId = await editBudDetails(budId, definition.arrID, definition.definition, definition.sound, definition.link, definition.context, transaction)
+        if (_budDetailsId === null) throw error.create('details does not exist')
+        await editExamples(_budDetailsId.dataValues.id, definition.examples, transaction)
+      } else {
+        await markBudDetailForDeletion(budId, definition.arrID, transaction)
+      }
+    }
+    await editAttachedTo(budId, obj.attachedTo, transaction)
+  } else {
+    console.log(clientObjId)
+    await markBudForDeletion(spoodawebId, clientObjId, transaction)
   }
-  await editAttachedTo(budId, obj.attachedTo, transaction)
 }
 
 module.exports = { // please add support for positions, budId
@@ -277,24 +282,6 @@ module.exports = { // please add support for positions, budId
       transaction = await sequelize.transaction()
       let objId = await Utils.getNextObjId(spoodawebId)
       for (const [ clientObjId, obj ] of Object.entries(data)) {
-        // if (obj.del) {
-        //   if (obj.del === "bud") {
-        //     await markBudForDeletion(clientObjId, transaction)
-        //   } else if (obj.del === "other") {
-        //     const bud = await findBud(req.body.spoodawebId, clientObjId, transaction)
-        //     const budId = bud.dataValues.id
-        //     for (const definitionId of Object.keys(obj.definitions)) {
-        //       if (obj.definitions[definitionId] === null) {
-        //         await markBudDetailForDeletion(budId, definitionId, transaction)
-        //       } else if (obj.definitions[definitionId].arrID === undefined) {
-        //         const examples = obj.definitions[definitionId]
-        //         for (const example of examples) {
-        //           await markExampleForDeletion(definitionId, example.arrID, transaction)
-        //         }
-        //       }
-        //     }
-        //   }
-        // }
         switch (obj.type) {
           case "bud":
             const bud = await completeEditBud(spoodawebId, clientObjId, objId, obj, transaction)

@@ -12,8 +12,7 @@ const budSample = {
   ],
   "attachedTo": [],
   "position": {},
-  "type": "bud", // bud silk
-  "operation": 'add' // add edit minus, default add,
+  "type": "bud" // bud silk
 }
 export { budSample }
 
@@ -23,8 +22,7 @@ const silkSample = {
   "objId": null,
   "attachedTo1": null,
   "attachedTo2": null,
-  "type": "silk",
-  "operation": 'add'
+  "type": "silk"
 }
 
 export { silkSample as silkSample }

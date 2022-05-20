@@ -69,8 +69,7 @@ const otherBudSample = {
   ],
   "attachedTo": [],
   "position": {},
-  "type": "bud", // bud silk
-  "operation": 'add' // add edit minus, default add,
+  "type": "bud" // bud silk
 }
 
 const handleInputChange = (e, type, renderData, setRenderData, id, definitionNo=0) => {
@@ -100,7 +99,11 @@ const addExample = (setRenderData, renderData, objId, definitionNo) => {
   })
 }
 
-function MoreBtn({ budId, definitionNo }) {
+const getOtherDef = (obj) => {
+  return obj.definitions.length-1
+}
+
+function MoreBtn({ budId, setDefinitionNo, definitionNo, setSelectedObj }) {
   const [ clicked, setClicked ] = useState(false)
   return (
     <>
@@ -121,28 +124,40 @@ function MoreBtn({ budId, definitionNo }) {
         <div className={clicked ? styles.budMenu : styles.none}>
           <button className={styles.deleteBtn}
             onClick={e => {
-              const obj = JSON.parse(JSON.stringify(utils.getObjById(budId)))
-              obj.operation = 'sub'
-              obj.del = 'bud'
-              utils.updateNewObjs(budId, obj)
+              utils.getKonvaObjById(budId).destroy()
+              utils.updateObj(budId, {del: true}) // pls make thing ignore bud that has del attr
+              setSelectedObj()
             }}>delete bud</button>
           <button className={styles.deleteBtn}
             onClick={e => {
-              const obj = JSON.parse(JSON.stringify(utils.getObjById(budId)))
-              obj.operation = 'sub'
-              obj.del = 'other'
-              obj.definitions[definitionNo] = null
-              utils.updateNewObjs(budId, obj)
+              const obj = utils.getObjById(budId)
+              const newDef = obj.definitions.splice(definitionNo, 1)[0]
+              newDef.del = true
+              utils.updateObj(budId, {
+                definitions: [
+                  ...obj.definitions,
+                  newDef
+                ]
+              })
+              // setTriggerRerender(!triggerRerender)
+              setDefinitionNo(getOtherDef(utils.getObjById(budId)))
             }}>delete definition</button>
+          <button
+            className={styles.newDefinition}
+            onClick={e => {
+              newDefinition(budId)
+              setDefinitionNo(getOtherDef(utils.getObjById(budId)))
+            }}>New definition</button>
         </div>
       </div>
     </>
   )
 }
 
-function BudView({ selectedObj }) {
+function BudView({ selectedObj, setSelectedObj }) {
   const [ canRender, setCanRender ] = useState(false)
   const [ definitionNo, setDefinitionNo ] = useState(0)
+  const [ totalDefinitionNo, setTotalDefinitionNo ] = useState()
   const [ renderedExamples, setRenderedExamples ] = useState()
   const originalRenderData = {
     word: '',
@@ -157,14 +172,12 @@ function BudView({ selectedObj }) {
     return (e) => handleInputChange(e, type, renderData, setRenderData, selectedObj, definitionNo)
   }
   useEffect(() => {
-    // selectedObj = 6
     if (!selectedObj) setRenderData(originalRenderData); setCanRender(false)
     const obj = utils.getObjById(selectedObj)
-    // const obj = budSample
     if (obj && obj.type === 'bud') {
+      setTotalDefinitionNo(getOtherDef(utils.getObjById(selectedObj)))
       setCanRender(true)
-      // console.log(obj, selectedObj)
-      // console.log(utils.getObjs())
+      console.log(obj.definitions, definitionNo)
       const currentDefinitionObj = obj.definitions[definitionNo]
       const data = {
         word: obj.word || '',
@@ -176,25 +189,34 @@ function BudView({ selectedObj }) {
       setRenderData(data)
       const examples = currentDefinitionObj.examples 
       const examplesRender = examples.map((example, index) => {
-        return (
-          <>
-            <textarea
-              placeholder='insert example'
-              key={example.arrID}
-              name={`example${index}`}
-              value={example.text}
-              onChange={handleInputChangeWrapper('example')}
-              className={styles.example}></textarea>
-            <button className={styles.deleteBtn}
-              onClick={e => {
-                const obj = JSON.parse(JSON.stringify(utils.getObjById(selectedObj)))
-                obj.operation = 'sub'
-                obj.del = 'other'
-                obj.definitions[definitionNo].examples.push(example.arrID)
-                utils.updateNewObjs(budId, obj)
-              }}>delete example</button>
-          </>
-        )
+        if (!example.del) {
+          return (
+            <>
+              <textarea
+                placeholder='insert example'
+                key={example.arrID}
+                name={`example${index}`}
+                value={example.text}
+                onChange={handleInputChangeWrapper('example')}
+                className={styles.example}></textarea>
+              <button className={styles.deleteBtn}
+                onClick={e => {
+                  const obj = utils.getObjById(selectedObj)
+                  const definition = obj.definitions[definitionNo]
+                  example.del = true
+                  utils.updateObj(budId, {
+                    definitions: [{
+                      ...definition,
+                      examples: [...definition.examples]
+                    }]
+                  })
+                  setTriggerRerender(!triggerRerender)
+                }}>delete example</button>
+            </>
+          )
+        } else {
+          return <></>
+        }
       })
       setRenderedExamples(examplesRender)
     }
@@ -203,13 +225,13 @@ function BudView({ selectedObj }) {
     console.log('sub')
     console.log(definitionNo)
     if (definitionNo-1 < 0) {
-      setDefinitionNo(utils.getObjById(selectedObj).definitions.length-1)
+      setDefinitionNo(totalDefinitionNo)
       return
     }
     setDefinitionNo(definitionNo-1)
   }
   const addDefinitionNo = () => {
-    if (definitionNo+1 > utils.getObjById(selectedObj).definitions.length-1) {
+    if (definitionNo+1 > totalDefinitionNo) {
       setDefinitionNo(0)
       return
     }
@@ -231,7 +253,13 @@ function BudView({ selectedObj }) {
             onChange={handleInputChangeWrapper('definition')}
             placeholder='definition'
             style={styles.definition}></BudAttr>
-          <MoreBtn budId={selectedObj} definitionNo={definitionNo}></MoreBtn>
+          <MoreBtn
+            budId={selectedObj}
+            setDefinitionNo={setDefinitionNo}
+            definitionNo={definitionNo}
+            setTriggerRerender={setTriggerRerender}
+            triggerRerender={triggerRerender}
+            setSelectedObj={setSelectedObj}></MoreBtn>
           {/* <button onClick={e => newDefinition(selectedObj)}>newDefinition</button> */}
           <button onClick={addDefinitionNo}>a</button>
         </div>

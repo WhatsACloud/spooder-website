@@ -14,7 +14,6 @@ const dbBudToData = (dbBud) => {
     "attachedTo": [],
     "position": {},
     "type": "bud", // bud silk
-    "operation": 'add', // add edit minus, default add
     "id": dbBud.dataValues.id
   }
   return newBud

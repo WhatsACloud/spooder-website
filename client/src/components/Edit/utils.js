@@ -78,7 +78,6 @@ export { getNextHighestAttr }
 const updateNewObjs = (objId, obj) => {
   const mainLayer = getMainLayer()
   const newObjs = mainLayer.getAttr('newObjs')
-  obj.operation = 'edit'
   const rootPos = getRootPos()
   newObjs[objId] = obj
   mainLayer.setAttr('newObjs', newObjs)

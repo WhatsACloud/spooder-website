@@ -279,7 +279,8 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
             rendered={rendered}></DrawCanvas>
         </div>
         <BudView
-          selectedObj={selectedObj}></BudView>
+          selectedObj={selectedObj}
+          setSelectedObj={setSelectedObj}></BudView>
         <Background canRender={settings.Background}></Background>
       </div>
     </>
