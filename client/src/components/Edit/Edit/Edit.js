@@ -78,47 +78,57 @@ function AddNewObjs({
   }) { // to add some updating of positions AND maybe index in the object itself to be specific
   useEffect(() => {
     if (objsToUpdate) {
-      const newRendered = [...rendered]
       const newObjsToUpdate = JSON.parse(JSON.stringify(objsToUpdate))
-      utils.addObjs(newObjsToUpdate)
-      const rootPos = utils.getRootPos()
-      Object.entries(newObjsToUpdate).forEach(([objId, obj]) => {
-        if (obj.type === 'bud') {
-          newRendered.push(
-            <BudShapes.Bud
-              x={obj.position.x + rootPos.x}
-              y={obj.position.y + rootPos.y}
-              attachedSilkObjId={obj.attachedTo}
-              key={newRendered.length}
-              objId={objId}
-              setHoverBud={setHoverBud}
-              setObjsToUpdate={setObjsToUpdate}
-              setTriggerDragLine={setTriggerDragLine}
-              setDragging={setDragging}
-              setSelectedObj={setSelectedObj}
-              ></BudShapes.Bud>
-          )
-        } else if (obj.type === 'silk') {
-          newRendered.push(
-            <SilkShapes.Silk
-              points={obj.positions}
-              key={newRendered.length}
-              attachedTo1={obj.attachedTo1}
-              attachedTo2={obj.attachedTo2}
-              setTriggerDragLine={setTriggerDragLine}
-              setDraggingLine={setDraggingLine}
-              setSelectedSilk={setSelectedSilk}
-              setSelectedObj={setSelectedObj}
-              setToggleCanDragLine={setToggleCanDragLine}
-              objId={objId}></SilkShapes.Silk>
-          )
-        } else {
-          console.warn('Error: object type not specified')
-        }
-      })
-      for (const objId in objsToUpdate) {
+      const addObjsToKonva = (newObjsToUpdate) => {
+        const newRendered = [...rendered]
+        const rootPos = utils.getRootPos()
+        Object.entries(newObjsToUpdate).forEach(([objId, obj]) => {
+          if (obj.type === 'bud') {
+            newRendered.push(
+              <BudShapes.Bud
+                x={obj.position.x + rootPos.x}
+                y={obj.position.y + rootPos.y}
+                attachedSilkObjId={obj.attachedTo}
+                key={newRendered.length}
+                objId={objId}
+                setHoverBud={setHoverBud}
+                setObjsToUpdate={setObjsToUpdate}
+                setTriggerDragLine={setTriggerDragLine}
+                setDragging={setDragging}
+                setSelectedObj={setSelectedObj}
+                ></BudShapes.Bud>
+            )
+          } else if (obj.type === 'silk') {
+            newRendered.push(
+              <SilkShapes.Silk
+                points={obj.positions}
+                key={newRendered.length}
+                attachedTo1={obj.attachedTo1}
+                attachedTo2={obj.attachedTo2}
+                setTriggerDragLine={setTriggerDragLine}
+                setDraggingLine={setDraggingLine}
+                setSelectedSilk={setSelectedSilk}
+                setSelectedObj={setSelectedObj}
+                setToggleCanDragLine={setToggleCanDragLine}
+                objId={objId}></SilkShapes.Silk>
+            )
+          } else {
+            console.log('Error: object type not specified')
+          }
+        })
+        setRendered(newRendered)
       }
-      setRendered(newRendered)
+      const removeObjsFromKonva = (objId) => {
+        console.log(rendered)
+        const newRendered = [...rendered]
+        for (const [ index, e ] of Object.entries(newRendered)) {
+          if (e.props.objId === objId) {
+            newRendered.splice(index, 1)
+          }
+        }
+        setRendered(newRendered)
+      }
+      utils.addObjs(newObjsToUpdate, addObjsToKonva, removeObjsFromKonva)
     }
   }, [ objsToUpdate ])
   return <></>
@@ -213,6 +223,8 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
     mainLayer.setAttr('modes', modes)
     mainLayer.setAttr('addedObj', false)
     mainLayer.setAttr('budObjs', {})
+    mainLayer.setAttr('history', [])
+    mainLayer.setAttr('historyIndex', -1)
     mainLayer.setAttr('triggerDragLine', false)
     mainLayer.setAttr('draggingLine', false)
     document.addEventListener('keydown', preventZoom)
@@ -229,6 +241,7 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
       <UpdateModes
         modes={modes}></UpdateModes>
       <AddNewObjs
+        setObjsToUpdate={setObjsToUpdate}
         objsToUpdate={objsToUpdate}
         setObjsToUpdate={setObjsToUpdate}
         setRendered={setRendered}

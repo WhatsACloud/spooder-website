@@ -271,7 +271,7 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
   return (
     <div className={styles.trainWrapper} id='trainWrapper'>
       <button
-        className={styles.trainSettingsBtn}
+        className={styles.openTrainSettings}
         onClick={() => {
           setOpenedTrain(true)
           const func = e => {

@@ -7,6 +7,7 @@ import { faGear, faFileLines } from '@fortawesome/free-solid-svg-icons'
 
 import { SearchBar, SearchResult } from './Search'
 import { Train } from './Train'
+import { UndoRedo } from './UndoRedo'
 import { Debugger } from './debug'
 
 function TaskBar({ setInSettings, setModes, modes, setSelectedObj, selectedObj, setFocus }) {
@@ -66,6 +67,7 @@ function TaskBar({ setInSettings, setModes, modes, setSelectedObj, selectedObj, 
         {renderedSearchResults}
       </SearchBar>
       {/* <Debugger></Debugger> */}
+      <UndoRedo></UndoRedo>
       <Train
         selectedObj={selectedObj}
         setSelectedObj={setSelectedObj}

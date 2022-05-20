@@ -94,12 +94,17 @@ div.trainWrapper {
     font-size: 150%;
     line-height: 0;
   }
-  button.trainSettingsBtnOpen {
-    @include trainSettingsBtn;
-  }
-  button.trainSettingsBtnClose {
-    @include trainSettingsBtn;
-    box-shadow: inset 0 10px 8px 5px rgba(0, 0, 0, 0.2);
+  button {
+    &.trainSettingsBtnOpen {
+      @include trainSettingsBtn;
+    }
+    &.trainSettingsBtnClose  {
+      @include trainSettingsBtn;
+      box-shadow: inset 0 10px 8px 5px rgba(0, 0, 0, 0.2);
+    }
+    &.openTrainSettings {
+      @include std-button;
+    }
   }
   div.trainSettings {
     $trainWidth: 20%;

@@ -14,7 +14,7 @@ const setSilk = (setObjsToUpdate, details) => {
     }
   }
   setObjsToUpdate({[nextObjId]: line})
-  utils.updateNewObjs(nextObjId, line)
+  utils.updateNewObjs(nextObjId, line, true)
   utils.setNextObjId(nextObjId+1)
 }
 export { setSilk as setSilk }

@@ -1,0 +1,5 @@
+@import '../../../../scss/standard.module.scss';
+
+button {
+  @include std-button;
+}

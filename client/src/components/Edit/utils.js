@@ -20,6 +20,20 @@ const getObjs = () => {
 }
 export { getObjs }
 
+const addToHistory = (undoFunc, redoFunc) => {
+  console.log('added to history')
+  const mainLayer = getMainLayer()
+  const history = mainLayer.getAttr('history')
+  const historyIndex = mainLayer.getAttr('historyIndex')
+  if (history.length > 0 && history[historyIndex+1]) {
+    history.splice(historyIndex+1, history.length-historyIndex)
+  }
+  history.push({undo: undoFunc, redo: redoFunc})
+  mainLayer.setAttr('history', history)
+  mainLayer.setAttr('historyIndex', historyIndex+1)
+}
+export { addToHistory }
+
 const getCanvasMousePos = (x, y) => {
   return {
     x: (
@@ -75,12 +89,23 @@ const getNextHighestAttr = (arr, attrName) => {
 }
 export { getNextHighestAttr }
 
-const updateNewObjs = (objId, obj) => {
+const updateNewObjs = (objId, obj, alrHistory=false) => {
+  console.log(alrHistory)
   const mainLayer = getMainLayer()
   const newObjs = mainLayer.getAttr('newObjs')
   const rootPos = getRootPos()
-  newObjs[objId] = obj
-  mainLayer.setAttr('newObjs', newObjs)
+  const redoFunc = () => {
+    const editObjs = {...newObjs}
+    editObjs[objId] = obj
+    mainLayer.setAttr('newObjs', editObjs)
+  }
+  if (!alrHistory) {
+    const undoFunc = () => {
+      mainLayer.setAttr('newObjs', newObjs)
+    }
+    addToHistory(undoFunc, redoFunc)
+  }
+  redoFunc()
 }
 export { updateNewObjs }
 
@@ -147,18 +172,41 @@ const getObjById = (id=null) => {
 }
 export { getObjById }
 
-const addObjs = (toAdd) => {
+const addObjs = (toAdd, addObjsToKonva, removeObjsFromKonva) => {
   const layer = getMainLayer()
   const currentObjs = layer.getAttr('objs')
-  const newObjs = {...currentObjs, ...toAdd}
-  layer.setAttr('objs', newObjs)
-  const currentBudObjs = layer.getAttr('budObjs')
-  for (const [ objId, toAddObj ] of Object.entries(toAdd)) {
-    if (toAddObj.type === "bud") {
-      currentBudObjs[objId] = toAddObj
+  const redoFunc = () => {
+    const newObjs = {...currentObjs, ...toAdd}
+    layer.setAttr('objs', newObjs)
+    const currentBudObjs = layer.getAttr('budObjs')
+    for (const [ objId, toAddObj ] of Object.entries(toAdd)) {
+      if (toAddObj.type === "bud") {
+        currentBudObjs[objId] = toAddObj
+      }
     }
+    layer.setAttr('budObjs', currentBudObjs)
+    console.log('redo')
+    addObjsToKonva(toAdd)
   }
-  layer.setAttr('budObjs', currentBudObjs)
+  if (currentObjs) {
+    const oldBudObjs = layer.getAttr('budObjs')
+    const undoFunc = () => {
+      console.log(currentObjs)
+      layer.setAttr('objs', currentObjs)
+      layer.setAttr('budObjs', oldBudObjs)
+      const objIds = Object.keys(toAdd)
+      for (const objId of objIds) {
+        const konvaObj = getKonvaObjById(objId)
+        console.log(konvaObj, objId)
+        konvaObj.destroy()
+        removeObjsFromKonva(objId) // to make it compatible with react konva
+      }
+      // console.log(toAdd, objIds)
+      setNextObjId(objIds[0]) // bcuz most of the time only one is added
+    }
+    addToHistory(undoFunc, redoFunc)
+  }
+  redoFunc()
 }
 export { addObjs }
 
@@ -166,27 +214,42 @@ const updateObj = (objId, attrs) => {
   const mainLayer = getMainLayer()
   const obj = mainLayer.getAttr('objs')[objId]
   const newObjs = mainLayer.getAttr('newObjs')
-  Object.entries(attrs).forEach(([name, val]) => {
-    obj[name] = val
-  })
-  updateNewObjs(objId, obj)
   const konvaObj = getKonvaObjById(objId) 
-  if ('position' in attrs) {
-    console.log(konvaObj)
-  }
+  let prevPositions 
   if ('positions' in attrs) {
-    const rootPos = getRootPos()
-    console.log(attrs.positions[0], attrs.positions[1])
-    konvaObj.children[0].setPoints([
-      attrs.positions[0].x + rootPos.x,
-      attrs.positions[0].y + rootPos.y,
-      attrs.positions[1].x + rootPos.x,
-      attrs.positions[1].y + rootPos.y
-    ])
+    prevPositions = konvaObj.children[0].getPoints()
   }
-  if ('attachedTo' in attrs) {
-    konvaObj.setAttr('attachedSilkObjId', attrs.attachedTo)
+  const prevAttachedTo = konvaObj.getAttr('attachedSilkObjId')
+  const redoFunc = () => {
+    const newObj = {...obj}
+    Object.entries(attrs).forEach(([name, val]) => {
+      newObj[name] = val
+    })
+    updateNewObjs(objId, newObj, true)
+    if ('position' in attrs) {
+      console.log(konvaObj)
+    }
+    if ('positions' in attrs) {
+      const rootPos = getRootPos()
+      console.log(attrs.positions[0], attrs.positions[1])
+      konvaObj.children[0].setPoints([
+        attrs.positions[0].x + rootPos.x,
+        attrs.positions[0].y + rootPos.y,
+        attrs.positions[1].x + rootPos.x,
+        attrs.positions[1].y + rootPos.y
+      ])
+    }
+    if ('attachedTo' in attrs) {
+      konvaObj.setAttr('attachedSilkObjId', attrs.attachedTo)
+    }
   }
+  const undoFunc = () => {
+    updateNewObjs(objId, obj, true)
+    if (prevAttachedTo) konvaObj.setAttr('attachedSilkObjId', prevAttachedTo)
+    if (prevPositions) konvaObj.children[0].setPoints(prevPositions)
+  }
+  addToHistory(undoFunc, redoFunc)
+  redoFunc()
 }
 export { updateObj as updateObj }
 

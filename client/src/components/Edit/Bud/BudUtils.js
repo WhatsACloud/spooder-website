@@ -11,9 +11,8 @@ const setBud = (setObjsToUpdate, details) => { // { pronounciation, contexts, ex
   }
   const nextObjId = utils.getNextObjId()
   setObjsToUpdate({[nextObjId]: obj})
-  utils.updateNewObjs(nextObjId, obj)
+  utils.updateNewObjs(nextObjId, obj, true)
   utils.setNextObjId(nextObjId+1)
-  console.log(utils.getObjs())
 }
 export { setBud }
 
