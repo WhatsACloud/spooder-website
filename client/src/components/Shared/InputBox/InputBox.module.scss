@@ -1,13 +1,18 @@
+@import '../../../scss/colors.scss';
+
+$width: 70%;
+
 @mixin input-container {
-  margin-left: 20px;
-  padding-right: 20px;
   width: 100%;
+  border-style: none;
+  margin-top: 20px;
   label {
     display: block;
     text-align: left;
     font-size: 15px;
   }
   div.inputContainer {
+    border-style: none;
     button.passwordIcon {
       $length: 40px;
       background-color: rgba(0, 0, 0, 0);
@@ -20,31 +25,43 @@
       margin-left: -50px;
       border-style: none;
       transition: background-color 0.2s;
+      padding: 0;
       cursor: pointer;
       &:hover {
         background-color: rgba(168, 168, 168, 0.664);
       }
-      .eye {
-        font-size: 80%;
-        vertical-align: 5px;
-        margin-left: -1px;
+      svg {
+        color: $login-color;
       }
     }
     input {
       display: inline-block;
       box-sizing: border-box;
       padding: 12px 40px;
-      margin: 8px;
-      border-style: solid;
-      border-radius: 5px;
-      border-color: rgb(88, 88, 88);
-      border-width: 1px;
-      width: 80%;
+      margin-left: calc((100% - #{$width}) / 2);
+      margin-top: 20px;
+      border-style: none;
+      box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.2);
+      width: $width;
       font-size: 15px;
       font-family: 'Courier New', Courier, monospace;
       outline: none;
-      &::selection {
-        border-color: black;
+    }
+    span {
+      transition: all 0.1s;
+      &.placeholderUnfocus {
+        position: absolute;
+        color: $login-color;
+        font-size: 20px;
+        margin-top: 1.5em;
+        left: calc((100% - #{$width}) / 2 + 2em);
+      }
+      &.placeholderFocus {
+        position: absolute;
+        color: $login-color;
+        font-size: 15px;
+        margin-top: 0em;
+        left: calc((100% - #{$width}) / 2 - 1em);
       }
     }
   }
@@ -67,6 +84,9 @@ div {
       }
     }
     p.errorMsg {
+      margin-left: calc((100% - #{$width}) / 2 + 1em);
+      margin-top: 10px;
+      margin-bottom: 10px;
       font-size: 15px;
       color: red;
     }

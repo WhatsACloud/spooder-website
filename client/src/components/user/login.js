@@ -44,30 +44,36 @@ const login = () => {
   return (
     <>
       <Authorizer navigate={navigate}></Authorizer>
-      <div className={styles.div}>
-        <p className={styles.header}>
-          Login
-        </p>
-        <form>
-          <InputBox name="email" display="Email" errorMsg={errorStates.Email}></InputBox>
-          <PasswordBox name="password" display="Password" errorMsg={errorStates.Password}></PasswordBox>
-          <ErrorBox>
-            {serverErrorState}
-          </ErrorBox>
-          <button
-            type="button"
-            className={styles.signUp}
-            onClick={() => Login(
-              errorStates,
-              changeErrorState,
-              changeServerErrorState,
-              navigate,
-              document.getElementById("email").value,
-              document.getElementById("password").value
-              )}>
-              Login
-          </button>
-        </form>
+      <div className={styles.background}></div>
+      <div className={styles.outerDiv}>
+        <div className={styles.div}>
+          <div className={styles.header}>
+            <div className={styles.block}></div>
+            <p className={styles.text}>
+              LOGIN
+            </p>
+          </div>
+          <form>
+            <InputBox name="email" display="Email" errorMsg={errorStates.Email}></InputBox>
+            <PasswordBox name="password" display="Password" errorMsg={errorStates.Password}></PasswordBox>
+            <ErrorBox>
+              {serverErrorState}
+            </ErrorBox>
+            <button
+              type="button"
+              className={styles.signUp}
+              onClick={() => Login(
+                errorStates,
+                changeErrorState,
+                changeServerErrorState,
+                navigate,
+                document.getElementById("email").value,
+                document.getElementById("password").value
+                )}>
+                Login
+            </button>
+          </form>
+        </div>
       </div>
     </>
   )

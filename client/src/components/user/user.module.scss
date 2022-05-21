@@ -1,35 +1,74 @@
 @import '../../scss/colors.scss';
 @import '../../scss/standard.module.scss';
 
-.div {
-  display: flex;
-  flex-direction: column;
-  justify-self: flex-end;
-  margin: auto;
-  background-color: $light1;
-  margin-top: 8vh;
-  padding: 5rem 2.5rem 0;
-  min-width: 500px;
-  max-width: 500px;
-  box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  border-radius: 10px;
-  font-size: 25px;
-  color: $textcolor;
-  .header {
-    text-align: center;
-    padding-top: 50px;
-    font-size: 25px;
-    font-family: 'Courier New', Courier, monospace;
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    button.signUp {
-      @include std-button;
-      padding: 1.7rem 2.8rem;
-      overflow: hidden;
-      background-color: ghostwhite;
+div.background {
+  background-color: rgb(221, 243, 255);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+}
+
+div.outerDiv {
+  div {
+    &.div {
+      $width: 500px;
+      position: relative;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      margin: auto;
+      background-color: #edf2f7;
+      margin-top: 8vh;
+      padding-right: 2.5rem;
+      min-width: $width;
+      max-width: $width;
+      box-shadow: 0 10px 8px 2px rgba(0, 0, 0, 0.2);
+      font-size: 25px;
+      color: $textcolor;
+      div.header {
+        $fontSize: 30px;
+        $theColor: #2b8ef5;
+        display: flex;
+        flex-direction: row;
+        div.block {
+          margin-top: 15px;
+          width: 10px;
+          height: $fontSize;
+          background-color: $theColor;
+        }
+        p.text {
+          padding-top: 10px;
+          font-size: $fontSize;
+          color: $theColor;
+          margin-left: 10px;
+        }
+      }
+      form {
+        width: $width;
+        display: flex;
+        flex-direction: column;
+        button.signUp {
+          @include std-button(1);
+          margin: 0;
+          margin-left: 10%;
+          margin-top: 30px;
+          margin-bottom: 30px;
+          padding: 10px;
+          width: 80%;
+          font-size: 20px;
+          overflow: hidden;
+          background-color: #2364ce;
+          box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+          color: white;
+          transition: background-color 0.1s;
+          &:hover {
+            background-color: #1f4e9b;
+          }
+        }
+      }
     }
   }
 }
