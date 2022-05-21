@@ -119,7 +119,6 @@ function AddNewObjs({
         setRendered(newRendered)
       }
       const removeObjsFromKonva = (objId) => {
-        console.log(rendered)
         const newRendered = [...rendered]
         for (const [ index, e ] of Object.entries(newRendered)) {
           if (e.props.objId === objId) {

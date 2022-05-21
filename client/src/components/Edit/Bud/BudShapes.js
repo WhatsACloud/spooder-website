@@ -103,21 +103,38 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
           }}
           onDragEnd={evt => {
             const obj = evt.target.parent
-            const bud = evt.target
+            const objId = obj.getAttr('objId')
             const offsetRootPos = obj.getAttr('offsetRootPos')
             const mousePos = {x: evt.evt.pageX, y: evt.evt.pageY}
             const previousMousePos = obj.getAttr('lastMousePos')
-            obj.setAttr('offsetRootPos', {x: offsetRootPos.x + mousePos.x - previousMousePos.x, y: offsetRootPos.y + mousePos.y - previousMousePos.y})
-            const rootPos = utils.getRootPos()
-            const newOffsetRootPos = obj.getAttr('offsetRootPos')
-            utils.updateObj(bud.parent.getAttr('objId'), {position: newOffsetRootPos})
-            const attachedObjIds = obj.getAttr('attachedSilkObjId')
-            for (const [ objId, innerIndex ] of Object.entries(attachedObjIds)) {
-              const line = utils.getKonvaObjById(objId)
-              const offsetRootPoses = line.getAttr('offsetRootPoses')
-              offsetRootPoses[innerIndex-1] = {x: newOffsetRootPos.x, y: newOffsetRootPos.y}
-              utils.updateObj(objId, {positions: offsetRootPoses})
+            const oldOffsetRootPos = obj.getAttr('offsetRootPos')
+            const newOffsetRootPos = {
+              x: offsetRootPos.x + mousePos.x - previousMousePos.x,
+              y: offsetRootPos.y + mousePos.y - previousMousePos.y
             }
+            const attachedObjIds = obj.getAttr('attachedSilkObjId')
+            const oldOffsetRootPoses = []
+            const redoFunc = () => {
+              // obj.setAttr('offsetRootPos', newOffsetRootPos)
+              utils.updateObj(objId, {position: newOffsetRootPos}, true)
+              for (const [ objId, innerIndex ] of Object.entries(attachedObjIds)) {
+                const line = utils.getKonvaObjById(objId)
+                const offsetRootPoses = line.getAttr('offsetRootPoses')
+                oldOffsetRootPoses.push(offsetRootPoses)
+                offsetRootPoses[innerIndex-1] = {x: newOffsetRootPos.x, y: newOffsetRootPos.y}
+                utils.updateObj(objId, {positions: offsetRootPoses}, true)
+              }
+            }
+            const undoFunc = () => {
+              // obj.setAttr('offsetRootPos', oldOffsetRootPos)
+              console.log('undone')
+              utils.updateObj(objId, {position: oldOffsetRootPos}, true)
+              // for (let index = 0; index < Object.keys(attachedObjIds); index++) {
+              //   utils.updateObj(objId, {positions: }, true)
+              // }
+            }
+            utils.addToHistory(undoFunc, redoFunc)
+            redoFunc()
           }}
           onMouseEnter={evt => {
             const mainLayer = utils.getMainLayer()

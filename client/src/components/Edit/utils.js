@@ -211,22 +211,33 @@ const addObjs = (toAdd, addObjsToKonva, removeObjsFromKonva) => {
     }
     addToHistory(undoFunc, redo => {
       redoFunc()
-      console.log('a')
-      redo()
+      console.log(Object.values(toAdd)[0])
+      if (Object.values(toAdd)[0].type !== "bud") {
+        console.log('a')
+        redo()
+      }
     })
   }
   redoFunc()
 }
 export { addObjs }
 
-const updateObj = (objId, attrs) => {
+const updateObj = (objId, attrs, alrHistory=false) => {
   const mainLayer = getMainLayer()
   const obj = getObjById(objId)
   const newObjs = mainLayer.getAttr('newObjs')
   const konvaObj = getKonvaObjById(objId) 
   let prevPositions 
+  console.log(attrs)
   if ('positions' in attrs) {
     prevPositions = konvaObj.children[0].getPoints()
+  }
+  let prevPosition
+  if ('position' in attrs) {
+    konvaObj.setAttr('offsetRootPos', attrs.position)
+    const bud = konvaObj.children[0]
+    bud.setX(attrs.position.x)
+    bud.setY(attrs.position.y)
   }
   const prevAttachedTo = konvaObj.getAttr('attachedSilkObjId')
   const redoFunc = () => {
@@ -235,14 +246,14 @@ const updateObj = (objId, attrs) => {
       konvaObj = getKonvaObjById(objId)
       if (konvaObj) {
         clearInterval(interval)
-        console.log(getKonvaObjs(), objId)
+        // console.log(getKonvaObjs(), objId)
         const newObj = {...obj}
         Object.entries(attrs).forEach(([name, val]) => {
           newObj[name] = val
         })
         updateNewObjs(objId, newObj, true)
         if ('position' in attrs) {
-          console.log(konvaObj)
+          // console.log(konvaObj)
         }
         if ('positions' in attrs) {
           const rootPos = getRootPos()
@@ -264,14 +275,16 @@ const updateObj = (objId, attrs) => {
     if (prevAttachedTo) konvaObj.setAttr('attachedSilkObjId', prevAttachedTo)
     if (prevPositions) konvaObj.children[0].setPoints(prevPositions)
   }
-  if (!obj.initialised) {
-    addToHistory(undoFunc, redoFunc)
-  } else {
-    addToHistory(undo => {
-      undoFunc()
-      undo()
-    }, redoFunc)
-    delete obj.initialised
+  if (!alrHistory) {
+    if (!obj.initialised) {
+      addToHistory(undoFunc, redoFunc)
+    } else {
+      addToHistory(undo => {
+        undoFunc()
+        undo()
+      }, redoFunc)
+      delete obj.initialised
+    }
   }
   redoFunc()
 }
