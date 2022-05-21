@@ -3,7 +3,8 @@ const routes = {
     '/register': require('./register'),
     '/webs': require('./spoodaweb'),
     '/auth': require('./auth'),
-    '/search': require('./search')
+    '/search': require('./search'),
+    '/logout': require('./logout')
   }
   
 function addApiRoutes(app) {

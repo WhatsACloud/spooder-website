@@ -26,10 +26,14 @@ module.exports = {
     if (token === undefined) return next(error.create('Please relogin!'))
     // console.log(process.env.TOKEN_SECRET)
     const result = jwt.verify(token, process.env.TOKEN_SECRET, (err, data) => {
-      if (err) return next(error.create('Please relogin!', {type: "tokenErr"}))
+      if (err) return next(error.create('Please relogin!', {type: "tokenErr", statusNo: 401}))
       console.log(data)
       req.body.jwtTokenData = data
       next()
     })
+  },
+  removeToken (req, res, next) {
+    res.clearCookie('Authorization')
+    next()
   }
 }

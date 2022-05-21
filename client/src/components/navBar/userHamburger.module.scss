@@ -1,0 +1,43 @@
+@import '../../scss/colors.scss';
+@import '../../scss/standard.module.scss';
+
+button.normal {
+  @include std-button;
+  background-color: $light1;
+  margin: 5px;
+  font-size: 125%;
+  min-width: 40px;
+}
+
+.nil {
+  display: none;
+  a {
+    display: none;
+  }
+}
+
+div.hamburgerMenu {
+  $minWidth: 15%;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 7.5px;
+  position: absolute;
+  min-width: $minWidth;
+  left: calc(100% - #{$minWidth});
+  top: 100%;
+  button {
+    @include std-button(1);
+    margin: 5px;
+    &.signOut {
+      font-size: 125%;
+      transition: background-color 0.1s, color 0.1s;
+      &:hover {
+        background-color: red;
+        color: white;
+      }
+    }
+  }
+}

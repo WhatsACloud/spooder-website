@@ -23,6 +23,7 @@ $text-size: 20px;
   align-items: center;
   ul {
     display: flex;
+    position: relative;
     li {
       display: flex;
       &.normal {
@@ -41,16 +42,6 @@ $text-size: 20px;
       }
       &.username {
         background-color: $light2;
-      }
-    }
-    button.normal {
-      @include std-button;
-      background-color: $light1;
-      margin: 5px;
-      min-width: 40px;
-      i.accountIcon {
-        font-size: 150%;
-        margin-top: -5px;
       }
     }
   }

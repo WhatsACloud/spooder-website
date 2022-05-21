@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom'
 import styles from './navBar.module'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser } from '@fortawesome/free-solid-svg-icons'
+import { UserHamburger } from './UserHamburger';
 
 const navBar = (props) => {
   const [ username, setUsername ] = useState()
@@ -21,10 +19,7 @@ const navBar = (props) => {
           <li className={styles.normal}><a href="/about">about</a></li>
           <li className={username ? styles.nil : styles.normal}><a href="/register">register</a></li>
           <li className={username ? styles.nil : styles.normal}><a href="/login">login</a></li>
-          <li className={username ? styles.username : styles.nil}><a>{username}</a></li>
-          <button className={username ? styles.normal : styles.nil}>
-            <FontAwesomeIcon icon={faUser} className={styles.accountIcon}></FontAwesomeIcon>
-          </button>
+          <UserHamburger username={username}></UserHamburger>
         </ul>
       </nav>
     </div>
