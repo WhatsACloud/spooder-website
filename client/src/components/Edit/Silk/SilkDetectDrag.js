@@ -62,7 +62,7 @@ const LineDragUpdater = memo(({
         console.log(`attachedTo${selectedSilk.innerIndex}`)
         utils.updateObj(selectedSilk.objId, {
           positions: offsetRootPoses,
-        [`attachedTo${selectedSilk.innerIndex}`]: lineCircle.getAttr('attachedToObjId')
+          innerIndex: selectedSilk.innerIndex
         })
       }
       setDraggingLine(false)

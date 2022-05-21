@@ -95,7 +95,6 @@ const getNextHighestAttr = (arr, attrName) => {
 export { getNextHighestAttr }
 
 const updateNewObjs = (objId, obj, alrHistory=false) => {
-  console.log(alrHistory)
   const mainLayer = getMainLayer()
   const newObjs = mainLayer.getAttr('newObjs')
   const rootPos = getRootPos()
@@ -130,18 +129,17 @@ const setRootPos = (rootPos) => {
       bud.setY(obj.getAttr('offsetRootPos').y + rootPos.y)
     } else if (type === 'silk') {
       const silk = obj.children[0]
+      const offsetRootPoses = obj.getAttr('offsetRootPoses')
       silk.setPoints([
-        obj.getAttr('offsetRootPoses')[0].x + rootPos.x,
-        obj.getAttr('offsetRootPoses')[0].y + rootPos.y,
-        obj.getAttr('offsetRootPoses')[1].x + rootPos.x,
-        obj.getAttr('offsetRootPoses')[1].y + rootPos.y,
+        offsetRootPoses[0].x + rootPos.x,
+        offsetRootPoses[0].y + rootPos.y,
+        offsetRootPoses[1].x + rootPos.x,
+        offsetRootPoses[1].y + rootPos.y,
       ])
-      const silkEnds = [obj.children[1], obj.children[2]]
-      for (const index in silkEnds) {
-        const silkEnd = silkEnds[index]
-        silkEnd.setX(obj.getAttr('offsetRootPoses')[index].x + rootPos.x)
-        silkEnd.setY(obj.getAttr('offsetRootPoses')[index].y + rootPos.y)
-      }
+      obj.children[1].setX(offsetRootPoses[0].x + rootPos.x)
+      obj.children[1].setY(offsetRootPoses[0].y + rootPos.y)
+      obj.children[2].setX(offsetRootPoses[1].x + rootPos.x)
+      obj.children[2].setY(offsetRootPoses[1].y + rootPos.y)
     } else {
     }
   }
@@ -225,12 +223,10 @@ export { addObjs }
 const updateObj = (objId, attrs, alrHistory=false) => {
   const mainLayer = getMainLayer()
   const obj = getObjById(objId)
-  const newObjs = mainLayer.getAttr('newObjs')
   const konvaObj = getKonvaObjById(objId) 
   let prevPositions 
-  console.log(attrs)
   if ('positions' in attrs) {
-    prevPositions = konvaObj.children[0].getPoints()
+    prevPositions = konvaObj.getAttr('offsetRootPoses')
   }
   let prevPosition
   if ('position' in attrs) {
@@ -263,6 +259,10 @@ const updateObj = (objId, attrs, alrHistory=false) => {
             attrs.positions[1].x + rootPos.x,
             attrs.positions[1].y + rootPos.y
           ])
+          konvaObj.children[1].setX(attrs.positions[0].x + rootPos.x)
+          konvaObj.children[1].setY(attrs.positions[0].y + rootPos.y)
+          konvaObj.children[2].setX(attrs.positions[1].x + rootPos.x)
+          konvaObj.children[2].setY(attrs.positions[1].y + rootPos.y)
         }
         if ('attachedTo' in attrs) {
           konvaObj.setAttr('attachedSilkObjId', attrs.attachedTo)
@@ -273,7 +273,36 @@ const updateObj = (objId, attrs, alrHistory=false) => {
   const undoFunc = () => {
     updateNewObjs(objId, obj, true)
     if (prevAttachedTo) konvaObj.setAttr('attachedSilkObjId', prevAttachedTo)
-    if (prevPositions) konvaObj.children[0].setPoints(prevPositions)
+    if (prevPositions) {
+      const rootPos = getRootPos()
+      // konvaObj.children[0].setPoints([
+      //   prevPositions[0],
+      //   prevPositions[1],
+      //   prevPositions[2],
+      //   prevPositions[3],
+      // ])
+      // konvaObj.children[1].setX(prevPositions[0])
+      // konvaObj.children[1].setY(prevPositions[1])
+      // konvaObj.children[2].setX(prevPositions[2])
+      // konvaObj.children[2].setY(prevPositions[3])
+      // console.log(oldRootPos)
+      // konvaObj.setAttr('offsetRootPoses', [
+      //   {x: prevPositions[0], y: prevPositions[1]},
+      //   {x: prevPositions[2], y: prevPositions[3]}
+      // ])
+
+      konvaObj.children[0].setPoints([
+        prevPositions[0].x + rootPos.x,
+        prevPositions[0].y + rootPos.y,
+        prevPositions[1].x + rootPos.x,
+        prevPositions[1].y + rootPos.y,
+      ])
+      konvaObj.children[1].setX(prevPositions[0].x + rootPos.x)
+      konvaObj.children[1].setY(prevPositions[0].y + rootPos.y)
+      konvaObj.children[2].setX(prevPositions[1].x + rootPos.x)
+      konvaObj.children[2].setY(prevPositions[1].y + rootPos.y)
+      konvaObj.setAttr('offsetRootPoses', prevPositions)
+    }
   }
   if (!alrHistory) {
     if (!obj.initialised) {

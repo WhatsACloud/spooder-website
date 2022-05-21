@@ -61,7 +61,7 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
       {x: points[1].x - rootPos.x, y: points[1].y - rootPos.y},
     ]
     lineGroup.setAttr('offsetRootPoses', newOffsetRootPoses)
-    utils.updateObj(objId, {positions: newOffsetRootPoses})
+    utils.updateObj(objId, {positions: newOffsetRootPoses}, true)
   }
   const getOffsetRootPoses = () => {
     const rootPos = utils.getRootPos()
