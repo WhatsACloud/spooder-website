@@ -232,8 +232,9 @@ const updateObj = (objId, attrs, alrHistory=false) => {
   if ('position' in attrs) {
     konvaObj.setAttr('offsetRootPos', attrs.position)
     const bud = konvaObj.children[0]
-    bud.setX(attrs.position.x)
-    bud.setY(attrs.position.y)
+    const rootPos = getRootPos()
+    bud.setX(attrs.position.x + rootPos.x)
+    bud.setY(attrs.position.y + rootPos.y)
   }
   const prevAttachedTo = konvaObj.getAttr('attachedSilkObjId')
   const redoFunc = () => {

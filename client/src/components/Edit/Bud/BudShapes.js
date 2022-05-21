@@ -52,7 +52,7 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
           radius={radius}
           fill='#00D2FF'
           stroke='black'
-          strokeWidth={1}
+          strokeWidth={0}
           onDragMove={normalDragMoveEvt}
           onDragStart={evt => {
             const bud = evt.target
