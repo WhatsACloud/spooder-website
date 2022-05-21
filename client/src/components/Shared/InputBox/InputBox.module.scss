@@ -51,14 +51,12 @@ $width: 70%;
       transition: all 0.1s;
       &.placeholderUnfocus {
         position: absolute;
-        color: $login-color;
         font-size: 20px;
         margin-top: 1.5em;
         left: calc((100% - #{$width}) / 2 + 2em);
       }
       &.placeholderFocus {
         position: absolute;
-        color: $login-color;
         font-size: 15px;
         margin-top: 0em;
         left: calc((100% - #{$width}) / 2 - 1em);

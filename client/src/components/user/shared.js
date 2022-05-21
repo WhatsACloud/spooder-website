@@ -67,8 +67,35 @@ function PasswordBox(props) {
   )
 }
 
+function Title({ name }) {
+  return (
+    <>
+      <div className={styles.header}>
+        <div className={styles.block}></div>
+        <p className={styles.text}>
+          {name}
+        </p>
+      </div>
+    </>
+  )
+}
+
+function ToOtherSide({ text, onClick }) {
+  return (
+    <>
+      <p
+        className={styles.toOtherSide}
+        onClick={onClick}>
+        {text}
+      </p>
+    </>
+  )
+}
+
 export {
   PasswordBox,
   assignError,
-  userLoginHandler
+  userLoginHandler,
+  Title,
+  ToOtherSide
 }

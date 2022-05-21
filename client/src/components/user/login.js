@@ -1,11 +1,17 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import styles from './user.module'
-import { PasswordBox, assignError, userLoginHandler } from './shared'
+import { PasswordBox, assignError, userLoginHandler, Title, ToOtherSide  } from './shared'
 import InputBox from '../Shared/InputBox'
 import { loginSchema } from './userSchema'
 import { ErrorBox } from '../Shared/errorMsg'
 import Authorizer from '../Shared/Authorizer'
+
+import Register from './register'
+
+// import { TransitionGroup } from 'react-transition-group'
+import Animate from 'Animate.css-react'
+import 'animate.css/animate.css'
 
 async function Login(errorStates, changeErrorState, changeServerErrorState, navigate, email, password) {
   try {
@@ -33,26 +39,23 @@ async function Login(errorStates, changeErrorState, changeServerErrorState, navi
 const login = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  let [ errorStates, changeErrorState ] = useState({
+  const urlString = window.location.search
+  let paramString = urlString.split('?')[1];
+  let queryString = new URLSearchParams(paramString);
+  const [ inLogin, setInLogin ] = useState(queryString.get('login') === "true")
+  const [ errorStates, changeErrorState ] = useState({
     "Username": false,
     "Email": false,
     "Password": false,
     "RepeatPassword": false
   })
-  let [ serverErrorState, changeServerErrorState ] = useState(location.state ? location.state.message || '' : '')
+  const [ serverErrorState, changeServerErrorState ] = useState(location.state ? location.state.message || '' : '')
+  const [ inner, setInner ] = useState()
 
-  return (
-    <>
-      <Authorizer navigate={navigate}></Authorizer>
-      <div className={styles.background}></div>
-      <div className={styles.outerDiv}>
-        <div className={styles.div}>
-          <div className={styles.header}>
-            <div className={styles.block}></div>
-            <p className={styles.text}>
-              LOGIN
-            </p>
-          </div>
+  useEffect(() => {
+    if (inLogin) {
+      setInner((
+        <>
           <form>
             <InputBox name="email" display="Email" errorMsg={errorStates.Email}></InputBox>
             <PasswordBox name="password" display="Password" errorMsg={errorStates.Password}></PasswordBox>
@@ -62,7 +65,7 @@ const login = () => {
             <button
               type="button"
               className={styles.signUp}
-              onClick={() => Login(
+              onMouseDown={() => Login(
                 errorStates,
                 changeErrorState,
                 changeServerErrorState,
@@ -73,6 +76,30 @@ const login = () => {
                 Login
             </button>
           </form>
+        </>
+      ))
+    } else {
+      setInner((
+        <Register setInLogin={setInLogin}></Register>
+      ))
+    }
+  }, [ inLogin ])
+  return (
+    <>
+      <Authorizer navigate={navigate}></Authorizer>
+      <div className={styles.background}></div>
+      <div
+        className={inLogin ? styles.outerDiv : styles.outerDivRegister}
+        class='animate__fadeIn animate__slideInLeft'>
+        <div className={styles.div}>
+          <Title name={inLogin ? "LOGIN" : "REGISTER"}></Title>
+          <ToOtherSide text={inLogin ?
+            "Don't have an account? Sign up for one here"
+            : 'Have an account already? Login here'}
+            onClick={() => {
+              setInLogin(!inLogin)
+            }}></ToOtherSide>
+          {inner}
         </div>
       </div>
     </>

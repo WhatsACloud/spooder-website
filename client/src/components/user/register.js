@@ -6,7 +6,7 @@ import { object } from 'yup'
 
 import { ErrorBox } from '../Shared/errorMsg'
 import styles from './user.module'
-import { PasswordBox, assignError, userLoginHandler } from './shared'
+import { PasswordBox, assignError, userLoginHandler, Title, ToOtherSide } from './shared'
 import InputBox from '../Shared/InputBox'
 import Authorizer from '../Shared/Authorizer'
 
@@ -37,7 +37,7 @@ async function signUp(errorStates, changeErrorState, changeServerErrorState, nav
   }
 }
 
-const Register = () => {
+const Register = ({ setInLogin }) => {
   let navigate = useNavigate()
   let [ errorStates, changeErrorState ] = useState({
     "Username": false,
@@ -49,36 +49,30 @@ const Register = () => {
 
   return (
     <>
-      <Authorizer navigate={navigate}></Authorizer>
-      <div className={styles.div}>
-        <p className={styles.header}>
-          Sign up
-        </p>
-        <form>
-          <InputBox name="username" display="Username" errorMsg={errorStates.Username}></InputBox>
-          <InputBox name="email" display="Email" errorMsg={errorStates.Email}></InputBox>
-          <PasswordBox name="password" display="Password" errorMsg={errorStates.Password}></PasswordBox>
-          <PasswordBox name="repeatPassword" display="Repeat Password" errorMsg={errorStates.RepeatPassword} noenter={true}></PasswordBox>
-          <ErrorBox>
-            {serverErrorState}
-          </ErrorBox>
-          <button
-            type="button"
-            className={styles.signUp}
-            onClick={() => signUp(
-              errorStates,
-              changeErrorState,
-              changeServerErrorState,
-              navigate,
-              document.getElementById("username").value,
-              document.getElementById("email").value, 
-              document.getElementById("password").value,
-              document.getElementById("repeatPassword").value
-              )}>
-              Sign Up
-          </button>
-        </form>
-      </div>
+      <form>
+        <InputBox name="username" display="Username" errorMsg={errorStates.Username}></InputBox>
+        <InputBox name="email" display="Email" errorMsg={errorStates.Email}></InputBox>
+        <PasswordBox name="password" display="Password" errorMsg={errorStates.Password}></PasswordBox>
+        <PasswordBox name="repeatPassword" display="Repeat Password" errorMsg={errorStates.RepeatPassword} noenter={true}></PasswordBox>
+        <ErrorBox>
+          {serverErrorState}
+        </ErrorBox>
+        <button
+          type="button"
+          className={styles.signUp}
+          onClick={() => signUp(
+            errorStates,
+            changeErrorState,
+            changeServerErrorState,
+            navigate,
+            document.getElementById("username").value,
+            document.getElementById("email").value, 
+            document.getElementById("password").value,
+            document.getElementById("repeatPassword").value
+            )}>
+            Sign Up
+        </button>
+      </form>
     </>
   )
 }

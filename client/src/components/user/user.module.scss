@@ -1,6 +1,8 @@
 @import '../../scss/colors.scss';
 @import '../../scss/standard.module.scss';
 
+$theColor: #2b8ef5;
+
 div.background {
   background-color: rgb(221, 243, 255);
   position: absolute;
@@ -11,17 +13,19 @@ div.background {
   z-index: 1;
 }
 
-div.outerDiv {
+@mixin inner($back, $front, $darker, $otherColor, $inputColor, $inputTextColor) {
   div {
     &.div {
+      $marginTop: 8vh;
+      height: calc(100vh - (#{$marginTop} * 3));
       $width: 500px;
       position: relative;
       z-index: 5;
       display: flex;
       flex-direction: column;
       margin: auto;
-      background-color: #edf2f7;
-      margin-top: 8vh;
+      background-color: $front;
+      margin-top: $marginTop;
       padding-right: 2.5rem;
       min-width: $width;
       max-width: $width;
@@ -30,26 +34,45 @@ div.outerDiv {
       color: $textcolor;
       div.header {
         $fontSize: 30px;
-        $theColor: #2b8ef5;
         display: flex;
         flex-direction: row;
         div.block {
           margin-top: 15px;
           width: 10px;
           height: $fontSize;
-          background-color: $theColor;
+          background-color: $back;
         }
         p.text {
           padding-top: 10px;
           font-size: $fontSize;
-          color: $theColor;
+          color: $back;
           margin-left: 10px;
+        }
+      }
+      p.toOtherSide {
+        position: absolute;
+        margin-top: 25px;
+        margin-left: 40%;
+        font-size: 12.5px;
+        color: $back;
+        &:hover {
+          text-decoration: underline;
         }
       }
       form {
         width: $width;
         display: flex;
         flex-direction: column;
+        div {
+          div {
+            input {
+              background-color: $inputColor;
+            }
+            span {
+              color: $inputTextColor;
+            }
+          }
+        }
         button.signUp {
           @include std-button(1);
           margin: 0;
@@ -60,15 +83,23 @@ div.outerDiv {
           width: 80%;
           font-size: 20px;
           overflow: hidden;
-          background-color: #2364ce;
+          background-color: $back;
           box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-          color: white;
+          color: $front;
           transition: background-color 0.1s;
           &:hover {
-            background-color: #1f4e9b;
+            background-color: $darker;
           }
         }
       }
     }
   }
+}
+
+div.outerDiv {
+  @include inner(#2364ce, #edf2f7, #1f4e9b, $theColor, #ffffff, $login-color);
+}
+
+div.outerDivRegister {
+  @include inner(#edf2f7, #2364ce, #c1c6cc, #2b8ef5, #89b6ff, #ffffff);
 }
