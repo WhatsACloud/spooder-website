@@ -14,7 +14,7 @@ const navBar = (props) => {
     <div>
       <nav className={styles.nav}>
         <ul>
-          <li><a className={styles.logo} href="/">testing</a></li>
+          <li><a className={styles.logo} href="/">Spooderweb</a></li>
           <li className={styles.space}><a></a></li>
           <li className={styles.normal}><a href="/about">about</a></li>
           <li className={username ? styles.nil : styles.normal}><a href="/register">register</a></li>
