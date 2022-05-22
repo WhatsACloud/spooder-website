@@ -77,9 +77,6 @@ div {
     input {
       border-color: red;
       color: red;
-      &::placeholder {
-        color: red;
-      }
     }
     p.errorMsg {
       margin-left: calc((100% - #{$width}) / 2 + 1em);

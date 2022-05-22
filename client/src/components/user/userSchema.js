@@ -13,16 +13,10 @@ const PASSWORD = string()
                 .max(40, 'Password should have at most 40 characters')
                 .required('Password is a required field')
 
-const REPEATPASSWORD = string()
-                      .when('Password', (Password, registerSchema) => 
-                        Password ? registerSchema.oneOf([ref('Password')], 'Passwords do not match') : registerSchema
-                      )
-
 const registerSchema = object({
   Username: USERNAME,
   Email: EMAIL.email('Email is invalid'),
   Password: PASSWORD,
-  RepeatPassword: REPEATPASSWORD
 })
 
 const loginSchema = object({

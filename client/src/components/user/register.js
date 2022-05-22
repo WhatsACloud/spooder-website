@@ -12,18 +12,16 @@ import Authorizer from '../Shared/Authorizer'
 
 const registerEndpoint = "/register"
 
-async function signUp(errorStates, changeErrorState, changeServerErrorState, navigate, username, email, password, repeatPassword) {
+async function signUp(errorStates, changeErrorState, changeServerErrorState, navigate, username, email, password) {
   // console.log(canSend)
   try {
     const toSend = {
       "Username": username,
       "Email": email,
-      "Password": password,
-      "RepeatPassword": repeatPassword
+      "Password": password
     }
     try {
       const result = await registerSchema.validate(toSend, {abortEarly: false})
-      delete toSend.RepeatPassword
       assignError(null, null, errorStates, changeErrorState)
       await userLoginHandler(registerEndpoint, toSend, changeServerErrorState, navigate)
     } catch(err) {
@@ -53,7 +51,6 @@ const Register = ({ setInLogin }) => {
         <InputBox name="username" display="Username" errorMsg={errorStates.Username}></InputBox>
         <InputBox name="email" display="Email" errorMsg={errorStates.Email}></InputBox>
         <PasswordBox name="password" display="Password" errorMsg={errorStates.Password}></PasswordBox>
-        <PasswordBox name="repeatPassword" display="Repeat Password" errorMsg={errorStates.RepeatPassword} noenter={true}></PasswordBox>
         <ErrorBox>
           {serverErrorState}
         </ErrorBox>
@@ -68,7 +65,6 @@ const Register = ({ setInLogin }) => {
             document.getElementById("username").value,
             document.getElementById("email").value, 
             document.getElementById("password").value,
-            document.getElementById("repeatPassword").value
             )}>
             Sign Up
         </button>
