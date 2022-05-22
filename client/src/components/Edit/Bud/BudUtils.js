@@ -11,8 +11,15 @@ const setBud = (setObjsToUpdate, details) => { // { pronounciation, contexts, ex
   }
   const nextObjId = utils.getNextObjId()
   setObjsToUpdate({[nextObjId]: obj})
-  utils.updateNewObjs(nextObjId, obj, true)
+  utils.updateNewObjs(nextObjId, obj)
   utils.setNextObjId(nextObjId+1)
+  const redoFunc = () => {
+
+  }
+  const undoFunc = () => {
+    setObjsToUpdate({[nextObjId]: null}) // add support to remove stuff like this
+  }
+  utils.addToHistory(undoFunc, redoFunc)
 }
 export { setBud }
 

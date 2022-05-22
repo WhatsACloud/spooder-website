@@ -23,9 +23,10 @@ const Authorizer = ({ requireAuth=false, navigate }) => {
   useEffect(() => {
     authorize()
       .then((result) => {
+        console.log(result, requireAuth)
         if (!result) {
           if (requireAuth) {
-            navigate('/login', {state: {message: 'the authorization failed on server, please relogin.'}})
+            navigate('/login?login=true')
           }
         } else {
           if (!requireAuth) {

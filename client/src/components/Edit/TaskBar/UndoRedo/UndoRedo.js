@@ -29,6 +29,7 @@ const redo = () => {
   const historyIndex = getHistoryIndex()
   const history = getHistory()
   const last = history[historyIndex+1]
+  console.log(historyIndex+1, history)
   if (last) {
     setHistoryIndex(historyIndex+1)
     last.redo(redo)

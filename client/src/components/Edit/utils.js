@@ -21,11 +21,11 @@ const getObjs = () => {
 export { getObjs }
 
 const addToHistory = (undoFunc, redoFunc) => {
-  console.log('added to history')
   const mainLayer = getMainLayer()
   const history = mainLayer.getAttr('history')
   const historyIndex = mainLayer.getAttr('historyIndex')
   if (history.length > 0 && history[historyIndex+1]) {
+    console.log(historyIndex+1, history.length-historyIndex)
     history.splice(historyIndex+1, history.length-historyIndex)
   }
   history.push({undo: undoFunc, redo: redoFunc})
@@ -94,7 +94,7 @@ const getNextHighestAttr = (arr, attrName) => {
 }
 export { getNextHighestAttr }
 
-const updateNewObjs = (objId, obj, alrHistory=false) => {
+const updateNewObjs = (objId, obj) => {
   const mainLayer = getMainLayer()
   const newObjs = mainLayer.getAttr('newObjs')
   const rootPos = getRootPos()
@@ -107,7 +107,6 @@ const updateNewObjs = (objId, obj, alrHistory=false) => {
     const undoFunc = () => {
       mainLayer.setAttr('newObjs', newObjs)
     }
-    addToHistory(undoFunc, redoFunc)
   }
   redoFunc()
 }
@@ -188,39 +187,27 @@ const addObjs = (toAdd, addObjsToKonva, removeObjsFromKonva) => {
       }
     }
     layer.setAttr('budObjs', currentBudObjs)
-    console.log('redo')
     addObjsToKonva(toAdd)
   }
   if (currentObjs) {
     const oldBudObjs = layer.getAttr('budObjs')
     const undoFunc = () => {
-      console.log(currentObjs)
       layer.setAttr('objs', currentObjs)
       layer.setAttr('budObjs', oldBudObjs)
       const objIds = Object.keys(toAdd)
       for (const objId of objIds) {
         const konvaObj = getKonvaObjById(objId)
-        console.log(konvaObj, objId)
         konvaObj.destroy()
         removeObjsFromKonva(objId) // to make it compatible with react konva
       }
-      // console.log(toAdd, objIds)
       setNextObjId(objIds[0]) // bcuz most of the time only one is added
     }
-    addToHistory(undoFunc, redo => {
-      redoFunc()
-      console.log(Object.values(toAdd)[0])
-      if (Object.values(toAdd)[0].type !== "bud") {
-        console.log('a')
-        redo()
-      }
-    })
   }
   redoFunc()
 }
 export { addObjs }
 
-const updateObj = (objId, attrs, alrHistory=false) => {
+const updateObj = (objId, attrs) => {
   const mainLayer = getMainLayer()
   const obj = getObjById(objId)
   const konvaObj = getKonvaObjById(objId) 
@@ -241,16 +228,15 @@ const updateObj = (objId, attrs, alrHistory=false) => {
     let konvaObj
     const interval = setInterval(() => {
       konvaObj = getKonvaObjById(objId)
+      console.log(konvaObj, objId)
       if (konvaObj) {
         clearInterval(interval)
-        // console.log(getKonvaObjs(), objId)
         const newObj = {...obj}
         Object.entries(attrs).forEach(([name, val]) => {
           newObj[name] = val
         })
         updateNewObjs(objId, newObj, true)
         if ('position' in attrs) {
-          // console.log(konvaObj)
         }
         if ('positions' in attrs) {
           const rootPos = getRootPos()
@@ -273,6 +259,7 @@ const updateObj = (objId, attrs, alrHistory=false) => {
   }
   const undoFunc = () => {
     updateNewObjs(objId, obj, true)
+    const konvaObj = getKonvaObjById(objId)
     if (prevAttachedTo) konvaObj.setAttr('attachedSilkObjId', prevAttachedTo)
     if (prevPositions) {
       const rootPos = getRootPos()
@@ -286,12 +273,10 @@ const updateObj = (objId, attrs, alrHistory=false) => {
       // konvaObj.children[1].setY(prevPositions[1])
       // konvaObj.children[2].setX(prevPositions[2])
       // konvaObj.children[2].setY(prevPositions[3])
-      // console.log(oldRootPos)
       // konvaObj.setAttr('offsetRootPoses', [
       //   {x: prevPositions[0], y: prevPositions[1]},
       //   {x: prevPositions[2], y: prevPositions[3]}
       // ])
-
       konvaObj.children[0].setPoints([
         prevPositions[0].x + rootPos.x,
         prevPositions[0].y + rootPos.y,
@@ -305,17 +290,6 @@ const updateObj = (objId, attrs, alrHistory=false) => {
       konvaObj.setAttr('offsetRootPoses', prevPositions)
     }
   }
-  if (!alrHistory) {
-    if (!obj.initialised) {
-      addToHistory(undoFunc, redoFunc)
-    } else {
-      addToHistory(undo => {
-        undoFunc()
-        undo()
-      }, redoFunc)
-      delete obj.initialised
-    }
-  }
   redoFunc()
 }
 export { updateObj as updateObj }
@@ -325,7 +299,6 @@ import api from '../../services/api'
 
 const save = async () => {
   const newObjs = getMainLayer().getAttr('newObjs') 
-  console.log(newObjs)
   const urlString = window.location.search
   let paramString = urlString.split('?')[1];
   let queryString = new URLSearchParams(paramString);
@@ -335,7 +308,6 @@ const save = async () => {
       spoodawebData: newObjs
     }
     const result = await api.post('/webs/edit', req)
-    console.log(result)
   } catch(err) {
     err = err.response
     console.log(err)

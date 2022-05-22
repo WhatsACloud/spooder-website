@@ -6,6 +6,7 @@ const router = Router()
 
 router.post(
   '/',
+  token.authenticateToken,
   function (req, res, next) {
     res.status(200).send({type: true})
   },
