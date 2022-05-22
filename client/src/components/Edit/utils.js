@@ -172,6 +172,13 @@ const getObjById = (id=null) => {
 }
 export { getObjById }
 
+const getHighlighter = () => {
+  const stage = getStage()
+  const highlighter = stage.find('.highlighter')[0]
+  return highlighter
+}
+export { getHighlighter }
+
 const addObjs = (toAdd) => {
   const layer = getMainLayer()
   const currentObjs = layer.getAttr('objs')
@@ -233,8 +240,6 @@ const updateObj = (objId, attrs) => {
           newObj[name] = val
         })
         updateNewObjs(objId, newObj, true)
-        if ('position' in attrs) {
-        }
         if ('positions' in attrs) {
           const rootPos = getRootPos()
           konvaObj.children[0].setPoints([

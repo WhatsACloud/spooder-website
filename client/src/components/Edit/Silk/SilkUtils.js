@@ -20,7 +20,7 @@ const setSilk = (setObjsToUpdate, details) => {
 }
 export { setSilk }
 
-const startDragLine = (e, setSelectedSilk, objId, innerIndex, toggleCanDragLine) => {
+const startDragLine = (e, setSelectedSilk, objId, innerIndex) => {
   if (e.button === 0 && utils.isInCanvas({x: e.pageX, y: e.pageY})) {
     const newSelectedSilk = {"objId": objId, "innerIndex": innerIndex}
     setSelectedSilk(newSelectedSilk)
@@ -47,36 +47,32 @@ const stopDragLine = (e, lineCircle) => { // todo: remove lineCircle, add mouseu
     }
   }
 }
-export { stopDragLine as stopDragLine }
+export { stopDragLine }
 
-const snapLine = (selectedSilk) => {
-  const stage = utils.getStage()
-  const highlighter = stage.find('.highlighter')[0]
+const snapLine = (selectedSilk, budObjId, x, y) => {
   const line = utils.getKonvaObjById(selectedSilk.objId)
   const lineCircle = line.children[selectedSilk.innerIndex]
-  const attachedTo = utils.getKonvaObjById(highlighter.getAttr('attachedObjId'))
-  console.log(highlighter.getAttr('attachedObjId'))
-  console.log(lineCircle.getX(), lineCircle.getY())
+  const attachedTo = utils.getKonvaObjById(budObjId)
+  // console.log(highlighter.getAttr('attachedObjId'))
+  // console.log(lineCircle.getX(), lineCircle.getY())
   lineCircle.setAttr('attachedToObjId', attachedTo.getAttr('objId'))
   const newAttachedSilkToBud = attachedTo.getAttr('attachedSilkObjId')
   if (!newAttachedSilkToBud[selectedSilk.objId]) {
     newAttachedSilkToBud[selectedSilk.objId] = selectedSilk.innerIndex
   }
   attachedTo.setAttr('attachedSilkObjId', newAttachedSilkToBud)
-  updateLinePos(lineCircle, highlighter.getX(), highlighter.getY())
+  updateLinePos(lineCircle, x, y)
   const offsetRootPoses = line.getAttr('offsetRootPoses')
   const rootPos = utils.getRootPos()
-  offsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: highlighter.getX() - rootPos.x, y: highlighter.getY() - rootPos.y}
+  offsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: x - rootPos.x, y: y - rootPos.y}
   line.setAttr('offsetRootPoses', offsetRootPoses)
   utils.updateObj(selectedSilk.objId, {
     positions: offsetRootPoses,
     [`attachedTo${selectedSilk.innerIndex}`]: lineCircle.getAttr('attachedToObjId')
   })
-  const bud = attachedTo
-  const budObjId = bud.getAttr('objId')
-  console.log(utils.getObjById(budObjId))
+  // console.log(utils.getObjById(budObjId))
   utils.updateObj(budObjId, {
-    attachedTo: {...utils.getObjById(budObjId).attachedTo, [line.getAttr('objId')]: selectedSilk.innerIndex}
+    attachedTo: {...utils.getObjById(budObjId).attachedTo, [selectedSilk.objId]: selectedSilk.innerIndex}
   })
 }
 export { snapLine as snapLine }

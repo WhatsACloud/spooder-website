@@ -13,8 +13,10 @@ const LineDragUpdater = memo(({
   setTriggerDragLine,
   triggerDragLine
   }) => { // still a functional component
+  const [ makingLine, setMakingLine ] = useState(false) // if true that means initialising line
   useEffect(() => {
     let lineCircle
+    let redoFunc, undoFunc
     if (selectedSilk) {
       const line = utils.getKonvaObjById(selectedSilk.objId)
       if (line) {
@@ -26,7 +28,8 @@ const LineDragUpdater = memo(({
       setDraggingLine(true)
       const currentObjId = utils.getNextObjId()
       SilkUtils.setSilk(setObjsToUpdate, {positions: [canvasMousePos, canvasMousePos]})
-      SilkUtils.startDragLine(e, setSelectedSilk, currentObjId, 1, toggleCanDragLine)
+      SilkUtils.startDragLine(e, setSelectedSilk, currentObjId, 1)
+      setMakingLine(true)
     }
     const startDragLineWrapper = (e) => {
       const canvasMousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
@@ -41,32 +44,61 @@ const LineDragUpdater = memo(({
     const stopDragLineWrapper = e => SilkUtils.stopDragLine(e, lineCircle)
     const dragLineWrapper = e => SilkUtils.lineCircleMove(e, draggingLine, selectedSilk)
     const dropLine = (e) => {
+      console.log('dropped line')
       const line = utils.getKonvaObjById(selectedSilk.objId)
       line.moveToBottom()
       if (!utils.isInCanvas({x: e.pageX, y: e.pageY})) SilkUtils.snapLineCircleToLine(selectedSilk) 
-      if (hoverBud) {
-        console.log(selectedSilk.innerIndex)
-        SilkUtils.snapLine(selectedSilk)
-      } else { // detaches line
-        const offsetRootPoses = line.getAttr('offsetRootPoses')
-        const mousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
-        const rootPos = utils.getRootPos()
-        // const oppositePointPos = offsetRootPoses[Math.abs(selectedSilk.innerIndex-2)]
-        offsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
-        console.log(Math.abs(selectedSilk.innerIndex-1))
-        // offsetRootPoses[selectedSilk.innerIndex-1] = oppositePointPos
-        line.setAttr('offsetRootPoses', offsetRootPoses)
-        const lineCircle = line.children[selectedSilk.innerIndex]
-        SilkUtils.removeAttachment(lineCircle)
-        console.log(selectedSilk.innerIndex)
-        console.log(`attachedTo${selectedSilk.innerIndex}`)
-        utils.updateObj(selectedSilk.objId, {
-          positions: offsetRootPoses,
-          innerIndex: selectedSilk.innerIndex
-        })
+      const highlighter = utils.getHighlighter()
+      const budId = highlighter.getAttr('attachedObjId')
+      const x = highlighter.getX()
+      const y = highlighter.getY()
+      const offsetRootPoses = line.getAttr('offsetRootPoses')
+      const newOffsetRootPoses = [...offsetRootPoses]
+      const mousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
+      const rootPos = utils.getRootPos()
+      newOffsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
+      console.log(makingLine)
+      if (makingLine) {
+        redoFunc = () => {
+          SilkUtils.setSilk(setObjsToUpdate, {positions: newOffsetRootPoses})
+        }
+        undoFunc = () => {
+          console.log(utils.getMainLayer())
+          const konvaObj = utils.getKonvaObjById(selectedSilk.objId)
+          console.log(konvaObj, selectedSilk.objId)
+          konvaObj.destroy()
+        }
+      } else {
+        if (hoverBud) {
+          console.log(selectedSilk.innerIndex)
+          SilkUtils.snapLine(selectedSilk, budId, x, y)
+        } else { // detaches line
+          const lineCircle = line.children[selectedSilk.innerIndex]
+          redoFunc = () => {
+            line.setAttr('offsetRootPoses', newOffsetRootPoses)
+            SilkUtils.removeAttachment(lineCircle)
+            utils.updateObj(selectedSilk.objId, {
+              positions: newOffsetRootPoses,
+              innerIndex: selectedSilk.innerIndex
+            })
+          }
+          undoFunc = () => {
+            line.setAttr('offsetRootPoses', offsetRootPoses)
+            SilkUtils.snapLine(selectedSilk, budId, x, y)
+            utils.updateObj(selectedSilk.objId, {
+              positions: offsetRootPoses,
+              innerIndex: selectedSilk.innerIndex
+            })
+          }
+        }
+      }
+      utils.addToHistory(undoFunc, redoFunc)
+      if (!makingLine) {
+        redoFunc()
       }
       setDraggingLine(false)
       setSelectedSilk()
+      setMakingLine(false)
     }
     utils.getMainLayer().setAttr('draggingLine', draggingLine)
     if (toggleCanDragLine) {
@@ -92,7 +124,7 @@ const LineDragUpdater = memo(({
       document.removeEventListener('mouseup', stopDragLineWrapper)
       document.removeEventListener('mouseup', dropLine)
     }
-  }, [ toggleCanDragLine, draggingLine, selectedSilk, hoverBud, triggerDragLine ])
+  }, [ toggleCanDragLine, draggingLine, selectedSilk, hoverBud, triggerDragLine, makingLine ])
   return (
     <></>
   )
