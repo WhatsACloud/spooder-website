@@ -103,10 +103,8 @@ const updateNewObjs = (objId, obj) => {
     editObjs[objId] = obj
     mainLayer.setAttr('newObjs', editObjs)
   }
-  if (!alrHistory) {
-    const undoFunc = () => {
-      mainLayer.setAttr('newObjs', newObjs)
-    }
+  const undoFunc = () => {
+    mainLayer.setAttr('newObjs', newObjs)
   }
   redoFunc()
 }
@@ -174,7 +172,7 @@ const getObjById = (id=null) => {
 }
 export { getObjById }
 
-const addObjs = (toAdd, addObjsToKonva, removeObjsFromKonva) => {
+const addObjs = (toAdd) => {
   const layer = getMainLayer()
   const currentObjs = layer.getAttr('objs')
   const redoFunc = () => {
@@ -187,22 +185,21 @@ const addObjs = (toAdd, addObjsToKonva, removeObjsFromKonva) => {
       }
     }
     layer.setAttr('budObjs', currentBudObjs)
-    addObjsToKonva(toAdd)
   }
-  if (currentObjs) {
-    const oldBudObjs = layer.getAttr('budObjs')
-    const undoFunc = () => {
-      layer.setAttr('objs', currentObjs)
-      layer.setAttr('budObjs', oldBudObjs)
-      const objIds = Object.keys(toAdd)
-      for (const objId of objIds) {
-        const konvaObj = getKonvaObjById(objId)
-        konvaObj.destroy()
-        removeObjsFromKonva(objId) // to make it compatible with react konva
-      }
-      setNextObjId(objIds[0]) // bcuz most of the time only one is added
-    }
-  }
+  // if (currentObjs) {
+  //   const oldBudObjs = layer.getAttr('budObjs')
+  //   const undoFunc = () => {
+  //     layer.setAttr('objs', currentObjs)
+  //     layer.setAttr('budObjs', oldBudObjs)
+  //     const objIds = Object.keys(toAdd)
+  //     for (const objId of objIds) {
+  //       const konvaObj = getKonvaObjById(objId)
+  //       konvaObj.destroy()
+  //       removeObjsFromKonva(objId) // to make it compatible with react konva
+  //     }
+  //     setNextObjId(objIds[0]) // bcuz most of the time only one is added
+  //   }
+  // }
   redoFunc()
 }
 export { addObjs }

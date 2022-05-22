@@ -79,10 +79,10 @@ function AddNewObjs({
   useEffect(() => {
     if (objsToUpdate) {
       const newObjsToUpdate = JSON.parse(JSON.stringify(objsToUpdate))
-      const addObjsToKonva = (newObjsToUpdate) => {
-        const newRendered = [...rendered]
-        const rootPos = utils.getRootPos()
-        Object.entries(newObjsToUpdate).forEach(([objId, obj]) => {
+      const newRendered = [...rendered]
+      const rootPos = utils.getRootPos()
+      Object.entries(newObjsToUpdate).forEach(([objId, obj]) => {
+        if (obj !== null) {
           if (obj.type === 'bud') {
             newRendered.push(
               <BudShapes.Bud
@@ -115,19 +115,20 @@ function AddNewObjs({
           } else {
             console.log('Error: object type not specified')
           }
-        })
-        setRendered(newRendered)
-      }
-      const removeObjsFromKonva = (objId) => {
-        const newRendered = [...rendered]
-        for (const [ index, e ] of Object.entries(newRendered)) {
-          if (e.props.objId === objId) {
-            newRendered.splice(index, 1)
+          utils.addObjs(newObjsToUpdate)
+        } else {
+          const newRendered = [...rendered]
+          for (const [ index, e ] of Object.entries(newRendered)) {
+            if (e.props.objId === objId) {
+              newRendered.splice(index, 1)
+            }
           }
+          setRendered(newRendered)
+          const konvaObj = utils.getKonvaObjById(objId)
+          konvaObj.destroy()
         }
-        setRendered(newRendered)
-      }
-      utils.addObjs(newObjsToUpdate, addObjsToKonva, removeObjsFromKonva)
+      })
+      setRendered(newRendered)
     }
   }, [ objsToUpdate ])
   return <></>

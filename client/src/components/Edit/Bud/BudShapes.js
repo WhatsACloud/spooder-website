@@ -139,22 +139,18 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
             const oldOffsetRootPoses = []
             const redoFunc = () => {
               // obj.setAttr('offsetRootPos', newOffsetRootPos)
-              utils.updateObj(objId, {position: newOffsetRootPos}, true)
+              utils.updateObj(objId, {position: newOffsetRootPos})
               for (const [ objId, innerIndex ] of Object.entries(attachedObjIds)) {
                 const line = utils.getKonvaObjById(objId)
                 const offsetRootPoses = line.getAttr('offsetRootPoses')
                 oldOffsetRootPoses.push(offsetRootPoses)
                 offsetRootPoses[innerIndex-1] = {x: newOffsetRootPos.x, y: newOffsetRootPos.y}
-                utils.updateObj(objId, {positions: offsetRootPoses}, true)
+                utils.updateObj(objId, {positions: offsetRootPoses})
               }
             }
             const undoFunc = () => {
-              // obj.setAttr('offsetRootPos', oldOffsetRootPos)
               console.log('undone')
-              utils.updateObj(objId, {position: oldOffsetRootPos}, true)
-              // for (let index = 0; index < Object.keys(attachedObjIds); index++) {
-              //   utils.updateObj(objId, {positions: }, true)
-              // }
+              utils.updateObj(objId, {position: oldOffsetRootPos})
             }
             utils.addToHistory(undoFunc, redoFunc)
             redoFunc()

@@ -2,24 +2,24 @@ import { budSample } from '../spoodawebSampleData'
 import * as utils from '../utils'
 
 const setBud = (setObjsToUpdate, details) => { // { pronounciation, contexts, examples, links, position, type }
-  const obj = {...budSample}
-  for (const name in details) {
-    if (name in obj) {
-      const detail = details[name]
-      obj[name] = detail
-    }
-  }
   const nextObjId = utils.getNextObjId()
-  setObjsToUpdate({[nextObjId]: obj})
-  utils.updateNewObjs(nextObjId, obj)
-  utils.setNextObjId(nextObjId+1)
   const redoFunc = () => {
-
+    const obj = {...budSample}
+    for (const name in details) {
+      if (name in obj) {
+        const detail = details[name]
+        obj[name] = detail
+      }
+    }
+    setObjsToUpdate({[nextObjId]: obj})
+    utils.updateNewObjs(nextObjId, obj)
+    utils.setNextObjId(nextObjId+1)
   }
   const undoFunc = () => {
     setObjsToUpdate({[nextObjId]: null}) // add support to remove stuff like this
   }
   utils.addToHistory(undoFunc, redoFunc)
+  redoFunc()
 }
 export { setBud }
 
