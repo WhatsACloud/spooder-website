@@ -56,7 +56,11 @@ function PasswordBox(props) {
     inputType = "password";
   }
   return (
-    <InputBox name={props.name} display={props.display} inputType={inputType} noenter={props.noenter} errorMsg={props.errorMsg}>
+    <InputBox
+      name={props.name}
+      display={props.display}
+      inputType={inputType}
+      errorMsg={props.errorMsg}>
       <button
         className={inputBoxStyles.passwordIcon}
         onClick={() => toggleVisible(!visible)}

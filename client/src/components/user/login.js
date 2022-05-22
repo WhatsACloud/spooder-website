@@ -10,8 +10,7 @@ import Authorizer from '../Shared/Authorizer'
 import Register from './register'
 
 // import { TransitionGroup } from 'react-transition-group'
-import Animate from 'Animate.css-react'
-import 'animate.css/animate.css'
+import { useSpring, animated, config } from "react-spring"
 
 async function Login(errorStates, changeErrorState, changeServerErrorState, navigate, email, password) {
   try {
@@ -42,7 +41,8 @@ const login = () => {
   const urlString = window.location.search
   let paramString = urlString.split('?')[1];
   let queryString = new URLSearchParams(paramString);
-  const [ inLogin, setInLogin ] = useState(queryString.get('login') === "true")
+  const initialIsLogin = queryString.get('login') === "true"
+  const [ inLogin, setInLogin ] = useState(initialIsLogin)
   const [ errorStates, changeErrorState ] = useState({
     "Username": false,
     "Email": false,
@@ -51,12 +51,25 @@ const login = () => {
   })
   const [ serverErrorState, changeServerErrorState ] = useState(location.state ? location.state.message || '' : '')
   const [ inner, setInner ] = useState()
-
+  const { opacity } = useSpring({
+    from: { opacity: 0 },
+    to: { opacity: 1 },
+    reset: true,
+    delay: 0,
+    config: config.gentle
+  })
+  const { x } = useSpring({
+    from: { x: -100 },
+    to: { x: 0 },
+    reset: true,
+    delay: 0,
+    config: config.default
+  })
   useEffect(() => {
     if (inLogin) {
       setInner((
         <>
-          <form>
+          <form className={styles.form}>
             <InputBox name="email" display="Email" errorMsg={errorStates.Email}></InputBox>
             <PasswordBox name="password" display="Password" errorMsg={errorStates.Password}></PasswordBox>
             <ErrorBox>
@@ -89,17 +102,23 @@ const login = () => {
       <Authorizer navigate={navigate}></Authorizer>
       <div className={styles.background}></div>
       <div
-        className={inLogin ? styles.outerDiv : styles.outerDivRegister}
-        class='animate__fadeIn animate__slideInLeft'>
+        className={inLogin ? styles.outerDiv : styles.outerDivRegister}>
         <div className={styles.div}>
-          <Title name={inLogin ? "LOGIN" : "REGISTER"}></Title>
-          <ToOtherSide text={inLogin ?
-            "Don't have an account? Sign up for one here"
-            : 'Have an account already? Login here'}
-            onClick={() => {
-              setInLogin(!inLogin)
-            }}></ToOtherSide>
-          {inner}
+          <animated.div
+            className={styles.anotherWrapper}
+            style={{
+              opacity: opacity,
+              marginLeft: x
+              }}>
+            <Title name={inLogin ? "LOGIN" : "REGISTER"}></Title>
+            <ToOtherSide text={inLogin ?
+              "Don't have an account? Sign up for one here"
+              : 'Have an account already? Login here'}
+              onClick={() => {
+                setInLogin(!inLogin)
+              }}></ToOtherSide>
+            {inner}
+          </animated.div>
         </div>
       </div>
     </>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import styles from './InputBox.module'
 
-export default function InputBox({ errorMsg, display, inputType, name, noenter, children}) {
+export default function InputBox({ errorMsg, display, inputType, name }) {
   const inputElement = useRef(null)
   const [ focused, setFocused ] = useState(false)
   const [ text, setText ] = useState('')
