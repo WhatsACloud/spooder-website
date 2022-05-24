@@ -60,13 +60,15 @@ const LineDragUpdater = memo(({
       console.log(makingLine)
       if (makingLine) {
         redoFunc = () => {
-          SilkUtils.setSilk(setObjsToUpdate, {positions: newOffsetRootPoses})
+          SilkUtils.setSilk(setObjsToUpdate, {positions: newOffsetRootPoses}, selectedSilk.objId)
         }
         undoFunc = () => {
           console.log(utils.getMainLayer())
           const konvaObj = utils.getKonvaObjById(selectedSilk.objId)
           console.log(konvaObj, selectedSilk.objId)
           konvaObj.destroy()
+          const obj = utils.getObjById(selectedSilk.objId)
+          obj.del = true
         }
       } else {
         if (hoverBud) {

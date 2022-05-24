@@ -57,14 +57,14 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
     const offsetRootPoses = lineGroup.getAttr('offsetRootPoses')
     const rootPos = utils.getRootPos()
     const newOffsetRootPoses = [
-      {x: points[0].x - rootPos.x, y: points[0].y - rootPos.y},
-      {x: points[1].x - rootPos.x, y: points[1].y - rootPos.y},
+      {x: points[0].x, y: points[0].y},
+      {x: points[1].x, y: points[1].y},
     ]
     lineGroup.setAttr('offsetRootPoses', newOffsetRootPoses)
     utils.updateObj(objId, {positions: newOffsetRootPoses}, true)
   }
+  const rootPos = utils.getRootPos()
   const getOffsetRootPoses = () => {
-    const rootPos = utils.getRootPos()
     const offsetX1 = points[0].x - rootPos.x 
     const offsetY1 = points[0].y - rootPos.y 
     const offsetX2 = points[1].x - rootPos.x 
@@ -80,7 +80,12 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
       objId={objId}
       offsetRootPoses={getOffsetRootPoses()}>
       <reactKonva.Line
-        points={[points[0].x, points[0].y, points[1].x, points[1].y]}
+        points={[
+          points[0].x + rootPos.x,
+          points[0].y + rootPos.y,
+          points[1].x + rootPos.x,
+          points[1].y + rootPos.y,
+        ]}
         stroke='black'
         strokeWidth={1}
         hitStrokeWidth={30}
@@ -93,12 +98,12 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
           const rootPos = utils.getRootPos()
           const offsetRootPoses = [
             {
-              x: points[0]-rootPos.x,
-              y: points[1]-rootPos.y
+              x: points[0],
+              y: points[1]
             },
             {
-              x: points[2]-rootPos.x,
-              y: points[3]-rootPos.y
+              x: points[2],
+              y: points[3]
             }
           ]
           utils.updateObj(silkGroup.getAttr('objId'), {positions: offsetRootPoses})
@@ -107,7 +112,7 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
         onDragEnd={lineDragendFunc}
         onClick={evt => {select(evt, setSelectedObj)}}></reactKonva.Line>
       <SilkEnd
-        points={points[0]}
+        points={{x: points[0].x + rootPos.x, y: points[0].y + rootPos.y}}
         setSelectedSilk={setSelectedSilk}
         setToggleCanDragLine={setToggleCanDragLine}
         objId={objId}
@@ -115,7 +120,7 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
         setSelectedObj={setSelectedObj}
         setDraggingLine={setDraggingLine}></SilkEnd>
       <SilkEnd
-        points={points[1]}
+        points={{x: points[1].x + rootPos.x, y: points[1].y + rootPos.y}}
         setSelectedSilk={setSelectedSilk}
         setToggleCanDragLine={setToggleCanDragLine}
         attachedToObjId={attachedTo2}

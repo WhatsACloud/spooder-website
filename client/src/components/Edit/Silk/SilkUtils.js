@@ -4,8 +4,8 @@ import React from 'react'
 
 import { silkSample } from '../spoodawebSampleData'
 
-const setSilk = (setObjsToUpdate, details) => {
-  const nextObjId = utils.getNextObjId()
+const setSilk = (setObjsToUpdate, details, objId) => {
+  const nextObjId = objId || utils.getNextObjId()
   const line = {...silkSample}
   for (const name in details) {
     if (name in line) {
@@ -14,8 +14,11 @@ const setSilk = (setObjsToUpdate, details) => {
     }
   }
   line.initialised = true // used for the history, such that program identifies it as just added
+  if (line.del) {
+    delete line.del
+  }
   setObjsToUpdate({[nextObjId]: line})
-  utils.updateNewObjs(nextObjId, line, true)
+  utils.updateNewObjs(nextObjId, line)
   utils.setNextObjId(nextObjId+1)
 }
 export { setSilk }
