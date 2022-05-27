@@ -94,19 +94,19 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
           const silkGroup = evt.target.parent
           SilkUtils.removeAttachment(silkGroup.children[1])
           SilkUtils.removeAttachment(silkGroup.children[2])
-          const points = evt.target.getPoints()
-          const rootPos = utils.getRootPos()
-          const offsetRootPoses = [
-            {
-              x: points[0],
-              y: points[1]
-            },
-            {
-              x: points[2],
-              y: points[3]
-            }
-          ]
-          utils.updateObj(silkGroup.getAttr('objId'), {positions: offsetRootPoses})
+          // const points = evt.target.getPoints()
+          // const rootPos = utils.getRootPos()
+          // const offsetRootPoses = [
+          //   {
+          //     x: points[0] - rootPos.x,
+          //     y: points[1] - rootPos.y,
+          //   },
+          //   {
+          //     x: points[2] - rootPos.x,
+          //     y: points[3] - rootPos.y,
+          //   }
+          // ]
+          // utils.updateObj(silkGroup.getAttr('objId'), {positions: offsetRootPoses})
         }}
         onDragMove={lineDragmoveFunc}
         onDragEnd={lineDragendFunc}

@@ -182,44 +182,21 @@ export { getHighlighter }
 const addObjs = (toAdd) => {
   const layer = getMainLayer()
   const currentObjs = layer.getAttr('objs')
-  const redoFunc = () => {
-    const newObjs = {...currentObjs, ...toAdd}
-    layer.setAttr('objs', newObjs)
-    const currentBudObjs = layer.getAttr('budObjs')
-    for (const [ objId, toAddObj ] of Object.entries(toAdd)) {
-      if (toAddObj.type === "bud") {
-        currentBudObjs[objId] = toAddObj
-      }
+  const newObjs = {...currentObjs, ...toAdd}
+  layer.setAttr('objs', newObjs)
+  const currentBudObjs = layer.getAttr('budObjs')
+  for (const [ objId, toAddObj ] of Object.entries(toAdd)) {
+    if (toAddObj.type === "bud") {
+      currentBudObjs[objId] = toAddObj
     }
-    layer.setAttr('budObjs', currentBudObjs)
   }
-  // if (currentObjs) {
-  //   const oldBudObjs = layer.getAttr('budObjs')
-  //   const undoFunc = () => {
-  //     layer.setAttr('objs', currentObjs)
-  //     layer.setAttr('budObjs', oldBudObjs)
-  //     const objIds = Object.keys(toAdd)
-  //     for (const objId of objIds) {
-  //       const konvaObj = getKonvaObjById(objId)
-  //       konvaObj.destroy()
-  //       removeObjsFromKonva(objId) // to make it compatible with react konva
-  //     }
-  //     setNextObjId(objIds[0]) // bcuz most of the time only one is added
-  //   }
-  // }
-  redoFunc()
+  layer.setAttr('budObjs', currentBudObjs)
 }
 export { addObjs }
 
 const updateObj = (objId, attrs) => {
-  const mainLayer = getMainLayer()
   const obj = getObjById(objId)
   const konvaObj = getKonvaObjById(objId) 
-  let prevPositions 
-  if ('positions' in attrs) {
-    prevPositions = konvaObj.getAttr('offsetRootPoses')
-  }
-  let prevPosition
   if ('position' in attrs) {
     konvaObj.setAttr('offsetRootPos', attrs.position)
     const bud = konvaObj.children[0]
@@ -242,16 +219,27 @@ const updateObj = (objId, attrs) => {
         updateNewObjs(objId, newObj, true)
         if ('positions' in attrs) {
           const rootPos = getRootPos()
+          console.log(attrs)
           konvaObj.children[0].setPoints([
-            attrs.positions[0].x + rootPos.x,
-            attrs.positions[0].y + rootPos.y,
-            attrs.positions[1].x + rootPos.x,
-            attrs.positions[1].y + rootPos.y
+            attrs.positions[0].x,
+            attrs.positions[0].y,
+            attrs.positions[1].x,
+            attrs.positions[1].y,
           ])
-          konvaObj.children[1].setX(attrs.positions[0].x + rootPos.x)
-          konvaObj.children[1].setY(attrs.positions[0].y + rootPos.y)
-          konvaObj.children[2].setX(attrs.positions[1].x + rootPos.x)
-          konvaObj.children[2].setY(attrs.positions[1].y + rootPos.y)
+          konvaObj.children[1].setX(attrs.positions[0].x)
+          konvaObj.children[1].setY(attrs.positions[0].y)
+          konvaObj.children[2].setX(attrs.positions[1].x)
+          konvaObj.children[2].setY(attrs.positions[1].y)
+          konvaObj.setAttr('offsetRootPoses', [
+            {
+              x: attrs.positions[0].x - rootPos.x,
+              y: attrs.positions[0].y - rootPos.y,
+            },
+            {
+              x: attrs.positions[1].x - rootPos.x,
+              y: attrs.positions[1].y - rootPos.y,
+            }
+          ])
         }
         if ('attachedTo' in attrs) {
           konvaObj.setAttr('attachedSilkObjId', attrs.attachedTo)
@@ -265,20 +253,6 @@ const updateObj = (objId, attrs) => {
     if (prevAttachedTo) konvaObj.setAttr('attachedSilkObjId', prevAttachedTo)
     if (prevPositions) {
       const rootPos = getRootPos()
-      // konvaObj.children[0].setPoints([
-      //   prevPositions[0],
-      //   prevPositions[1],
-      //   prevPositions[2],
-      //   prevPositions[3],
-      // ])
-      // konvaObj.children[1].setX(prevPositions[0])
-      // konvaObj.children[1].setY(prevPositions[1])
-      // konvaObj.children[2].setX(prevPositions[2])
-      // konvaObj.children[2].setY(prevPositions[3])
-      // konvaObj.setAttr('offsetRootPoses', [
-      //   {x: prevPositions[0], y: prevPositions[1]},
-      //   {x: prevPositions[2], y: prevPositions[3]}
-      // ])
       konvaObj.children[0].setPoints([
         prevPositions[0].x + rootPos.x,
         prevPositions[0].y + rootPos.y,

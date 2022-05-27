@@ -27,6 +27,7 @@ const LineDragUpdater = memo(({
       if (!utils.isInCanvas(canvasMousePos)) return
       setDraggingLine(true)
       const currentObjId = utils.getNextObjId()
+      console.log('what')
       SilkUtils.setSilk(setObjsToUpdate, {positions: [canvasMousePos, canvasMousePos]})
       SilkUtils.startDragLine(e, setSelectedSilk, currentObjId, 1)
       setMakingLine(true)
@@ -43,7 +44,7 @@ const LineDragUpdater = memo(({
     }
     const stopDragLineWrapper = e => SilkUtils.stopDragLine(e, lineCircle)
     const dragLineWrapper = e => SilkUtils.lineCircleMove(e, draggingLine, selectedSilk)
-    const dropLine = (e) => {
+    const dropLine = (e) => { // wow! aMaZiNg CoDe!!!!!
       console.log('dropped line')
       const line = utils.getKonvaObjById(selectedSilk.objId)
       line.moveToBottom()
@@ -57,7 +58,7 @@ const LineDragUpdater = memo(({
       const mousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
       const rootPos = utils.getRootPos()
       newOffsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
-      console.log(makingLine)
+      console.log(newOffsetRootPoses, offsetRootPoses)
       if (makingLine) {
         redoFunc = () => {
           SilkUtils.setSilk(setObjsToUpdate, {positions: newOffsetRootPoses}, selectedSilk.objId)
@@ -94,6 +95,7 @@ const LineDragUpdater = memo(({
           }
         }
       }
+      line.setAttr('offsetRootPoses', newOffsetRootPoses)
       utils.addToHistory(undoFunc, redoFunc)
       if (!makingLine) {
         redoFunc()
