@@ -46,7 +46,7 @@ const stopDragLine = (e, lineCircle) => { // todo: remove lineCircle, add mouseu
       const highlighter = stage.find('.highlighter')[0]
       const x = highlighter.getX()
       const y = highlighter.getY()
-      updateLinePos(lineCircle, x, y)
+      updateLineCirclePos(lineCircle, x, y)
     }
   }
 }
@@ -64,7 +64,7 @@ const snapLine = (selectedSilk, budObjId, x, y) => {
     newAttachedSilkToBud[selectedSilk.objId] = selectedSilk.innerIndex
   }
   attachedTo.setAttr('attachedSilkObjId', newAttachedSilkToBud)
-  updateLinePos(lineCircle, x, y)
+  updateLineCirclePos(lineCircle, x, y)
   const offsetRootPoses = line.getAttr('offsetRootPoses')
   const rootPos = utils.getRootPos()
   offsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: x - rootPos.x, y: y - rootPos.y}
@@ -102,12 +102,24 @@ const lineCircleMove = (e, draggingLine, selectedSilk) => {
     const canvasMousePos = utils.getCanvasMousePos(mousePos.x, mousePos.y)
     const lineGroup = utils.getKonvaObjById(selectedSilk.objId).children
     const start = lineGroup[selectedSilk.innerIndex]
-    updateLinePos(start, canvasMousePos.x, canvasMousePos.y)
+    updateLineCirclePos(start, canvasMousePos.x, canvasMousePos.y)
   }
 }
 export { lineCircleMove as lineCircleMove }
 
-const updateLinePos = (lineCircle, x, y) => {
+const updateLinePos = (lineGroup, points) => {
+  const line = lineGroup.children[0]
+  const circle1 = lineGroup.children[1]
+  const circle2 = lineGroup.children[2]
+  line.setPoints(points)
+  circle1.setX(points[0])
+  circle1.setY(points[1])
+  circle2.setX(points[2])
+  circle2.setY(points[3])
+}
+export { updateLinePos }
+
+const updateLineCirclePos = (lineCircle, x, y) => {
   lineCircle.setX(x)
   lineCircle.setY(y)
   const lineGroup = lineCircle.parent
@@ -119,7 +131,7 @@ const updateLinePos = (lineCircle, x, y) => {
   const newEnd = lineTransform.point({x: end.getX(), y: end.getY()})
   line.setPoints([newStart.x, newStart.y, newEnd.x, newEnd.y])
 }
-export { updateLinePos as updateLinePos }
+export { updateLineCirclePos }
 
 const getLinePos = (lineGroup) => {
   const line = lineGroup.children[0]

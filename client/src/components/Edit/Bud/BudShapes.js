@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import * as reactKonva from 'react-konva'
 import * as utils from '../utils'
 import * as BudUtils from './BudUtils'
-import { lineCircleMove, updateLinePos } from '../Silk/SilkUtils'
+import { lineCircleMove, updateLineCirclePos } from '../Silk/SilkUtils'
 import { select } from '../Select'
 
 function BudAnchorHighlighter() {
@@ -31,7 +31,7 @@ function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTri
       const obj = utils.getKonvaObjById(objId).children[innerIndex]
       const budX = bud.getX() 
       const budY = bud.getY() 
-      updateLinePos(obj, budX, budY)
+      updateLineCirclePos(obj, budX, budY)
     }
   }
   const mouseMoveEvt = e => {
