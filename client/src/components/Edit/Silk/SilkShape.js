@@ -54,17 +54,31 @@ function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDra
     const objId = lineGroup.getAttr('objId')
     const points = SilkUtils.getLinePos(lineGroup)
     const offsetRootPoses = lineGroup.getAttr('offsetRootPoses')
-    const newOffsetRootPoses = points
+    const oldRootPos = utils.getRootPos()
     const redoFunc = () => {
+      const rootPos = utils.getRootPos()
       const lineGroup = utils.getKonvaObjById(objId)
-      lineGroup.setAttr('offsetRootPoses', newOffsetRootPoses)
-      utils.updateObj(objId, {positions: newOffsetRootPoses}, true)
+      console.log(rootPos)
+      lineGroup.setAttr('offsetRootPoses', [
+        {x: points[0].x + rootPos.x, y: points[0].y + rootPos.y},
+        {x: points[1].x + rootPos.x, y: points[1].y + rootPos.y},
+      ])
+      utils.updateObj(objId, {positions: [
+        {x: points[0].x + rootPos.x, y: points[0].y + rootPos.y},
+        {x: points[1].x + rootPos.x, y: points[1].y + rootPos.y},
+      ]}, true)
     }
     const undoFunc = () => {
-      const lineGroup = utils.getKonvaObjById(objId)
       const rootPos = utils.getRootPos()
-      lineGroup.setAttr('offsetRootPoses', offsetRootPoses)
-      utils.updateObj(objId, {positions: offsetRootPoses}, true)
+      const lineGroup = utils.getKonvaObjById(objId)
+      lineGroup.setAttr('offsetRootPoses', [
+        {x: offsetRootPoses[0].x + rootPos.x, y: offsetRootPoses[0].y + rootPos.y},
+        {x: offsetRootPoses[1].x + rootPos.x, y: offsetRootPoses[1].y + rootPos.y},
+      ])
+      utils.updateObj(objId, {positions: [
+        {x: offsetRootPoses[0].x + rootPos.x, y: offsetRootPoses[0].y + rootPos.y},
+        {x: offsetRootPoses[1].x + rootPos.x, y: offsetRootPoses[1].y + rootPos.y},
+      ]}, true)
     }
     utils.addToHistory(undoFunc, redoFunc)
     redoFunc()
