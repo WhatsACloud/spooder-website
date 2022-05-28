@@ -36,7 +36,7 @@ const startDragLine = (e, setSelectedSilk, objId, innerIndex) => {
     }, 500)
   }
 }
-export { startDragLine as startDragLine }
+export { startDragLine }
 
 const stopDragLine = (e, lineCircle) => { // todo: remove lineCircle, add mouseup event for border detectors and document
   if (e.button === 0) {

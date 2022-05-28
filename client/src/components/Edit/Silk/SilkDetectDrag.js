@@ -60,8 +60,8 @@ const LineDragUpdater = memo(({
       const offsetRootPoses = line.getAttr('offsetRootPoses')
       const newOffsetRootPoses = [...offsetRootPoses]
       const mousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
-      const rootPos = utils.getRootPos()
-      newOffsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: mousePos.x - rootPos.x, y: mousePos.y - rootPos.y}
+      const oldRootPos = utils.getRootPos()
+      newOffsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: mousePos.x - oldRootPos.x, y: mousePos.y - oldRootPos.y}
       console.log(newOffsetRootPoses, offsetRootPoses)
       if (makingLine) {
         redoFunc = () => {
@@ -82,21 +82,32 @@ const LineDragUpdater = memo(({
         } else { // detaches line
           const lineCircle = line.children[selectedSilk.innerIndex]
           redoFunc = () => {
+            const rootPos = utils.getRootPos()
             line.setAttr('offsetRootPoses', newOffsetRootPoses)
             SilkUtils.removeAttachment(lineCircle)
             utils.updateObj(selectedSilk.objId, {
               positions: [
-                {x: offsetRootPoses[0].x + rootPos.x, y: offsetRootPoses[0].y + rootPos.y},
-                {x: offsetRootPoses[1].x + rootPos.x, y: offsetRootPoses[1].y + rootPos.y},
+                {
+                  x: newOffsetRootPoses[0].x + rootPos.x,
+                  y: newOffsetRootPoses[0].y + rootPos.y
+                },
+                {
+                  x: newOffsetRootPoses[1].x + rootPos.x,
+                  y: newOffsetRootPoses[1].y + rootPos.y
+                },
               ],
               innerIndex: selectedSilk.innerIndex
             })
           }
           undoFunc = () => {
+            const rootPos = utils.getRootPos()
             line.setAttr('offsetRootPoses', offsetRootPoses)
             // SilkUtils.snapLine(selectedSilk, budId, x, y)
             utils.updateObj(selectedSilk.objId, {
-              positions: offsetRootPoses,
+              positions: [
+                {x: offsetRootPoses[0].x + rootPos.x, y: offsetRootPoses[0].y + rootPos.y},
+                {x: offsetRootPoses[1].x + rootPos.x, y: offsetRootPoses[1].y + rootPos.y},
+              ],
               innerIndex: selectedSilk.innerIndex
             })
           }
