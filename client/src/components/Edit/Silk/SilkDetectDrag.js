@@ -28,7 +28,11 @@ const LineDragUpdater = memo(({
       setDraggingLine(true)
       const currentObjId = utils.getNextObjId()
       console.log('what')
-      SilkUtils.setSilk(setObjsToUpdate, {positions: [canvasMousePos, canvasMousePos]})
+      const rootPos = utils.getRootPos()
+      SilkUtils.setSilk(setObjsToUpdate, {positions: [
+        {x: canvasMousePos.x - rootPos.x, y: canvasMousePos.y - rootPos.y},
+        {x: canvasMousePos.x - rootPos.x, y: canvasMousePos.y - rootPos.y},
+      ]})
       SilkUtils.startDragLine(e, setSelectedSilk, currentObjId, 1)
       setMakingLine(true)
     }

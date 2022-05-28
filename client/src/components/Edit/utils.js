@@ -205,70 +205,37 @@ const updateObj = (objId, attrs) => {
     bud.setY(attrs.position.y + rootPos.y)
   }
   const prevAttachedTo = konvaObj.getAttr('attachedSilkObjId')
-  const redoFunc = () => {
-    let konvaObj
-    const interval = setInterval(() => {
-      konvaObj = getKonvaObjById(objId)
-      console.log(konvaObj, objId)
-      if (konvaObj) {
-        clearInterval(interval)
-        const newObj = {...obj}
-        Object.entries(attrs).forEach(([name, val]) => {
-          newObj[name] = val
-        })
-        updateNewObjs(objId, newObj, true)
-        if ('positions' in attrs) {
-          const rootPos = getRootPos()
-          console.log(attrs)
-          konvaObj.children[0].setPoints([
-            attrs.positions[0].x,
-            attrs.positions[0].y,
-            attrs.positions[1].x,
-            attrs.positions[1].y,
-          ])
-          konvaObj.children[1].setX(attrs.positions[0].x)
-          konvaObj.children[1].setY(attrs.positions[0].y)
-          konvaObj.children[2].setX(attrs.positions[1].x)
-          konvaObj.children[2].setY(attrs.positions[1].y)
-          konvaObj.setAttr('offsetRootPoses', [
-            {
-              x: attrs.positions[0].x - rootPos.x,
-              y: attrs.positions[0].y - rootPos.y,
-            },
-            {
-              x: attrs.positions[1].x - rootPos.x,
-              y: attrs.positions[1].y - rootPos.y,
-            }
-          ])
-        }
-        if ('attachedTo' in attrs) {
-          konvaObj.setAttr('attachedSilkObjId', attrs.attachedTo)
-        }
+  const newObj = {...obj}
+  Object.entries(attrs).forEach(([name, val]) => {
+    newObj[name] = val
+  })
+  updateNewObjs(objId, newObj, true)
+  if ('positions' in attrs) {
+    const rootPos = getRootPos()
+    console.log(attrs)
+    konvaObj.children[0].setPoints([
+      attrs.positions[0].x,
+      attrs.positions[0].y,
+      attrs.positions[1].x,
+      attrs.positions[1].y,
+    ])
+    konvaObj.children[1].setX(attrs.positions[0].x)
+    konvaObj.children[1].setY(attrs.positions[0].y)
+    konvaObj.children[2].setX(attrs.positions[1].x)
+    konvaObj.children[2].setY(attrs.positions[1].y)
+    konvaObj.setAttr('offsetRootPoses', [
+      {
+        x: attrs.positions[0].x - rootPos.x,
+        y: attrs.positions[0].y - rootPos.y,
+      },
+      {
+        x: attrs.positions[1].x - rootPos.x,
+        y: attrs.positions[1].y - rootPos.y,
       }
-    }, 100)
+    ])
   }
-  const undoFunc = () => {
-    updateNewObjs(objId, obj, true)
-    const konvaObj = getKonvaObjById(objId)
-    if (prevAttachedTo) konvaObj.setAttr('attachedSilkObjId', prevAttachedTo)
-    if (prevPositions) {
-      const rootPos = getRootPos()
-      konvaObj.children[0].setPoints([
-        prevPositions[0].x + rootPos.x,
-        prevPositions[0].y + rootPos.y,
-        prevPositions[1].x + rootPos.x,
-        prevPositions[1].y + rootPos.y,
-      ])
-      konvaObj.children[1].setX(prevPositions[0].x + rootPos.x)
-      konvaObj.children[1].setY(prevPositions[0].y + rootPos.y)
-      konvaObj.children[2].setX(prevPositions[1].x + rootPos.x)
-      konvaObj.children[2].setY(prevPositions[1].y + rootPos.y)
-      konvaObj.setAttr('offsetRootPoses', prevPositions)
-    }
-  }
-  redoFunc()
 }
-export { updateObj as updateObj }
+export { updateObj }
 
 import 'regenerator-runtime/runtime'
 import api from '../../services/api'

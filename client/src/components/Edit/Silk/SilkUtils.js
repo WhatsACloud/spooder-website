@@ -47,6 +47,8 @@ const stopDragLine = (e, lineCircle) => { // todo: remove lineCircle, add mouseu
       const x = highlighter.getX()
       const y = highlighter.getY()
       updateLineCirclePos(lineCircle, x, y)
+      const lineGroup = lineCircle.parent
+      const points = lineGroup.children[0].getPoints()
     }
   }
 }
@@ -105,19 +107,7 @@ const lineCircleMove = (e, draggingLine, selectedSilk) => {
     updateLineCirclePos(start, canvasMousePos.x, canvasMousePos.y)
   }
 }
-export { lineCircleMove as lineCircleMove }
-
-const updateLinePos = (lineGroup, points) => {
-  const line = lineGroup.children[0]
-  const circle1 = lineGroup.children[1]
-  const circle2 = lineGroup.children[2]
-  line.setPoints(points)
-  circle1.setX(points[0])
-  circle1.setY(points[1])
-  circle2.setX(points[2])
-  circle2.setY(points[3])
-}
-export { updateLinePos }
+export { lineCircleMove }
 
 const updateLineCirclePos = (lineCircle, x, y) => {
   lineCircle.setX(x)
