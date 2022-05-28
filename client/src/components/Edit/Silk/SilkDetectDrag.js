@@ -85,13 +85,16 @@ const LineDragUpdater = memo(({
             line.setAttr('offsetRootPoses', newOffsetRootPoses)
             SilkUtils.removeAttachment(lineCircle)
             utils.updateObj(selectedSilk.objId, {
-              positions: newOffsetRootPoses,
+              positions: [
+                {x: offsetRootPoses[0].x + rootPos.x, y: offsetRootPoses[0].y + rootPos.y},
+                {x: offsetRootPoses[1].x + rootPos.x, y: offsetRootPoses[1].y + rootPos.y},
+              ],
               innerIndex: selectedSilk.innerIndex
             })
           }
           undoFunc = () => {
             line.setAttr('offsetRootPoses', offsetRootPoses)
-            SilkUtils.snapLine(selectedSilk, budId, x, y)
+            // SilkUtils.snapLine(selectedSilk, budId, x, y)
             utils.updateObj(selectedSilk.objId, {
               positions: offsetRootPoses,
               innerIndex: selectedSilk.innerIndex
