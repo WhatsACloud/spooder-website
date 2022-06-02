@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import * as reactKonva from 'react-konva'
 import * as SilkUtils from './SilkUtils'
 import * as utils from '../utils'
 import { select } from '../Select'

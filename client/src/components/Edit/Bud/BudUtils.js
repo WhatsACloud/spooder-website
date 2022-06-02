@@ -145,7 +145,7 @@ const snapToPreview = (evt) => {
 }
 export { snapToPreview as snapToPreview }
 
-const drop = (e, setObjsToUpdate) => {
+const drop = (e) => {
   // console.log(isMouseHoverCanvas)
   // if (!isMouseHoverCanvas) return
   if (utils.isInCanvas({x: e.pageX, y: e.pageY})) {

@@ -25,14 +25,6 @@ Konva.hitOnDragEnabled = true
 
 const gridLink = "http://phrogz.net/tmp/grid.gif"
 
-/*
-how thingy works:
-update objs state with data, AddNewObjs component updates the stuff to render, drawCanvas renders it onto the canvas
-
-TO DO
-add saving ability
-*/
-
 function MouseMoveDetector() {
   const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
   const [ mousePos, setMousePos ] = useState({
@@ -62,83 +54,11 @@ function MouseMoveDetector() {
   return <></>
 }
 
-function AddNewObjs({
-    objsToUpdate,
-    setDraggingLine,
-    setObjsToUpdate,
-    setTriggerDragLine,
-    setRendered,
-    rendered,
-    setHoverBud,
-    setSelectedSilk,
-    setToggleCanDragLine,
-    selectedObj,
-    setDragging,
-    setSelectedObj
-  }) { // to add some updating of positions AND maybe index in the object itself to be specific
-  useEffect(() => {
-    if (objsToUpdate) {
-      const newObjsToUpdate = JSON.parse(JSON.stringify(objsToUpdate))
-      const newRendered = [...rendered]
-      const rootPos = utils.getRootPos()
-      Object.entries(newObjsToUpdate).forEach(([objId, obj]) => {
-        if (obj !== null) {
-          if (obj.type === 'bud') {
-            newRendered.push(
-              <BudShapes.Bud
-                x={obj.position.x + rootPos.x}
-                y={obj.position.y + rootPos.y}
-                attachedSilkObjId={obj.attachedTo}
-                key={newRendered.length}
-                objId={objId}
-                setHoverBud={setHoverBud}
-                setObjsToUpdate={setObjsToUpdate}
-                setTriggerDragLine={setTriggerDragLine}
-                setDragging={setDragging}
-                setSelectedObj={setSelectedObj}
-                ></BudShapes.Bud>
-            )
-          } else if (obj.type === 'silk') {
-            newRendered.push(
-              <SilkShapes.Silk
-                points={obj.positions}
-                key={newRendered.length}
-                attachedTo1={obj.attachedTo1}
-                attachedTo2={obj.attachedTo2}
-                setTriggerDragLine={setTriggerDragLine}
-                setDraggingLine={setDraggingLine}
-                setSelectedSilk={setSelectedSilk}
-                setSelectedObj={setSelectedObj}
-                setToggleCanDragLine={setToggleCanDragLine}
-                objId={objId}></SilkShapes.Silk>
-            )
-          } else {
-            console.log('Error: object type not specified')
-          }
-          utils.addObjs(newObjsToUpdate)
-        } else {
-          const newRendered = [...rendered]
-          for (const [ index, e ] of Object.entries(newRendered)) {
-            if (e.props.objId === objId) {
-              newRendered.splice(index, 1)
-            }
-          }
-          setRendered(newRendered)
-          const konvaObj = utils.getKonvaObjById(objId)
-          konvaObj.destroy()
-        }
-      })
-      setRendered(newRendered)
-    }
-  }, [ objsToUpdate ])
-  return <></>
-}
-
-function UpdateModes(modes) { // pls fix this later
+function UpdateModes({ modes }) { // pls fix this later
   // basically when reactState modes changes then this updates the one in Konva
   useEffect(() => {
-    const mainLayer = utils.getMainLayer()
-    mainLayer.setAttr('modes', modes)
+    console.log(modes, utils.getGlobals())
+    utils.getGlobals().modes = modes
   }, [modes])
   return <></>
 }
@@ -160,18 +80,29 @@ function FocusOnObj({ focus }) {
   return <></>
 }
 
-function Edit() { // TODO: change objs such that they are indexed by their objId and add saving
-  /* 
-  the objects list in the canvas is stored in the Konva main layer, as well as other data.
-  Yes, that contradicts react state's entire purpose, but when I switched from Konva to react-konva,
-  I realised that when you update the objects rendered, it just adds more objects to the canvas instead of updating them.
-  For these reasons (and that I don't want to waste more time changing back to Konva), global data is stored in the Konva main layer.
-  */
+function SetGlobal() {
+  useEffect(() => {
+    window.spoodawebVars = {}
+    console.log('set spoodawebVars')
+  }, [])
+  return <></>
+}
+
+const scrollRight = (amt) => {
+  const rootPos = utils.getRootPos()
+  utils.setRootPos({x: rootPos.x - amt, y: rootPos.y})
+}
+
+const scrollDown = (amt) => {
+  const rootPos = utils.getRootPos()
+  utils.setRootPos({x: rootPos.x, y: rootPos.y - amt})
+}
+
+function Edit() {
   const navigate = useNavigate()
   const [ dragging, setDragging ] = useState(false)
   const [ toggleCanDragLine, setToggleCanDragLine ] = useState(false)
   const [ hoverBud, setHoverBud ] = useState(false)
-  const [ objsToUpdate, setObjsToUpdate ] = useState()
   const [ rendered, setRendered ] = useState([])
   const [ draggingLine, setDraggingLine ] = useState(false)
   const [ triggerDragLine, setTriggerDragLine ] = useState(false)
@@ -182,9 +113,10 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   const [ settings, setSettings ] = useState({
     Background: false
   })
-  const [ modes, setModes ] = useState({
+  const originalModes = {
     autoDrag: false
-  })
+  }
+  const [ modes, setModes ] = useState(originalModes)
   useEffect(async () => {
     const rootPos = utils.getRootPos()
     const width = utils.getStage().getAttr('width')
@@ -216,19 +148,38 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
       console.log('Unable to retrieve objects.')
     }
     const spoodawebData = objs.data.spoodawebData
-    setObjsToUpdate(spoodawebData)
-    const mainLayer = utils.getMainLayer()
-    mainLayer.setAttr('nextObjId', objs.data.nextObjId) // probably should be the next highest objId instead of this
-    mainLayer.setAttr('newObjs', {})
-    mainLayer.setAttr('modes', modes)
-    mainLayer.setAttr('addedObj', false)
-    mainLayer.setAttr('budObjs', {})
-    mainLayer.setAttr('history', [])
-    mainLayer.setAttr('historyIndex', -1)
-    mainLayer.setAttr('triggerDragLine', false)
-    mainLayer.setAttr('draggingLine', false)
+    const globals = window.spoodawebVars 
+    globals.nextObjId = objs.data.nextObjId
+    globals.newObjs = {}
+    globals.modes = originalModes 
+    globals.addedObj = false
+    globals.budObjs = {}
+    globals.history = []
+    globals.historyIndex = -1
+    globals.triggerDragLine = false
+    globals.draggingLine = false
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
+
+    utils.setRootPos({x: 0, y: 0})
+    const scrollAmt = 20
+    document.addEventListener('keydown', (e) => {
+      const key = e.key
+      switch (key) {
+        case 'ArrowUp':
+          scrollDown(-scrollAmt)
+          break
+        case 'ArrowDown':
+          scrollDown(scrollAmt)
+          break
+        case 'ArrowLeft':
+          scrollRight(-scrollAmt)
+          break
+        case 'ArrowRight':
+          scrollRight(scrollAmt)
+          break
+      }
+    })
     return () => {
       document.removeEventListener('keydown', preventZoom)
       document.removeEventListener('wheel', preventZoomScroll)
@@ -237,23 +188,10 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
   return (
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
+      <SetGlobal></SetGlobal>
       <MouseMoveDetector></MouseMoveDetector>
       <UpdateModes
         modes={modes}></UpdateModes>
-      <AddNewObjs
-        setObjsToUpdate={setObjsToUpdate}
-        objsToUpdate={objsToUpdate}
-        setObjsToUpdate={setObjsToUpdate}
-        setRendered={setRendered}
-        rendered={rendered}
-        setTriggerDragLine={setTriggerDragLine}
-        setHoverBud={setHoverBud}
-        setSelectedSilk={setSelectedSilk}
-        setDraggingLine={setDraggingLine}
-        setDragging={setDragging}
-        setToggleCanDragLine={setToggleCanDragLine}
-        selectedObj={selectedObj}
-        setSelectedObj={setSelectedObj}></AddNewObjs>
       <Settings
         inSettings={inSettings}
         setInSettings={setInSettings}
@@ -269,24 +207,22 @@ function Edit() { // TODO: change objs such that they are indexed by their objId
       <FocusOnObj
         focus={focus}></FocusOnObj>
       <div className={styles.wrapper}>
-        <SilkShapes.LineDragUpdater
+        {/* <SilkShapes.LineDragUpdater
           toggleCanDragLine={toggleCanDragLine}
-          setObjsToUpdate={setObjsToUpdate}
           setDraggingLine={setDraggingLine}
           hoverBud={hoverBud}
           setSelectedSilk={setSelectedSilk}
           selectedSilk={selectedSilk}
           setTriggerDragLine={setTriggerDragLine}
           triggerDragLine={triggerDragLine}
-          draggingLine={draggingLine}></SilkShapes.LineDragUpdater>
+          draggingLine={draggingLine}></SilkShapes.LineDragUpdater> */}
         <OtherElements.ObjectDrawer
           setDragging={setDragging}
           toggleCanDragLine={toggleCanDragLine}
           setToggleCanDragLine={setToggleCanDragLine}></OtherElements.ObjectDrawer>
         <OtherElements.FakeDraggableObj
           dragging={dragging}
-          setDragging={setDragging}
-          setObjsToUpdate={setObjsToUpdate}></OtherElements.FakeDraggableObj>
+          setDragging={setDragging}></OtherElements.FakeDraggableObj>
         <div className={styles.divCanvas} id='divCanvas'>
           <DrawCanvas
             rendered={rendered}></DrawCanvas>

@@ -6,6 +6,7 @@ import { faObjectGroup, faLinesLeaning } from '@fortawesome/free-solid-svg-icons
 
 import * as utils from './utils'
 import * as BudUtils from './Bud/BudUtils'
+import { Bud } from './Bud/BudShapes'
 
 function ObjectDrawer({ setDragging, toggleCanDragLine, setToggleCanDragLine }) {
   const items = {
@@ -50,10 +51,10 @@ function FakeDraggableObj({ dragging, setDragging, setObjsToUpdate }) {
   useEffect(() => {
     if (!Konva.stages[0]) return
     const dropWrapper = (e) => {
-      BudUtils.drop(e, setObjsToUpdate)
+      BudUtils.drop(e)
       setDragging(false)
       const mainLayer = utils.getMainLayer()
-      mainLayer.setAttr('addedObj', true)
+      getGlobals().addedObj = true
       console.log(mainLayer)
     }
     const moveWrapper = (e) => {

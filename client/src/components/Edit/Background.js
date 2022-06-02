@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import * as reactKonva from 'react-konva'
 
 import * as utils from './utils'
 import * as BudUtils from './Bud/BudUtils'

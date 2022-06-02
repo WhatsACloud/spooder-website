@@ -3,7 +3,13 @@ import Konva from 'konva'
 const getStage = () => {
   return Konva.stages[0] 
 }
-export { getStage as getStage }
+export { getStage }
+
+const getGlobals = () => {
+  console.log(window.spoodawebVars)
+  return window.spoodawebVars
+}
+export { getGlobals }
 
 const getMainLayer = () => {
   return getStage().children[0]
@@ -16,21 +22,21 @@ const getKonvaObjs = () => {
 export { getKonvaObjs as getKonvaObjs }
 
 const getObjs = () => {
-  return getMainLayer().getAttr('objs')
+  return getGlobals().objs
 }
 export { getObjs }
 
 const addToHistory = (undoFunc, redoFunc) => {
-  const mainLayer = getMainLayer()
-  const history = mainLayer.getAttr('history')
-  const historyIndex = mainLayer.getAttr('historyIndex')
+  const globals = getGlobals()
+  const history = globals.history
+  const historyIndex = globals.historyIndex
   if (history.length > 0 && history[historyIndex+1]) {
     console.log(historyIndex+1, history.length-historyIndex)
     history.splice(historyIndex+1, history.length-historyIndex)
   }
   history.push({undo: undoFunc, redo: redoFunc})
-  mainLayer.setAttr('history', history)
-  mainLayer.setAttr('historyIndex', historyIndex+1)
+  globals.history = history
+  globals.historyIndex = historyIndex+1
 }
 export { addToHistory }
 
@@ -71,13 +77,13 @@ const withinRect = (mousePos, startX, startY, endX, endY) => {
 
 const setNextObjId = (amt) => {
   const mainLayer = getMainLayer()
-  mainLayer.setAttr('nextObjId', amt)
+  getGlobals().nextObjId = amt
 }
 export { setNextObjId as setNextObjId }
 
 const getNextObjId = () => {
   const mainLayer = getMainLayer()
-  const currentNextObjId = mainLayer.getAttr('nextObjId')
+  const currentNextObjId = getGlobals().nextObjId
   return currentNextObjId
 }
 export { getNextObjId as getNextObjId }
@@ -96,15 +102,15 @@ export { getNextHighestAttr }
 
 const updateNewObjs = (objId, obj) => {
   const mainLayer = getMainLayer()
-  const newObjs = mainLayer.getAttr('newObjs')
+  const newObjs = getGlobals().newObjs
   const rootPos = getRootPos()
   const redoFunc = () => {
     const editObjs = {...newObjs}
     editObjs[objId] = obj
-    mainLayer.setAttr('newObjs', editObjs)
+    getGlobals().newObjs = editObjs
   }
   const undoFunc = () => {
-    mainLayer.setAttr('newObjs', newObjs)
+    getGlobals().newObjs = newObjs
   }
   redoFunc()
 }
@@ -180,17 +186,18 @@ const getHighlighter = () => {
 export { getHighlighter }
 
 const addObjs = (toAdd) => {
-  const layer = getMainLayer()
-  const currentObjs = layer.getAttr('objs')
+  console.log(toAdd[0])
+  const globals = getGlobals()
+  const currentObjs = globals.getAttr('objs')
   const newObjs = {...currentObjs, ...toAdd}
-  layer.setAttr('objs', newObjs)
-  const currentBudObjs = layer.getAttr('budObjs')
+  globals.setAttr('objs', newObjs)
+  const currentBudObjs = globals.getAttr('budObjs')
   for (const [ objId, toAddObj ] of Object.entries(toAdd)) {
     if (toAddObj.type === "bud") {
       currentBudObjs[objId] = toAddObj
     }
   }
-  layer.setAttr('budObjs', currentBudObjs)
+  globals.setAttr('budObjs', currentBudObjs)
 }
 export { addObjs }
 
