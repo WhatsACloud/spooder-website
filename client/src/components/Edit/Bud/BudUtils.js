@@ -1,19 +1,12 @@
 import { budSample } from '../spoodawebSampleData'
 import * as utils from '../utils'
 
-const setBud = (setObjsToUpdate, details) => { // { pronounciation, contexts, examples, links, position, type }
+import { Bud } from './BudShapes'
+
+const setBud = (pos) => { // { pronounciation, contexts, examples, links, position, type }
   const nextObjId = utils.getNextObjId()
   const redoFunc = () => {
-    const obj = {...budSample}
-    for (const name in details) {
-      if (name in obj) {
-        const detail = details[name]
-        obj[name] = detail
-      }
-    }
-    setObjsToUpdate({[nextObjId]: obj})
-    utils.updateNewObjs(nextObjId, obj)
-    utils.setNextObjId(nextObjId+1)
+    const bud = new Bud(pos.x, pos.y)
   }
   const undoFunc = () => {
     setObjsToUpdate({[nextObjId]: null}) // add support to remove stuff like this
@@ -156,7 +149,7 @@ const drop = (e) => {
     canvasMousePos.x -= rootPos.x
     canvasMousePos.y -= rootPos.y
     console.log(canvasMousePos, rootPos)
-    setBud(setObjsToUpdate, {position: canvasMousePos})
+    setBud(canvasMousePos)
   }
 }
 export { drop }

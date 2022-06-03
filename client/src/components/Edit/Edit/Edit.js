@@ -129,7 +129,8 @@ function Edit() {
     let queryString = new URLSearchParams(paramString);
     let objs = {
       data: {
-        spoodawebData: {}
+        spoodawebData: {},
+        nextObjId: 0
       }
     }
     try {
@@ -149,11 +150,14 @@ function Edit() {
     }
     const spoodawebData = objs.data.spoodawebData
     const globals = window.spoodawebVars 
+    console.log(objs.data)
     globals.nextObjId = objs.data.nextObjId
     globals.newObjs = {}
     globals.modes = originalModes 
     globals.addedObj = false
     globals.budObjs = {}
+    globals.objs = {}
+    globals.rootPos = {x: 0, y: 0}
     globals.history = []
     globals.historyIndex = -1
     globals.triggerDragLine = false

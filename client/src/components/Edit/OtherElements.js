@@ -54,7 +54,7 @@ function FakeDraggableObj({ dragging, setDragging, setObjsToUpdate }) {
       BudUtils.drop(e)
       setDragging(false)
       const mainLayer = utils.getMainLayer()
-      getGlobals().addedObj = true
+      utils.getGlobals().addedObj = true
       console.log(mainLayer)
     }
     const moveWrapper = (e) => {

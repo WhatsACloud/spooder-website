@@ -6,7 +6,6 @@ const getStage = () => {
 export { getStage }
 
 const getGlobals = () => {
-  console.log(window.spoodawebVars)
   return window.spoodawebVars
 }
 export { getGlobals }
@@ -76,13 +75,11 @@ const withinRect = (mousePos, startX, startY, endX, endY) => {
 }
 
 const setNextObjId = (amt) => {
-  const mainLayer = getMainLayer()
   getGlobals().nextObjId = amt
 }
 export { setNextObjId as setNextObjId }
 
 const getNextObjId = () => {
-  const mainLayer = getMainLayer()
   const currentNextObjId = getGlobals().nextObjId
   return currentNextObjId
 }
@@ -117,38 +114,44 @@ const updateNewObjs = (objId, obj) => {
 export { updateNewObjs }
 
 const getRootPos = () => {
-  return getMainLayer().getAttr('rootPos')
+  return getGlobals().rootPos
 }
-export { getRootPos as getRootPos }
+export { getRootPos }
 
 import * as BudUtils from './Bud/BudUtils'
 
 const setRootPos = (rootPos) => {
-  for (let obj of getKonvaObjs()) {
-    const type = obj.getAttr('objType')
-    if (type === 'bud') {
-      const bud = obj.children[0]
-      bud.setX(obj.getAttr('offsetRootPos').x + rootPos.x)
-      bud.setY(obj.getAttr('offsetRootPos').y + rootPos.y)
-    } else if (type === 'silk') {
-      const silk = obj.children[0]
-      const offsetRootPoses = obj.getAttr('offsetRootPoses')
-      silk.setPoints([
-        offsetRootPoses[0].x + rootPos.x,
-        offsetRootPoses[0].y + rootPos.y,
-        offsetRootPoses[1].x + rootPos.x,
-        offsetRootPoses[1].y + rootPos.y,
-      ])
-      obj.children[1].setX(offsetRootPoses[0].x + rootPos.x)
-      obj.children[1].setY(offsetRootPoses[0].y + rootPos.y)
-      obj.children[2].setX(offsetRootPoses[1].x + rootPos.x)
-      obj.children[2].setY(offsetRootPoses[1].y + rootPos.y)
-    } else {
+  // for (let obj of getKonvaObjs()) {
+  //   const type = obj.getAttr('objType')
+  //   if (type === 'bud') {
+  //     const bud = obj.children[0]
+  //     bud.setX(obj.getAttr('offsetRootPos').x + rootPos.x)
+  //     bud.setY(obj.getAttr('offsetRootPos').y + rootPos.y)
+  //   } else if (type === 'silk') {
+  //     const silk = obj.children[0]
+  //     const offsetRootPoses = obj.getAttr('offsetRootPoses')
+  //     silk.setPoints([
+  //       offsetRootPoses[0].x + rootPos.x,
+  //       offsetRootPoses[0].y + rootPos.y,
+  //       offsetRootPoses[1].x + rootPos.x,
+  //       offsetRootPoses[1].y + rootPos.y,
+  //     ])
+  //     obj.children[1].setX(offsetRootPoses[0].x + rootPos.x)
+  //     obj.children[1].setY(offsetRootPoses[0].y + rootPos.y)
+  //     obj.children[2].setX(offsetRootPoses[1].x + rootPos.x)
+  //     obj.children[2].setY(offsetRootPoses[1].y + rootPos.y)
+  //   } else {
+  //   }
+  console.log(getObjs())
+  for (const [ objId, obj ] of Object.entries(getObjs())) {
+    if (!obj.dragging) {
+      obj.konvaObj.setX(obj.x + rootPos.x)
+      obj.konvaObj.setY(obj.y + rootPos.y)
     }
   }
-  getMainLayer().setAttr('rootPos', rootPos)
+  getGlobals().rootPos = rootPos
 }
-export { setRootPos as setRootPos }
+export { setRootPos }
 
 const isInCanvas = (mousePos) => {
   const startX = window.innerWidth * 0.15
@@ -188,16 +191,16 @@ export { getHighlighter }
 const addObjs = (toAdd) => {
   console.log(toAdd[0])
   const globals = getGlobals()
-  const currentObjs = globals.getAttr('objs')
+  const currentObjs = globals.objs
   const newObjs = {...currentObjs, ...toAdd}
-  globals.setAttr('objs', newObjs)
-  const currentBudObjs = globals.getAttr('budObjs')
+  globals.objs = newObjs
+  const currentBudObjs = globals.budObjs
   for (const [ objId, toAddObj ] of Object.entries(toAdd)) {
     if (toAddObj.type === "bud") {
       currentBudObjs[objId] = toAddObj
     }
   }
-  globals.setAttr('budObjs', currentBudObjs)
+  globals.budObjs = currentBudObjs
 }
 export { addObjs }
 

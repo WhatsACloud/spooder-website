@@ -22,8 +22,6 @@ function BudAnchorHighlighter() {
 export { BudAnchorHighlighter as BudAnchorHighlighter }
 
 // function Bud({ x, y, objId, setSelectedObj, setObjsToUpdate, setDragging, setTriggerDragLine, setHoverBud, attachedSilkObjId }) {
-//   const rootPos = utils.getRootPos()
-//   const radius = 40
 //   const normalDragMoveEvt = (evt) => {
 //     const bud = evt.target
 //     const attachedObjIds = bud.parent.getAttr('attachedSilkObjId')
@@ -194,30 +192,53 @@ export { BudAnchorHighlighter as BudAnchorHighlighter }
 // export { Bud as Bud }
 
 class Bud {
+  x = 0
+  y = 0
+  konvaObj = null
+  dragging = false
   constructor(x, y) {
+    const rootPos = utils.getRootPos()
+    this.x = x
+    this.y = y
+    const radius = 40
     const budGroup = new Konva.Group({
+      x: x + rootPos.x,
+      y: y + rootPos.y,
+      draggable: true,
+    })
+    budGroup.on('dragstart', () => {
+      this.dragging = true
+    })
+    budGroup.on('dragend', () => {
+      this.dragging = false
+      const rootPos = utils.getRootPos()
+      const newX = this.konvaObj.getX()
+      const newY = this.konvaObj.getY()
+      this.x = newX - rootPos.x
+      this.y = newY - rootPos.y
     })
     const budShape = new Konva.Shape({
-      x: x,
-      y: y,
       strokeWidth: 0,
-      radius: radius+10,
+      radius: radius,
       sceneFunc: (ctx, shape) => {
         const points = BudUtils.hexagonPoints(shape.getAttr('radius'), 0, 0) // why is this not the same as points variable above???
         BudUtils.drawHexagon(ctx, points)
         ctx.fillStrokeShape(shape)
       },
-      fillRadialGradientStartPoint: { x: 0, y: 0 },
-      fillRadialGradientStartRadius: radius,
-      fillRadialGradientEndPoint: { x: 0, y: 0 },
-      fillRadialGradientEndRadius: radius+40,
-      fillRadialGradientColorStops: [0, "#9bedff", 0.05, 'rgba(0, 0, 0, 0)'],
-      // fillLinearGradientColorStops={[0, "#000046", 0.5, "#1CB5E0"]},
+      fillLinearGradientStartPoint: { x: -100, y: 0 },
+      fillLinearGradientEndPoint: { x: 100, y: 150 },
+      fillLinearGradientColorStops: [0, "#000046", 0.5, "#1CB5E0"],
+      shadowColor: 'black',
+      shadowBlur: 10,
+      shadowOffset: { x: 10, y: 10 },
+      shadowOpacity: 0.5,
     })
     budGroup.add(budShape)
     const mainLayer = utils.getMainLayer()
     mainLayer.add(budGroup)
-    utils.addObjs([this])
+    this.konvaObj = budGroup
+    utils.addObjs({[utils.getNextObjId()]: this})
+    utils.setNextObjId(utils.getNextObjId() + 1)
   }
 }
 export { Bud }
