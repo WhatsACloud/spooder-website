@@ -118,7 +118,6 @@ function Edit() {
   }
   const [ modes, setModes ] = useState(originalModes)
   useEffect(async () => {
-    const rootPos = utils.getRootPos()
     const width = utils.getStage().getAttr('width')
     const height = utils.getStage().getAttr('height')
     utils.getStage().on('mousedown', evt => {
@@ -133,6 +132,7 @@ function Edit() {
         nextObjId: 0
       }
     }
+    const rootPos = utils.getRootPos() || {x: 0, y: 0}
     try {
       objs = await api.post('/webs/get/objects', {
         spoodawebId: queryString.get('id'),
@@ -146,6 +146,7 @@ function Edit() {
         ]
       })
     } catch(err) {
+      console.log(err)
       console.log('Unable to retrieve objects.')
     }
     const spoodawebData = objs.data.spoodawebData

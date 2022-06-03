@@ -191,13 +191,67 @@ export { BudAnchorHighlighter as BudAnchorHighlighter }
 // }
 // export { Bud as Bud }
 
+const budSample = {
+  "objId": null,
+  "word": "",
+  "definition": "",
+  "sound": "",
+  "context": "",
+  "examples": [],
+  "link": 0,
+  "attachedTo": [],
+  "position": {},
+  "type": "bud" // bud silk
+}
+
+class example {
+  arrID = null
+  text = ""
+  constructor(arrID, text) {
+    this.arrID = arrID
+    this.text = text
+  }
+}
+
 class Bud {
   x = 0
   y = 0
+  attachedTo = []
+  word = ""
+  definition = ""
+  sound = ""
+  context = ""
+  examples = []
+  link = 0
   konvaObj = null
   dragging = false
   del = false
   objId = null
+  toJSON = () => {
+    const bud = {...budSample}
+    bud.word = this.word
+    bud.definition = this.definition
+    bud.sound = this.sound
+    bud.context = this.context
+    bud.link = this.link
+    bud.examples = this.examples
+    bud.attachedTo = this.attachedTo
+    bud.position = {x: this.x, y: this.y}
+    bud.objId = this.objId
+    return bud
+  }
+  static fromJSON = (bud) => {
+    this.word = bud.word
+    this.definition = bud.definition
+    this.sound = bud.sound
+    this.context = bud.context
+    this.link = bud.link
+    this.examples = bud.examples
+    this.attachedTo = bud.attachedTo
+    this.x = bud.position.x
+    this.y = bud.position.y
+    this.objId = bud.objId
+  }
   init = (x, y) => {
     const rootPos = utils.getRootPos()
     const radius = 40

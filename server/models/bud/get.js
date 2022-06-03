@@ -7,9 +7,8 @@ const User = require('../../databaseModels/user')(sequelize, DataTypes)
 const Spoodaweb = require('../../databaseModels/spoodaweb')(sequelize, DataTypes)
 
 const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
-const BudDetails = require('../../databaseModels/BudDetails/budDetails')(sequelize, DataTypes)
-const Example = require('../../databaseModels/BudDetails/examples')(sequelize, DataTypes)
-const AttachedTo = require('../../databaseModels/BudDetails/AttachedTo')(sequelize, DataTypes)
+const Example = require('../../databaseModels/examples')(sequelize, DataTypes)
+const AttachedTo = require('../../databaseModels/AttachedTo')(sequelize, DataTypes)
 const Silk = require('../../databaseModels/Silk')(sequelize, DataTypes)
 
 async function getBudsWithinRange(spoodawebId, startPos, endPos) {
@@ -91,31 +90,6 @@ async function getSpoodaweb(userId, spoodawebId) {
   return spoodaweb
 }
 
-async function getBudDetails(id) {
-  const budDetails = await BudDetails.findAll({
-    where: {
-      fk_bud_id: id,
-      deletedAt: {
-        [Op.is]: null
-      }
-    }
-  }) 
-  return budDetails
-}
-
-async function getExamples(id) {
-  const examples = Example.findAll({
-    where: {
-      fk_budDetails_id: id,
-      deletedAt: {
-        [Op.is]: null
-      }
-    }
-  })
-  return examples
-}
-
-
 async function get (req, res, next) {
   try {
     const toResObjs = {}
@@ -144,7 +118,8 @@ async function get (req, res, next) {
           attachedTo: {}, 
           type: "bud"
         }
-        const budDetails = await getBudDetails(objData.id)
+        // const budDetails = await getBudDetails(objData.id)
+        const budDetails = null
         for (const budDetail of budDetails) {
           const budDetailData = budDetail.dataValues
           const budDetailId = budDetailData.id
@@ -163,7 +138,7 @@ async function get (req, res, next) {
           toResObjs[objId].definitions[index].context = budDetailData.context
           toResObjs[objId].definitions[index].link = budDetailData.link
           toResObjs[objId].definitions[index].arrID = budDetailData.arrID
-          const examples = await getExamples(budDetailId)
+          const examples = await Utils.findExamples(budId, Utils.DelType.NotDel)
           for (const [ exampleIndex, example ] of Object.entries(examples)) {
             const exampleData = example.dataValues
             toResObjs[objId].definitions[index].examples.push({
@@ -209,6 +184,7 @@ async function get (req, res, next) {
     }
     req.body.spoodawebData = toResObjs
     req.body.nextObjId = await Utils.getNextObjId(spoodawebId)
+    console.log(toResObjs)
     next()
   } catch (err) {
     console.log('get spoodawebs err', err)

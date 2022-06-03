@@ -3,9 +3,8 @@ const { sequelize, DataTypes, Op } = require('../../database')
 const error = require('../../middleware/error')
 
 const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
-const BudDetails = require('../../databaseModels/BudDetails/budDetails')(sequelize, DataTypes)
-const Example = require('../../databaseModels/BudDetails/examples')(sequelize, DataTypes)
-const AttachedTo = require('../../databaseModels/BudDetails/AttachedTo')(sequelize, DataTypes)
+const Example = require('../../databaseModels/examples')(sequelize, DataTypes)
+const AttachedTo = require('../../databaseModels/AttachedTo')(sequelize, DataTypes)
 
 const dbBudToData = (dbBud) => {
   const newBud = {
