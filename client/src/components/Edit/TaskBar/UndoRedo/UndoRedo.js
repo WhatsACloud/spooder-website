@@ -3,15 +3,15 @@ import styles from './undoRedo.module'
 import * as utils from '../../utils'
 
 const getHistory = () => {
-  return utils.getMainLayer().getAttr('history')
+  return utils.getGlobals().history
 }
 
 const getHistoryIndex = () => {
-  return utils.getMainLayer().getAttr('historyIndex')
+  return utils.getGlobals().historyIndex
 }
 
 const setHistoryIndex = (histIndex) => {
-  return utils.getMainLayer().setAttr('historyIndex', histIndex)
+  utils.getGlobals().historyIndex = histIndex
 }
 
 const undo = () => {

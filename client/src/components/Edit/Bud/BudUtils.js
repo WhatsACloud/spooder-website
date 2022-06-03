@@ -6,13 +6,16 @@ import { Bud } from './BudShapes'
 const setBud = (pos) => { // { pronounciation, contexts, examples, links, position, type }
   const nextObjId = utils.getNextObjId()
   const redoFunc = () => {
-    const bud = new Bud(pos.x, pos.y)
+    utils.getObjById(nextObjId).redo()
+    utils.setNextObjId(utils.getNextObjId()+1)
   }
   const undoFunc = () => {
-    setObjsToUpdate({[nextObjId]: null}) // add support to remove stuff like this
+    utils.getObjById(nextObjId).undo()
+    utils.setNextObjId(utils.getNextObjId()-1)
   }
+  new Bud(nextObjId, pos.x, pos.y)
+  utils.setNextObjId(utils.getNextObjId()+1)
   utils.addToHistory(undoFunc, redoFunc)
-  redoFunc()
 }
 export { setBud }
 

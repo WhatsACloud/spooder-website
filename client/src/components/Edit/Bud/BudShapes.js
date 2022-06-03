@@ -196,10 +196,10 @@ class Bud {
   y = 0
   konvaObj = null
   dragging = false
-  constructor(x, y) {
+  del = false
+  objId = null
+  init = (x, y) => {
     const rootPos = utils.getRootPos()
-    this.x = x
-    this.y = y
     const radius = 40
     const budGroup = new Konva.Group({
       x: x + rootPos.x,
@@ -237,8 +237,23 @@ class Bud {
     const mainLayer = utils.getMainLayer()
     mainLayer.add(budGroup)
     this.konvaObj = budGroup
-    utils.addObjs({[utils.getNextObjId()]: this})
-    utils.setNextObjId(utils.getNextObjId() + 1)
+  }
+  undo = () => {
+    this.konvaObj.destroy()
+    this.del = true
+  }
+  redo = () => {
+    this.del = false
+    this.init(this.x, this.y)
+  }
+  delete = () => {
+  }
+  constructor(nextObjId, x, y) {
+    this.x = x
+    this.y = y
+    this.objId = nextObjId
+    this.init(x, y)
+    utils.addObjs({[nextObjId]: this})
   }
 }
 export { Bud }
