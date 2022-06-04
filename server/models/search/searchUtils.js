@@ -3,7 +3,6 @@ const { sequelize, DataTypes, Op } = require('../../database')
 const error = require('../../middleware/error')
 
 const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
-const Example = require('../../databaseModels/examples')(sequelize, DataTypes)
 const AttachedTo = require('../../databaseModels/AttachedTo')(sequelize, DataTypes)
 
 const dbBudToData = (dbBud) => {
@@ -45,14 +44,6 @@ const getEntireBud = async (spoodawebId) => {
       buds[objId].definitions[definitionId].sound = budDetail.dataValues.sound
       buds[objId].definitions[definitionId].context = budDetail.dataValues.context
       buds[objId].definitions[definitionId].link = budDetail.dataValues.link
-      const _examples = await Example.findAll({
-        where: {
-          fk_budDetails_id: budDetail.dataValues.id
-        }
-      })
-      for (const example of _examples) {
-        buds[objId].definitions[definitionId].examples.push(example.dataValues.example)
-      }
     }
     for (const [ attachedToId, attachedTo ] of _attachedTo.entries()) {
       buds[objId].attachedTo.push(attachedTo.dataValues.attachedToId)

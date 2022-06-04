@@ -1,7 +1,6 @@
 const { sequelize, DataTypes, Op } = require('../../database')
 const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
 const Silk = require('../../databaseModels/Silk')(sequelize, DataTypes)
-const Example = require('../../databaseModels/examples')(sequelize, DataTypes)
 const Spoodaweb = require('../../databaseModels/spoodaweb')(sequelize, DataTypes)
 
 async function getNextObjId(spoodawebId) {
@@ -38,27 +37,6 @@ const DelType = {
 }
 
 module.exports.DelType = DelType
-
-const findExamples = async (budId, deleted=DelType.NotDel) => {
-  switch (deleted) {
-    case DelType.NotDel:
-      return await Example.findAll({
-        where: { fk_bud_id: budId, deletedAt: {[Op.is]: null}}
-      })
-    case DelType.Del:
-      return await Example.findAll({
-        where: { fk_bud_id: budId, deletedAt: {[Op.not]: null}}
-      })
-    case DelType.Both:
-      return await Example.findAll({
-        where: { fk_bud_id: budId}
-      })
-    default:
-      console.log(`Error: provided type (${deleted}) in findExamples is not in the enum 'DelType'`)
-  }
-}
-
-module.exports.findExamples = findExamples 
 
 const findSpoodaweb = async (spoodawebId) => {
   const spoodaweb = await Spoodaweb.findAll({

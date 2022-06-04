@@ -7,7 +7,6 @@ const User = require('../../databaseModels/user')(sequelize, DataTypes)
 const Spoodaweb = require('../../databaseModels/spoodaweb')(sequelize, DataTypes)
 
 const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
-const Example = require('../../databaseModels/examples')(sequelize, DataTypes)
 const AttachedTo = require('../../databaseModels/AttachedTo')(sequelize, DataTypes)
 const Silk = require('../../databaseModels/Silk')(sequelize, DataTypes)
 
@@ -138,7 +137,6 @@ async function get (req, res, next) {
           toResObjs[objId].definitions[index].context = budDetailData.context
           toResObjs[objId].definitions[index].link = budDetailData.link
           toResObjs[objId].definitions[index].arrID = budDetailData.arrID
-          const examples = await Utils.findExamples(budId, Utils.DelType.NotDel)
           for (const [ exampleIndex, example ] of Object.entries(examples)) {
             const exampleData = example.dataValues
             toResObjs[objId].definitions[index].examples.push({

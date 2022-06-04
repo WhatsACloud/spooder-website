@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false 
       },
       context: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING,
         allowNull: false 
       },
       link: {
@@ -43,6 +43,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         allowNull: false
       },
+      example: {
+        type: DataTypes.TEXT,
+        allowNull: false 
+      },
       deletedAt: {
         type: DataTypes.DATE,
         allowNull: true
@@ -52,7 +56,6 @@ module.exports = (sequelize, DataTypes) => {
   Bud.associate = (models) => {
     Bud.belongsTo(models.Spoodawebs)
     Bud.hasMany(models.AttachedTo, {foreignKey: DataTypes.UUID})
-    Bud.hasMany(models.Examples, {foreignKey: DataTypes.UUID})
   }
   return Bud
 }
