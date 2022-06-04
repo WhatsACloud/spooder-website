@@ -5,14 +5,23 @@ const AttachedTo = require('../../databaseModels/AttachedTo')(sequelize, DataTyp
 const error = require('../../middleware/error')
 const Utils = require('./Utils')
 
-async function findBud(spoodawebId, objId, transaction) {
-  const possibleDbBud = await Bud.findAll({
+async function findBud(spoodawebId, objId, deleted=Utils.DelType.NotDel, transaction) {
+  const query = {
     where: {
       fk_spoodaweb_id: spoodawebId,
       objId: objId,
       deletedAt: {[Op.is]: null}
     }
-  })
+  }
+  switch (deleted) {
+    case Utils.DelType.Both:
+      delete query.where.deletedAt
+      break
+    case Utils.DelType.Del:
+      query.where.deletedAt = {[Op.not]: null}
+      break
+  }
+  const possibleDbBud = await Bud.findOne(query)
   if (possibleDbBud === null) return false
   // if (possibleDbBud.length > 0) { // self correction system
   //   const bud = possibleDbBud.shift()
@@ -23,7 +32,7 @@ async function findBud(spoodawebId, objId, transaction) {
   //   }
   //   return bud
   // }
-  return possibleDbBud[0]
+  return possibleDbBud
 }
 
 async function markForDeletion(obj, t) { // TO DO: add links thingy
@@ -128,11 +137,11 @@ async function editSilk(spoodawebId, positions, strength, objId, attachedTo1, at
 }
 
 async function editBud(spoodawebId, objId, obj, transaction) {
-  const possibleDbBud = await findBud(spoodawebId, objId, transaction)
-  if (possibleDbBud === false) return false 
-  const bud = await Bud.findOne({ where: { fk_spoodaweb_id: spoodawebId, objId: objId }})
-  if (bud === null) return false
-  await bud.update({
+  const bud = await findBud(spoodawebId, objId, Utils.DelType.Both, transaction)
+  if (bud === false) return false 
+  // const bud = await Bud.findOne({ where: { fk_spoodaweb_id: spoodawebId, objId: objId }})
+  // if (bud === null) return false
+  const query = {
     word: obj.word,
     x: obj.position.x,
     y: obj.position.y,
@@ -140,7 +149,11 @@ async function editBud(spoodawebId, objId, obj, transaction) {
     sound: obj.sound,
     context: obj.context,
     link: obj.link,
-  }, {transaction: transaction})
+  }
+  if (obj.restore) {
+    query.deletedAt = null
+  }
+  await bud.update(query, {transaction: transaction})
   return bud 
 }
 
