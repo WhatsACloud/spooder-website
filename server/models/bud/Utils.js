@@ -2,6 +2,7 @@ const { sequelize, DataTypes, Op } = require('../../database')
 const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
 const Silk = require('../../databaseModels/Silk')(sequelize, DataTypes)
 const Example = require('../../databaseModels/examples')(sequelize, DataTypes)
+const Spoodaweb = require('../../databaseModels/spoodaweb')(sequelize, DataTypes)
 
 async function getNextObjId(spoodawebId) {
   let highestBudObjId = await Bud.max("objId", { "where": {
@@ -58,3 +59,13 @@ const findExamples = async (budId, deleted=DelType.NotDel) => {
 }
 
 module.exports.findExamples = findExamples 
+
+const findSpoodaweb = async (spoodawebId) => {
+  const spoodaweb = await Spoodaweb.findAll({
+    where: {
+      id: spoodawebId
+    }
+  })
+  return spoodaweb[0] || false
+}
+module.exports.findSpoodaweb = findSpoodaweb  

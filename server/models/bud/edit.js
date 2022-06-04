@@ -51,7 +51,6 @@ async function markBudForDeletion(spoodawebId, budId, transaction) {
 }
 
 async function createBud(spoodawebId, objId, obj, transaction) {
-  console.log(objId, "why")
   const possibleDbBud = await findBud(spoodawebId, objId, transaction)
   if (possibleDbBud !== false) return false
   const _bud = await Bud.create({
@@ -60,11 +59,10 @@ async function createBud(spoodawebId, objId, obj, transaction) {
     word: obj.word,
     x: obj.position.x,
     y: obj.position.y,
-    objId: obj.objId,
     definition: obj.definition,
     sound: obj.sound,
     context: obj.context,
-    link: obj.definition,
+    link: obj.link,
   }, {transaction: transaction})
   return _bud
 }
@@ -222,6 +220,7 @@ module.exports = { // please add support for positions, budId
       const spoodawebId = req.body.spoodawebId
       transaction = await sequelize.transaction()
       let objId = await Utils.getNextObjId(spoodawebId)
+      if (await Utils.findSpoodaweb(spoodawebId) === false) throw error.create('The spoodaweb you are editing does not exist or has been deleted.')
       for (const [ clientObjId, obj ] of Object.entries(data)) {
         switch (obj.type) {
           case "bud":
