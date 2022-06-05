@@ -3,7 +3,7 @@ import * as utils from '../utils'
 
 import { Bud } from './BudShapes'
 
-const setBud = (pos) => { // { pronounciation, contexts, examples, links, position, type }
+const setBud = (pos) => {
   const nextObjId = utils.getNextObjId()
   const redoFunc = () => {
     utils.getObjById(nextObjId).redo()

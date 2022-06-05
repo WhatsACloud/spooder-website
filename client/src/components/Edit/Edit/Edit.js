@@ -20,6 +20,7 @@ import { Settings } from '../Settings'
 
 import Konva from 'konva'
 import { BudView } from '../Select/BudView'
+import { setBud } from '../Bud/BudUtils'
 
 Konva.hitOnDragEnabled = true
 
@@ -163,6 +164,22 @@ function Edit() {
     globals.historyIndex = -1
     globals.triggerDragLine = false
     globals.draggingLine = false
+    for (const [ objId, obj ] of Object.entries(spoodawebData)) {
+      console.log(obj.type)
+      if (obj.type === 'bud') {
+        const bud = new BudShapes.Bud(objId, obj.position.x, obj.position.y)
+        bud.word = obj.word
+        bud.definition = obj.definition
+        bud.sound = obj.sound
+        bud.context = obj.context
+        bud.link = obj.link
+        bud.example = obj.example
+        bud.attachedTos = obj.attachedTos
+        bud.x = obj.position.x
+        bud.y = obj.position.y
+        bud.objId = obj.objId
+      }
+    }
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
 

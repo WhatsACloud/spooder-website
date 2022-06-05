@@ -107,13 +107,13 @@ export { BudAnchorHighlighter as BudAnchorHighlighter }
 //                     ...currentBud.getAttr('attachedSilkObjId'),
 //                     [silkId]: 2
 //                   }
-//                   silk.children[1].setAttr('attachedToObjId', newBudId)
-//                   silk.children[2].setAttr('attachedToObjId', objId)
-//                   utils.updateObj(newBudId, {attachedTo: newBudAttachedSilk})
-//                   utils.updateObj(objId, {attachedTo: currentBudAttachedSilk})
+//                   silk.children[1].setAttr('attachedTosObjId', newBudId)
+//                   silk.children[2].setAttr('attachedTosObjId', objId)
+//                   utils.updateObj(newBudId, {attachedTos: newBudAttachedSilk})
+//                   utils.updateObj(objId, {attachedTos: currentBudAttachedSilk})
 //                   utils.updateObj(silkId, {
-//                     attachedTo1: newBudId,
-//                     attachedTo2: objId
+//                     attachedTos1: newBudId,
+//                     attachedTos2: objId
 //                   })
 //                 }
 //               }, 1000)
@@ -191,17 +191,17 @@ export { BudAnchorHighlighter as BudAnchorHighlighter }
 // }
 // export { Bud as Bud }
 
-const budSample = {
-  "objId": null,
-  "word": "",
-  "definition": "",
-  "sound": "",
-  "context": "",
-  "examples": [],
-  "link": 0,
-  "attachedTo": [],
-  "position": {},
-  "type": "bud" // bud silk
+const baseBud = {
+  word: '',
+  definition: '',
+  sound: '',
+  context: '',
+  example: '',
+  link: 0,
+  attachedToss: [],
+  position: null,
+  objId: null,
+  type: 'bud',
 }
 
 class example {
@@ -216,12 +216,12 @@ class example {
 class Bud {
   x = 0
   y = 0
-  attachedTo = []
+  attachedTos = []
   word = ""
   definition = ""
   sound = ""
   context = ""
-  examples = []
+  example = []
   link = 0
   konvaObj = null
   dragging = false
@@ -234,20 +234,26 @@ class Bud {
     bud.sound = this.sound
     bud.context = this.context
     bud.link = this.link
-    bud.examples = this.examples
-    bud.attachedTo = this.attachedTo
+    bud.example = this.example
+    bud.attachedTos = this.attachedTos
     bud.position = {x: this.x, y: this.y}
     bud.objId = this.objId
     return bud
   }
-  static fromJSON = (bud) => {
+  fromJSON = (bud) => {
+    for (attr in Object.keys(bud)) {
+      if (!(attr in baseBud)) {
+        console.log(`WARNING: given JSON contains (${attr}) which is not an attribute of bud.`)
+        return false
+      }
+    }
     this.word = bud.word
     this.definition = bud.definition
     this.sound = bud.sound
     this.context = bud.context
     this.link = bud.link
-    this.examples = bud.examples
-    this.attachedTo = bud.attachedTo
+    this.example = bud.example
+    this.attachedTos = bud.attachedTos
     this.x = bud.position.x
     this.y = bud.position.y
     this.objId = bud.objId
@@ -307,7 +313,7 @@ class Bud {
     this.y = y
     this.objId = nextObjId
     this.init(x, y)
-    utils.addObjs({[nextObjId]: this})
+    utils.addObjs({[Number(nextObjId)]: this})
   }
 }
 export { Bud }

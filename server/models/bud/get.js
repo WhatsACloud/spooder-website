@@ -10,6 +10,8 @@ const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
 const AttachedTo = require('../../databaseModels/AttachedTo')(sequelize, DataTypes)
 const Silk = require('../../databaseModels/Silk')(sequelize, DataTypes)
 
+const { Cbud } = require('../../utils/bud')
+
 async function getBudsWithinRange(spoodawebId, startPos, endPos) {
   console.log(startPos, endPos)
   const objs = await Bud.findAll({
@@ -79,7 +81,6 @@ async function getUser(id) {
 }
 
 async function getSpoodaweb(userId, spoodawebId) {
-  console.log('xue hua zhe piao piao', spoodawebId)
   const spoodaweb = await Spoodaweb.findOne({
     where: {
       fk_user_id: userId,
@@ -101,50 +102,25 @@ async function get (req, res, next) {
     if (spoodaweb === null) throw error.create('spoodaweb does not exist')
     // if (!(userId === spoodaweb.dataValues.fk_user_id)) throw error.create('requested spoodaweb is not under user')
     const spoodawebId = spoodaweb.dataValues.id
-    const dbBudObjs = await getBudsWithinRange(spoodawebId, startPos, endPos)
+    const dbBudObjs = await Bud.findAll({ where : {
+      fk_spoodaweb_id: spoodawebId,
+      deletedAt: {[Op.is]: null},
+    }})
     console.log(dbBudObjs)
     for (const dbObj of dbBudObjs) {
       const objData = dbObj.dataValues
       const objId = objData.objId
       if (typeof objId === 'number') {
-        toResObjs[objId] = {
+        toResObjs[objId] = new Cbud({
           word: objData.word,
-          definitions: [],
-          position: {
-            x: objData.x,
-            y: objData.y
-          },
-          attachedTo: {}, 
-          type: "bud"
-        }
-        // const budDetails = await getBudDetails(objData.id)
-        const budDetails = null
-        for (const budDetail of budDetails) {
-          const budDetailData = budDetail.dataValues
-          const budDetailId = budDetailData.id
-          console.log(toResObjs[objId])
-          toResObjs[objId].definitions.push({
-            sound: '',
-            definition: '',
-            context: '',
-            examples: [],
-            link: null,
-            arrID: null
-          })
-          const index = toResObjs[objId].definitions.length-1
-          toResObjs[objId].definitions[index].sound = budDetailData.sound
-          toResObjs[objId].definitions[index].definition = budDetailData.definition
-          toResObjs[objId].definitions[index].context = budDetailData.context
-          toResObjs[objId].definitions[index].link = budDetailData.link
-          toResObjs[objId].definitions[index].arrID = budDetailData.arrID
-          for (const [ exampleIndex, example ] of Object.entries(examples)) {
-            const exampleData = example.dataValues
-            toResObjs[objId].definitions[index].examples.push({
-              text: exampleData.example,
-              arrID: exampleData.arrID
-            })
-          }
-        }
+          definition: objData.definition,
+          sound: objData.sound,
+          context: objData.context,
+          example: objData.example,
+          link: objData.link,
+          position: {x: objData.x, y: objData.y},
+          objId: objId,
+        })
         const attachedTos = await AttachedTo.findAll({
           where: {
             fk_bud_id: objData.id,
@@ -153,10 +129,13 @@ async function get (req, res, next) {
             }
           }
         }) 
+        const toAttachedTos = {}
         for (const attachedTo of attachedTos) {
           const attachedToData = attachedTo.dataValues
-          toResObjs[objId].attachedTo[attachedToData.attachedToId] = attachedToData.innerIndex
+          toAttachedTos[attachedToData.attachedToId] = attachedToData.innerIndex
         }
+        toResObjs[objId].setJSONAttr('attachedTos', toAttachedTos)
+        toResObjs[objId] = toResObjs[objId].toJSON()
       }
     }
     const dbSilkObjs = await getSilksWithinRange(spoodawebId, startPos, endPos)

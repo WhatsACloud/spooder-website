@@ -3,7 +3,7 @@
 module.exports = {
   root: true,
   parserOptions: {
-    "ecmaVersion": 2017
+    "ecmaVersion": 2022
   },
   env: {
     browser: true,
