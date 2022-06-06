@@ -8,7 +8,6 @@ const Spoodaweb = require('../../databaseModels/spoodaweb')(sequelize, DataTypes
 
 const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
 const AttachedTo = require('../../databaseModels/AttachedTo')(sequelize, DataTypes)
-const Silk = require('../../databaseModels/Silk')(sequelize, DataTypes)
 
 const { Cbud } = require('../../utils/bud')
 
@@ -32,39 +31,6 @@ async function getBudsWithinRange(spoodawebId, startPos, endPos) {
       deletedAt: {
         [Op.is]: null
       }
-    }
-  }) 
-  return objs
-}
-
-async function getSilksWithinRange(spoodawebId, startPos, endPos) {
-  const objs = await Silk.findAll({
-    where: {
-      x1: {
-        [Op.and]: {
-          [Op.gt]: startPos[0],
-          [Op.lt]: endPos[0],
-        }
-      },
-      y1: {
-        [Op.and]: {
-          [Op.gt]: startPos[0],
-          [Op.lt]: endPos[1],
-        }
-      },
-      x2: {
-        [Op.and]: {
-          [Op.gt]: startPos[0],
-          [Op.lt]: endPos[0],
-        }
-      },
-      y2: {
-        [Op.and]: {
-          [Op.gt]: startPos[0],
-          [Op.lt]: endPos[1],
-        }
-      },
-      fk_spoodaweb_id: spoodawebId
     }
   }) 
   return objs
@@ -136,27 +102,6 @@ async function get (req, res, next) {
         }
         toResObjs[objId].setJSONAttr('attachedTos', toAttachedTos)
         toResObjs[objId] = toResObjs[objId].toJSON()
-      }
-    }
-    const dbSilkObjs = await getSilksWithinRange(spoodawebId, startPos, endPos)
-    for (const silk of dbSilkObjs) {
-      const silkData = silk.dataValues
-      const objId = silkData.objId
-      if (typeof objId === 'number') {
-        toResObjs[objId] = {
-          "positions": [],
-          "strength": null,
-          "attachedTo1": null,
-          "attachedTo2": null,
-          "type": "silk"
-        }
-        toResObjs[objId].positions = [
-          {x: silkData.x1, y: silkData.y1},
-          {x: silkData.x2, y: silkData.y2}
-        ]
-        toResObjs[objId].strength = silkData.strength
-        toResObjs[objId].attachedTo1 = silkData.attachedTo1
-        toResObjs[objId].attachedTo2 = silkData.attachedTo2
       }
     }
     req.body.spoodawebData = toResObjs

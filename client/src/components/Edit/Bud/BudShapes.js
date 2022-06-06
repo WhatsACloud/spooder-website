@@ -65,6 +65,24 @@ class Bud {
   del = false
   objId = null
   json = {...Bud.base}
+  mouseDown = () => {
+    console.log('selected')
+    if (utils.getGlobals().modes.autoDrag) {
+      this.konvaObj.setDraggable(false)
+      const mousemove = () => {
+        // ill do ltr
+      }
+      const mouseup = () => {
+        this.konvaObj.setDraggable(true)
+        document.removeEventListener('mouseup', mouseup)
+        document.removeEventListener('mousemove', mousemove)
+      }
+      document.addEventListener('mouseup', mouseup)
+      document.addEventListener('mousemove', mousemove)
+    } else {
+      this.select()
+    }
+  }
   dragEnd = () => {
     this.dragging = false
     const oldRootPos = utils.getRootPos()
@@ -102,6 +120,39 @@ class Bud {
     this._json = sifted
     console.log(this._json)
   }
+  select = () => {
+    utils.getGlobals().selected = this.objId
+    const radius = 40
+    // const highlightPart = new Konva.Shape({
+    //   strokeWidth: 0,
+    //   radius: radius+5,
+    //   sceneFunc: (ctx, shape) => {
+    //     const points = BudUtils.hexagonPoints(shape.getAttr('radius'), 0, 0) // why is this not the same as points variable above???
+    //     BudUtils.drawHexagon(ctx, points)
+    //     ctx.fillStrokeShape(shape)
+    //   },
+    //   fill: 'black',
+    // })
+    // const budShape = this.konvaObj.children[0]
+    // this.konvaObj.add(highlightPart)
+    // highlightPart.setZIndex(0)
+    // budShape.setZIndex(1)
+    const budShape = this.konvaObj.children[0]
+    budShape.setStrokeWidth(5)
+    budShape.setStroke('black')
+    const mousedown = () => {
+      console.log('unselected')
+      utils.getGlobals().selected = null
+      budShape.setStrokeWidth(0)
+      document.getElementById('divCanvas').removeEventListener('mousedown', mousedown)
+    }
+    const mouseleave = () => {
+      console.log('left')
+      document.getElementById('divCanvas').addEventListener('mousedown', mousedown)
+      budShape.off('mouseleave', mouseleave)
+    }
+    budShape.on('mouseleave', mouseleave)
+  }
   init = (objId) => {
     if (this.loaded === null) console.warn('Please set the bud.loaded variable before init!')
     const rootPos = utils.getRootPos()
@@ -115,6 +166,7 @@ class Bud {
       this.dragging = true
     })
     budGroup.on('dragend', this.dragEnd)
+    budGroup.on('mousedown', this.mouseDown)
     const budShape = new Konva.Shape({
       strokeWidth: 0,
       radius: radius,

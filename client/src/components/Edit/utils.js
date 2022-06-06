@@ -121,8 +121,8 @@ const getRootPos = () => {
 }
 export { getRootPos }
 
-const calcKonvaPosByPos = (pos) => {
-  const rootPos = getRootPos()
+const calcKonvaPosByPos = (pos, leRootPos=null) => {
+  const rootPos = leRootPos || getRootPos()
   return {
     x: pos.x + rootPos.x,
     y: pos.y + rootPos.y,
@@ -133,10 +133,9 @@ export { calcKonvaPosByPos }
 import * as BudUtils from './Bud/BudUtils'
 
 const setRootPos = (rootPos) => {
-  console.log(getObjs())
   for (const [ objId, obj ] of Object.entries(getObjs())) {
     if (!obj.dragging) {
-      const pos = calcKonvaPosByPos(obj.position)
+      const pos = calcKonvaPosByPos(obj.position, rootPos)
       obj.konvaObj.setX(pos.x)
       obj.konvaObj.setY(pos.y)
     }

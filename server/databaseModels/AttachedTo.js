@@ -11,10 +11,6 @@ module.exports = (sequelize, DataTypes) => {
             key: 'id'
           }
       },
-      innerIndex: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-      },
       attachedToId: {
         type: DataTypes.INTEGER,
         allowNull: false 

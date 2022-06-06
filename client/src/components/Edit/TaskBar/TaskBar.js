@@ -9,8 +9,9 @@ import { SearchBar, SearchResult } from './Search'
 import { Train } from './Train'
 import { UndoRedo } from './UndoRedo'
 import { Debugger } from './debug'
+import * as utils from '../utils'
 
-function TaskBar({ setInSettings, setModes, modes, setSelectedObj, selectedObj, setFocus }) {
+function TaskBar({ setInSettings, setSelectedObj, selectedObj, setFocus }) {
   const [ searchVal, setSearchVal ] = useState('')
   const [ renderedSearchResults, setRenderedSearchResults ] = useState()
   useEffect(() => {
@@ -55,11 +56,18 @@ function TaskBar({ setInSettings, setModes, modes, setSelectedObj, selectedObj, 
       <button
         className={styles.autoDragBtn}
         onClick={() => {
-          const newModes = {...modes}
-          newModes.autoDrag = !(modes.autoDrag)
-          setModes(newModes)
+          const modes = utils.getGlobals().modes
+          modes.autoDrag = !(modes.autoDrag)
         }}>
         <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
+      </button>
+      <button
+        className={styles.autoDragBtn}
+        onClick={() => {
+          const modes = utils.getGlobals().modes
+          modes.glue = !(modes.glue)
+        }}>
+        glue
       </button>
       <SearchBar
         searchVal={searchVal}

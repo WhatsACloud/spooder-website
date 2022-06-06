@@ -55,15 +55,6 @@ function MouseMoveDetector() {
   return <></>
 }
 
-function UpdateModes({ modes }) { // pls fix this later
-  // basically when reactState modes changes then this updates the one in Konva
-  useEffect(() => {
-    console.log(modes, utils.getGlobals())
-    utils.getGlobals().modes = modes
-  }, [modes])
-  return <></>
-}
-
 function FocusOnObj({ focus }) {
   useEffect(() => {
     const obj = utils.getObjById(focus)
@@ -114,10 +105,6 @@ function Edit() {
   const [ settings, setSettings ] = useState({
     Background: false
   })
-  const originalModes = {
-    autoDrag: false
-  }
-  const [ modes, setModes ] = useState(originalModes)
   useEffect(async () => {
     const width = utils.getStage().getAttr('width')
     const height = utils.getStage().getAttr('height')
@@ -156,7 +143,6 @@ function Edit() {
     console.log(objs.data)
     globals.nextObjId = objs.data.nextObjId
     globals.newObjs = []
-    globals.modes = originalModes 
     globals.addedObj = false
     globals.budObjs = {}
     globals.objs = {}
@@ -165,6 +151,11 @@ function Edit() {
     globals.historyIndex = -1
     globals.triggerDragLine = false
     globals.draggingLine = false
+    globals.selected = null
+    globals.modes = {
+      autoDrag: false,
+      gluing: false,
+    }
     for (const [ objId, obj ] of Object.entries(spoodawebData)) {
       console.log(obj.type)
       if (obj.type === 'bud') {
@@ -213,8 +204,6 @@ function Edit() {
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <SetGlobal></SetGlobal>
       <MouseMoveDetector></MouseMoveDetector>
-      <UpdateModes
-        modes={modes}></UpdateModes>
       <Settings
         inSettings={inSettings}
         setInSettings={setInSettings}
@@ -222,11 +211,10 @@ function Edit() {
         setSettings={setSettings}></Settings>
       <TaskBar
         setInSettings={setInSettings}
-        setModes={setModes}
         setSelectedObj={setSelectedObj}
         selectedObj={selectedObj}
         setFocus={setFocus}
-        modes={modes}></TaskBar>
+        ></TaskBar>
       <FocusOnObj
         focus={focus}></FocusOnObj>
       <div className={styles.wrapper}>

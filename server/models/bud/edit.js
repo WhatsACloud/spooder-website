@@ -1,6 +1,5 @@
 const { sequelize, DataTypes, Op } = require('../../database')
 const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
-const Silk = require('../../databaseModels/Silk')(sequelize, DataTypes)
 const AttachedTo = require('../../databaseModels/AttachedTo')(sequelize, DataTypes)
 const error = require('../../middleware/error')
 const Utils = require('./Utils')
@@ -69,11 +68,10 @@ async function createBud(spoodawebId, objId, obj, transaction) {
   return _bud
 }
 
-async function createAttachedTo(attachedToId, innerIndex, fk_bud_id, transaction) {
+async function createAttachedTo(attachedToId, fk_bud_id, transaction) {
   await AttachedTo.create({
     attachedToId: attachedToId,
     fk_bud_id: fk_bud_id,
-    innerIndex: innerIndex
   }, {transaction: transaction})
 }
 
@@ -86,54 +84,17 @@ async function editAttachedTo(budId, attachedTo, transaction) {
   // for (_attachedTo of _attachedTos) {
   //   await _attachedTo.destroy({transaction: transaction})
   // }
-  for (const [ index, attachedToId ] of Object.keys(attachedTo).entries()) {
+  for (let i = 0; i < attachedTo.length; i++) {
+    const attachedToId = attachedTo[i]
     if (_attachedTos[index]) {
-      const innerIndex = attachedTo[attachedToId]
       _attachedTos[index].update({
-        attachedToId: attachedToId,
-        innerIndex: innerIndex
+        attachedToId: attachedToId
       })
     } else {
-      const innerIndex = attachedTo[attachedToId]
-      await createAttachedTo(attachedToId, innerIndex, budId, transaction)
+      await createAttachedTo(attachedToId, budId, transaction)
     }
   }
   return _attachedTos
-}
-
-async function createSilk(spoodawebId, positions, strength, objId, attachedTo1, attachedTo2, transaction) {
-  const silk = await Silk.create({
-    fk_spoodaweb_id: spoodawebId,
-    x1: positions[0].x,
-    y1: positions[0].y,
-    x2: positions[1].x,
-    y2: positions[1].y,
-    attachedTo1: attachedTo1,
-    attachedTo2: attachedTo2,
-    objId: objId,
-    strength: strength
-  }, {transaction: transaction})
-  return silk
-}
-
-async function editSilk(spoodawebId, positions, strength, objId, attachedTo1, attachedTo2, transaction) {
-  const silk = await Silk.findOne({
-    where: {
-     fk_spoodaweb_id: spoodawebId,
-     objId: objId 
-    }
-  })
-  if (silk === null) return false
-  await silk.update({
-    x1: positions[0].x,
-    y1: positions[0].y,
-    x2: positions[1].x,
-    y2: positions[1].y,
-    attachedTo1: attachedTo1,
-    attachedTo2: attachedTo2,
-    strength: strength
-  }, {transaction: transaction})
-  return silk
 }
 
 async function editBud(spoodawebId, objId, obj, transaction) {
@@ -162,11 +123,8 @@ const addBud = async (spoodawebId, obj, objId, transaction) => {
   if (_budId === false) throw error.create(`object ${objId-1} (bud) already exists within database.`)
   objId += 1
   const budId = _budId.dataValues.id
-  let i = 0
-  for (const attachedToId of Object.keys(obj.attachedTos)) {
-    const innerIndex = obj.attachedTo[attachedToId]
-    await createAttachedTo(attachedToId, i, budId, transaction)
-    i++
+  for (const attachedToId of obj.attachedTos) {
+    await createAttachedTo(attachedToId, budId, transaction)
   }
 }
 
