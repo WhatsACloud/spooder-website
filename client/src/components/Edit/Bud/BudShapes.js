@@ -191,80 +191,71 @@ export { BudAnchorHighlighter as BudAnchorHighlighter }
 // }
 // export { Bud as Bud }
 
-const baseBud = {
-  word: '',
-  definition: '',
-  sound: '',
-  context: '',
-  example: '',
-  link: 0,
-  attachedToss: [],
-  position: null,
-  objId: null,
-  type: 'bud',
-}
-
-class example {
-  arrID = null
-  text = ""
-  constructor(arrID, text) {
-    this.arrID = arrID
-    this.text = text
-  }
-}
-
 class Bud {
-  loaded = false
-  x = 0
-  y = 0
-  attachedTos = []
-  word = ""
-  definition = ""
-  sound = ""
-  context = ""
-  example = []
-  link = 0
+  static base = {
+    word: '',
+    definition: '',
+    sound: '',
+    context: '',
+    example: '',
+    link: 0,
+    attachedTos: {},
+    position: {x: 0, y: 0},
+    objId: null,
+  }
+  loaded = null
+  _position = {x: 0, y: 0}
+  get position() {return this._position}
+  set position(lePos) {
+    if (!(isNaN(lePos.x)) && !(isNaN(lePos.y))) {
+      this._position = lePos
+      this.json.position = lePos
+      const konvaPos = utils.calcKonvaPosByPos(lePos)
+      this.konvaObj.setX(konvaPos.x) // reason being calculation of konvaObj by rootPos was a nightmare sooooo just in case
+      this.konvaObj.setY(konvaPos.y)
+      return
+    }
+    console.warn(`WARNING: position given is invalid, given ${lePos} (bud ${this.objId})`)
+  }
+  get x() {return this.position.x}
+  get y() {return this.position.y}
+  set x(leX) {
+    this.position.x = leX
+    this.json.position.x = leX
+    this.konvaObj.setX(utils.calcKonvaPosByPos({x: leX, y: this.y}).x) // reason being calculation of konvaObj by rootPos was a nightmare sooooo just in case
+  }
+  set y(leY) {
+    this.position.y = leY
+    this.json.position.y = leY
+    this.konvaObj.setY(utils.calcKonvaPosByPos({x: this.x, y: leY}).y) // reason being calculation of konvaObj by rootPos was a nightmare sooooo just in case
+  }
   konvaObj = null
   dragging = false
   del = false
   objId = null
-  toJSON = () => {
-    const bud = {...budSample}
-    bud.word = this.word
-    bud.definition = this.definition
-    bud.sound = this.sound
-    bud.context = this.context
-    bud.link = this.link
-    bud.example = this.example
-    bud.attachedTos = this.attachedTos
-    bud.position = {x: this.x, y: this.y}
-    bud.objId = this.objId
-    return bud
-  }
-  fromJSON = (bud) => {
-    for (attr in Object.keys(bud)) {
-      if (!(attr in baseBud)) {
-        console.log(`WARNING: given JSON contains (${attr}) which is not an attribute of bud.`)
-        return false
+  json = {...Bud.base}
+  fromJson = () => {
+    const sifted = {}
+    for (attr in Object.keys(leJson)) {
+      if (!(attr in Bud.base)) {
+        console.warn(`WARNING: given JSON contains (${attr}) of value (${leJson[attr]}) which is not an attribute of bud. (bud ${this.objId})`)
+        continue
+      } else if (!(typeof Bud.base[attr] === typeof leJson[attr])) {
+        console.warn(`WARNING: (${attr}) should be of type ${typeof Bud.base[attr]}, not ${typeof leJson[attr]}. (${this.objId})`)
+        continue
       }
+      sifted[attr] = leJson[attr]
     }
-    this.word = bud.word
-    this.definition = bud.definition
-    this.sound = bud.sound
-    this.context = bud.context
-    this.link = bud.link
-    this.example = bud.example
-    this.attachedTos = bud.attachedTos
-    this.x = bud.position.x
-    this.y = bud.position.y
-    this.objId = bud.objId
+    this._json = sifted
+    console.log(this._json)
   }
-  init = (x, y) => {
+  init = (objId) => {
+    if (this.loaded === null) console.warn('Please set the bud.loaded variable before init!')
     const rootPos = utils.getRootPos()
     const radius = 40
     const budGroup = new Konva.Group({
-      x: x + rootPos.x,
-      y: y + rootPos.y,
+      x: 0,
+      y: 0,
       draggable: true,
     })
     budGroup.on('dragstart', () => {
@@ -298,8 +289,8 @@ class Bud {
     const mainLayer = utils.getMainLayer()
     mainLayer.add(budGroup)
     this.konvaObj = budGroup
-    if (!this.loaded) {
-      utils.addToNewObjs(this.objId)
+    if (this.loaded === false) {
+      utils.addToNewObjs(objId)
     }
   }
   undo = () => {
@@ -308,17 +299,17 @@ class Bud {
   }
   redo = () => {
     this.del = false
-    this.init(this.x, this.y)
+    this.init(this.objId)
+    this.position = {x: this.x, y: this.y}
   }
   delete = () => {
   }
   constructor(nextObjId, x, y, loaded=false) { // loaded meaning loaded from database
     nextObjId = Number(nextObjId)
-    this.x = x
-    this.y = y
-    this.objId = nextObjId
     this.loaded = loaded
-    this.init(x, y)
+    console.log(this.loaded)
+    this.init(nextObjId)
+    this.position = {x: x, y: y}
     utils.addObjs({[Number(nextObjId)]: this})
   }
 }

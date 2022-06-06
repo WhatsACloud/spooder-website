@@ -53,7 +53,7 @@ async function markBudForDeletion(spoodawebId, budId, transaction) {
 
 async function createBud(spoodawebId, objId, obj, transaction) {
   const possibleDbBud = await findBud(spoodawebId, objId, transaction)
-  if (possibleDbBud === false) return false
+  if (possibleDbBud !== false) return false
   const _bud = await Bud.create({
     fk_spoodaweb_id: spoodawebId,
     objId: objId,
@@ -163,7 +163,7 @@ const addBud = async (spoodawebId, obj, objId, transaction) => {
   objId += 1
   const budId = _budId.dataValues.id
   let i = 0
-  for (const attachedToId of Object.keys(obj.attachedTo)) {
+  for (const attachedToId of Object.keys(obj.attachedTos)) {
     const innerIndex = obj.attachedTo[attachedToId]
     await createAttachedTo(attachedToId, i, budId, transaction)
     i++
@@ -177,7 +177,7 @@ const completeEditBud = async (spoodawebId, clientObjId, objId, obj, transaction
       return false
     }
     const budId = bud.dataValues.id
-    await editAttachedTo(budId, obj.attachedTo, transaction)
+    await editAttachedTo(budId, obj.attachedTos, transaction)
   } else {
     console.log(clientObjId)
     await markBudForDeletion(spoodawebId, clientObjId, transaction)
@@ -195,20 +195,10 @@ module.exports = { // please add support for positions, budId
       let objId = await Utils.getNextObjId(spoodawebId)
       if (await Utils.findSpoodaweb(spoodawebId) === false) throw error.create('The spoodaweb you are editing does not exist or has been deleted.')
       for (const [ clientObjId, obj ] of Object.entries(data)) {
-        switch (obj.type) {
-          case "bud":
-            const bud = await completeEditBud(spoodawebId, clientObjId, objId, obj, transaction)
-            if (bud === false) {
-              await addBud(spoodawebId, obj, objId, transaction)
-              objId++
-            }
-            break
-          case "silk":
-            const silk = await editSilk(spoodawebId, obj.positions, obj.strength, clientObjId, obj.attachedTo1, obj.attachedTo2, transaction)
-            if (!silk) {
-              await createSilk(spoodawebId, obj.positions, obj.strength, objId, obj.attachedTo1, obj.attachedTo2, transaction) 
-              objId++
-            }
+        const bud = await completeEditBud(spoodawebId, clientObjId, objId, obj, transaction)
+        if (bud === false) {
+          await addBud(spoodawebId, obj, objId, transaction)
+          objId++
         }
       }
       await transaction.commit()

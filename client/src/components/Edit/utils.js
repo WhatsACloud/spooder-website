@@ -98,6 +98,7 @@ const getNextHighestAttr = (arr, attrName) => {
 export { getNextHighestAttr }
 
 const addToNewObjs = (objId) => {
+  console.log(objId)
   const newObjs = getGlobals().newObjs
   newObjs.push(objId)
 }
@@ -114,14 +115,24 @@ const getRootPos = () => {
 }
 export { getRootPos }
 
+const calcKonvaPosByPos = (pos) => {
+  const rootPos = getRootPos()
+  return {
+    x: pos.x + rootPos.x,
+    y: pos.y + rootPos.y,
+  }
+}
+export { calcKonvaPosByPos }
+
 import * as BudUtils from './Bud/BudUtils'
 
 const setRootPos = (rootPos) => {
   console.log(getObjs())
   for (const [ objId, obj ] of Object.entries(getObjs())) {
     if (!obj.dragging) {
-      obj.konvaObj.setX(obj.x + rootPos.x)
-      obj.konvaObj.setY(obj.y + rootPos.y)
+      const pos = calcKonvaPosByPos(obj.position)
+      obj.konvaObj.setX(pos.x)
+      obj.konvaObj.setY(pos.y)
     }
   }
   getGlobals().rootPos = rootPos
@@ -172,10 +183,15 @@ import api from '../../services/api'
 
 const save = async () => {
   const newObjs = getGlobals().newObjs
+  const toSend = {}
+  for (const objId of newObjs) {
+    toSend[objId] = getObjById(objId).json
+  }
+  console.log(toSend)
   try {
     const req = {
       spoodawebId: getGlobals().spoodawebId,
-      spoodawebData: newObjs
+      spoodawebData: toSend
     }
     const result = await api.post('/webs/edit', req)
   } catch(err) {
