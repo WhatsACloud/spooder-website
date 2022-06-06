@@ -98,15 +98,21 @@ const getNextHighestAttr = (arr, attrName) => {
 export { getNextHighestAttr }
 
 const addToNewObjs = (objId) => {
-  console.log(objId)
   const newObjs = getGlobals().newObjs
-  newObjs.push(objId)
+  if (!(newObjs.includes(objId))) {
+    newObjs.push(objId)
+  }
 }
 export { addToNewObjs }
 
-const delFromNewObjs = (objId, obj) => {
+const delFromNewObjs = (objId) => {
   const newObjs = getGlobals().newObjs
-  delete newObjs[objId]
+  for (let i = 0; i < newObjs.length; i++) {
+    const id = newObjs[i]
+    if (id === objId) {
+      newObjs.splice(i, 1)
+    }
+  }
 }
 export { delFromNewObjs }
 
@@ -187,6 +193,7 @@ const save = async () => {
   for (const objId of newObjs) {
     toSend[objId] = getObjById(objId).json
   }
+  console.log(newObjs)
   console.log(toSend)
   try {
     const req = {
@@ -198,6 +205,7 @@ const save = async () => {
     err = err.response
     console.log(err)
   }
+  getGlobals().newObjs = []
   // below simulates the thing reloading
 
   // const rootPos = getRootPos()
