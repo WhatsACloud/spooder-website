@@ -18,7 +18,7 @@ const LineDragUpdater = memo(({
     let lineCircle
     let redoFunc, undoFunc
     if (selectedSilk) {
-      const line = utils.getKonvaObjById(selectedSilk.objId)
+      // const line = utils.getKonvaObjById(selectedSilk.objId)
       if (line) {
         lineCircle = line.children[selectedSilk.innerIndex]
       }
@@ -50,7 +50,7 @@ const LineDragUpdater = memo(({
     const dragLineWrapper = e => SilkUtils.lineCircleMove(e, draggingLine, selectedSilk)
     const dropLine = (e) => { // wow! aMaZiNg CoDe!!!!!
       console.log('dropped line')
-      const line = utils.getKonvaObjById(selectedSilk.objId)
+      // const line = utils.getKonvaObjById(selectedSilk.objId)
       line.moveToBottom()
       if (!utils.isInCanvas({x: e.pageX, y: e.pageY})) SilkUtils.snapLineCircleToLine(selectedSilk) 
       const highlighter = utils.getHighlighter()
@@ -69,7 +69,7 @@ const LineDragUpdater = memo(({
         }
         undoFunc = () => {
           console.log(utils.getMainLayer())
-          const konvaObj = utils.getKonvaObjById(selectedSilk.objId)
+          // const konvaObj = utils.getKonvaObjById(selectedSilk.objId)
           console.log(konvaObj, selectedSilk.objId)
           konvaObj.destroy()
           const obj = utils.getObjById(selectedSilk.objId)
@@ -85,31 +85,31 @@ const LineDragUpdater = memo(({
             const rootPos = utils.getRootPos()
             line.setAttr('offsetRootPoses', newOffsetRootPoses)
             SilkUtils.removeAttachment(lineCircle)
-            utils.updateObj(selectedSilk.objId, {
-              positions: [
-                {
-                  x: newOffsetRootPoses[0].x + rootPos.x,
-                  y: newOffsetRootPoses[0].y + rootPos.y
-                },
-                {
-                  x: newOffsetRootPoses[1].x + rootPos.x,
-                  y: newOffsetRootPoses[1].y + rootPos.y
-                },
-              ],
-              innerIndex: selectedSilk.innerIndex
-            })
+            // utils.updateObj(selectedSilk.objId, {
+            //   positions: [
+            //     {
+            //       x: newOffsetRootPoses[0].x + rootPos.x,
+            //       y: newOffsetRootPoses[0].y + rootPos.y
+            //     },
+            //     {
+            //       x: newOffsetRootPoses[1].x + rootPos.x,
+            //       y: newOffsetRootPoses[1].y + rootPos.y
+            //     },
+            //   ],
+            //   innerIndex: selectedSilk.innerIndex
+            // })
           }
           undoFunc = () => {
             const rootPos = utils.getRootPos()
             line.setAttr('offsetRootPoses', offsetRootPoses)
             // SilkUtils.snapLine(selectedSilk, budId, x, y)
-            utils.updateObj(selectedSilk.objId, {
-              positions: [
-                {x: offsetRootPoses[0].x + rootPos.x, y: offsetRootPoses[0].y + rootPos.y},
-                {x: offsetRootPoses[1].x + rootPos.x, y: offsetRootPoses[1].y + rootPos.y},
-              ],
-              innerIndex: selectedSilk.innerIndex
-            })
+            // utils.updateObj(selectedSilk.objId, {
+            //   positions: [
+            //     {x: offsetRootPoses[0].x + rootPos.x, y: offsetRootPoses[0].y + rootPos.y},
+            //     {x: offsetRootPoses[1].x + rootPos.x, y: offsetRootPoses[1].y + rootPos.y},
+            //   ],
+            //   innerIndex: selectedSilk.innerIndex
+            // })
           }
         }
       }

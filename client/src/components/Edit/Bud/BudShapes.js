@@ -214,6 +214,7 @@ class example {
 }
 
 class Bud {
+  loaded = false
   x = 0
   y = 0
   attachedTos = []
@@ -297,6 +298,9 @@ class Bud {
     const mainLayer = utils.getMainLayer()
     mainLayer.add(budGroup)
     this.konvaObj = budGroup
+    if (!this.loaded) {
+      utils.addToNewObjs(this.objId)
+    }
   }
   undo = () => {
     this.konvaObj.destroy()
@@ -308,10 +312,12 @@ class Bud {
   }
   delete = () => {
   }
-  constructor(nextObjId, x, y) {
+  constructor(nextObjId, x, y, loaded=false) { // loaded meaning loaded from database
+    nextObjId = Number(nextObjId)
     this.x = x
     this.y = y
     this.objId = nextObjId
+    this.loaded = loaded
     this.init(x, y)
     utils.addObjs({[Number(nextObjId)]: this})
   }

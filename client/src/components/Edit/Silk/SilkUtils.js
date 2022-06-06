@@ -18,7 +18,7 @@ const setSilk = (setObjsToUpdate, details, objId) => {
     delete line.del
   }
   setObjsToUpdate({[nextObjId]: line})
-  utils.updateNewObjs(nextObjId, line)
+  // utils.updateNewObjs(nextObjId, line)
   utils.setNextObjId(nextObjId+1)
 }
 export { setSilk }
@@ -28,7 +28,7 @@ const startDragLine = (e, setSelectedSilk, objId, innerIndex) => {
     const newSelectedSilk = {"objId": objId, "innerIndex": innerIndex}
     setSelectedSilk(newSelectedSilk)
     const interval = setInterval(() => {
-      const renderedLine = utils.getKonvaObjById(objId)
+      // const renderedLine = utils.getKonvaObjById(objId)
       if (renderedLine) {
         renderedLine.moveToBottom()
         clearInterval(interval)
@@ -55,9 +55,9 @@ const stopDragLine = (e, lineCircle) => { // todo: remove lineCircle, add mouseu
 export { stopDragLine }
 
 const snapLine = (selectedSilk, budObjId, x, y) => {
-  const line = utils.getKonvaObjById(selectedSilk.objId)
+  // const line = utils.getKonvaObjById(selectedSilk.objId)
   const lineCircle = line.children[selectedSilk.innerIndex]
-  const attachedTo = utils.getKonvaObjById(budObjId)
+  // const attachedTo = utils.getKonvaObjById(budObjId)
   // console.log(highlighter.getAttr('attachedObjId'))
   // console.log(lineCircle.getX(), lineCircle.getY())
   lineCircle.setAttr('attachedToObjId', attachedTo.getAttr('objId'))
@@ -71,19 +71,19 @@ const snapLine = (selectedSilk, budObjId, x, y) => {
   const rootPos = utils.getRootPos()
   offsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: x - rootPos.x, y: y - rootPos.y}
   line.setAttr('offsetRootPoses', offsetRootPoses)
-  utils.updateObj(selectedSilk.objId, {
-    positions: offsetRootPoses,
-    [`attachedTo${selectedSilk.innerIndex}`]: lineCircle.getAttr('attachedToObjId')
-  })
-  // console.log(utils.getObjById(budObjId))
-  utils.updateObj(budObjId, {
-    attachedTo: {...utils.getObjById(budObjId).attachedTo, [selectedSilk.objId]: selectedSilk.innerIndex}
-  })
+  // utils.updateObj(selectedSilk.objId, {
+  //   positions: offsetRootPoses,
+  //   [`attachedTo${selectedSilk.innerIndex}`]: lineCircle.getAttr('attachedToObjId')
+  // })
+  // // console.log(utils.getObjById(budObjId))
+  // utils.updateObj(budObjId, {
+  //   attachedTo: {...utils.getObjById(budObjId).attachedTo, [selectedSilk.objId]: selectedSilk.innerIndex}
+  // })
 }
 export { snapLine as snapLine }
 
 const snapLineCircleToLine = (selectedSilk) => { // pls fix ltr it doesnt work if innerIndex is 2
-  const lineGroup = utils.getKonvaObjById(selectedSilk.objId)
+  // const lineGroup = utils.getKonvaObjById(selectedSilk.objId)
   const line = lineGroup.children[0]
   const lineCircle = lineGroup.children[selectedSilk.innerIndex]
   console.log(selectedSilk)
@@ -102,7 +102,7 @@ const lineCircleMove = (e, draggingLine, selectedSilk) => {
   if (utils.isInCanvas({x: e.pageX, y: e.pageY}) && draggingLine) {
     const mousePos = {x: e.pageX, y: e.pageY}
     const canvasMousePos = utils.getCanvasMousePos(mousePos.x, mousePos.y)
-    const lineGroup = utils.getKonvaObjById(selectedSilk.objId).children
+    // const lineGroup = utils.getKonvaObjById(selectedSilk.objId).children
     const start = lineGroup[selectedSilk.innerIndex]
     updateLineCirclePos(start, canvasMousePos.x, canvasMousePos.y)
   }
@@ -136,7 +136,7 @@ const getLinePos = (lineGroup) => {
 export { getLinePos as getLinePos}
 
 const removeAttachment = (lineCircle) => {
-  const attachedTo = utils.getKonvaObjById(lineCircle.getAttr('attachedToObjId'))
+  // const attachedTo = utils.getKonvaObjById(lineCircle.getAttr('attachedToObjId'))
   if (attachedTo) {
     const newObjs = {...attachedTo.getAttr('attachedSilkObjId')}
     delete newObjs[Number(lineCircle.parent.getAttr('objId'))]

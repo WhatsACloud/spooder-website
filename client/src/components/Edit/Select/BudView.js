@@ -79,10 +79,10 @@ const handleInputChange = (e, type, renderData, setRenderData, id, definitionNo=
   newData[type] = val
   const obj = utils.getObjById(id)
   if (type === "word") {
-    utils.updateObj(id, {word: val})
+    // utils.updateObj(id, {word: val})
   } else {
     obj.definitions[definitionNo][type] = val
-    utils.updateNewObjs(id, obj)
+    // utils.updateNewObjs(id, obj)
   }
   setRenderData(newData)
 }
@@ -124,8 +124,8 @@ function MoreBtn({ budId, setDefinitionNo, definitionNo, setSelectedObj }) {
         <div className={clicked ? styles.budMenu : styles.none}>
           <button className={styles.deleteBtn}
             onClick={e => {
-              utils.getKonvaObjById(budId).destroy()
-              utils.updateObj(budId, {del: true}) // pls make thing ignore bud that has del attr
+              // utils.getKonvaObjById(budId).destroy()
+              // utils.updateObj(budId, {del: true}) // pls make thing ignore bud that has del attr
               setSelectedObj()
             }}>delete bud</button>
           <button className={styles.deleteBtn}
@@ -133,12 +133,12 @@ function MoreBtn({ budId, setDefinitionNo, definitionNo, setSelectedObj }) {
               const obj = utils.getObjById(budId)
               const newDef = obj.definitions.splice(definitionNo, 1)[0]
               newDef.del = true
-              utils.updateObj(budId, {
-                definitions: [
-                  ...obj.definitions,
-                  newDef
-                ]
-              })
+              // utils.updateObj(budId, {
+              //   definitions: [
+              //     ...obj.definitions,
+              //     newDef
+              //   ]
+              // })
               // setTriggerRerender(!triggerRerender)
               setDefinitionNo(getOtherDef(utils.getObjById(budId)))
             }}>delete definition</button>
@@ -204,12 +204,12 @@ function BudView({ selectedObj, setSelectedObj }) {
                   const obj = utils.getObjById(selectedObj)
                   const definition = obj.definitions[definitionNo]
                   example.del = true
-                  utils.updateObj(budId, {
-                    definitions: [{
-                      ...definition,
-                      examples: [...definition.examples]
-                    }]
-                  })
+                  // utils.updateObj(budId, {
+                  //   definitions: [{
+                  //     ...definition,
+                  //     examples: [...definition.examples]
+                  //   }]
+                  // })
                   setTriggerRerender(!triggerRerender)
                 }}>delete example</button>
             </>

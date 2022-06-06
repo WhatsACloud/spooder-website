@@ -127,6 +127,8 @@ function Edit() {
     const urlString = window.location.search
     let paramString = urlString.split('?')[1];
     let queryString = new URLSearchParams(paramString);
+    const globals = utils.getGlobals()
+    globals.spoodawebId = queryString.get('id')
     let objs = {
       data: {
         spoodawebData: {},
@@ -136,7 +138,7 @@ function Edit() {
     const rootPos = utils.getRootPos() || {x: 0, y: 0}
     try {
       objs = await api.post('/webs/get/objects', {
-        spoodawebId: queryString.get('id'),
+        spoodawebId: globals.spoodawebId,
         startPos: [
           rootPos.x - width,
           rootPos.y - height,
@@ -151,10 +153,9 @@ function Edit() {
       console.log('Unable to retrieve objects.')
     }
     const spoodawebData = objs.data.spoodawebData
-    const globals = window.spoodawebVars 
     console.log(objs.data)
     globals.nextObjId = objs.data.nextObjId
-    globals.newObjs = {}
+    globals.newObjs = []
     globals.modes = originalModes 
     globals.addedObj = false
     globals.budObjs = {}
@@ -167,7 +168,7 @@ function Edit() {
     for (const [ objId, obj ] of Object.entries(spoodawebData)) {
       console.log(obj.type)
       if (obj.type === 'bud') {
-        const bud = new BudShapes.Bud(objId, obj.position.x, obj.position.y)
+        const bud = new BudShapes.Bud(objId, obj.position.x, obj.position.y, true)
         bud.word = obj.word
         bud.definition = obj.definition
         bud.sound = obj.sound

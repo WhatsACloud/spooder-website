@@ -97,21 +97,17 @@ const getNextHighestAttr = (arr, attrName) => {
 }
 export { getNextHighestAttr }
 
-const updateNewObjs = (objId, obj) => {
-  const mainLayer = getMainLayer()
+const addToNewObjs = (objId) => {
   const newObjs = getGlobals().newObjs
-  const rootPos = getRootPos()
-  const redoFunc = () => {
-    const editObjs = {...newObjs}
-    editObjs[objId] = obj
-    getGlobals().newObjs = editObjs
-  }
-  const undoFunc = () => {
-    getGlobals().newObjs = newObjs
-  }
-  redoFunc()
+  newObjs.push(objId)
 }
-export { updateNewObjs }
+export { addToNewObjs }
+
+const delFromNewObjs = (objId, obj) => {
+  const newObjs = getGlobals().newObjs
+  delete newObjs[objId]
+}
+export { delFromNewObjs }
 
 const getRootPos = () => {
   return getGlobals().rootPos
@@ -121,27 +117,6 @@ export { getRootPos }
 import * as BudUtils from './Bud/BudUtils'
 
 const setRootPos = (rootPos) => {
-  // for (let obj of getKonvaObjs()) {
-  //   const type = obj.getAttr('objType')
-  //   if (type === 'bud') {
-  //     const bud = obj.children[0]
-  //     bud.setX(obj.getAttr('offsetRootPos').x + rootPos.x)
-  //     bud.setY(obj.getAttr('offsetRootPos').y + rootPos.y)
-  //   } else if (type === 'silk') {
-  //     const silk = obj.children[0]
-  //     const offsetRootPoses = obj.getAttr('offsetRootPoses')
-  //     silk.setPoints([
-  //       offsetRootPoses[0].x + rootPos.x,
-  //       offsetRootPoses[0].y + rootPos.y,
-  //       offsetRootPoses[1].x + rootPos.x,
-  //       offsetRootPoses[1].y + rootPos.y,
-  //     ])
-  //     obj.children[1].setX(offsetRootPoses[0].x + rootPos.x)
-  //     obj.children[1].setY(offsetRootPoses[0].y + rootPos.y)
-  //     obj.children[2].setX(offsetRootPoses[1].x + rootPos.x)
-  //     obj.children[2].setY(offsetRootPoses[1].y + rootPos.y)
-  //   } else {
-  //   }
   console.log(getObjs())
   for (const [ objId, obj ] of Object.entries(getObjs())) {
     if (!obj.dragging) {
@@ -162,18 +137,6 @@ const isInCanvas = (mousePos) => {
 }
 export { isInCanvas as isInCanvas }
 
-const getKonvaObjById = (id=null) => { // pls make it more efficient
-  if (id === null) return false
-  const objs = getKonvaObjs()
-  for (const obj of objs) {
-    if (Number(obj.getAttr('objId')) === Number(id)) {
-      return obj
-    }
-  }
-  return false
-}
-export { getKonvaObjById as getKonvaObjById }
-
 const getObjById = (id=null) => {
   if (id === null) return false
   const objs = getObjs() 
@@ -189,7 +152,7 @@ const getHighlighter = () => {
 export { getHighlighter }
 
 const addObjs = (toAdd) => {
-  // console.log(toAdd[0])
+  console.log(toAdd)
   const globals = getGlobals()
   const currentObjs = globals.objs
   const newObjs = {...currentObjs, ...toAdd}
@@ -204,60 +167,14 @@ const addObjs = (toAdd) => {
 }
 export { addObjs }
 
-const updateObj = (objId, attrs) => {
-  const obj = getObjById(objId)
-  const konvaObj = getKonvaObjById(objId) 
-  if ('position' in attrs) {
-    konvaObj.setAttr('offsetRootPos', attrs.position)
-    const bud = konvaObj.children[0]
-    const rootPos = getRootPos()
-    bud.setX(attrs.position.x + rootPos.x)
-    bud.setY(attrs.position.y + rootPos.y)
-  }
-  const prevAttachedTo = konvaObj.getAttr('attachedSilkObjId')
-  const newObj = {...obj}
-  Object.entries(attrs).forEach(([name, val]) => {
-    newObj[name] = val
-  })
-  updateNewObjs(objId, newObj, true)
-  if ('positions' in attrs) {
-    const rootPos = getRootPos()
-    console.log(attrs)
-    konvaObj.children[0].setPoints([
-      attrs.positions[0].x,
-      attrs.positions[0].y,
-      attrs.positions[1].x,
-      attrs.positions[1].y,
-    ])
-    konvaObj.children[1].setX(attrs.positions[0].x)
-    konvaObj.children[1].setY(attrs.positions[0].y)
-    konvaObj.children[2].setX(attrs.positions[1].x)
-    konvaObj.children[2].setY(attrs.positions[1].y)
-    konvaObj.setAttr('offsetRootPoses', [
-      {
-        x: attrs.positions[0].x - rootPos.x,
-        y: attrs.positions[0].y - rootPos.y,
-      },
-      {
-        x: attrs.positions[1].x - rootPos.x,
-        y: attrs.positions[1].y - rootPos.y,
-      }
-    ])
-  }
-}
-export { updateObj }
-
 import 'regenerator-runtime/runtime'
 import api from '../../services/api'
 
 const save = async () => {
-  const newObjs = getMainLayer().getAttr('newObjs') 
-  const urlString = window.location.search
-  let paramString = urlString.split('?')[1];
-  let queryString = new URLSearchParams(paramString);
+  const newObjs = getGlobals().newObjs
   try {
     const req = {
-      spoodawebId: queryString.get('id'),
+      spoodawebId: getGlobals().spoodawebId,
       spoodawebData: newObjs
     }
     const result = await api.post('/webs/edit', req)
