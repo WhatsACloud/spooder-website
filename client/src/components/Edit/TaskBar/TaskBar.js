@@ -65,7 +65,7 @@ function TaskBar({ setInSettings, setSelectedObj, selectedObj, setFocus }) {
         className={styles.autoDragBtn}
         onClick={() => {
           const modes = utils.getGlobals().modes
-          modes.glue = !(modes.glue)
+          modes.gluing = !(modes.gluing)
         }}>
         glue
       </button>

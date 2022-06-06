@@ -29,7 +29,7 @@ class Bud {
     context: '',
     example: '',
     link: 0,
-    attachedTos: {},
+    attachedTos: [],
     position: {x: 0, y: 0},
     objId: null,
   }
@@ -67,7 +67,9 @@ class Bud {
   json = {...Bud.base}
   mouseDown = () => {
     console.log('selected')
-    if (utils.getGlobals().modes.autoDrag) {
+    const modes = utils.getGlobals().modes
+    console.log(this.objId !== utils.getGlobals().selected, modes.gluing)
+    if (modes.autoDrag) {
       this.konvaObj.setDraggable(false)
       const mousemove = () => {
         // ill do ltr
@@ -79,6 +81,8 @@ class Bud {
       }
       document.addEventListener('mouseup', mouseup)
       document.addEventListener('mousemove', mousemove)
+    } else if (modes.gluing && (this.objId !== utils.getGlobals().selected)) {
+      console.log('pls glue')
     } else {
       this.select()
     }
