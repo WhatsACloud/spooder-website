@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import * as utils from '../utils'
 import * as BudUtils from './BudUtils'
 import { lineCircleMove, updateLineCirclePos } from '../Silk/SilkUtils'
-import { select } from '../Select'
 import Konva from 'konva'
+import { Silk } from '../Silk/SilkShape'
 
 function BudAnchorHighlighter() {
   return (
@@ -35,7 +35,9 @@ class Bud {
   }
   loaded = null
   _position = {x: 0, y: 0}
-  originalPos = {x: 0, y: 0}
+  originalPos = {x: null, y: null}
+  get attachedSilk() { return this.json.attachedTos }
+  set attachedSilk(newSilk) { this.json.attachedTos = newSilk }
   get position() {return this._position}
   set position(lePos) {
     if (!(isNaN(lePos.x)) && !(isNaN(lePos.y))) {
@@ -65,6 +67,9 @@ class Bud {
   del = false
   objId = null
   json = {...Bud.base}
+  addToAttached = (silk) => {
+    this.attachedSilk.push(silk)
+  }
   mouseDown = () => {
     console.log('selected')
     const modes = utils.getGlobals().modes
@@ -83,8 +88,24 @@ class Bud {
       document.addEventListener('mousemove', mousemove)
     } else if (modes.gluing && (this.objId !== utils.getGlobals().selected)) {
       console.log('pls glue')
+      const bud1 = utils.getObjById(utils.getGlobals().selected)
+      const bud2 = utils.getObjById(this.objId)
+      this.addToAttached(new Silk(bud1, bud2))
     } else {
       this.select()
+    }
+  }
+  calcNewPos = () => {
+    const rootPos = utils.getRootPos()
+    const { x, y } = utils.calcPosByKonvaPos(this.konvaObj.getX(), this.konvaObj.getY())
+    return {newX: x, newY: y}
+  }
+  dragMove = () => {
+    const { newX, newY } = this.calcNewPos()
+    this.x = newX
+    this.y = newY
+    for (const silk of this.attachedSilk) {
+      silk.update()
     }
   }
   dragEnd = () => {
@@ -92,8 +113,7 @@ class Bud {
     const oldRootPos = utils.getRootPos()
     const oldX = this.x
     const oldY = this.y
-    const newX = this.konvaObj.getX() - oldRootPos.x
-    const newY = this.konvaObj.getY() - oldRootPos.y
+    const { newX, newY } = this.calcNewPos()
     const undoFunc = () => {
       this.x = oldX
       this.y = oldY
@@ -169,6 +189,7 @@ class Bud {
     budGroup.on('dragstart', () => {
       this.dragging = true
     })
+    budGroup.on('dragmove', this.dragMove)
     budGroup.on('dragend', this.dragEnd)
     budGroup.on('mousedown', this.mouseDown)
     const budShape = new Konva.Shape({

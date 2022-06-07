@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react'
+import Konva from 'konva'
+
 import * as SilkUtils from './SilkUtils'
 import * as utils from '../utils'
 import { select } from '../Select'
@@ -139,7 +141,60 @@ export { SilkEnd as SilkEnd }
 // export { Silk as Silk }
 
 class Silk {
-  constructor() {
+  konvaObj = null
+  _pos1 = null
+  _pos2 = null
+  get pos1() {return this._pos1}
+  get pos2() {return this._pos2}
+  set pos1(pos) {this._pos1 = pos}
+  set pos2(pos) {this._pos2 = pos}
+  _bud1 = null
+  _bud2 = null
+  get bud1() {return this._bud1}
+  get bud2() {return this._bud2}
+  // set bud1(id) { this._setBud('_bud1Id', '_pos1', id) }
+  // set bud2(id) { this._setBud('_bud2Id', '_pos2', id) }
+  set bud1(bud) {
+    this._bud1 = bud
+    this.pos1 = bud.position
+  }
+  set bud2(bud) {
+    this._bud2 = bud
+    this.pos2 = bud.position
+  }
+  getKonvaPoints = () => {
+    const newPos1 = utils.calcKonvaPosByPos(this.pos1)
+    const newPos2 = utils.calcKonvaPosByPos(this.pos2)
+    return [
+      newPos1.x,
+      newPos1.y,
+      newPos2.x,
+      newPos2.y,
+    ]
 
   }
+  update = () => {
+    this.pos1 = utils.calcPosByKonvaPos(this.bud1.konvaObj.getX(), this.bud1.konvaObj.getY())
+    this.pos2 = utils.calcPosByKonvaPos(this.bud2.konvaObj.getX(), this.bud2.konvaObj.getY())
+    this.konvaObj.children[0].setPoints(this.getKonvaPoints())
+  }
+  init = () => {
+    this.pos1 = this.bud1
+    const group = new Konva.Group()
+    const line = new Konva.Line({
+        points: this.getKonvaPoints(),
+        stroke: 'black',
+        strokeWidth: 1,
+        hitStrokeWidth: 30,
+    })
+    group.add(line)
+    this.konvaObj = group
+    utils.getMainLayer().add(group)
+  }
+  constructor(bud1, bud2) {
+    this.bud1 = bud1
+    this.bud2 = bud2
+    this.init()
+  }
 }
+export { Silk }

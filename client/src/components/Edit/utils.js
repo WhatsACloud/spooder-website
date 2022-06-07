@@ -130,6 +130,15 @@ const calcKonvaPosByPos = (pos, leRootPos=null) => {
 }
 export { calcKonvaPosByPos }
 
+const calcPosByKonvaPos = (x, y, leRootPos=null) => {
+  const rootPos = leRootPos || getRootPos()
+  return {
+    x: x - rootPos.x,
+    y: y - rootPos.y,
+  }
+}
+export { calcPosByKonvaPos }
+
 import * as BudUtils from './Bud/BudUtils'
 
 const setRootPos = (rootPos) => {
