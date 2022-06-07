@@ -156,6 +156,29 @@ const setRootPos = (rootPos) => {
 }
 export { setRootPos }
 
+class ObjType {
+  static Bud = Symbol("bud")
+  static Silk = Symbol("Silk")
+}
+export { ObjType }
+
+const selectObj = (id, type, konvaObj, selectFunc, unselectFunc) => {
+  getGlobals().selected = {id: id, type: type}
+  selectFunc()
+  const click = () => {
+    getGlobals().selected = null
+    unselectFunc()
+    document.getElementById('divCanvas').removeEventListener('click', click)
+  }
+  const mouseleave = () => {
+    console.log('left')
+    document.getElementById('divCanvas').addEventListener('click', click)
+    konvaObj.off('mouseleave', mouseleave)
+  }
+  konvaObj.on('mouseleave', mouseleave)
+}
+export { selectObj }
+
 const isInCanvas = (mousePos) => {
   const startX = window.innerWidth * 0.15
   const startY = 0
@@ -165,9 +188,15 @@ const isInCanvas = (mousePos) => {
 }
 export { isInCanvas as isInCanvas }
 
+const getNextSilkId = () => {
+  return Object.keys(getGlobals().silkObjs).length
+}
+export { getNextSilkId }
+
 const addToSilks = (silk) => {
   const silks = getGlobals().silkObjs
-  silk.silkId = Object.keys(silks).length
+  // silk.silkId = Object.keys(silks).length
+  console.log(silk)
   silks[silk.silkId] = silk
 }
 export { addToSilks }
@@ -203,6 +232,7 @@ export { addObjs }
 
 import 'regenerator-runtime/runtime'
 import api from '../../services/api'
+import { select } from './Select'
 
 const save = async () => {
   const newObjs = getGlobals().newObjs

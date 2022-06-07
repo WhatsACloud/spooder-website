@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import * as utils from '../utils'
 import * as BudUtils from './BudUtils'
-import { lineCircleMove, updateLineCirclePos } from '../Silk/SilkUtils'
 import Konva from 'konva'
 import { Silk } from '../Silk/SilkShape'
 
@@ -36,8 +35,7 @@ class Bud {
   loaded = null
   _position = {x: 0, y: 0}
   originalPos = {x: null, y: null}
-  get attachedSilk() { return this.json.attachedTos }
-  set attachedSilk(newSilk) { this.json.attachedTos = newSilk }
+  attachedSilk = {}
   get position() {return this._position}
   set position(lePos) {
     if (!(isNaN(lePos.x)) && !(isNaN(lePos.y))) {
@@ -67,16 +65,19 @@ class Bud {
   konvaObj = null
   dragging = false
   del = false
-  objId = null
+  get objId() { return this.json.objId }
+  set objId(id) { this.json.objId = id }
   json = {...Bud.base}
   addToAttached = (silk) => {
-    this.attachedSilk.push(silk)
+    this.attachedSilk[silk.silkId] = silk
+  }
+  delFromAttached = (silkId) => {
+    delete this.attachedSilk[silkId]
   }
   dragStart = () => {
     this.dragging = true
     this.oldX = this.x
     this.oldY = this.y
-    console.log('test')
   }
   click = () => {
     console.log('selected')
@@ -96,12 +97,27 @@ class Bud {
       document.addEventListener('mousemove', mousemove)
     } else if (modes.gluing && (this.objId !== utils.getGlobals().selected)) {
       console.log('pls glue')
-      console.log(utils.getGlobals().selected)
-      const bud1 = utils.getObjById(utils.getGlobals().selected)
-      const bud2 = utils.getObjById(this.objId)
-      this.addToAttached(new Silk(bud1, bud2))
+      const selected = utils.getGlobals().selected
+      if (selected.type === utils.ObjType.Bud) {
+        const bud1 = utils.getObjById(selected.id)
+        const silkId = utils.getNextSilkId()
+        const redoFunc = () => {
+          new Silk(silkId, bud1, this)
+        }
+        const undoFunc = () => {
+          utils.getGlobals().silkObjs[silkId].delete()
+        }
+        redoFunc()
+        utils.addToHistory(undoFunc, redoFunc)
+      }
     } else {
       this.select()
+    }
+  }
+  updateSilks = () => {
+    console.log(this.attachedSilk)
+    for (const [ silkId, silk ] of Object.entries(this.attachedSilk)) {
+      silk.update()
     }
   }
   calcNewPos = () => {
@@ -112,9 +128,7 @@ class Bud {
     const { newX, newY } = this.calcNewPos()
     this.x = newX
     this.y = newY
-    for (const silk of this.attachedSilk) {
-      silk.update()
-    }
+    this.updateSilks()
   }
   dragEnd = () => {
     this.dragging = false
@@ -128,12 +142,14 @@ class Bud {
       if (oldX === this.originalPos.x && oldY === this.originalPos.y) {
         utils.delFromNewObjs(this.objId)
       }
+      this.updateSilks()
     }
     const redoFunc = () => {
       console.log('dragEnd redo')
       this.x = newX
       this.y = newY
       utils.addToNewObjs(this.objId)
+      this.updateSilks()
     }
     utils.addToHistory(undoFunc, redoFunc)
     redoFunc()
@@ -156,37 +172,16 @@ class Bud {
     console.log(this._json)
   }
   select = () => {
-    utils.getGlobals().selected = this.objId
-    const radius = 40
-    // const highlightPart = new Konva.Shape({
-    //   strokeWidth: 0,
-    //   radius: radius+5,
-    //   sceneFunc: (ctx, shape) => {
-    //     const points = BudUtils.hexagonPoints(shape.getAttr('radius'), 0, 0) // why is this not the same as points variable above???
-    //     BudUtils.drawHexagon(ctx, points)
-    //     ctx.fillStrokeShape(shape)
-    //   },
-    //   fill: 'black',
-    // })
-    // const budShape = this.konvaObj.children[0]
-    // this.konvaObj.add(highlightPart)
-    // highlightPart.setZIndex(0)
-    // budShape.setZIndex(1)
     const budShape = this.konvaObj.children[0]
-    budShape.setStrokeWidth(5)
-    budShape.setStroke('black')
-    const click = () => {
+    const selectFunc = () => {
+      budShape.setStrokeWidth(5)
+      budShape.setStroke('black')
+    }
+    const unselectFunc = () => {
       console.log('unselected')
-      utils.getGlobals().selected = null
       budShape.setStrokeWidth(0)
-      document.getElementById('divCanvas').removeEventListener('click', click)
     }
-    const mouseleave = () => {
-      console.log('left')
-      document.getElementById('divCanvas').addEventListener('click', click)
-      budShape.off('mouseleave', mouseleave)
-    }
-    budShape.on('mouseleave', mouseleave)
+    utils.selectObj(this.objId, utils.ObjType.Bud, budShape, selectFunc, unselectFunc)
   }
   init = (objId) => {
     if (this.loaded === null) console.warn('Please set the bud.loaded variable before init!')

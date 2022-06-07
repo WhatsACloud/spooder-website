@@ -142,6 +142,8 @@ export { SilkEnd as SilkEnd }
 
 class Silk {
   konvaObj = null
+  silkObj = null
+  highlight = null
   _pos1 = null
   _pos2 = null
   silkId = null
@@ -156,11 +158,19 @@ class Silk {
   // set bud1(id) { this._setBud('_bud1Id', '_pos1', id) }
   // set bud2(id) { this._setBud('_bud2Id', '_pos2', id) }
   set bud1(bud) {
+    if (this._bud1) {
+      this._bud1.delFromAttached(this.silkId)
+    }
     this._bud1 = bud
+    bud.addToAttached(this)
     this.pos1 = bud.position
   }
   set bud2(bud) {
+    if (this._bud2) {
+      this._bud2.delFromAttached(this.silkId)
+    }
     this._bud2 = bud
+    bud.addToAttached(this)
     this.pos2 = bud.position
   }
   getKonvaPoints = () => {
@@ -175,13 +185,45 @@ class Silk {
 
   }
   update = () => {
-    this.pos1 = utils.calcPosByKonvaPos(this.bud1.konvaObj.getX(), this.bud1.konvaObj.getY())
-    this.pos2 = utils.calcPosByKonvaPos(this.bud2.konvaObj.getX(), this.bud2.konvaObj.getY())
-    this.konvaObj.children[0].setPoints(this.getKonvaPoints())
+    // this.pos1 = utils.calcPosByKonvaPos(this.bud1.konvaObj.getX(), this.bud1.konvaObj.getY())
+    // this.pos2 = utils.calcPosByKonvaPos(this.bud2.konvaObj.getX(), this.bud2.konvaObj.getY())
+    this.pos1 = this.bud1.position
+    this.pos2 = this.bud2.position
+    this.silkObj.setPoints(this.getKonvaPoints())
+  }
+  mouseDown = () => {
+    this.select()
+  }
+  delete = () => {
+    delete this.bud1.attachedSilk[this.silkId]
+    delete this.bud2.attachedSilk[this.silkId]
+    utils.delFromSilks(this.silkId)
+    this.konvaObj.destroy()
+  }
+  select = () => {
+    console.log('selected')
+    const highlight = new Konva.Line({
+        points: this.getKonvaPoints(),
+        stroke: 'blue',
+        strokeWidth: 5,
+        hitStrokeWidth: 0,
+    })
+    const selectFunc = () => {
+      this.highlight = highlight
+      this.konvaObj.add(highlight)
+      this.silkObj.setZIndex(1)
+      highlight.setZIndex(0)
+    }
+    const unselectFunc = () => {
+      this.highlight = null
+      highlight.destroy()
+    }
+    utils.selectObj(this.silkId, utils.ObjType.Silk, this.konvaObj, selectFunc, unselectFunc)
   }
   init = () => {
-    this.pos1 = this.bud1
+    this.pos1 = this.bud1.position
     const group = new Konva.Group()
+    group.on('mousedown', this.mouseDown)
     const line = new Konva.Line({
         points: this.getKonvaPoints(),
         stroke: 'black',
@@ -190,13 +232,16 @@ class Silk {
     })
     group.add(line)
     this.konvaObj = group
+    this.silkObj = line
     utils.getMainLayer().add(group)
     utils.addToSilks(this)
   }
-  constructor(bud1, bud2) {
+  constructor(silkId, bud1, bud2) {
     this.bud1 = bud1
     this.bud2 = bud2
+    this.silkId = silkId
     this.init()
+
   }
 }
 export { Silk }
