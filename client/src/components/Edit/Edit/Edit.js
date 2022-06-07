@@ -144,7 +144,6 @@ function Edit() {
     globals.nextObjId = objs.data.nextObjId
     globals.newObjs = []
     globals.addedObj = false
-    globals.budObjs = {}
     globals.objs = {}
     globals.rootPos = {x: 0, y: 0}
     globals.history = []
@@ -152,6 +151,7 @@ function Edit() {
     globals.triggerDragLine = false
     globals.draggingLine = false
     globals.selected = null
+    globals.silkObjs = {}
     globals.modes = {
       autoDrag: false,
       gluing: false,

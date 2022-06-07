@@ -62,6 +62,8 @@ class Bud {
     this.json.position.y = leY
     this.konvaObj.setY(utils.calcKonvaPosByPos({x: this.x, y: leY}).y) // reason being calculation of konvaObj by rootPos was a nightmare sooooo just in case
   }
+  oldX = null
+  oldY = null
   konvaObj = null
   dragging = false
   del = false
@@ -70,7 +72,13 @@ class Bud {
   addToAttached = (silk) => {
     this.attachedSilk.push(silk)
   }
-  mouseDown = () => {
+  dragStart = () => {
+    this.dragging = true
+    this.oldX = this.x
+    this.oldY = this.y
+    console.log('test')
+  }
+  click = () => {
     console.log('selected')
     const modes = utils.getGlobals().modes
     console.log(this.objId !== utils.getGlobals().selected, modes.gluing)
@@ -88,6 +96,7 @@ class Bud {
       document.addEventListener('mousemove', mousemove)
     } else if (modes.gluing && (this.objId !== utils.getGlobals().selected)) {
       console.log('pls glue')
+      console.log(utils.getGlobals().selected)
       const bud1 = utils.getObjById(utils.getGlobals().selected)
       const bud2 = utils.getObjById(this.objId)
       this.addToAttached(new Silk(bud1, bud2))
@@ -96,7 +105,6 @@ class Bud {
     }
   }
   calcNewPos = () => {
-    const rootPos = utils.getRootPos()
     const { x, y } = utils.calcPosByKonvaPos(this.konvaObj.getX(), this.konvaObj.getY())
     return {newX: x, newY: y}
   }
@@ -110,24 +118,27 @@ class Bud {
   }
   dragEnd = () => {
     this.dragging = false
-    const oldRootPos = utils.getRootPos()
-    const oldX = this.x
-    const oldY = this.y
+    const oldX = this.oldX
+    const oldY = this.oldY
     const { newX, newY } = this.calcNewPos()
     const undoFunc = () => {
       this.x = oldX
       this.y = oldY
-      if (oldX === this.originalPos.x || oldY === this.originalPos.y) {
+      console.log(oldX, this.originalPos.x, oldY, this.originalPos.y)
+      if (oldX === this.originalPos.x && oldY === this.originalPos.y) {
         utils.delFromNewObjs(this.objId)
       }
     }
     const redoFunc = () => {
+      console.log('dragEnd redo')
       this.x = newX
       this.y = newY
       utils.addToNewObjs(this.objId)
     }
     utils.addToHistory(undoFunc, redoFunc)
     redoFunc()
+    this.oldX = this.x
+    this.oldY = this.y
   }
   fromJson = () => {
     const sifted = {}
@@ -164,15 +175,15 @@ class Bud {
     const budShape = this.konvaObj.children[0]
     budShape.setStrokeWidth(5)
     budShape.setStroke('black')
-    const mousedown = () => {
+    const click = () => {
       console.log('unselected')
       utils.getGlobals().selected = null
       budShape.setStrokeWidth(0)
-      document.getElementById('divCanvas').removeEventListener('mousedown', mousedown)
+      document.getElementById('divCanvas').removeEventListener('click', click)
     }
     const mouseleave = () => {
       console.log('left')
-      document.getElementById('divCanvas').addEventListener('mousedown', mousedown)
+      document.getElementById('divCanvas').addEventListener('click', click)
       budShape.off('mouseleave', mouseleave)
     }
     budShape.on('mouseleave', mouseleave)
@@ -186,12 +197,10 @@ class Bud {
       y: 0,
       draggable: true,
     })
-    budGroup.on('dragstart', () => {
-      this.dragging = true
-    })
     budGroup.on('dragmove', this.dragMove)
     budGroup.on('dragend', this.dragEnd)
-    budGroup.on('mousedown', this.mouseDown)
+    budGroup.on('click', this.click)
+    budGroup.on('dragstart', this.dragStart)
     const budShape = new Konva.Shape({
       strokeWidth: 0,
       radius: radius,
@@ -214,9 +223,6 @@ class Bud {
     this.konvaObj = budGroup
     if (this.loaded === false) {
       utils.addToNewObjs(objId)
-    } else {
-      this.originalPos.x = this.x
-      this.originalPos.y = this.y
     }
   }
   undo = () => {
@@ -232,9 +238,12 @@ class Bud {
   constructor(nextObjId, x, y, loaded=false) { // loaded meaning loaded from database
     nextObjId = Number(nextObjId)
     this.loaded = loaded
-    console.log(this.loaded)
     this.init(nextObjId)
     this.position = {x: x, y: y}
+    if (loaded === true) {
+      this.originalPos.x = this.x
+      this.originalPos.y = this.y
+    }
     utils.addObjs({[Number(nextObjId)]: this})
     this.loaded = true
   }

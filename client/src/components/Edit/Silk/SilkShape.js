@@ -144,6 +144,7 @@ class Silk {
   konvaObj = null
   _pos1 = null
   _pos2 = null
+  silkId = null
   get pos1() {return this._pos1}
   get pos2() {return this._pos2}
   set pos1(pos) {this._pos1 = pos}
@@ -190,6 +191,7 @@ class Silk {
     group.add(line)
     this.konvaObj = group
     utils.getMainLayer().add(group)
+    utils.addToSilks(this)
   }
   constructor(bud1, bud2) {
     this.bud1 = bud1

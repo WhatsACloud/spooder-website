@@ -149,6 +149,9 @@ const setRootPos = (rootPos) => {
       obj.konvaObj.setY(pos.y)
     }
   }
+  for (const [ silkId, silk ] of Object.entries(getGlobals().silkObjs)) {
+    silk.update()
+  }
   getGlobals().rootPos = rootPos
 }
 export { setRootPos }
@@ -161,6 +164,19 @@ const isInCanvas = (mousePos) => {
   return withinRect(mousePos, startX, startY, endX, endY)
 }
 export { isInCanvas as isInCanvas }
+
+const addToSilks = (silk) => {
+  const silks = getGlobals().silkObjs
+  silk.silkId = Object.keys(silks).length
+  silks[silk.silkId] = silk
+}
+export { addToSilks }
+
+const delFromSilks = (silkId) => {
+  const silks = getGlobals().silkObjs
+  delete silks[silkId]
+}
+export { delFromSilks }
 
 const getObjById = (id=null) => {
   if (id === null) return false
@@ -182,13 +198,6 @@ const addObjs = (toAdd) => {
   const currentObjs = globals.objs
   const newObjs = {...currentObjs, ...toAdd}
   globals.objs = newObjs
-  const currentBudObjs = globals.budObjs
-  for (const [ objId, toAddObj ] of Object.entries(toAdd)) {
-    if (toAddObj.type === "bud") {
-      currentBudObjs[objId] = toAddObj
-    }
-  }
-  globals.budObjs = currentBudObjs
 }
 export { addObjs }
 
