@@ -35,6 +35,7 @@ class Bud {
   loaded = null
   _position = {x: 0, y: 0}
   originalPos = {x: null, y: null}
+  originalAttachedTos = []
   attachedSilk = {}
   get position() {return this._position}
   set position(lePos) {
@@ -65,9 +66,24 @@ class Bud {
   konvaObj = null
   dragging = false
   del = false
+  parsed = false
+  get attachedTos() { return this.json.attachedTos }
+  setAttachedTos = (attachedTos) => {
+    this.json.attachedTos = attachedTos
+    for (const attachedToId of attachedTos) {
+      const attachedBud = utils.getObjById(attachedToId)
+      // console.log(attachedToId, attachedBud)
+      if (!attachedBud) {
+        const silkId = utils.getNextSilkId()
+        new Silk(silkId, false, this)
+      } else {
+        attachedBud.attachedSilk[this.objId].fillInBud(this)
+      }
+    }
+  }
   get objId() { return this.json.objId }
   set objId(id) { this.json.objId = id }
-  json = {...Bud.base}
+  json = JSON.parse(JSON.stringify(Bud.base))
   addToAttached = (silk) => {
     this.attachedSilk[silk.silkId] = silk
   }
@@ -75,6 +91,7 @@ class Bud {
     delete this.attachedSilk[silkId]
   }
   dragStart = () => {
+    console.log(utils.getObjs(), utils.getGlobals().silkObjs)
     this.dragging = true
     this.oldX = this.x
     this.oldY = this.y
@@ -103,9 +120,15 @@ class Bud {
         const silkId = utils.getNextSilkId()
         const redoFunc = () => {
           new Silk(silkId, bud1, this)
+          utils.addToNewObjs(this.objId)
+          utils.addToNewObjs(bud1.objId)
         }
         const undoFunc = () => {
           utils.getGlobals().silkObjs[silkId].delete()
+          if (JSON.stringify(this.originalAttachedTos) == JSON.stringify(this.json.attachedTos)) {
+            utils.delFromNewObjs(this.objId)
+            utils.delFromNewObjs(bud1.objId)
+          }
         }
         redoFunc()
         utils.addToHistory(undoFunc, redoFunc)
@@ -115,7 +138,6 @@ class Bud {
     }
   }
   updateSilks = () => {
-    console.log(this.attachedSilk)
     for (const [ silkId, silk ] of Object.entries(this.attachedSilk)) {
       silk.update()
     }

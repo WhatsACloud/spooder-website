@@ -81,18 +81,12 @@ async function editAttachedTo(budId, attachedTo, transaction) {
       fk_bud_id: budId
     }
   })
-  // for (_attachedTo of _attachedTos) {
-  //   await _attachedTo.destroy({transaction: transaction})
-  // }
+  for (const _attachedTo of _attachedTos) {
+    await _attachedTo.destroy({transaction: transaction})
+  }
   for (let i = 0; i < attachedTo.length; i++) {
     const attachedToId = attachedTo[i]
-    if (_attachedTos[index]) {
-      _attachedTos[index].update({
-        attachedToId: attachedToId
-      })
-    } else {
-      await createAttachedTo(attachedToId, budId, transaction)
-    }
+    await createAttachedTo(attachedToId, budId, transaction)
   }
   return _attachedTos
 }

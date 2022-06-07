@@ -95,10 +95,10 @@ async function get (req, res, next) {
             }
           }
         }) 
-        const toAttachedTos = {}
+        const toAttachedTos = []
         for (const attachedTo of attachedTos) {
           const attachedToData = attachedTo.dataValues
-          toAttachedTos[attachedToData.attachedToId] = attachedToData.innerIndex
+          toAttachedTos.push(attachedToData.attachedToId)
         }
         toResObjs[objId].setJSONAttr('attachedTos', toAttachedTos)
         toResObjs[objId] = toResObjs[objId].toJSON()

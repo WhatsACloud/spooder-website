@@ -196,7 +196,7 @@ export { getNextSilkId }
 const addToSilks = (silk) => {
   const silks = getGlobals().silkObjs
   // silk.silkId = Object.keys(silks).length
-  console.log(silk)
+  // console.log(silk)
   silks[silk.silkId] = silk
 }
 export { addToSilks }

@@ -5,36 +5,6 @@ import * as SilkUtils from './SilkUtils'
 import * as utils from '../utils'
 import { select } from '../Select'
 
-function SilkEnd({ points, setDraggingLine, setSelectedSilk, setToggleCanDragLine, setSelectedObj, attachedToObjId }) {
-  const circleDragmoveFunc = evt => SilkUtils.lineCircleMove(evt.evt, true, {"objId": evt.target.parent.getAttr('objId'), "innerIndex": evt.target.index}) 
-  const stopDragLineWrapper = (e) => {
-    document.removeEventListener('mouseup', stopDragLineWrapper)
-  }
-  return (
-    <reactKonva.Circle
-      radius={5}
-      x={points.x}
-      y={points.y}
-      fill='red'
-      stroke='red'
-      strokeWidth={4}
-      hitStrokeWidth={30}
-      draggable={true}
-      attachedToObjId={attachedToObjId || null}
-      onDragStart={(e) => {
-        const objId = e.target.parent.getAttr('objId')
-        document.addEventListener('mouseup', stopDragLineWrapper)
-        setToggleCanDragLine(false)
-        setDraggingLine(true)
-        SilkUtils.startDragLine(e.evt, setSelectedSilk, objId, e.target.index, false)
-      }}
-      onDragMove={circleDragmoveFunc}
-      onClick={evt => {select(evt, setSelectedObj)}}>
-    </reactKonva.Circle>
-  )
-}
-export { SilkEnd as SilkEnd }
-
 // function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDragLine, setSelectedObj, attachedTo1, attachedTo2 }) {
 //   const lineDragmoveFunc = evt => {
 //     const line = evt.target
@@ -144,8 +114,8 @@ class Silk {
   konvaObj = null
   silkObj = null
   highlight = null
-  _pos1 = null
-  _pos2 = null
+  _pos1 = {x: null, y: null}
+  _pos2 = {x: null, y: null}
   silkId = null
   get pos1() {return this._pos1}
   get pos2() {return this._pos2}
@@ -158,20 +128,34 @@ class Silk {
   // set bud1(id) { this._setBud('_bud1Id', '_pos1', id) }
   // set bud2(id) { this._setBud('_bud2Id', '_pos2', id) }
   set bud1(bud) {
-    if (this._bud1) {
-      this._bud1.delFromAttached(this.silkId)
+    if (bud) {
+      if (this._bud1) {
+        this._bud1.delFromAttached(this.silkId)
+      }
+      bud.addToAttached(this)
+      this.pos1 = bud.position
     }
     this._bud1 = bud
-    bud.addToAttached(this)
-    this.pos1 = bud.position
   }
   set bud2(bud) {
-    if (this._bud2) {
-      this._bud2.delFromAttached(this.silkId)
+    if (bud) {
+      if (this._bud2) {
+        this._bud2.delFromAttached(this.silkId)
+      }
+      bud.addToAttached(this)
+      this.pos2 = bud.position
     }
     this._bud2 = bud
-    bud.addToAttached(this)
-    this.pos2 = bud.position
+  }
+  fillInBud = (bud) => {
+    if (this.bud1 === false) {
+      this.bud1 = bud
+      return
+    } else if (this.bud2 === false) {
+      this.bud2 = bud
+      return
+    }
+    console.log('nothing to fill in')
   }
   getKonvaPoints = () => {
     const newPos1 = utils.calcKonvaPosByPos(this.pos1)
@@ -185,10 +169,10 @@ class Silk {
 
   }
   update = () => {
-    // this.pos1 = utils.calcPosByKonvaPos(this.bud1.konvaObj.getX(), this.bud1.konvaObj.getY())
-    // this.pos2 = utils.calcPosByKonvaPos(this.bud2.konvaObj.getX(), this.bud2.konvaObj.getY())
-    this.pos1 = this.bud1.position
-    this.pos2 = this.bud2.position
+    this.pos1 = utils.calcPosByKonvaPos(this.bud1.konvaObj.getX(), this.bud1.konvaObj.getY())
+    this.pos2 = utils.calcPosByKonvaPos(this.bud2.konvaObj.getX(), this.bud2.konvaObj.getY())
+    // this.pos1 = this.bud1.position
+    // this.pos2 = this.bud2.position
     this.silkObj.setPoints(this.getKonvaPoints())
   }
   mouseDown = () => {
@@ -197,6 +181,18 @@ class Silk {
   delete = () => {
     delete this.bud1.attachedSilk[this.silkId]
     delete this.bud2.attachedSilk[this.silkId]
+    const attachedTos1 = this.bud1.json.attachedTos
+    for (let i = 0; i < attachedTos1.length; i++) {
+      if (attachedTos1[i] === this.bud2.objId) {
+        attachedTos1.splice(i, 1)
+      }
+    }
+    const attachedTos2 = this.bud2.json.attachedTos
+    for (let i = 0; i < attachedTos2.length; i++) {
+      if (attachedTos2[i] === this.bud1.objId) {
+        attachedTos2.splice(i, 1)
+      }
+    }
     utils.delFromSilks(this.silkId)
     this.konvaObj.destroy()
   }
@@ -221,7 +217,8 @@ class Silk {
     utils.selectObj(this.silkId, utils.ObjType.Silk, this.konvaObj, selectFunc, unselectFunc)
   }
   init = () => {
-    this.pos1 = this.bud1.position
+    // this.pos1 = this.bud1.position
+    this.pos1 = this.bud1 ? this.bud1.position : this.pos1
     const group = new Konva.Group()
     group.on('mousedown', this.mouseDown)
     const line = new Konva.Line({
@@ -239,9 +236,14 @@ class Silk {
   constructor(silkId, bud1, bud2) {
     this.bud1 = bud1
     this.bud2 = bud2
+    if (bud2) {
+      bud1.json?.attachedTos.push(bud2.objId)
+    }
+    if (bud1) {
+      bud2.json?.attachedTos.push(bud1?.objId)
+    }
     this.silkId = silkId
     this.init()
-
   }
 }
 export { Silk }

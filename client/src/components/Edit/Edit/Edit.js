@@ -159,14 +159,15 @@ function Edit() {
     for (const [ objId, obj ] of Object.entries(spoodawebData)) {
       console.log(obj.type)
       if (obj.type === 'bud') {
+        console.log(objId)
         const bud = new BudShapes.Bud(objId, obj.position.x, obj.position.y, true)
-        bud.word = obj.word
-        bud.definition = obj.definition
-        bud.sound = obj.sound
-        bud.context = obj.context
-        bud.link = obj.link
-        bud.example = obj.example
-        bud.attachedTos = obj.attachedTos
+        bud.json.word = obj.word
+        bud.json.definition = obj.definition
+        bud.json.sound = obj.sound
+        bud.json.context = obj.context
+        bud.json.link = obj.link
+        bud.json.example = obj.example
+        bud.setAttachedTos(obj.attachedTos)
         bud.x = obj.position.x
         bud.y = obj.position.y
         bud.objId = obj.objId
