@@ -142,17 +142,15 @@ export { calcPosByKonvaPos }
 import * as BudUtils from './Bud/BudUtils'
 
 const setRootPos = (rootPos) => {
+  getGlobals().rootPos = rootPos
   for (const [ objId, obj ] of Object.entries(getObjs())) {
     if (!obj.dragging) {
-      const pos = calcKonvaPosByPos(obj.position, rootPos)
-      obj.konvaObj.setX(pos.x)
-      obj.konvaObj.setY(pos.y)
+      obj.updateKonvaObj()
     }
   }
   for (const [ silkId, silk ] of Object.entries(getGlobals().silkObjs)) {
     silk.update()
   }
-  getGlobals().rootPos = rootPos
 }
 export { setRootPos }
 

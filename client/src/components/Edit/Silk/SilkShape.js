@@ -169,11 +169,13 @@ class Silk {
 
   }
   update = () => {
+    console.log('updated silk')
     this.pos1 = utils.calcPosByKonvaPos(this.bud1.konvaObj.getX(), this.bud1.konvaObj.getY())
     this.pos2 = utils.calcPosByKonvaPos(this.bud2.konvaObj.getX(), this.bud2.konvaObj.getY())
     // this.pos1 = this.bud1.position
     // this.pos2 = this.bud2.position
     this.silkObj.setPoints(this.getKonvaPoints())
+    this.highlight?.setPoints(this.getKonvaPoints())
   }
   mouseDown = () => {
     this.select()
@@ -204,6 +206,7 @@ class Silk {
         strokeWidth: 5,
         hitStrokeWidth: 0,
     })
+    this.silkObj.setPoints(this.getKonvaPoints())
     const selectFunc = () => {
       this.highlight = highlight
       this.konvaObj.add(highlight)

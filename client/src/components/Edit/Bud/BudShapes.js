@@ -1,24 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import * as utils from '../utils'
-import * as BudUtils from './BudUtils'
 import Konva from 'konva'
 import { Silk } from '../Silk/SilkShape'
-
-function BudAnchorHighlighter() {
-  return (
-    <reactKonva.Circle
-      radius={5}
-      x={0}
-      y={0}
-      fill='grey'
-      name='highlighter'
-      attachedObjId={null}
-      visible={false}>
-
-    </reactKonva.Circle>
-  )
-}
-export { BudAnchorHighlighter as BudAnchorHighlighter }
+import * as drawConfig from './konvaDrawConfigs'
 
 class Bud {
   static base = {
@@ -33,46 +17,51 @@ class Bud {
     objId: null,
   }
   loaded = null
-  _position = {x: 0, y: 0}
-  originalPos = {x: null, y: null}
-  originalAttachedTos = []
-  attachedSilk = {}
-  get position() {return this._position}
-  set position(lePos) {
-    if (!(isNaN(lePos.x)) && !(isNaN(lePos.y))) {
-      this._position = lePos
-      this.json.position = lePos
-      const konvaPos = utils.calcKonvaPosByPos(lePos)
-      this.konvaObj.setX(konvaPos.x) // reason being calculation of konvaObj by rootPos was a nightmare sooooo just in case
-      this.konvaObj.setY(konvaPos.y)
-      return
-    }
-    console.warn(`WARNING: position given is invalid, given ${lePos} (bud ${this.objId})`)
-  }
-  get x() {return this.position.x}
-  get y() {return this.position.y}
-  set x(leX) {
-    this.position.x = leX
-    this.json.position.x = leX
-    this.konvaObj.setX(utils.calcKonvaPosByPos({x: leX, y: this.y}).x) // reason being calculation of konvaObj by rootPos was a nightmare sooooo just in case
-  }
-  set y(leY) {
-    this.position.y = leY
-    this.json.position.y = leY
-    this.konvaObj.setY(utils.calcKonvaPosByPos({x: this.x, y: leY}).y) // reason being calculation of konvaObj by rootPos was a nightmare sooooo just in case
-  }
-  oldX = null
-  oldY = null
   konvaObj = null
   dragging = false
   del = false
   parsed = false
+
+  json = JSON.parse(JSON.stringify(Bud.base))
+
+  get objId() { return this.json.objId }
+  set objId(id) { this.json.objId = id }
+
+  oldX = null
+  oldY = null
+
+  originalPos = {x: null, y: null}
+
+  get position() {return this.json.position}
+  get x() {return this.position.x}
+  get y() {return this.position.y}
+  set position(lePos) {
+    if (!(isNaN(lePos.x)) && !(isNaN(lePos.y))) {
+      this.json.position = lePos
+      if (this.konvaObj) {
+        this.updateKonvaObj()
+      }
+      return
+    }
+    console.warn(`WARNING: position given is invalid, given ${lePos} (bud ${this.objId})`)
+  }
+  set x(leX) {
+    this.position.x = leX
+    this.updateKonvaObj(leX)
+  }
+  set y(leY) {
+    this.position.y = leY
+    this.konvaObj.setY(utils.calcKonvaPosByPos({x: this.x, y: leY}).y) // reason being calculation of konvaObj by rootPos was a nightmare sooooo just in case
+  }
+
+  originalAttachedTos = []
+  attachedSilk = {}
   get attachedTos() { return this.json.attachedTos }
   setAttachedTos = (attachedTos) => {
     this.json.attachedTos = attachedTos
     for (const attachedToId of attachedTos) {
       const attachedBud = utils.getObjById(attachedToId)
-      // console.log(attachedToId, attachedBud)
+      console.log(attachedToId, attachedBud)
       if (!attachedBud) {
         const silkId = utils.getNextSilkId()
         new Silk(silkId, false, this)
@@ -81,14 +70,17 @@ class Bud {
       }
     }
   }
-  get objId() { return this.json.objId }
-  set objId(id) { this.json.objId = id }
-  json = JSON.parse(JSON.stringify(Bud.base))
   addToAttached = (silk) => {
     this.attachedSilk[silk.silkId] = silk
   }
   delFromAttached = (silkId) => {
     delete this.attachedSilk[silkId]
+  }
+
+  updateKonvaObj = (leX=this.x, leY=this.y) => {
+    const { x, y } = utils.calcKonvaPosByPos({x: leX, y: leY})
+    if (x) this.konvaObj.setX(x)
+    if (y) this.konvaObj.setY(y)
   }
   dragStart = () => {
     console.log(utils.getObjs(), utils.getGlobals().silkObjs)
@@ -205,42 +197,25 @@ class Bud {
     }
     utils.selectObj(this.objId, utils.ObjType.Bud, budShape, selectFunc, unselectFunc)
   }
-  init = (objId) => {
-    if (this.loaded === null) console.warn('Please set the bud.loaded variable before init!')
-    const rootPos = utils.getRootPos()
+  init = (objId, loaded=true) => {
     const radius = 40
-    const budGroup = new Konva.Group({
-      x: 0,
-      y: 0,
-      draggable: true,
-    })
+    const budGroup = new Konva.Group(drawConfig.budGroupConfig(this.x, this.y))
     budGroup.on('dragmove', this.dragMove)
     budGroup.on('dragend', this.dragEnd)
     budGroup.on('click', this.click)
     budGroup.on('dragstart', this.dragStart)
-    const budShape = new Konva.Shape({
-      strokeWidth: 0,
-      radius: radius,
-      sceneFunc: (ctx, shape) => {
-        const points = BudUtils.hexagonPoints(shape.getAttr('radius'), 0, 0) // why is this not the same as points variable above???
-        BudUtils.drawHexagon(ctx, points)
-        ctx.fillStrokeShape(shape)
-      },
-      fillLinearGradientStartPoint: { x: -100, y: 0 },
-      fillLinearGradientEndPoint: { x: 100, y: 150 },
-      fillLinearGradientColorStops: [0, "#000046", 0.5, "#1CB5E0"],
-      shadowColor: 'black',
-      shadowBlur: 10,
-      shadowOffset: { x: 10, y: 10 },
-      shadowOpacity: 0.5,
-    })
+    const budShape = new Konva.Shape(drawConfig.budShapeConfig())
     budGroup.add(budShape)
     const mainLayer = utils.getMainLayer()
     mainLayer.add(budGroup)
     this.konvaObj = budGroup
     if (this.loaded === false) {
       utils.addToNewObjs(objId)
+      this.loaded = true
+      return
     }
+    this.originalPos.x = this.x
+    this.originalPos.y = this.y
   }
   undo = () => {
     this.konvaObj.destroy()
@@ -255,14 +230,9 @@ class Bud {
   constructor(nextObjId, x, y, loaded=false) { // loaded meaning loaded from database
     nextObjId = Number(nextObjId)
     this.loaded = loaded
-    this.init(nextObjId)
     this.position = {x: x, y: y}
-    if (loaded === true) {
-      this.originalPos.x = this.x
-      this.originalPos.y = this.y
-    }
-    utils.addObjs({[Number(nextObjId)]: this})
-    this.loaded = true
+    this.init(nextObjId, loaded)
+    utils.addObjs({[nextObjId]: this})
   }
 }
 export { Bud }

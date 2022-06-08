@@ -1,6 +1,3 @@
-import { Bud, BudAnchorHighlighter } from "./BudShapes"
+import { Bud } from "./BudShapes"
 
-export {
-  Bud,
-  BudAnchorHighlighter
-}
+export { Bud }
