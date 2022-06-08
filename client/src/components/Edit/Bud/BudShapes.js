@@ -22,13 +22,10 @@ class Bud {
   del = false
   parsed = false
 
-  json = JSON.parse(JSON.stringify(Bud.base))
+  json = JSON.parse(JSON.stringify(Bud.base)) // maybe add setter such that if json changed then auto adds to new objs?
 
   get objId() { return this.json.objId }
   set objId(id) { this.json.objId = id }
-
-  oldX = null
-  oldY = null
 
   originalPos = {x: null, y: null}
 
@@ -51,7 +48,7 @@ class Bud {
   }
   set y(leY) {
     this.position.y = leY
-    this.konvaObj.setY(utils.calcKonvaPosByPos({x: this.x, y: leY}).y) // reason being calculation of konvaObj by rootPos was a nightmare sooooo just in case
+    this.updateKonvaObj(null, leY)
   }
 
   originalAttachedTos = []
@@ -77,16 +74,13 @@ class Bud {
     delete this.attachedSilk[silkId]
   }
 
-  updateKonvaObj = (leX=this.x, leY=this.y) => {
-    const { x, y } = utils.calcKonvaPosByPos({x: leX, y: leY})
+  updateKonvaObj = (leX, leY) => {
+    const { x, y } = utils.calcKonvaPosByPos({x: leX ?? this.x, y: leY ?? this.y})
     if (x) this.konvaObj.setX(x)
     if (y) this.konvaObj.setY(y)
   }
   dragStart = () => {
-    console.log(utils.getObjs(), utils.getGlobals().silkObjs)
     this.dragging = true
-    this.oldX = this.x
-    this.oldY = this.y
   }
   click = () => {
     console.log('selected')
@@ -110,28 +104,15 @@ class Bud {
       if (selected.type === utils.ObjType.Bud) {
         const bud1 = utils.getObjById(selected.id)
         const silkId = utils.getNextSilkId()
-        const redoFunc = () => {
-          new Silk(silkId, bud1, this)
-          utils.addToNewObjs(this.objId)
-          utils.addToNewObjs(bud1.objId)
-        }
-        const undoFunc = () => {
-          utils.getGlobals().silkObjs[silkId].delete()
-          if (JSON.stringify(this.originalAttachedTos) == JSON.stringify(this.json.attachedTos)) {
-            utils.delFromNewObjs(this.objId)
-            utils.delFromNewObjs(bud1.objId)
-          }
-        }
-        redoFunc()
-        utils.addToHistory(undoFunc, redoFunc)
+        new Silk(silkId, bud1, this)
       }
     } else {
       this.select()
     }
   }
   updateSilks = () => {
-    for (const [ silkId, silk ] of Object.entries(this.attachedSilk)) {
-      silk.update()
+    for (const silk of Object.values(this.attachedSilk)) {
+      silk.updateKonvaObj()
     }
   }
   calcNewPos = () => {
@@ -139,16 +120,17 @@ class Bud {
     return {newX: x, newY: y}
   }
   dragMove = () => {
-    const { newX, newY } = this.calcNewPos()
-    this.x = newX
-    this.y = newY
+    // const { newX, newY } = this.calcNewPos()
+    // this.x = newX
+    // this.y = newY
     this.updateSilks()
   }
   dragEnd = () => {
     this.dragging = false
-    const oldX = this.oldX
-    const oldY = this.oldY
+    const oldX = this.x
+    const oldY = this.y
     const { newX, newY } = this.calcNewPos()
+    console.log(newX, newY)
     const undoFunc = () => {
       this.x = oldX
       this.y = oldY
@@ -167,8 +149,6 @@ class Bud {
     }
     utils.addToHistory(undoFunc, redoFunc)
     redoFunc()
-    this.oldX = this.x
-    this.oldY = this.y
   }
   fromJson = () => {
     const sifted = {}

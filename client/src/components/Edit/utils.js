@@ -149,7 +149,7 @@ const setRootPos = (rootPos) => {
     }
   }
   for (const [ silkId, silk ] of Object.entries(getGlobals().silkObjs)) {
-    silk.update()
+    silk.updateKonvaObj()
   }
 }
 export { setRootPos }

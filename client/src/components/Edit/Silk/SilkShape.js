@@ -5,111 +5,6 @@ import * as SilkUtils from './SilkUtils'
 import * as utils from '../utils'
 import { select } from '../Select'
 
-// function Silk({ points, setDraggingLine, objId, setSelectedSilk, setToggleCanDragLine, setSelectedObj, attachedTo1, attachedTo2 }) {
-//   const lineDragmoveFunc = evt => {
-//     const line = evt.target
-//     const lineGroup = line.parent.children
-//     const points = line.getPoints()
-//     const start = lineGroup[1]
-//     const end = lineGroup[2]
-//     const lineTransform = line.getAbsoluteTransform()
-//     const newStart = lineTransform.point({x: points[2], y: points[3]})
-//     const newEnd = lineTransform.point({x: points[0], y: points[1]})
-//     start.setX(newStart.x)
-//     start.setY(newStart.y)
-//     end.setX(newEnd.x)
-//     end.setY(newEnd.y)
-//   }
-//   const lineDragendFunc = evt => {
-//     const lineGroup = evt.target.parent
-//     const objId = lineGroup.getAttr('objId')
-//     const points = SilkUtils.getLinePos(lineGroup)
-//     const offsetRootPoses = lineGroup.getAttr('offsetRootPoses')
-//     const oldRootPos = utils.getRootPos()
-//     const redoFunc = () => {
-//       const rootPos = utils.getRootPos()
-//       // const lineGroup = utils.getKonvaObjById(objId)
-//       console.log(rootPos)
-//       lineGroup.setAttr('offsetRootPoses', [
-//         {x: points[0].x + rootPos.x, y: points[0].y + rootPos.y},
-//         {x: points[1].x + rootPos.x, y: points[1].y + rootPos.y},
-//       ])
-//       // utils.updateObj(objId, {positions: [
-//       //   {x: points[0].x + rootPos.x, y: points[0].y + rootPos.y},
-//       //   {x: points[1].x + rootPos.x, y: points[1].y + rootPos.y},
-//       // ]}, true)
-//     }
-//     const undoFunc = () => {
-//       const rootPos = utils.getRootPos()
-//       // const lineGroup = utils.getKonvaObjById(objId)
-//       lineGroup.setAttr('offsetRootPoses', [
-//         {x: offsetRootPoses[0].x + rootPos.x, y: offsetRootPoses[0].y + rootPos.y},
-//         {x: offsetRootPoses[1].x + rootPos.x, y: offsetRootPoses[1].y + rootPos.y},
-//       ])
-//       // utils.updateObj(objId, {positions: [
-//       //   {x: offsetRootPoses[0].x + rootPos.x, y: offsetRootPoses[0].y + rootPos.y},
-//       //   {x: offsetRootPoses[1].x + rootPos.x, y: offsetRootPoses[1].y + rootPos.y},
-//       // ]}, true)
-//     }
-//     utils.addToHistory(undoFunc, redoFunc)
-//     redoFunc()
-//   }
-//   const rootPos = utils.getRootPos()
-//   const getOffsetRootPoses = () => {
-//     const offsetX1 = points[0].x 
-//     const offsetY1 = points[0].y 
-//     const offsetX2 = points[1].x 
-//     const offsetY2 = points[1].y 
-//     return [
-//       {x: offsetX1, y: offsetY1},
-//       {x: offsetX2, y: offsetY2}
-//     ] 
-//   } 
-//   return (
-//     <reactKonva.Group
-//       objType='silk'
-//       objId={objId}
-//       offsetRootPoses={getOffsetRootPoses()}>
-//       <reactKonva.Line
-//         points={[
-//           points[0].x + rootPos.x,
-//           points[0].y + rootPos.y,
-//           points[1].x + rootPos.x,
-//           points[1].y + rootPos.y,
-//         ]}
-//         stroke='black'
-//         strokeWidth={1}
-//         hitStrokeWidth={30}
-//         draggable={true}
-//         onDragStart={evt => {
-//           const silkGroup = evt.target.parent
-//           SilkUtils.removeAttachment(silkGroup.children[1])
-//           SilkUtils.removeAttachment(silkGroup.children[2])
-//         }}
-//         onDragMove={lineDragmoveFunc}
-//         onDragEnd={lineDragendFunc}
-//         onClick={evt => {select(evt, setSelectedObj)}}></reactKonva.Line>
-//       <SilkEnd
-//         points={{x: points[0].x + rootPos.x, y: points[0].y + rootPos.y}}
-//         setSelectedSilk={setSelectedSilk}
-//         setToggleCanDragLine={setToggleCanDragLine}
-//         objId={objId}
-//         attachedToObjId={attachedTo1}
-//         setSelectedObj={setSelectedObj}
-//         setDraggingLine={setDraggingLine}></SilkEnd>
-//       <SilkEnd
-//         points={{x: points[1].x + rootPos.x, y: points[1].y + rootPos.y}}
-//         setSelectedSilk={setSelectedSilk}
-//         setToggleCanDragLine={setToggleCanDragLine}
-//         attachedToObjId={attachedTo2}
-//         objId={objId}
-//         setSelectedObj={setSelectedObj}
-//         setDraggingLine={setDraggingLine}></SilkEnd>
-//     </reactKonva.Group>
-//   )
-// }
-// export { Silk as Silk }
-
 class Silk {
   konvaObj = null
   silkObj = null
@@ -168,8 +63,7 @@ class Silk {
     ]
 
   }
-  update = () => {
-    console.log('updated silk')
+  updateKonvaObj = () => {
     this.pos1 = utils.calcPosByKonvaPos(this.bud1.konvaObj.getX(), this.bud1.konvaObj.getY())
     this.pos2 = utils.calcPosByKonvaPos(this.bud2.konvaObj.getX(), this.bud2.konvaObj.getY())
     // this.pos1 = this.bud1.position
@@ -181,22 +75,31 @@ class Silk {
     this.select()
   }
   delete = () => {
-    delete this.bud1.attachedSilk[this.silkId]
-    delete this.bud2.attachedSilk[this.silkId]
-    const attachedTos1 = this.bud1.json.attachedTos
-    for (let i = 0; i < attachedTos1.length; i++) {
-      if (attachedTos1[i] === this.bud2.objId) {
-        attachedTos1.splice(i, 1)
+    const redoFunc = () => {
+      delete this.bud1.attachedSilk[this.silkId]
+      delete this.bud2.attachedSilk[this.silkId]
+      const attachedTos1 = this.bud1.json.attachedTos
+      for (let i = 0; i < attachedTos1.length; i++) {
+        if (attachedTos1[i] === this.bud2.objId) {
+          attachedTos1.splice(i, 1)
+        }
       }
-    }
-    const attachedTos2 = this.bud2.json.attachedTos
-    for (let i = 0; i < attachedTos2.length; i++) {
-      if (attachedTos2[i] === this.bud1.objId) {
-        attachedTos2.splice(i, 1)
+      const attachedTos2 = this.bud2.json.attachedTos
+      for (let i = 0; i < attachedTos2.length; i++) {
+        if (attachedTos2[i] === this.bud1.objId) {
+          attachedTos2.splice(i, 1)
+        }
       }
+      utils.delFromSilks(this.silkId)
+      this.konvaObj.destroy()
     }
-    utils.delFromSilks(this.silkId)
-    this.konvaObj.destroy()
+    const undoFunc = () => {
+      this.bud1.json.attachedTos.push(this.bud2.objId)
+      this.bud2.json.attachedTos.push(this.bud1.objId)
+      this.init()
+    }
+    utils.addToHistory(undoFunc, redoFunc)
+    redoFunc()
   }
   select = () => {
     console.log('selected')
@@ -237,16 +140,31 @@ class Silk {
     utils.addToSilks(this)
   }
   constructor(silkId, bud1, bud2) {
+    const redoFunc = () => {
+      this.init()
+      bud1.json.attachedTos.push(bud2.objId)
+      bud2.json.attachedTos.push(bud1.objId)
+      utils.addToNewObjs(this.objId)
+      utils.addToNewObjs(bud1.objId)
+    }
+    const undoFunc = () => {
+      this.delete()
+      if (JSON.stringify(this.originalAttachedTos) == JSON.stringify(this.json.attachedTos)) {
+        utils.delFromNewObjs(this.objId)
+        utils.delFromNewObjs(bud1.objId)
+      }
+    }
     this.bud1 = bud1
     this.bud2 = bud2
     if (bud2) {
       bud1.json?.attachedTos.push(bud2.objId)
     }
     if (bud1) {
-      bud2.json?.attachedTos.push(bud1?.objId)
+      bud2.json?.attachedTos.push(bud1.objId)
     }
     this.silkId = silkId
     this.init()
+    utils.addToHistory(undoFunc, redoFunc)
   }
 }
 export { Silk }
