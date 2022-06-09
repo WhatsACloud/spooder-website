@@ -58,7 +58,6 @@ class Bud {
     this.json.attachedTos = attachedTos
     for (const attachedToId of attachedTos) {
       const attachedBud = utils.getObjById(attachedToId)
-      console.log(attachedToId, attachedBud)
       if (!attachedBud) {
         const silkId = utils.getNextSilkId()
         new Silk(silkId, false, this)
@@ -83,9 +82,7 @@ class Bud {
     this.dragging = true
   }
   click = () => {
-    console.log('selected')
     const modes = utils.getGlobals().modes
-    console.log(this.objId !== utils.getGlobals().selected, modes.gluing)
     if (modes.autoDrag) {
       this.konvaObj.setDraggable(false)
       const mousemove = () => {
@@ -99,7 +96,6 @@ class Bud {
       document.addEventListener('mouseup', mouseup)
       document.addEventListener('mousemove', mousemove)
     } else if (modes.gluing && (this.objId !== utils.getGlobals().selected)) {
-      console.log('pls glue')
       const selected = utils.getGlobals().selected
       if (selected.type === utils.ObjType.Bud) {
         const bud1 = utils.getObjById(selected.id)
@@ -130,18 +126,15 @@ class Bud {
     const oldX = this.x
     const oldY = this.y
     const { newX, newY } = this.calcNewPos()
-    console.log(newX, newY)
     const undoFunc = () => {
       this.x = oldX
       this.y = oldY
-      console.log(oldX, this.originalPos.x, oldY, this.originalPos.y)
       if (oldX === this.originalPos.x && oldY === this.originalPos.y) {
         utils.delFromNewObjs(this.objId)
       }
       this.updateSilks()
     }
     const redoFunc = () => {
-      console.log('dragEnd redo')
       this.x = newX
       this.y = newY
       utils.addToNewObjs(this.objId)
@@ -163,7 +156,6 @@ class Bud {
       sifted[attr] = leJson[attr]
     }
     this._json = sifted
-    console.log(this._json)
   }
   select = () => {
     const budShape = this.konvaObj.children[0]
@@ -172,7 +164,6 @@ class Bud {
       budShape.setStroke('black')
     }
     const unselectFunc = () => {
-      console.log('unselected')
       budShape.setStrokeWidth(0)
     }
     utils.selectObj(this.objId, utils.ObjType.Bud, budShape, selectFunc, unselectFunc)

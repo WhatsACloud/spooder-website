@@ -220,7 +220,6 @@ const getHighlighter = () => {
 export { getHighlighter }
 
 const addObjs = (toAdd) => {
-  console.log(toAdd)
   const globals = getGlobals()
   const currentObjs = globals.objs
   const newObjs = {...currentObjs, ...toAdd}

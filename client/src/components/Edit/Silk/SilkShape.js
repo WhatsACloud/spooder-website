@@ -50,7 +50,6 @@ class Silk {
       this.bud2 = bud
       return
     }
-    console.log('nothing to fill in')
   }
   getKonvaPoints = () => {
     const newPos1 = utils.calcKonvaPosByPos(this.pos1)
@@ -76,33 +75,40 @@ class Silk {
   }
   delete = () => {
     const redoFunc = () => {
-      delete this.bud1.attachedSilk[this.silkId]
-      delete this.bud2.attachedSilk[this.silkId]
-      const attachedTos1 = this.bud1.json.attachedTos
-      for (let i = 0; i < attachedTos1.length; i++) {
-        if (attachedTos1[i] === this.bud2.objId) {
-          attachedTos1.splice(i, 1)
-        }
-      }
-      const attachedTos2 = this.bud2.json.attachedTos
-      for (let i = 0; i < attachedTos2.length; i++) {
-        if (attachedTos2[i] === this.bud1.objId) {
-          attachedTos2.splice(i, 1)
-        }
-      }
-      utils.delFromSilks(this.silkId)
-      this.konvaObj.destroy()
+      this._delete()
     }
     const undoFunc = () => {
-      this.bud1.json.attachedTos.push(this.bud2.objId)
-      this.bud2.json.attachedTos.push(this.bud1.objId)
-      this.init()
+      this.restore()
     }
     utils.addToHistory(undoFunc, redoFunc)
     redoFunc()
   }
+  _delete = () => {
+    this.bud1.delFromAttached [this.silkId]
+    delete this.bud2.attachedSilk[this.silkId]
+    const attachedTos1 = this.bud1.json.attachedTos
+    for (let i = 0; i < attachedTos1.length; i++) {
+      if (attachedTos1[i] === this.bud2.objId) {
+        attachedTos1.splice(i, 1)
+      }
+    }
+    const attachedTos2 = this.bud2.json.attachedTos
+    for (let i = 0; i < attachedTos2.length; i++) {
+      if (attachedTos2[i] === this.bud1.objId) {
+        attachedTos2.splice(i, 1)
+      }
+    }
+    utils.delFromSilks(this.silkId)
+    this.konvaObj.destroy()
+  }
+  restore = () => {
+    this.bud1.json.attachedTos.push(this.bud2.objId)
+    this.bud2.json.attachedTos.push(this.bud1.objId)
+    this.bud1.attachedSilk[this.silkId] = this
+    this.bud2.attachedSilk[this.silkId] = this
+    this.init()
+  }
   select = () => {
-    console.log('selected')
     const highlight = new Konva.Line({
         points: this.getKonvaPoints(),
         stroke: 'blue',
@@ -141,18 +147,16 @@ class Silk {
   }
   constructor(silkId, bud1, bud2) {
     const redoFunc = () => {
-      this.init()
-      bud1.json.attachedTos.push(bud2.objId)
-      bud2.json.attachedTos.push(bud1.objId)
+      this.restore()
       utils.addToNewObjs(this.objId)
       utils.addToNewObjs(bud1.objId)
     }
     const undoFunc = () => {
       this.delete()
-      if (JSON.stringify(this.originalAttachedTos) == JSON.stringify(this.json.attachedTos)) {
-        utils.delFromNewObjs(this.objId)
-        utils.delFromNewObjs(bud1.objId)
-      }
+      // if (JSON.stringify(this.originalAttachedTos) == JSON.stringify(this.json.attachedTos)) {
+      //   utils.delFromNewObjs(this.objId)
+      //   utils.delFromNewObjs(bud1.objId)
+      // }
     }
     this.bud1 = bud1
     this.bud2 = bud2
