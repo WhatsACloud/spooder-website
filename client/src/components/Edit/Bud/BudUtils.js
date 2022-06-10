@@ -6,13 +6,16 @@ import { Bud } from './BudShapes'
 const setBud = (pos) => {
   const nextObjId = utils.getNextObjId()
   const redoFunc = () => {
+    utils.addToNewObjs(nextObjId)
     utils.getObjById(nextObjId).redo()
     utils.setNextObjId(utils.getNextObjId()+1)
   }
   const undoFunc = () => {
+    utils.delFromNewObjs(nextObjId)
     utils.getObjById(nextObjId).undo()
     utils.setNextObjId(utils.getNextObjId()-1)
   }
+  utils.addToNewObjs(nextObjId)
   new Bud(nextObjId, pos.x, pos.y)
   utils.setNextObjId(utils.getNextObjId()+1)
   utils.addToHistory(undoFunc, redoFunc)

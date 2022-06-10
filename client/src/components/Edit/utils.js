@@ -98,6 +98,8 @@ const getNextHighestAttr = (arr, attrName) => {
 export { getNextHighestAttr }
 
 const addToNewObjs = (objId) => {
+  console.log(objId)
+  if (objId === null) throw new Error
   const newObjs = getGlobals().newObjs
   if (!(newObjs.includes(objId))) {
     newObjs.push(objId)
@@ -162,8 +164,10 @@ export { ObjType }
 
 const selectObj = (id, type, konvaObj, selectFunc, unselectFunc) => {
   getGlobals().selected = {id: id, type: type}
+  console.log('selected', getGlobals().selected)
   selectFunc()
   const click = () => {
+    console.log('unselected')
     getGlobals().selected = null
     unselectFunc()
     document.getElementById('divCanvas').removeEventListener('click', click)
@@ -234,6 +238,7 @@ import { select } from './Select'
 const save = async () => {
   const newObjs = getGlobals().newObjs
   const toSend = {}
+  console.log(newObjs)
   for (const objId of newObjs) {
     toSend[objId] = getObjById(objId).json.json
   }

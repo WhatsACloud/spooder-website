@@ -73,7 +73,9 @@ class Silk {
     const attachedTos1 = this.bud1.json.attachedTos
     for (let i = 0; i < attachedTos1.length; i++) {
       if (attachedTos1[i] === this.bud2.objId) {
+        console.log(attachedTos1)
         attachedTos1.splice(i, 1)
+        console.log(attachedTos1)
       }
     }
     const attachedTos2 = this.bud2.json.attachedTos
@@ -85,10 +87,14 @@ class Silk {
     utils.delFromSilks(this.silkId)
     this.konvaObj.destroy()
   }
+  initSilkInBud = (bud1, bud2) => {
+    bud1.attachedTos.push(bud2.objId)
+    bud1.attachedSilk[bud2.objId] = this
+  }
   restore = () => {
-    this.bud1.json.attachedTos.push(this.bud2.objId)
-    this.bud2.json.attachedTos.push(this.bud1.objId)
-    // this.init()
+    this.initSilkInBud(this.bud1, this.bud2)
+    this.initSilkInBud(this.bud2, this.bud1)
+    this.init()
   }
   select = () => {
     const highlight = new Konva.Line({
@@ -126,15 +132,20 @@ class Silk {
     utils.addToSilks(this)
   }
   constructor(silkId, bud1, bud2) {
+    if (bud2.objId in bud1.attachedSilk || bud1.objId in bud2.attachedSilk) return
     const redoFunc = () => {
       this.restore()
     }
     const undoFunc = () => {
-      this.delete()
+      this._delete()
     }
     // console.log(bud1, bud2)
     this.bud1 = bud1
     this.bud2 = bud2
+    this.initSilkInBud(this.bud1, this.bud2)
+    console.log(bud1.objId, bud1.attachedSilk, bud2.objId, bud2.attachedSilk)
+    this.initSilkInBud(this.bud2, this.bud1)
+    console.log(bud1.objId, bud1.attachedSilk, bud2.objId, bud2.attachedSilk)
     this.silkId = silkId
     this.init()
     utils.addToHistory(undoFunc, redoFunc)

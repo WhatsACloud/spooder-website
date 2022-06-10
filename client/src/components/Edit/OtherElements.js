@@ -30,11 +30,11 @@ function ObjectDrawer({ setDragging, toggleCanDragLine, setToggleCanDragLine }) 
             <button onClick={utils.save}>
               save
             </button>
+            <button onClick={() => console.log(Object.entries(utils.getObjs()).map(e => [e[0], e[1].json.json]))}>
+              debug 
+            </button>
             <button className={styles.drawerButton} onMouseDown={() => setDragging(true)}>
               <FontAwesomeIcon icon={faObjectGroup}></FontAwesomeIcon>
-            </button>
-            <button className={toggleCanDragLine ? styles.darkenedDrawerButton : styles.drawerButton} onMouseDown={() => setToggleCanDragLine(!toggleCanDragLine)}>
-              <FontAwesomeIcon icon={faLinesLeaning}></FontAwesomeIcon>
             </button>
           </div>
         </div>

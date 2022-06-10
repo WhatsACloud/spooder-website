@@ -52,16 +52,6 @@ class BudJson {
     position: {x: 0, y: 0},
     objId: null,
   }
-  initSilk = (budId) => {
-    const bud = utils.getObjById(budId)
-    const silkId = utils.getNextSilkId()
-    console.log(this.objId, budId, this.attachedSilk, this.attachedTos)
-    if (!(budId in this.attachedSilk)) {
-      const silk = new Silk(silkId, bud, this.bud)
-      this.attachedSilk[budId] = silk
-      bud.attachedSilk[this.objId] = silk
-    }
-  }
   
   attachedTosProxyDelete = (target, property) => {
     const attachedTo = target[property]
@@ -74,17 +64,25 @@ class BudJson {
   }
   
   attachedTosProxySet = (target, property, value) => {
-    let plsCheck = false
-    if (!target.includes(value)) plsCheck = true
-    if (property === "length") plsCheck = false
-    if (plsCheck) {
-      Reflect.set(target, property, value)
-      this.initSilk(value)
-      this.checkForUpdate('attachedTos')
-      return true
+    if (property !== "length") {
+      if (!target.includes(value)) {
+        Reflect.set(target, property, value)
+        this.checkForUpdate('attachedTos')
+        return true
+      }
+      console.log(target, property, value)
     }
-    console.log(`${target} already contains ${value}`)
     return true
+  }
+  attachedTosProxyGet = (target, property) => {
+    if (property === "splice") {
+      const origMethod = target[property]
+      return (...args) => {
+        origMethod.apply(target, args)
+        this.checkForUpdate('attachedTos')
+      }
+    }
+    return target[property]
   }
   objProxyDelete = (target, property) => {
     delete target[property]
@@ -98,7 +96,8 @@ class BudJson {
   }
   attachedTosProxyConfig = {
     deleteProperty: this.attachedTosProxyDelete,
-    set: this.attachedTosProxySet
+    set: this.attachedTosProxySet,
+    get: this.attachedTosProxyGet
   }
   objProxyConfig = {
     deleteProperty: this.objProxyDelete,
@@ -164,7 +163,6 @@ class BudJson {
 }
 
 class Bud {
-  loaded = null // should delete this
   konvaObj = null
   dragging = false
   del = false
@@ -216,6 +214,7 @@ class Bud {
       document.addEventListener('mousemove', mousemove)
     } else if (modes.gluing && (this.objId !== utils.getGlobals().selected)) {
       const selected = utils.getGlobals().selected
+      console.log(selected, utils.ObjType.Bud, selected.type === utils.ObjType.Bud)
       if (selected.type === utils.ObjType.Bud) {
         const bud1 = utils.getObjById(selected.id)
         const silkId = utils.getNextSilkId()
@@ -274,7 +273,7 @@ class Bud {
     }
     utils.selectObj(this.objId, utils.ObjType.Bud, budShape, selectFunc, unselectFunc)
   }
-  init = (objId, loaded=true) => {
+  init = (objId) => {
     const radius = 40
     const budGroup = new Konva.Group(drawConfig.budGroupConfig(this.x, this.y))
     budGroup.on('dragmove', this.dragMove)
@@ -286,10 +285,6 @@ class Bud {
     const mainLayer = utils.getMainLayer()
     mainLayer.add(budGroup)
     this.konvaObj = budGroup
-    if (this.loaded === false) {
-      this.loaded = true
-      return
-    }
   }
   undo = () => {
     this.konvaObj.destroy()
@@ -299,16 +294,18 @@ class Bud {
   redo = () => {
     this.del = false
     this.init(this.objId)
-    this.position = {x: this.x, y: this.y}
+    this.updateKonvaObj()
   }
-  constructor(nextObjId, x=null, y, loaded=false) { // loaded meaning loaded from database
+  constructor(nextObjId, x=null, y) {
     utils.addObjs({[nextObjId]: this})
     if (x === null) return
-    this.json = new BudJson(this, BudJson.base)
+    this.json = new BudJson(this, JSON.parse(JSON.stringify(BudJson.base)))
+    this.json.initialising = true
     nextObjId = Number(nextObjId)
-    this.loaded = loaded
-    this.position = {x: x, y: y}
-    this.init(nextObjId, loaded)
+    this.init(nextObjId, true)
+    this.x = x
+    this.y = y
+    this.json.initialising = false
   }
 }
 export { Bud }

@@ -165,8 +165,7 @@ function Edit() {
     for (const leObj of Object.values(utils.getObjs())) {
       console.log('one iter')
       for (const attachedTo of leObj.attachedTos) {
-        console.log('how???')
-        leObj.json.initSilk(attachedTo)
+        new SilkShapes.Silk(utils.getNextSilkId(), leObj, utils.getObjById(attachedTo))
       }
     }
     document.addEventListener('keydown', preventZoom)
