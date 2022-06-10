@@ -235,7 +235,7 @@ const save = async () => {
   const newObjs = getGlobals().newObjs
   const toSend = {}
   for (const objId of newObjs) {
-    toSend[objId] = getObjById(objId).json
+    toSend[objId] = getObjById(objId).json.json
   }
   console.log(newObjs)
   console.log(toSend)

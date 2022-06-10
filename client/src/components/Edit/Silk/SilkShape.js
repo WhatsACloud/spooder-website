@@ -148,8 +148,6 @@ class Silk {
   constructor(silkId, bud1, bud2) {
     const redoFunc = () => {
       this.restore()
-      utils.addToNewObjs(this.objId)
-      utils.addToNewObjs(bud1.objId)
     }
     const undoFunc = () => {
       this.delete()
