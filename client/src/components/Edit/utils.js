@@ -237,8 +237,6 @@ const save = async () => {
   for (const objId of newObjs) {
     toSend[objId] = getObjById(objId).json.json
   }
-  console.log(newObjs)
-  console.log(toSend)
   try {
     const req = {
       spoodawebId: getGlobals().spoodawebId,

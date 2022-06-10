@@ -52,33 +52,56 @@ class BudJson {
     position: {x: 0, y: 0},
     objId: null,
   }
-  proxyDelete = (target, property) => {
+  initSilk = (budId) => {
+    const bud = utils.getObjById(budId)
+    const silkId = utils.getNextSilkId()
+    console.log(this.objId, budId, this.attachedSilk, this.attachedTos)
+    if (!(budId in this.attachedSilk)) {
+      const silk = new Silk(silkId, bud, this.bud)
+      this.attachedSilk[budId] = silk
+      bud.attachedSilk[this.objId] = silk
+    }
+  }
+  
+  attachedTosProxyDelete = (target, property) => {
+    const attachedTo = target[property]
+    const bud = utils.getObjById(attachedTo)
     delete target[property]
-    BudJson.checkForUpdate(property)
+    delete this.attachedSilk[attachedTo]
+    delete bud.attachedSilk[this.objId]
+    this.checkForUpdate('attachedTos')
     return true
   }
-  arrProxySet = (target, property, value) => {
+  
+  attachedTosProxySet = (target, property, value) => {
     let plsCheck = false
-    if (property === "length") plsCheck = true
     if (!target.includes(value)) plsCheck = true
+    if (property === "length") plsCheck = false
     if (plsCheck) {
       Reflect.set(target, property, value)
-      this.checkForUpdate(property)
+      this.initSilk(value)
+      this.checkForUpdate('attachedTos')
       return true
     }
-    return false
+    console.log(`${target} already contains ${value}`)
+    return true
+  }
+  objProxyDelete = (target, property) => {
+    delete target[property]
+    this.checkForUpdate(property)
+    return true
   }
   objProxySet = (target, property, value) => {
     Reflect.set(target, property, value)
     this.checkForUpdate(property)
     return true
   }
-  arrProxyConfig = {
-    deleteProperty: this.proxyDelete,
-    set: this.arrProxySet
+  attachedTosProxyConfig = {
+    deleteProperty: this.attachedTosProxyDelete,
+    set: this.attachedTosProxySet
   }
   objProxyConfig = {
-    deleteProperty: this.proxyDelete,
+    deleteProperty: this.objProxyDelete,
     set: this.objProxySet
   }
   checkForUpdate(attr) {
@@ -96,12 +119,12 @@ class BudJson {
       if (var1 !== var2) check = true
     }
     if (check) {
-      console.log(this, var1, var2)
       utils.addToNewObjs(this.objId)
     } else {
       utils.delFromNewObjs(this.objId)
     }
   }
+  attachedSilk = {}
   initialising = true
   get word() { return this.json.word }
   get definition() { return this.json.definition }
@@ -118,12 +141,13 @@ class BudJson {
   set context(context) { this.checkForUpdate('context'); this.json.context = context}
   set example(example) { this.checkForUpdate('example'); this.json.example = example}
   set link(link) { this.checkForUpdate('link'); this.json.link = link}
-  set attachedTos(attachedTos) { this.checkForUpdate('attachedTos'); this.json.attachedTos = new Proxy(attachedTos, this.arrProxyConfig)}
+  set attachedTos(attachedTos) { this.checkForUpdate('attachedTos'); this.json.attachedTos = new Proxy(attachedTos, this.attachedTosProxyConfig) }
   set position(position) { this.checkForUpdate('position'); this.json.position = new Proxy(position, this.objProxyConfig)}
   set objId(objId) { this.checkForUpdate('objId'); this.json.objId = objId }
   json = JSON.parse(JSON.stringify(BudJson.base))
   _originalJson = null
-  constructor(leJson) {
+  constructor(bud, leJson) {
+    this.bud = bud
     for (const attr of Object.keys(this.json)) {
       if (!(attr in leJson)) {
         console.warn(`WARNING: given JSON does not contain (${attr}) of type ${typeof this.json[attr]} (${this.objId})`)
@@ -140,33 +164,21 @@ class BudJson {
 }
 
 class Bud {
-  loaded = null
+  loaded = null // should delete this
   konvaObj = null
   dragging = false
   del = false
   parsed = false
 
   json = null
-  setJsonAttr(attr, val) {
-    const equals = this.json[attr] !== val
-    const arrayEquals = isArray(val) ? compareArrays(this.json[attr], val) : false
-    const objectEquals = isObject(val) ? compareObjects(this.json[attr], val) : false
-    if (equals || arrayEquals || objectEquals) {
-      this.json[attr] = val
-      return
-    }
-  }
-  getJsonAttr(attr) {
-    return this.json[attr]
-  }
 
   get objId() { return this.json.objId }
   set objId(id) { this.json.objId = id }
 
-  originalPos = {x: null, y: null}
+  get position() { return this.json.position }
 
-  get x() {return this.json.position.x}
-  get y() {return this.json.position.y}
+  get x() {return this.position.x}
+  get y() {return this.position.y}
   set x(leX) {
     this.json.position.x = leX
     this.updateKonvaObj(leX)
@@ -176,27 +188,9 @@ class Bud {
     this.updateKonvaObj(null, leY)
   }
 
-  originalAttachedTos = []
-  attachedSilk = {}
+  get attachedSilk() { return this.json.attachedSilk }
+
   get attachedTos() { return this.json.attachedTos }
-  setAttachedTos = (attachedTos) => {
-    this.json.attachedTos = attachedTos
-    for (const attachedToId of attachedTos) {
-      const attachedBud = utils.getObjById(attachedToId)
-      if (!attachedBud) {
-        const silkId = utils.getNextSilkId()
-        new Silk(silkId, false, this)
-      } else {
-        attachedBud.attachedSilk[this.objId].fillInBud(this)
-      }
-    }
-  }
-  addToAttached = (silk) => {
-    this.attachedSilk[silk.silkId] = silk
-  }
-  delFromAttached = (silkId) => {
-    delete this.attachedSilk[silkId]
-  }
 
   updateKonvaObj = (leX, leY) => {
     const { x, y } = utils.calcKonvaPosByPos({x: leX ?? this.x, y: leY ?? this.y})
@@ -267,7 +261,7 @@ class Bud {
     redoFunc()
   }
   fromJson = (leJson) => {
-    this.json = new BudJson(leJson)
+    this.json = new BudJson(this, leJson)
   }
   select = () => {
     const budShape = this.konvaObj.children[0]
@@ -296,8 +290,6 @@ class Bud {
       this.loaded = true
       return
     }
-    this.originalPos.x = this.x
-    this.originalPos.y = this.y
   }
   undo = () => {
     this.konvaObj.destroy()
@@ -312,7 +304,7 @@ class Bud {
   constructor(nextObjId, x=null, y, loaded=false) { // loaded meaning loaded from database
     utils.addObjs({[nextObjId]: this})
     if (x === null) return
-    this.json = new BudJson(BudJson.base)
+    this.json = new BudJson(this, BudJson.base)
     nextObjId = Number(nextObjId)
     this.loaded = loaded
     this.position = {x: x, y: y}

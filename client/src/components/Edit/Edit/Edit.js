@@ -157,12 +157,16 @@ function Edit() {
       gluing: false,
     }
     for (const [ objId, obj ] of Object.entries(spoodawebData)) {
-      console.log(obj.type)
-      if (obj.type === 'bud') {
-        console.log(objId)
-        const bud = new BudShapes.Bud(obj.objId)
-        bud.fromJson(obj)
-        bud.init(bud.objId, true)
+      console.log(objId)
+      const bud = new BudShapes.Bud(obj.objId)
+      bud.fromJson(obj)
+      bud.init(bud.objId, true)
+    }
+    for (const leObj of Object.values(utils.getObjs())) {
+      console.log('one iter')
+      for (const attachedTo of leObj.attachedTos) {
+        console.log('how???')
+        leObj.json.initSilk(attachedTo)
       }
     }
     document.addEventListener('keydown', preventZoom)

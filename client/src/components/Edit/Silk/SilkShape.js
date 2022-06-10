@@ -9,13 +9,9 @@ class Silk {
   konvaObj = null
   silkObj = null
   highlight = null
-  _pos1 = {x: null, y: null}
-  _pos2 = {x: null, y: null}
+  pos1 = {x: null, y: null}
+  pos2 = {x: null, y: null}
   silkId = null
-  get pos1() {return this._pos1}
-  get pos2() {return this._pos2}
-  set pos1(pos) {this._pos1 = pos}
-  set pos2(pos) {this._pos2 = pos}
   _bud1 = null
   _bud2 = null
   get bud1() {return this._bud1}
@@ -23,23 +19,13 @@ class Silk {
   // set bud1(id) { this._setBud('_bud1Id', '_pos1', id) }
   // set bud2(id) { this._setBud('_bud2Id', '_pos2', id) }
   set bud1(bud) {
-    if (bud) {
-      if (this._bud1) {
-        this._bud1.delFromAttached(this.silkId)
-      }
-      bud.addToAttached(this)
-      this.pos1 = bud.position
-    }
+    // console.log(bud)
+    this.pos1 = bud.position
     this._bud1 = bud
   }
   set bud2(bud) {
-    if (bud) {
-      if (this._bud2) {
-        this._bud2.delFromAttached(this.silkId)
-      }
-      bud.addToAttached(this)
-      this.pos2 = bud.position
-    }
+    // console.log(bud)
+    this.pos2 = bud.position
     this._bud2 = bud
   }
   fillInBud = (bud) => {
@@ -84,8 +70,6 @@ class Silk {
     redoFunc()
   }
   _delete = () => {
-    this.bud1.delFromAttached [this.silkId]
-    delete this.bud2.attachedSilk[this.silkId]
     const attachedTos1 = this.bud1.json.attachedTos
     for (let i = 0; i < attachedTos1.length; i++) {
       if (attachedTos1[i] === this.bud2.objId) {
@@ -104,9 +88,7 @@ class Silk {
   restore = () => {
     this.bud1.json.attachedTos.push(this.bud2.objId)
     this.bud2.json.attachedTos.push(this.bud1.objId)
-    this.bud1.attachedSilk[this.silkId] = this
-    this.bud2.attachedSilk[this.silkId] = this
-    this.init()
+    // this.init()
   }
   select = () => {
     const highlight = new Konva.Line({
@@ -129,8 +111,6 @@ class Silk {
     utils.selectObj(this.silkId, utils.ObjType.Silk, this.konvaObj, selectFunc, unselectFunc)
   }
   init = () => {
-    // this.pos1 = this.bud1.position
-    this.pos1 = this.bud1 ? this.bud1.position : this.pos1
     const group = new Konva.Group()
     group.on('mousedown', this.mouseDown)
     const line = new Konva.Line({
@@ -151,19 +131,10 @@ class Silk {
     }
     const undoFunc = () => {
       this.delete()
-      // if (JSON.stringify(this.originalAttachedTos) == JSON.stringify(this.json.attachedTos)) {
-      //   utils.delFromNewObjs(this.objId)
-      //   utils.delFromNewObjs(bud1.objId)
-      // }
     }
+    // console.log(bud1, bud2)
     this.bud1 = bud1
     this.bud2 = bud2
-    if (bud2) {
-      bud1.json?.attachedTos.push(bud2.objId)
-    }
-    if (bud1) {
-      bud2.json?.attachedTos.push(bud1.objId)
-    }
     this.silkId = silkId
     this.init()
     utils.addToHistory(undoFunc, redoFunc)
