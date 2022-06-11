@@ -151,6 +151,7 @@ function Edit() {
     globals.triggerDragLine = false
     globals.draggingLine = false
     globals.selected = null
+    globals.unselectFunc = null
     globals.silkObjs = {}
     globals.modes = {
       autoDrag: false,
@@ -165,7 +166,7 @@ function Edit() {
     for (const leObj of Object.values(utils.getObjs())) {
       console.log('one iter')
       for (const attachedTo of leObj.attachedTos) {
-        new SilkShapes.Silk(utils.getNextSilkId(), leObj, utils.getObjById(attachedTo))
+        new SilkShapes.Silk(utils.getNextSilkId(), leObj, utils.getObjById(attachedTo), true)
       }
     }
     document.addEventListener('keydown', preventZoom)

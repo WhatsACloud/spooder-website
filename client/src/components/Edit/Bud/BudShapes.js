@@ -51,6 +51,7 @@ class BudJson {
     attachedTos: [],
     position: {x: 0, y: 0},
     objId: null,
+    del: false,
   }
   
   attachedTosProxyDelete = (target, property) => {
@@ -108,6 +109,7 @@ class BudJson {
     if (attr === 'x' || attr === 'y') attr = 'position'
     const var1 = this._originalJson[attr]
     const var2 = this.json[attr]
+    console.log(var1, var2)
     let check = false
     if (var1.constructor !== var2.constructor) throw new Error(`WARNING: setting ${var1} of type ${typeof var1} as ${var2} which is of type ${typeof var2}`)
     if (isArray(var1)) {
@@ -134,20 +136,23 @@ class BudJson {
   get attachedTos() { return this.json.attachedTos }
   get position() { return this.json.position }
   get objId() { return this.json.objId }
-  set word(word) { this.checkForUpdate('word'); this.json.word = word }
-  set definition(definition) { this.checkForUpdate('definition'); this.json.definition = definition}
-  set sound(sound) { this.checkForUpdate('sound'); this.json.sound = sound}
-  set context(context) { this.checkForUpdate('context'); this.json.context = context}
-  set example(example) { this.checkForUpdate('example'); this.json.example = example}
-  set link(link) { this.checkForUpdate('link'); this.json.link = link}
-  set attachedTos(attachedTos) { this.checkForUpdate('attachedTos'); this.json.attachedTos = new Proxy(attachedTos, this.attachedTosProxyConfig) }
-  set position(position) { this.checkForUpdate('position'); this.json.position = new Proxy(position, this.objProxyConfig)}
-  set objId(objId) { this.checkForUpdate('objId'); this.json.objId = objId }
+  get del() { return this.json.del }
+  set word(word) { this.json.word = word; this.checkForUpdate('word') }
+  set definition(definition) { this.json.definition = definition; this.checkForUpdate('definition') }
+  set sound(sound) { this.json.sound = sound; this.checkForUpdate('sound') }
+  set context(context) { this.json.context = context; this.checkForUpdate('context') }
+  set example(example) { this.json.example = example; this.checkForUpdate('example') }
+  set link(link) { this.json.link = link; this.checkForUpdate('link') }
+  set attachedTos(attachedTos) { this.json.attachedTos = new Proxy(attachedTos, this.attachedTosProxyConfig) }
+  set position(position) { this.json.position = new Proxy(position, this.objProxyConfig) }
+  set objId(objId) { this.json.objId = objId; this.checkForUpdate('objId') }
+  set del(del) { this.json.del = del; this.checkForUpdate('del')}
   json = JSON.parse(JSON.stringify(BudJson.base))
   _originalJson = null
   constructor(bud, leJson) {
     this.bud = bud
     for (const attr of Object.keys(this.json)) {
+      if (attr === 'del') continue
       if (!(attr in leJson)) {
         console.warn(`WARNING: given JSON does not contain (${attr}) of type ${typeof this.json[attr]} (${this.objId})`)
         continue
@@ -165,7 +170,9 @@ class BudJson {
 class Bud {
   konvaObj = null
   dragging = false
-  del = false
+  new = false
+  get del() { return this.json.del }
+  set del(del) { this.json.del = del }
   parsed = false
 
   json = null
@@ -212,13 +219,13 @@ class Bud {
       }
       document.addEventListener('mouseup', mouseup)
       document.addEventListener('mousemove', mousemove)
-    } else if (modes.gluing && (this.objId !== utils.getGlobals().selected)) {
+    } else if (modes.gluing && (this !== utils.getGlobals().selected.obj)) {
       const selected = utils.getGlobals().selected
-      console.log(selected, utils.ObjType.Bud, selected.type === utils.ObjType.Bud)
+      // console.log(selected, utils.ObjType.Bud, selected.type === utils.ObjType.Bud)
       if (selected.type === utils.ObjType.Bud) {
-        const bud1 = utils.getObjById(selected.id)
+        const bud = selected.obj
         const silkId = utils.getNextSilkId()
-        new Silk(silkId, bud1, this)
+        new Silk(silkId, bud, this)
       }
     } else {
       this.select()
@@ -271,7 +278,7 @@ class Bud {
     const unselectFunc = () => {
       budShape.setStrokeWidth(0)
     }
-    utils.selectObj(this.objId, utils.ObjType.Bud, budShape, selectFunc, unselectFunc)
+    utils.selectObj(this, utils.ObjType.Bud, budShape, selectFunc, unselectFunc)
   }
   init = (objId) => {
     const radius = 40
@@ -286,25 +293,40 @@ class Bud {
     mainLayer.add(budGroup)
     this.konvaObj = budGroup
   }
+  delete = () => {
+    this.undo()
+    utils.addToHistory(this.redo, this.undo)
+  }
   undo = () => {
     this.konvaObj.destroy()
+    for (const silk of Object.values(this.attachedSilk)) {
+      silk.delete()
+    }
+    if (this.new) {
+      utils.delFromNewObjs(this.objId)
+      return
+    }
     this.del = true
-    utils.delFromNewObjs(this.objId)
   }
   redo = () => {
     this.del = false
     this.init(this.objId)
     this.updateKonvaObj()
+    if (this.new) {
+      utils.addToNewObjs(this.objId)
+    }
   }
   constructor(nextObjId, x=null, y) {
     utils.addObjs({[nextObjId]: this})
     if (x === null) return
     this.json = new BudJson(this, JSON.parse(JSON.stringify(BudJson.base)))
     this.json.initialising = true
+    this.new = true
     nextObjId = Number(nextObjId)
     this.init(nextObjId, true)
     this.x = x
     this.y = y
+    this.objId = nextObjId
     this.json.initialising = false
   }
 }

@@ -162,8 +162,8 @@ class ObjType {
 }
 export { ObjType }
 
-const selectObj = (id, type, konvaObj, selectFunc, unselectFunc) => {
-  getGlobals().selected = {id: id, type: type}
+const selectObj = (obj, type, konvaObj, selectFunc, unselectFunc) => {
+  getGlobals().selected = {obj: obj, type: type}
   console.log('selected', getGlobals().selected)
   selectFunc()
   const click = () => {
@@ -177,9 +177,17 @@ const selectObj = (id, type, konvaObj, selectFunc, unselectFunc) => {
     document.getElementById('divCanvas').addEventListener('click', click)
     konvaObj.off('mouseleave', mouseleave)
   }
+  getGlobals().unselectFunc = click
   konvaObj.on('mouseleave', mouseleave)
 }
 export { selectObj }
+
+const unselect = () => {
+  if (getGlobals().unselectFunc) {
+    getGlobals().unselectFunc()
+  }
+}
+export { unselect }
 
 const isInCanvas = (mousePos) => {
   const startX = window.innerWidth * 0.15
@@ -240,7 +248,10 @@ const save = async () => {
   const toSend = {}
   console.log(newObjs)
   for (const objId of newObjs) {
-    toSend[objId] = getObjById(objId).json.json
+    const objJson = getObjById(objId).json
+    toSend[objId] = objJson.json
+    objJson._originalJson = JSON.parse(JSON.stringify(objJson.json))
+    console.log(objJson._originalJson, objJson.json)
   }
   try {
     const req = {

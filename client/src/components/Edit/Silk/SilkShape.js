@@ -84,6 +84,9 @@ class Silk {
         attachedTos2.splice(i, 1)
       }
     }
+    console.log(this.bud1.json.attachedSilk)
+    delete this.bud1.json.attachedSilk[this.bud2.objId]
+    delete this.bud2.json.attachedSilk[this.bud1.objId]
     utils.delFromSilks(this.silkId)
     this.konvaObj.destroy()
   }
@@ -114,7 +117,7 @@ class Silk {
       this.highlight = null
       highlight.destroy()
     }
-    utils.selectObj(this.silkId, utils.ObjType.Silk, this.konvaObj, selectFunc, unselectFunc)
+    utils.selectObj(this, utils.ObjType.Silk, this.konvaObj, selectFunc, unselectFunc)
   }
   init = () => {
     const group = new Konva.Group()
@@ -131,15 +134,9 @@ class Silk {
     utils.getMainLayer().add(group)
     utils.addToSilks(this)
   }
-  constructor(silkId, bud1, bud2) {
+  constructor(silkId, bud1, bud2, initialising=false) {
     if (bud2.objId in bud1.attachedSilk || bud1.objId in bud2.attachedSilk) return
-    const redoFunc = () => {
-      this.restore()
-    }
-    const undoFunc = () => {
-      this._delete()
-    }
-    // console.log(bud1, bud2)
+    console.log(bud1, bud2)
     this.bud1 = bud1
     this.bud2 = bud2
     this.initSilkInBud(this.bud1, this.bud2)
@@ -148,7 +145,9 @@ class Silk {
     console.log(bud1.objId, bud1.attachedSilk, bud2.objId, bud2.attachedSilk)
     this.silkId = silkId
     this.init()
-    utils.addToHistory(undoFunc, redoFunc)
+    if (!initialising) {
+      utils.addToHistory(this._delete, this.restore)
+    }
   }
 }
 export { Silk }

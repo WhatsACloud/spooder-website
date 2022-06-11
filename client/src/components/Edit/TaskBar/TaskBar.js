@@ -73,12 +73,8 @@ function TaskBar({ setInSettings, setSelectedObj, selectedObj, setFocus }) {
         className={styles.autoDragBtn}
         onClick={() => {
           const selected = utils.getGlobals().selected
-          switch (selected.type) {
-            case (utils.ObjType.Bud):
-              utils.getObjById(selected.id).delete()
-            case (utils.ObjType.Silk):
-              utils.getGlobals().silkObjs[selected.id].delete()
-          }
+          selected?.obj.delete()
+          utils.unselect()
         }}>
         delete
       </button>
