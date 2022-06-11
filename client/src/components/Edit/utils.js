@@ -167,6 +167,10 @@ const selectObj = (obj, type, konvaObj, selectFunc, unselectFunc) => {
   console.log('selected', getGlobals().selected)
   selectFunc()
   const click = () => {
+    if (getGlobals().dragging) {
+      getGlobals().dragging = false
+      return
+    }
     console.log('unselected')
     getGlobals().selected = null
     unselectFunc()

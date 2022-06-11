@@ -21,6 +21,7 @@ import { Settings } from '../Settings'
 import Konva from 'konva'
 import { BudView } from '../Select/BudView'
 import { setBud } from '../Bud/BudUtils'
+import { Keybinds } from './keybinds'
 
 Konva.hitOnDragEnabled = true
 
@@ -157,6 +158,10 @@ function Edit() {
       autoDrag: false,
       gluing: false,
     }
+    globals.lastMousePos = null
+    globals.dragging = false
+    const keybinds = new Keybinds(true)
+    globals.keybinds = keybinds
     for (const [ objId, obj ] of Object.entries(spoodawebData)) {
       console.log(objId)
       const bud = new BudShapes.Bud(obj.objId)
@@ -174,22 +179,34 @@ function Edit() {
 
     utils.setRootPos({x: 0, y: 0})
     const scrollAmt = 20
-    document.addEventListener('keydown', (e) => {
-      const key = e.key
-      switch (key) {
-        case 'ArrowUp':
-          scrollDown(-scrollAmt)
-          break
-        case 'ArrowDown':
-          scrollDown(scrollAmt)
-          break
-        case 'ArrowLeft':
-          scrollRight(-scrollAmt)
-          break
-        case 'ArrowRight':
-          scrollRight(scrollAmt)
-          break
+    keybinds.add('ArrowUp', () => scrollDown(-scrollAmt))
+    keybinds.add('ArrowDown', () => scrollDown(scrollAmt))
+    keybinds.add('ArrowLeft', () => scrollRight(-scrollAmt))
+    keybinds.add('ArrowRight', () => scrollRight(scrollAmt))
+    const mouseMoveFunc = (e) => {
+      const pos = {x: e.screenX, y: e.screenY}
+      const globals = utils.getGlobals()
+      if (!globals.lastMousePos) {
+        globals.lastMousePos = pos
       }
+      const multiplier = 2
+      const diff = {x: globals.lastMousePos.x - pos.x, y: globals.lastMousePos.y - pos.y}
+      scrollDown(-diff.y * multiplier)
+      scrollRight(-diff.x * multiplier)
+      utils.getGlobals().lastMousePos = pos
+    }
+    document.getElementById('divCanvas').addEventListener('mousedown', () => {
+      document.addEventListener('mousemove', mouseMoveFunc)
+      const func = () => {
+        utils.getGlobals().dragging = true
+        document.removeEventListener('mousemove', func)
+      }
+      document.addEventListener('mousemove', func)
+    })
+    document.getElementById('divCanvas').addEventListener('mouseup', () => {
+      const globals = utils.getGlobals()
+      globals.lastMousePos = null
+      document.removeEventListener('mousemove', mouseMoveFunc)
     })
     return () => {
       document.removeEventListener('keydown', preventZoom)
