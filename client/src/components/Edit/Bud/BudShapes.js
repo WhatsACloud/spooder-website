@@ -291,8 +291,7 @@ class Bud {
     budGroup.on('mouseup', (e) => { e.cancelBubble = true })
     const budShape = new Konva.Shape(drawConfig.budShapeConfig())
     budGroup.add(budShape)
-    const mainLayer = utils.getMainLayer()
-    mainLayer.add(budGroup)
+    utils.getBudGroup().add(budGroup)
     this.konvaObj = budGroup
   }
   delete = () => {

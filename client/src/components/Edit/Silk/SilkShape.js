@@ -131,7 +131,7 @@ class Silk {
     group.add(line)
     this.konvaObj = group
     this.silkObj = line
-    utils.getMainLayer().add(group)
+    utils.getSilkGroup().add(group)
     utils.addToSilks(this)
   }
   constructor(silkId, bud1, bud2, initialising=false) {

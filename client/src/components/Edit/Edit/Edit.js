@@ -162,6 +162,11 @@ function Edit() {
     globals.dragging = false
     const keybinds = new Keybinds(true)
     globals.keybinds = keybinds
+    const budGroup = new Konva.Group()
+    const silkGroup = new Konva.Group()
+    utils.getMainLayer().add(budGroup, silkGroup)
+    budGroup.setZIndex(1)
+    silkGroup.setZIndex(0)
     for (const [ objId, obj ] of Object.entries(spoodawebData)) {
       console.log(objId)
       const bud = new BudShapes.Bud(obj.objId)
@@ -208,7 +213,6 @@ function Edit() {
       globals.lastMousePos = null
       document.removeEventListener('mousemove', mouseMoveFunc)
     })
-    console.log(utils.getMainLayer())
     return () => {
       document.removeEventListener('keydown', preventZoom)
       document.removeEventListener('wheel', preventZoomScroll)

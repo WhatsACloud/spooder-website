@@ -13,12 +13,17 @@ export { getGlobals }
 const getMainLayer = () => {
   return getStage().children[0]
 }
-export { getMainLayer as getMainLayer }
+export { getMainLayer }
 
-const getKonvaObjs = () => {
-  return getMainLayer().children
+const getBudGroup = () => {
+  return getMainLayer().children[1]
 }
-export { getKonvaObjs as getKonvaObjs }
+export { getBudGroup }
+
+const getSilkGroup = () => {
+  return getMainLayer().children[0]
+}
+export { getSilkGroup }
 
 const getObjs = () => {
   return getGlobals().objs
@@ -38,11 +43,6 @@ const addToHistory = (undoFunc, redoFunc) => {
   globals.historyIndex = historyIndex+1
 }
 export { addToHistory }
-
-const getHistory = () => {
-  return getMainLayer().getAttr('history')
-}
-export { getHistory }
 
 const getCanvasMousePos = (x, y) => {
   return {

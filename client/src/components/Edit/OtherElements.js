@@ -53,9 +53,7 @@ function FakeDraggableObj({ dragging, setDragging, setObjsToUpdate }) {
     const dropWrapper = (e) => {
       BudUtils.drop(e)
       setDragging(false)
-      const mainLayer = utils.getMainLayer()
       utils.getGlobals().addedObj = true
-      console.log(mainLayer)
     }
     const moveWrapper = (e) => {
       const draggable = document.getElementById('fakeDraggableObj')
