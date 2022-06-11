@@ -195,7 +195,7 @@ function Edit() {
       scrollRight(-diff.x * multiplier)
       utils.getGlobals().lastMousePos = pos
     }
-    document.getElementById('divCanvas').addEventListener('mousedown', () => {
+    utils.getStage().on('mousedown', () => {
       document.addEventListener('mousemove', mouseMoveFunc)
       const func = () => {
         utils.getGlobals().dragging = true
@@ -203,11 +203,12 @@ function Edit() {
       }
       document.addEventListener('mousemove', func)
     })
-    document.getElementById('divCanvas').addEventListener('mouseup', () => {
+    utils.getStage().on('mouseup', () => {
       const globals = utils.getGlobals()
       globals.lastMousePos = null
       document.removeEventListener('mousemove', mouseMoveFunc)
     })
+    console.log(utils.getMainLayer())
     return () => {
       document.removeEventListener('keydown', preventZoom)
       document.removeEventListener('wheel', preventZoomScroll)

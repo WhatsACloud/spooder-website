@@ -287,6 +287,8 @@ class Bud {
     budGroup.on('dragend', this.dragEnd)
     budGroup.on('click', this.click)
     budGroup.on('dragstart', this.dragStart)
+    budGroup.on('mousedown', (e) => { e.cancelBubble = true })
+    budGroup.on('mouseup', (e) => { e.cancelBubble = true })
     const budShape = new Konva.Shape(drawConfig.budShapeConfig())
     budGroup.add(budShape)
     const mainLayer = utils.getMainLayer()
