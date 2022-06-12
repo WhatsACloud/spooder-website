@@ -2,6 +2,7 @@
 ISSUES
 
 1. select not consistent
+2. Add mass select (using quadtrees glhf lol)
 
 */
 
@@ -9,6 +10,8 @@ import React, { memo, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Authorizer from '../../Shared/Authorizer'
 import styles from '../edit.module'
+
+import Quadtree from '@timohausmann/quadtree-js'
 
 import { preventZoom, preventZoomScroll } from '../PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from '../Events'
@@ -167,6 +170,9 @@ function Edit() {
     }
     globals.lastMousePos = null
     globals.dragging = false
+    globals.quadTree = new Quadtree({
+
+    })
     const keybinds = new Keybinds(true)
     globals.keybinds = keybinds
     const budGroup = new Konva.Group()
@@ -207,16 +213,21 @@ function Edit() {
       scrollRight(-diff.x * multiplier)
       utils.getGlobals().lastMousePos = pos
     }
-    utils.getStage().on('mousedown', () => {
-      document.addEventListener('mousemove', mouseMoveFunc)
-      const func = () => {
-        utils.getGlobals().dragging = true
-        document.removeEventListener('mousemove', func)
+    document.addEventListener('contextmenu', (e) => e.preventDefault())
+    utils.getStage().on('mousedown', (e) => {
+      if (e.evt.button === 2) {
+        utils.setCursor("grab")
+        document.addEventListener('mousemove', mouseMoveFunc)
+        const func = () => {
+          utils.getGlobals().dragging = true
+          document.removeEventListener('mousemove', func)
+        }
+        document.addEventListener('mousemove', func)
       }
-      document.addEventListener('mousemove', func)
     })
     utils.getStage().on('mouseup', () => {
       const globals = utils.getGlobals()
+      utils.setCursor("default")
       globals.lastMousePos = null
       document.removeEventListener('mousemove', mouseMoveFunc)
     })

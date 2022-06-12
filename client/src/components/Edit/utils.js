@@ -141,6 +141,11 @@ const calcPosByKonvaPos = (x, y, leRootPos=null) => {
 }
 export { calcPosByKonvaPos }
 
+const setCursor = (cursorType) => {
+  document.getElementById('root').style.cursor = cursorType
+}
+export { setCursor }
+
 import * as BudUtils from './Bud/BudUtils'
 
 const setRootPos = (rootPos) => {
