@@ -3,6 +3,7 @@ import * as utils from '../utils'
 import Konva from 'konva'
 import { Silk } from '../Silk/SilkShape'
 import * as drawConfig from './konvaDrawConfigs'
+import { setBud } from './BudUtils'
 
 const isArray = (val) => { return val.constructor === Array }
 const isObject = (val) => { return val.constructor === Object }
@@ -171,6 +172,34 @@ class Bud {
   konvaObj = null
   dragging = false
   new = false
+  _followMouse = false
+  mouseFollower = (e) => {
+    const { x, y } = utils.getCanvasMousePos(e.clientX, e.clientY)
+    this.konvaObj.setX(x)
+    this.konvaObj.setY(y)
+    this.updateSilks()
+  }
+  mouseFollowerUp = (e) => {
+    document.removeEventListener('mouseup', this.mouseFollowerUp)
+    document.removeEventListener('mousemove', this.mouseFollower)
+    const canvasMousePos = utils.getCanvasMousePos(e.clientX, e.clientY)
+    const { x, y } = utils.calcPosByKonvaPos(canvasMousePos.x, canvasMousePos.y)
+    console.log(x, y)
+    this.x = x
+    this.y = y
+    this.followMouse = false
+  }
+  get followMouse() { return this._followMouse }
+  set followMouse(followMouse) {
+    if (followMouse) {
+      document.addEventListener('mousemove', this.mouseFollower)
+      document.addEventListener('mouseup', this.mouseFollowerUp)
+    } else {
+      document.removeEventListener('mousemove', this.mouseFollower)
+      document.removeEventListener('mouseup', this.mouseFollowerUp)
+    }
+    this._followMouse = followMouse
+  }
   get del() { return this.json.del }
   set del(del) { this.json.del = del }
   parsed = false
@@ -242,6 +271,36 @@ class Bud {
     const { x, y } = utils.calcPosByKonvaPos(this.konvaObj.getX(), this.konvaObj.getY())
     return {newX: x, newY: y}
   }
+  mouseDown = (e) => {
+    const globals = utils.getGlobals()
+    if (globals.modes.autoDrag) {
+      this.konvaObj.setDraggable(false)
+      const objId = utils.getNextObjId()
+      const bud = new Bud(objId, this.x, this.y)
+      utils.setNextObjId(objId+1)
+      new Silk(utils.getNextSilkId(), bud, this, true)
+      const redoFunc = () => {
+        console.log('redone')
+        bud.redo()
+        utils.setNextObjId(objId+1)
+        new Silk(utils.getNextSilkId(), bud, this, true)
+      }
+      const undoFunc = () => {
+        console.log('undone')
+        bud.undo()
+        utils.setNextObjId(objId)
+      }
+      bud.followMouse = true
+      console.log('add to histroy')
+      utils.addToHistory(undoFunc, redoFunc)
+    }
+    const func = () => {
+      this.konvaObj.setDraggable(true)
+      document.removeEventListener('mouseup', func)
+    }
+    document.addEventListener('mouseup', func)
+    e.cancelBubble = true
+  }
   dragMove = () => {
     // const { newX, newY } = this.calcNewPos()
     // this.x = newX
@@ -287,7 +346,7 @@ class Bud {
     budGroup.on('dragend', this.dragEnd)
     budGroup.on('click', this.click)
     budGroup.on('dragstart', this.dragStart)
-    budGroup.on('mousedown', (e) => { e.cancelBubble = true })
+    budGroup.on('mousedown', this.mouseDown)
     budGroup.on('mouseup', (e) => { e.cancelBubble = true })
     const budShape = new Konva.Shape(drawConfig.budShapeConfig())
     budGroup.add(budShape)
@@ -301,7 +360,7 @@ class Bud {
   undo = () => {
     this.konvaObj.destroy()
     for (const silk of Object.values(this.attachedSilk)) {
-      silk.delete()
+      silk._delete()
     }
     if (this.new) {
       utils.delFromNewObjs(this.objId)

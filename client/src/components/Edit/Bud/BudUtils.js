@@ -13,7 +13,7 @@ const setBud = (pos) => {
   const undoFunc = () => {
     utils.delFromNewObjs(nextObjId)
     utils.getObjById(nextObjId).undo()
-    utils.setNextObjId(utils.getNextObjId()-1)
+    utils.setNextObjId(nextObjId) // potential break?
   }
   utils.addToNewObjs(nextObjId)
   new Bud(nextObjId, pos.x, pos.y)

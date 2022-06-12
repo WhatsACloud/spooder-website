@@ -1,3 +1,10 @@
+/*
+ISSUES
+
+1. select not consistent
+
+*/
+
 import React, { memo, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Authorizer from '../../Shared/Authorizer'
