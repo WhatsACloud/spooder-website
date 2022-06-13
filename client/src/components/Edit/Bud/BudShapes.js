@@ -172,6 +172,7 @@ class Bud {
   konvaObj = null
   dragging = false
   new = false
+  selected = false
   _followMouse = false
   mouseFollower = (e) => {
     const { x, y } = utils.getCanvasMousePos(e.clientX, e.clientY)
@@ -329,6 +330,8 @@ class Bud {
     this.json = new BudJson(this, leJson)
   }
   select = () => {
+    this.selected = true
+    utils.viewObj(this.objId)
     const budShape = this.konvaObj.children[0]
     const selectFunc = () => {
       budShape.setStrokeWidth(5)

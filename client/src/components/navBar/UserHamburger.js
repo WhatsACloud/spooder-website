@@ -16,7 +16,7 @@ function UserHamburger({ username }) {
     <>
       <BackgroundClickDetector
         on={opened}
-        zIndex={7}></BackgroundClickDetector>
+        zIndex={1000}></BackgroundClickDetector>
       <button
         className={username ? styles.normal : styles.nil}
         onClick={() => {
@@ -33,7 +33,6 @@ function UserHamburger({ username }) {
         <button
           className={styles.signOut}
           onClick={async () => {
-            console.log('ur mom')
             await api.patch('/logout')
             window.location.reload()
             navigate('/login')

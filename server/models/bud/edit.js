@@ -103,6 +103,7 @@ async function editBud(spoodawebId, objId, obj, transaction) {
     definition: obj.definition,
     sound: obj.sound,
     context: obj.context,
+    example: obj.example,
     link: obj.link,
   }
   if (obj.restore) {

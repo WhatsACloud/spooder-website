@@ -167,6 +167,14 @@ class ObjType {
 }
 export { ObjType }
 
+const viewObj = (objId=null) => {
+  if (objId === null) {
+    getGlobals().setViewing(null)
+  }
+  getGlobals().setViewing(objId)
+}
+export { viewObj }
+
 const selectObj = (obj, type, konvaObj, selectFunc, unselectFunc) => {
   getGlobals().selected = {obj: obj, type: type}
   console.log('selected', getGlobals().selected)

@@ -2,7 +2,7 @@
 ISSUES
 
 1. select not consistent
-2. Add mass select (using quadtrees glhf lol)
+2. Add mass select
 
 */
 
@@ -10,8 +10,6 @@ import React, { memo, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Authorizer from '../../Shared/Authorizer'
 import styles from '../edit.module'
-
-import Quadtree from '@timohausmann/quadtree-js'
 
 import { preventZoom, preventZoomScroll } from '../PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from '../Events'
@@ -162,6 +160,7 @@ function Edit() {
     globals.triggerDragLine = false
     globals.draggingLine = false
     globals.selected = null
+    globals.viewing = null
     globals.unselectFunc = null
     globals.silkObjs = {}
     globals.modes = {
@@ -170,11 +169,10 @@ function Edit() {
     }
     globals.lastMousePos = null
     globals.dragging = false
-    globals.quadTree = new Quadtree({
 
-    })
     const keybinds = new Keybinds(true)
     globals.keybinds = keybinds
+
     const budGroup = new Konva.Group()
     const silkGroup = new Konva.Group()
     utils.getMainLayer().add(budGroup, silkGroup)
@@ -214,6 +212,13 @@ function Edit() {
       utils.getGlobals().lastMousePos = pos
     }
     document.addEventListener('contextmenu', (e) => e.preventDefault())
+    const stopDrag = () => {
+      const globals = utils.getGlobals()
+      utils.setCursor("default")
+      globals.lastMousePos = null
+      document.removeEventListener('mouseup', stopDrag)
+      document.removeEventListener('mousemove', mouseMoveFunc)
+    }
     utils.getStage().on('mousedown', (e) => {
       if (e.evt.button === 2) {
         utils.setCursor("grab")
@@ -221,15 +226,11 @@ function Edit() {
         const func = () => {
           utils.getGlobals().dragging = true
           document.removeEventListener('mousemove', func)
+          document.addEventListener('mouseup', stopDrag)
         }
         document.addEventListener('mousemove', func)
+      } else if (e.evt.button == 0) {
       }
-    })
-    utils.getStage().on('mouseup', () => {
-      const globals = utils.getGlobals()
-      utils.setCursor("default")
-      globals.lastMousePos = null
-      document.removeEventListener('mousemove', mouseMoveFunc)
     })
     return () => {
       document.removeEventListener('keydown', preventZoom)
@@ -275,9 +276,7 @@ function Edit() {
           <DrawCanvas
             rendered={rendered}></DrawCanvas>
         </div>
-        <BudView
-          selectedObj={selectedObj}
-          setSelectedObj={setSelectedObj}></BudView>
+        <BudView></BudView>
         <Background canRender={settings.Background}></Background>
       </div>
     </>

@@ -21,85 +21,21 @@
   outline: none;
 }
 
-div.BudView {
+div.budView {
   $minWidth: 60%;
   $leftMargin: calc(100% - #{$minWidth});
   display: flex;
   position: absolute;
   margin-left: $leftMargin;
-  z-index: 6;
+  z-index: 8;
   box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   height: 100vh;
   min-width: $minWidth;
   border-radius: 7px;
-  background-color: rgb(43, 156, 255);
+  background-color: rgba(243, 243, 243, 1);
+  // filter: blur(2px);
   flex-direction: column;
-  div {
-    &.attrBox {
-      display: flex;
-      width: 100%;
-      justify-content: center;
-      input {
-        &.normal {
-          @include inputBox;
-        }
-        &.definition {
-          @include inputBox;  
-          margin-top: 50px;
-        }
-      }
-      textarea {
-        &.context {
-          @include inputBox;
-          width: 80%;
-          padding-top: 1em;
-          padding-bottom: 20%;
-        }
-      }
-    }
-    &.examplesBox {
-      background-color: aqua;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      textarea.example {
-        @include inputBox;
-        width: 80%;
-      }
-      div.divNewExample {
-        display: flex;
-        flex-direction: row;
-      }
-      button.addExampleBtn {
-        @include std-button;
-      }
-    }
-    &.divWord {
-      display: flex;
-      flex-direction: row;
-      div.outerBudMenuDiv {
-        z-index: 2;
-        position: absolute;
-        margin-top: 30px;
-        margin-left: 75%;
-        button.more {
-          $width: 40px;
-          @include std-button;
-          width: $width;
-          height: $width;
-        }
-        div.budMenu {
-          background-color: white;
-          box-shadow: 0 5px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-          border-radius: 7.5px;
-          button {
-            @include std-button;
-            &.deleteBtn {
-            }
-          }
-        }
-
-      }
-    }
+  input.inputBox {
+    @include inputBox();
   }
 }
