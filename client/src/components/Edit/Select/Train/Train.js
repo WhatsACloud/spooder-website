@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import styles from '../taskBar.module'
+import styles from './train.module'
 import * as utils from '../../utils'
 
 import { TrainSettings, potentialGiven, potentialTested } from './TrainSettings'
@@ -273,12 +273,8 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
       <button
         className={styles.openTrainSettings}
         onClick={() => {
-          setOpenedTrain(true)
-          const func = e => {
-            setOpenedTrain(false)
-            document.getElementById('divCanvas').removeEventListener('mousedown', func)
-          }
-          document.getElementById('divCanvas').addEventListener('mousedown', func)}}>
+          setOpenedTrain(!openedTrain)
+        }}>
         train
       </button>
       <TrainSettings
@@ -296,33 +292,6 @@ function Train({ selectedObj, setSelectedObj, setFocus }) {
       <div
         className={startedTraining ? styles.divTraining : styles.none}
         id='divTraining'>
-        <p>{trainingCols.given || ''}</p>
-        <p>{trainingCols.type || ''}</p>
-        <div className={styles.divTested}>
-          {trainingCols.tested}
-          <div className={trainingCols.tested ? styles.none : styles.inputTestedWrapper}>
-            <input
-              className={styles.inputTested}
-              type="text"
-              value={answer}
-              onChange={e => {
-                setAnswer(e.target.value)
-              }}></input>
-            <button
-              className={styles.inputCheckBtn}
-              onClick={() => {
-                const tested = trainingCols.tested
-                if (answer === tested) {
-                  setCorrect(true)
-                } else {
-                  setCorrect(false)
-                }
-                setAnswered(true)
-              }}>
-              check
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   )

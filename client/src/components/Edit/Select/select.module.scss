@@ -1,26 +1,9 @@
 @import '../../../scss/standard.module.scss';
+@import './Train/train.module.scss';
 
 .none {
   display: none;
 }
-
-@mixin inputBox {
-  display: inline-block;
-  box-sizing: border-box;
-  padding: 12px 40px;
-  margin: 8px;
-  border-style: solid;
-  border-radius: 5px;
-  border-color: rgba(0, 0, 0, 0);
-  box-shadow: 0 5px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  border-width: 1px;
-  width: 40%;
-  height: 3em;
-  font-size: 15px;
-  font-family: 'Courier New', Courier, monospace;
-  outline: none;
-}
-
 div.budView {
   $minWidth: 60%;
   $leftMargin: calc(100% - #{$minWidth});
@@ -35,6 +18,10 @@ div.budView {
   background-color: rgba(243, 243, 243, 1);
   // filter: blur(2px);
   flex-direction: column;
+  p.subtitle {
+    margin: 0;
+    color:rgb(141, 141, 141);
+  }
   input.inputBox {
     @include inputBox();
   }

@@ -19,12 +19,10 @@ class Silk {
   // set bud1(id) { this._setBud('_bud1Id', '_pos1', id) }
   // set bud2(id) { this._setBud('_bud2Id', '_pos2', id) }
   set bud1(bud) {
-    // console.log(bud)
     this.pos1 = bud.position
     this._bud1 = bud
   }
   set bud2(bud) {
-    // console.log(bud)
     this.pos2 = bud.position
     this._bud2 = bud
   }
@@ -73,9 +71,7 @@ class Silk {
     const attachedTos1 = this.bud1.json.attachedTos
     for (let i = 0; i < attachedTos1.length; i++) {
       if (attachedTos1[i] === this.bud2.objId) {
-        console.log(attachedTos1)
         attachedTos1.splice(i, 1)
-        console.log(attachedTos1)
       }
     }
     const attachedTos2 = this.bud2.json.attachedTos
@@ -84,7 +80,6 @@ class Silk {
         attachedTos2.splice(i, 1)
       }
     }
-    console.log(this.bud1.json.attachedSilk)
     delete this.bud1.json.attachedSilk[this.bud2.objId]
     delete this.bud2.json.attachedSilk[this.bud1.objId]
     utils.delFromSilks(this.silkId)
@@ -136,13 +131,10 @@ class Silk {
   }
   constructor(silkId, bud1, bud2, initialising=false) {
     if (bud2.objId in bud1.attachedSilk || bud1.objId in bud2.attachedSilk) return
-    console.log(bud1, bud2)
     this.bud1 = bud1
     this.bud2 = bud2
     this.initSilkInBud(this.bud1, this.bud2)
-    console.log(bud1.objId, bud1.attachedSilk, bud2.objId, bud2.attachedSilk)
     this.initSilkInBud(this.bud2, this.bud1)
-    console.log(bud1.objId, bud1.attachedSilk, bud2.objId, bud2.attachedSilk)
     this.silkId = silkId
     this.init()
     if (!initialising) {

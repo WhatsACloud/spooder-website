@@ -2,7 +2,20 @@ import React, { useEffect, useState } from 'react'
 import styles from './select.module'
 import * as utils from '../utils'
 
+import { Train } from './Train'
+
 import { BackgroundClickDetector } from '../../BackgroundClickDetector'
+
+const getLink = (objId, isObj=false) => {
+  const obj = isObj ? objId : utils.getObjById(objId) 
+  return obj.json.link
+}
+
+const setLink = (objId, val, isObj=false) => {
+  if (isNaN(val) || val > 1 || val < 0) return false
+  const obj = isObj ? objId : utils.getObjById(objId) 
+  obj.json.link = val
+}
 
 function InputIniter({ obj, setText, attr }) {
   useEffect(() => {
@@ -16,22 +29,25 @@ function InputBox({ obj, attr }) {
   useEffect(() => {
     if (obj) {
       obj.json[attr] = text
-      console.log(obj.json.json)
     }
   }, [ text ])
   return (
     <>
       <InputIniter obj={obj} setText={setText} attr={attr}></InputIniter>
+      <p className={styles.subtitle}>
+        {`${attr[0].toUpperCase()}${attr.substring(1)}`}
+      </p>
       <input className={styles.inputBox} value={text} onChange={(e) => setText(e.target.value)}></input>
     </>
   )
 }
 
-function Trainer({ viewing }) {
+function Viewer({ viewing }) {
   const [ obj, setObj ] = useState(null)
   useEffect(() => {
     const object = utils.getObjById(viewing)
-    console.log(object)
+    if (object) {
+    }
     setObj(object)
   }, [ viewing ])
   return (
@@ -49,12 +65,20 @@ function BudView() {
   const [ viewing, setViewing ] = useState(null)
   useEffect(() => {
     utils.getGlobals().setViewing = setViewing
+    document.getElementById('divCanvas').addEventListener('mousedown', () => {
+      setViewing(null)
+    })
   }, [])
   return (
     <>
-      <BackgroundClickDetector on={viewing} zIndex={7} mousedown={() => setViewing(null)}></BackgroundClickDetector>
+      {/* <BackgroundClickDetector on={viewing} zIndex={7} mousedown={() => setViewing(null)}></BackgroundClickDetector> */}
       <div className={viewing ? styles.budView : styles.none}>
-        <Trainer viewing={viewing}></Trainer>
+        <Train
+          selectedObj={selectedObj}
+          setSelectedObj={setSelectedObj}
+          setFocus={setFocus}
+          ></Train>
+        <Viewer viewing={viewing}></Viewer>
       </div>
     </>
   )

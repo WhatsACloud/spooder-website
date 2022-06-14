@@ -3,6 +3,7 @@ ISSUES
 
 1. select not consistent
 2. Add mass select
+3. Redo backclickdetector so can share one div
 
 */
 
@@ -87,6 +88,12 @@ function SetGlobal() {
     console.log('set spoodawebVars')
   }, [])
   return <></>
+}
+
+function SetGlobalSelectedObj() {
+  useEffect(() => {
+
+  }, [ ])
 }
 
 const scrollRight = (amt) => {
@@ -179,13 +186,11 @@ function Edit() {
     budGroup.setZIndex(1)
     silkGroup.setZIndex(0)
     for (const [ objId, obj ] of Object.entries(spoodawebData)) {
-      console.log(objId)
       const bud = new BudShapes.Bud(obj.objId)
+      bud.init({x: obj.x, y: obj.y})
       bud.fromJson(obj)
-      bud.init(bud.objId, true)
     }
     for (const leObj of Object.values(utils.getObjs())) {
-      console.log('one iter')
       for (const attachedTo of leObj.attachedTos) {
         new SilkShapes.Silk(utils.getNextSilkId(), leObj, utils.getObjById(attachedTo), true)
       }

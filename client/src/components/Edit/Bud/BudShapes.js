@@ -72,7 +72,6 @@ class BudJson {
         this.checkForUpdate('attachedTos')
         return true
       }
-      console.log(target, property, value)
     }
     return true
   }
@@ -110,7 +109,6 @@ class BudJson {
     if (attr === 'x' || attr === 'y') attr = 'position'
     const var1 = this._originalJson[attr]
     const var2 = this.json[attr]
-    console.log(var1, var2)
     let check = false
     if (var1.constructor !== var2.constructor) throw new Error(`WARNING: setting ${var1} of type ${typeof var1} as ${var2} which is of type ${typeof var2}`)
     if (isArray(var1)) {
@@ -138,7 +136,11 @@ class BudJson {
   get position() { return this.json.position }
   get objId() { return this.json.objId }
   get del() { return this.json.del }
-  set word(word) { this.json.word = word; this.checkForUpdate('word') }
+  set word(word) {
+    this.bud.setText(word)
+    this.json.word = word
+    this.checkForUpdate('word')
+  }
   set definition(definition) { this.json.definition = definition; this.checkForUpdate('definition') }
   set sound(sound) { this.json.sound = sound; this.checkForUpdate('sound') }
   set context(context) { this.json.context = context; this.checkForUpdate('context') }
@@ -174,6 +176,7 @@ class Bud {
   new = false
   selected = false
   _followMouse = false
+  textObj = null
   mouseFollower = (e) => {
     const { x, y } = utils.getCanvasMousePos(e.clientX, e.clientY)
     this.konvaObj.setX(x)
@@ -185,7 +188,6 @@ class Bud {
     document.removeEventListener('mousemove', this.mouseFollower)
     const canvasMousePos = utils.getCanvasMousePos(e.clientX, e.clientY)
     const { x, y } = utils.calcPosByKonvaPos(canvasMousePos.x, canvasMousePos.y)
-    console.log(x, y)
     this.x = x
     this.y = y
     this.followMouse = false
@@ -251,7 +253,6 @@ class Bud {
       document.addEventListener('mousemove', mousemove)
     } else if (modes.gluing && (this !== utils.getGlobals().selected.obj)) {
       const selected = utils.getGlobals().selected
-      // console.log(selected, utils.ObjType.Bud, selected.type === utils.ObjType.Bud)
       if (selected.type === utils.ObjType.Bud) {
         const bud = selected.obj
         const silkId = utils.getNextSilkId()
@@ -261,7 +262,37 @@ class Bud {
       this.select()
     }
   }
-  checkForJsonUpdate() {
+  setText = (word) => {
+    const fontSize = 50
+    const wordLength = word.length
+    const calcX = () => -(wordLength / 4 * fontSize)
+    const calcY = () => -(wordLength / 6 * fontSize)
+    if (word) {
+      if (!this.textObj) {
+        const text = new Konva.Text({
+          text: word,
+          fontSize: fontSize,
+          x: calcX(),
+          y: calcY(),
+          fill: 'white',
+          shadowColor: 'black',
+          shadowOffset: {x: 2, y: 2},
+        })
+        this.textObj = text
+        this.konvaObj.add(text)
+        console.log(word, 'text', this.konvaObj)
+        return
+      }
+      this.textObj.setText(word)
+      this.textObj.setX(calcX())
+      this.textObj.setY(calcY())
+    } else {
+      if (this.textObj) { this.destroyText() }
+    }
+  }
+  destroyText = () => {
+    this.textObj.destroy()
+    this.textObj = null
   }
   updateSilks = () => {
     for (const silk of Object.values(this.attachedSilk)) {
@@ -281,18 +312,15 @@ class Bud {
       utils.setNextObjId(objId+1)
       new Silk(utils.getNextSilkId(), bud, this, true)
       const redoFunc = () => {
-        console.log('redone')
         bud.redo()
         utils.setNextObjId(objId+1)
         new Silk(utils.getNextSilkId(), bud, this, true)
       }
       const undoFunc = () => {
-        console.log('undone')
         bud.undo()
         utils.setNextObjId(objId)
       }
       bud.followMouse = true
-      console.log('add to histroy')
       utils.addToHistory(undoFunc, redoFunc)
     }
     const func = () => {
@@ -342,9 +370,15 @@ class Bud {
     }
     utils.selectObj(this, utils.ObjType.Bud, budShape, selectFunc, unselectFunc)
   }
-  init = (objId) => {
+  init = (position) => {
     const radius = 40
-    const budGroup = new Konva.Group(drawConfig.budGroupConfig(this.x, this.y))
+    let pos
+    if (position) {
+      pos = position
+    } else {
+      pos = {x: this.x, y: this.y}
+    }
+    const budGroup = new Konva.Group(drawConfig.budGroupConfig(pos.x, pos.y))
     budGroup.on('dragmove', this.dragMove)
     budGroup.on('dragend', this.dragEnd)
     budGroup.on('click', this.click)
@@ -373,7 +407,7 @@ class Bud {
   }
   redo = () => {
     this.del = false
-    this.init(this.objId)
+    this.init()
     this.updateKonvaObj()
     if (this.new) {
       utils.addToNewObjs(this.objId)
@@ -386,7 +420,7 @@ class Bud {
     this.json.initialising = true
     this.new = true
     nextObjId = Number(nextObjId)
-    this.init(nextObjId, true)
+    this.init()
     this.x = x
     this.y = y
     this.objId = nextObjId

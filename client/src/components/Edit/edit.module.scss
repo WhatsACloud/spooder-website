@@ -37,6 +37,7 @@ body {
 div.wrapper {
   display: flex;
   flex-direction: row;
+  z-index: 2;
   div.fakeDraggableObj {
     position: absolute;
     z-index: 1000;

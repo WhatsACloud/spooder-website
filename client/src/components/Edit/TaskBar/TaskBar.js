@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGear, faFileLines } from '@fortawesome/free-solid-svg-icons'
 
 import { SearchBar, SearchResult } from './Search'
-import { Train } from './Train'
 import { UndoRedo } from './UndoRedo'
 import { Debugger } from './debug'
 import * as utils from '../utils'
@@ -85,10 +84,6 @@ function TaskBar({ setInSettings, setSelectedObj, selectedObj, setFocus }) {
       </SearchBar>
       {/* <Debugger></Debugger> */}
       <UndoRedo></UndoRedo>
-      <Train
-        selectedObj={selectedObj}
-        setSelectedObj={setSelectedObj}
-        setFocus={setFocus}></Train>
     </div>
   )
 }

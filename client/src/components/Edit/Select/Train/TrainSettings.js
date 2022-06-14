@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import styles from '../taskBar.module'
+import styles from './train.module'
+import * as utils from '../../utils'
 
 const potentialGiven = [
   ["word", false],
@@ -17,6 +18,9 @@ export { potentialGiven, potentialTested }
 
 function SettingBtn({ arr, setArr, index, children }) {
   const [ clicked, setClicked ] = useState(arr[index][1])
+  useEffect(() => {
+    console.log(clicked)
+  }, [ clicked ])
   return (
     <button
       className={clicked ? styles.trainSettingsBtnClose : styles.trainSettingsBtnOpen}
