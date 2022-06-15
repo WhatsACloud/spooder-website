@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import styles from './select.module'
 import * as utils from '../utils'
 
-import { Train } from './Train'
+import { TrainWrapper } from './Train'
 
 import { BackgroundClickDetector } from '../../BackgroundClickDetector'
 
@@ -31,7 +31,7 @@ function InputBox({ obj, attr }) {
   )
 }
 
-function Viewer({ viewing }) {
+function Viewer({ viewing, startedTraining }) {
   const [ obj, setObj ] = useState(null)
   useEffect(() => {
     const object = utils.getObjById(viewing)
@@ -40,18 +40,19 @@ function Viewer({ viewing }) {
     setObj(object)
   }, [ viewing ])
   return (
-    <>
+    <div className={startedTraining ? styles.none : ''}>
       <InputBox obj={obj} attr='word'></InputBox>
       <InputBox obj={obj} attr='definition'></InputBox>
       <InputBox obj={obj} attr='sound'></InputBox>
       <InputBox obj={obj} attr='context'></InputBox>
       <InputBox obj={obj} attr='example'></InputBox>
-    </>
+    </div>
   )
 }
 
 function BudView({ selectedObj, setSelectedObj }) {
   const [ viewing, setViewing ] = useState(null)
+  const [ startedTraining, setStartedTraining ] = useState(false)
   useEffect(() => {
     document.getElementById('divCanvas').addEventListener('mousedown', () => {
       setViewing(null)
@@ -62,11 +63,13 @@ function BudView({ selectedObj, setSelectedObj }) {
       {/* <BackgroundClickDetector on={viewing} zIndex={7} mousedown={() => setViewing(null)}></BackgroundClickDetector> */}
       <utils.SetGlobalReactSetter val={viewing} setVal={setViewing} namespace='viewing'></utils.SetGlobalReactSetter>
       <div className={viewing ? styles.budView : styles.none}>
-        <Train
+        <TrainWrapper
           selectedObj={selectedObj}
           setSelectedObj={setSelectedObj}
-          ></Train>
-        <Viewer viewing={viewing}></Viewer>
+          startedTraining={startedTraining}
+          setStartedTraining={setStartedTraining}
+          ></TrainWrapper>
+        <Viewer viewing={viewing} startedTraining={startedTraining}></Viewer>
       </div>
     </>
   )

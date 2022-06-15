@@ -1,10 +1,32 @@
 @import '../../../scss/standard.module.scss';
-@import './Train/train.module.scss';
 
 .none {
   display: none;
 }
+
+@mixin inputBox {
+  display: inline-block;
+  box-sizing: border-box;
+  padding: 12px 40px;
+  margin: 8px;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: rgba(0, 0, 0, 0);
+  box-shadow: 0 5px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-width: 1px;
+  width: 40%;
+  height: 3em;
+  font-size: 15px;
+  font-family: 'Courier New', Courier, monospace;
+  outline: none;
+}
+
+button.btn {
+  @include std-button;
+}
+
 div.budView {
+  overflow-y: scroll;
   $minWidth: 60%;
   $leftMargin: calc(100% - #{$minWidth});
   display: flex;
@@ -25,4 +47,120 @@ div.budView {
   input.inputBox {
     @include inputBox();
   }
+  div.train {
+    div.given {
+      p {
+        &.givenText {
+          font-size: 30px;
+          margin-bottom: 0;
+        }
+        &.givenType {
+          margin-top: 0;
+          font-size: 15px;
+          color:rgb(141, 141, 141);
+        }
+      }
+    }
+  }
+}
+
+div.trainSettings {
+  $trainWidth: 20%;
+  background-color: rgb(255, 255, 255);
+  position: absolute;
+  z-index: 9;
+  border-radius: 7.5px;
+  box-shadow: 0 10px 8px 5px rgba(0, 0, 0, 0.2);
+  min-width: $trainWidth;
+  left: 97.5%-22.5%-$trainWidth;
+  button.trainBtn {
+    @include std-button;
+    background-color: rgb(62, 62, 255);
+    color: white;
+    font-size: 25px;
+  }
+  div.trainSettingsInner {
+    display: flex;
+    flex-direction: row;
+    font-size: 10px;
+    div {
+      flex-direction: column;
+      @mixin column {
+        background-color: white;
+        box-shadow: 0 5px 8px 5px rgba(0, 0, 0, 0.2);
+        margin: 10px;
+        border-radius: 7.5px;
+      }
+      &.givenCol {
+        @include column;
+      }
+      &.testedCol {
+        @include column;
+      }
+    }
+  }
+}
+
+div.trainWrapper {
+  z-index: 6;
+  @mixin trainSettingsBtn {
+    @include std-button;
+    padding: 20px;
+    margin-top: 10px;
+    font-size: 150%;
+    line-height: 0;
+  }
+  button {
+    &.trainSettingsBtnOpen {
+      @include trainSettingsBtn;
+    }
+    &.trainSettingsBtnClose  {
+      @include trainSettingsBtn;
+      box-shadow: inset 0 10px 8px 5px rgba(0, 0, 0, 0.2);
+    }
+    &.openTrainSettings {
+      @include std-button;
+    }
+  }
+  div.divTraining {
+    // pls make some mixin with budView (in select) cause they very similar
+    display: flex;
+    $minWidth: 600px;
+    $leftMargin: calc(100%-#{$minWidth});
+    position: absolute;
+    height: 100vh;
+    // margin-left: $leftMargin;
+    left: 40%;
+    z-index: 10;
+    box-shadow: 0 10px 8px 5px rgba(0, 0, 0, 0.7);
+    min-width: $minWidth;
+    border-radius: 7px;
+    background-color: white;
+    flex-direction: column;
+    div.divTested {
+      button {
+        &.multiChoice {
+          @include std-button;
+        }
+      }
+      div.inputTestedWrapper {
+        input.inputTested {
+          @include inputBox;
+        }
+      }
+    }
+  }
+}
+
+.debug {
+  position: absolute;
+  overflow-y: scroll;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: 400px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: aqua;
 }

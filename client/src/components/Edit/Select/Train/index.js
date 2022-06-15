@@ -1,3 +1,3 @@
-import { Train } from './Train'
+import { TrainWrapper } from './Train'
 
-export { Train }
+export { TrainWrapper }

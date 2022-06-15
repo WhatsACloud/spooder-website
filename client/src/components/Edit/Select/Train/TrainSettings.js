@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import styles from './train.module'
+import styles from '../select.module'
 import * as utils from '../../utils'
 
 const potentialGiven = [

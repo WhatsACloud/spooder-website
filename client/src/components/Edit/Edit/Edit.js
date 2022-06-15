@@ -189,7 +189,7 @@ function Edit() {
       scrollRight(-diff.x * multiplier)
       utils.getGlobals().lastMousePos = pos
     }
-    document.addEventListener('contextmenu', (e) => e.preventDefault())
+    document.getElementById('divCanvas').addEventListener('contextmenu', (e) => e.preventDefault())
     const stopDrag = () => {
       const globals = utils.getGlobals()
       utils.setCursor("default")
