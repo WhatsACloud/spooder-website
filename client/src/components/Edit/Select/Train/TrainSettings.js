@@ -36,10 +36,6 @@ function SettingBtn({ arr, setArr, index, children }) {
 function TrainSettings({
   openedTrain,
   setStartedTraining,
-  setFocus,
-  setCurrentObj,
-  setSelectedObj,
-  selectedObj,
   toGive,
   setToGive,
   toTest,
@@ -74,9 +70,6 @@ function TrainSettings({
         className={styles.trainBtn}
         onMouseDown={() => {
           setStartedTraining(true)
-          setFocus(selectedObj)
-          setCurrentObj(selectedObj)
-          setSelectedObj()
           const func = e => {
             setStartedTraining(false)
             document.getElementById('divCanvas').removeEventListener('click', func)

@@ -10,7 +10,7 @@ import { UndoRedo } from './UndoRedo'
 import { Debugger } from './debug'
 import * as utils from '../utils'
 
-function TaskBar({ setInSettings, setSelectedObj, selectedObj, setFocus }) {
+function TaskBar({ setInSettings }) {
   const [ searchVal, setSearchVal ] = useState('')
   const [ renderedSearchResults, setRenderedSearchResults ] = useState()
   useEffect(() => {
@@ -46,45 +46,47 @@ function TaskBar({ setInSettings, setSelectedObj, selectedObj, setFocus }) {
     }
   }, [ searchVal ])
   return (
-    <div className={styles.taskBar}>
-      <button
-        className={styles.settingsBtn}
-        onClick={() => setInSettings(true)}>
-        <FontAwesomeIcon icon={faGear}></FontAwesomeIcon>
-      </button>
-      <button
-        className={styles.autoDragBtn}
-        onClick={() => {
-          const modes = utils.getGlobals().modes
-          modes.autoDrag = !(modes.autoDrag)
-        }}>
-        <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
-      </button>
-      <button
-        className={styles.autoDragBtn}
-        onClick={() => {
-          const modes = utils.getGlobals().modes
-          modes.gluing = !(modes.gluing)
-        }}>
-        glue
-      </button>
-      <button
-        className={styles.autoDragBtn}
-        onClick={() => {
-          const selected = utils.getGlobals().selected
-          selected?.obj.delete()
-          utils.unselect()
-        }}>
-        delete
-      </button>
-      <SearchBar
-        searchVal={searchVal}
-        setSearchVal={setSearchVal}>
-        {renderedSearchResults}
-      </SearchBar>
-      {/* <Debugger></Debugger> */}
-      <UndoRedo></UndoRedo>
-    </div>
+    <>
+      <div className={styles.taskBar}>
+        <button
+          className={styles.settingsBtn}
+          onClick={() => setInSettings(true)}>
+          <FontAwesomeIcon icon={faGear}></FontAwesomeIcon>
+        </button>
+        <button
+          className={styles.autoDragBtn}
+          onClick={() => {
+            const modes = utils.getGlobals().modes
+            modes.autoDrag = !(modes.autoDrag)
+          }}>
+          <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
+        </button>
+        <button
+          className={styles.autoDragBtn}
+          onClick={() => {
+            const modes = utils.getGlobals().modes
+            modes.gluing = !(modes.gluing)
+          }}>
+          glue
+        </button>
+        <button
+          className={styles.autoDragBtn}
+          onClick={() => {
+            const selected = utils.getGlobals().selected
+            selected?.obj.delete()
+            utils.unselect()
+          }}>
+          delete
+        </button>
+        <SearchBar
+          searchVal={searchVal}
+          setSearchVal={setSearchVal}>
+          {renderedSearchResults}
+        </SearchBar>
+        {/* <Debugger></Debugger> */}
+        <UndoRedo></UndoRedo>
+      </div>
+    </>
   )
 }
 export default TaskBar

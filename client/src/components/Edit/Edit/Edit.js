@@ -65,35 +65,13 @@ function MouseMoveDetector() {
   return <></>
 }
 
-function FocusOnObj({ focus }) {
-  useEffect(() => {
-    const obj = utils.getObjById(focus)
-    if (obj) {
-      const position = obj.position
-      const divCanvas = document.getElementById('divCanvas')
-      const toBeRootPos = {
-        x: position.x - divCanvas.clientWidth,
-        y: position.y - divCanvas.clientHeight,
-      }
-      console.log(toBeRootPos)
-      utils.setRootPos(toBeRootPos)
-    }
-  }, [ focus ])
-  return <></>
-}
-
 function SetGlobal() {
   useEffect(() => {
     window.spoodawebVars = {}
+    window.spoodawebVars.react = {}
     console.log('set spoodawebVars')
   }, [])
   return <></>
-}
-
-function SetGlobalSelectedObj() {
-  useEffect(() => {
-
-  }, [ ])
 }
 
 const scrollRight = (amt) => {
@@ -110,14 +88,9 @@ function Edit() {
   const navigate = useNavigate()
   const [ dragging, setDragging ] = useState(false)
   const [ toggleCanDragLine, setToggleCanDragLine ] = useState(false)
-  const [ hoverBud, setHoverBud ] = useState(false)
   const [ rendered, setRendered ] = useState([])
-  const [ draggingLine, setDraggingLine ] = useState(false)
-  const [ triggerDragLine, setTriggerDragLine ] = useState(false)
-  const [ selectedSilk, setSelectedSilk ] = useState()
-  const [ selectedObj, setSelectedObj ] = useState()
   const [ inSettings, setInSettings ] = useState(false)
-  const [ focus, setFocus ] = useState()
+  const [ renderTrain, setRenderTrain ] = useState(false)
   const [ settings, setSettings ] = useState({
     Background: false
   })
@@ -125,7 +98,7 @@ function Edit() {
     const width = utils.getStage().getAttr('width')
     const height = utils.getStage().getAttr('height')
     utils.getStage().on('mousedown', evt => {
-      setSelectedObj()
+      utils.getReactNamespace('renderTrain').setVal(utils.getReactNamespace('renderTrain').val)
     })
     const urlString = window.location.search
     let paramString = urlString.split('?')[1];
@@ -246,6 +219,7 @@ function Edit() {
     <>
       <Authorizer navigate={navigate} requireAuth={true}></Authorizer>
       <SetGlobal></SetGlobal>
+      <utils.SetGlobalReactSetter val={renderTrain} setVal={setRenderTrain} namespace='renderTrain'></utils.SetGlobalReactSetter>
       <MouseMoveDetector></MouseMoveDetector>
       <Settings
         inSettings={inSettings}
@@ -254,22 +228,8 @@ function Edit() {
         setSettings={setSettings}></Settings>
       <TaskBar
         setInSettings={setInSettings}
-        setSelectedObj={setSelectedObj}
-        selectedObj={selectedObj}
-        setFocus={setFocus}
         ></TaskBar>
-      <FocusOnObj
-        focus={focus}></FocusOnObj>
       <div className={styles.wrapper}>
-        {/* <SilkShapes.LineDragUpdater
-          toggleCanDragLine={toggleCanDragLine}
-          setDraggingLine={setDraggingLine}
-          hoverBud={hoverBud}
-          setSelectedSilk={setSelectedSilk}
-          selectedSilk={selectedSilk}
-          setTriggerDragLine={setTriggerDragLine}
-          triggerDragLine={triggerDragLine}
-          draggingLine={draggingLine}></SilkShapes.LineDragUpdater> */}
         <OtherElements.ObjectDrawer
           setDragging={setDragging}
           toggleCanDragLine={toggleCanDragLine}

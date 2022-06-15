@@ -6,17 +6,6 @@ import { Train } from './Train'
 
 import { BackgroundClickDetector } from '../../BackgroundClickDetector'
 
-const getLink = (objId, isObj=false) => {
-  const obj = isObj ? objId : utils.getObjById(objId) 
-  return obj.json.link
-}
-
-const setLink = (objId, val, isObj=false) => {
-  if (isNaN(val) || val > 1 || val < 0) return false
-  const obj = isObj ? objId : utils.getObjById(objId) 
-  obj.json.link = val
-}
-
 function InputIniter({ obj, setText, attr }) {
   useEffect(() => {
     if (obj) setText(obj.json[attr])
@@ -61,10 +50,9 @@ function Viewer({ viewing }) {
   )
 }
 
-function BudView() {
+function BudView({ selectedObj, setSelectedObj }) {
   const [ viewing, setViewing ] = useState(null)
   useEffect(() => {
-    utils.getGlobals().setViewing = setViewing
     document.getElementById('divCanvas').addEventListener('mousedown', () => {
       setViewing(null)
     })
@@ -72,11 +60,11 @@ function BudView() {
   return (
     <>
       {/* <BackgroundClickDetector on={viewing} zIndex={7} mousedown={() => setViewing(null)}></BackgroundClickDetector> */}
+      <utils.SetGlobalReactSetter val={viewing} setVal={setViewing} namespace='viewing'></utils.SetGlobalReactSetter>
       <div className={viewing ? styles.budView : styles.none}>
         <Train
           selectedObj={selectedObj}
           setSelectedObj={setSelectedObj}
-          setFocus={setFocus}
           ></Train>
         <Viewer viewing={viewing}></Viewer>
       </div>

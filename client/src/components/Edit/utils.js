@@ -168,10 +168,7 @@ class ObjType {
 export { ObjType }
 
 const viewObj = (objId=null) => {
-  if (objId === null) {
-    getGlobals().setViewing(null)
-  }
-  getGlobals().setViewing(objId)
+  getReactNamespace('viewing').setVal(objId)
 }
 export { viewObj }
 
@@ -299,4 +296,29 @@ const save = async () => {
   //   }
   // })
 } 
-export { save as save }
+export { save }
+
+import React, { useEffect, useState } from 'react'
+
+function SetGlobalSetter({ setVal, namespace }) {
+  useEffect(() => {
+    getGlobals().react[namespace] = {}
+    getGlobals().react[namespace].setVal = setVal
+  }, [])
+  return <></>
+}
+
+function SetGlobalReactSetter({ val, setVal, namespace }) {
+  useEffect(() => {
+    getGlobals().react[namespace].val = val
+    }, [ val ])
+  return (
+    <SetGlobalSetter setVal={setVal} namespace={namespace}></SetGlobalSetter>
+  )
+}
+export { SetGlobalReactSetter }
+
+const getReactNamespace = (namespace) => {
+  return getGlobals().react[namespace]
+}
+export { getReactNamespace }
