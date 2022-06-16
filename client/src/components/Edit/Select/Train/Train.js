@@ -15,25 +15,34 @@ const setLink = (objId, val, isObj=false) => {
   obj.json.link = val
 }
 
-const randomIndex = (arr) => {
-  return Math.floor(Math.random() * arr.length)
+const randomIndexFrRange = (num) => {
+  return Math.floor(Math.random() * num)
+}
+
+const getNotEmptyOfCateg = (categName) => {
+  const objs = Object.values(utils.getObjs()).filter(obj => String(obj.json[categName]).length > 0)
+  return objs
 }
 
 const getRandomOfCateg = (categName, no, exclude=[]) => {
   exclude = exclude.map(e => String(e))
   const arr = []
   const excludedArr = []
-  const objs = Object.values(utils.getObjs())
+  const objs = getNotEmptyOfCateg(categName).filter(obj => !(exclude.includes(obj.json[categName])))
   if (no > objs.length) no = objs.length
+  for (let i = 0; i < exclude.length; i++) {
+    const randomElement = randomIndexFrRange(no)
+    console.log(randomElement)
+    excludedArr.push(randomElement)
+  }
   for (let i = 0; i < no; i++) {
-    const index = randomIndex(objs)
+    if (excludedArr.includes(i)) {
+      arr.push(null)
+      continue
+    }
+    const index = randomIndexFrRange(objs.length)
     let val = objs[index].json[categName]
     objs.splice(index, 1)
-    if (val.constructor === String && val.length === 0) continue
-    if (exclude.includes(val)) {
-      val = null
-      excludedArr.push(arr.length)
-    }
     arr.push(val)
   }
   return [ arr, excludedArr ]
@@ -48,39 +57,55 @@ function Given({ text, type }) {
   )
 }
 
-function MultiChoiceBtn({ val, setAnswer }) {
+function MultiChoiceBtn({ val, correct, setAnswer }) {
   return (
-    <button className={styles.btn} onClick={() => setAnswer(val)}>{val}</button>
+    <button className={styles.btn} onClick={() => setAnswer(correct)}>{val}</button>
   )
+}
+
+function AnswerHandler({ answer }) {
+  useEffect(() => {
+    console.log(answer)
+  }, [ answer ])
+  return <></>
 }
 
 const multiChoiceAmt = 4
 
-function Train({ startedTraining }) {
+function Train({ startedTraining, viewing }) {
   const [ multiChoices, setMultiChoices ] = useState()
-  const [ answer, setAnswer ] = useState()
+  const [ answer, setAnswer ] = useState(null)
   useEffect(() => {
     if (startedTraining) {
-      const multiChoiceArr = getRandomOfCateg('definition', multiChoiceAmt)
+      const viewingVal = utils.getObjById(viewing).json.definition
+      const [ multiChoiceArr, excluded ] = getRandomOfCateg('definition', multiChoiceAmt, [viewingVal])
+      const renderedMultiChoiceArr = []
+      console.log(multiChoiceArr)
       for (let i = 0; i < multiChoiceAmt; i++) {
-        if (multiChoiceArr[i]) {
-          multiChoiceArr.push(
-            <MultiChoiceBtn key={i} val={multiChoiceArr[i]} setAnswer={setAnswer}></MultiChoiceBtn>
-          )
-        }
+        renderedMultiChoiceArr.push(
+          <MultiChoiceBtn
+            key={i}
+            val={multiChoiceArr[i] === null ? viewingVal : multiChoiceArr[i]}
+            correct={multiChoiceArr[i] === null}
+            setAnswer={setAnswer}
+            ></MultiChoiceBtn>
+        )
       }
-      setMultiChoices(multiChoiceArr)
+      setMultiChoices(renderedMultiChoiceArr)
     }
-  }, [ startedTraining ])
+  }, [ startedTraining, answer ])
   return (
-    <div className={startedTraining ? styles.train : styles.none}>
-      <Given text={'text test'} type={'word'}></Given>
-      {multiChoices}
-    </div>
+    <>
+      <AnswerHandler answer={answer}></AnswerHandler>
+      <div className={startedTraining ? styles.train : styles.none}>
+        <Given text={'text test'} type={'word'}></Given>
+        {multiChoices}
+      </div>
+    </>
   )
 }
 
-function TrainWrapper({ selectedObj, setSelectedObj, setStartedTraining, startedTraining }) {
+function TrainWrapper({ selectedObj, setSelectedObj, setStartedTraining, startedTraining, viewing }) {
   const [ currentObj, setCurrentObj ] = useState()
   const [ openedTrain, setOpenedTrain ] = useState(false)
   const [ trainingCols, setTrainingCols ] = useState({
@@ -94,7 +119,7 @@ function TrainWrapper({ selectedObj, setSelectedObj, setStartedTraining, started
   }, [ answered, startedTraining, currentObj ])
   return (
     <>
-      <Train startedTraining={startedTraining}></Train>
+      <Train startedTraining={startedTraining} viewing={viewing}></Train>
       <div className={startedTraining ? styles.none : ''}>
         <button
           className={styles.openTrainSettings}

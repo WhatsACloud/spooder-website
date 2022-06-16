@@ -6,29 +6,44 @@ const utils = {
       3: { json: {word: '3'} },
       4: { json: {word: '4'} },
       5: { json: {word: ''} },
+      6: { json: {word: ''} },
+      7: { json: {word: ''} },
+      8: { json: {word: ''} },
+      9: { json: {word: '5'} },
+      10: { json: {word: '6'} },
+      11: { json: {word: '7'} },
     }
   }
 }
 
-const randomIndex = (arr) => {
-  return Math.floor(Math.random() * arr.length)
+const randomIndexFrRange = (num) => {
+  return Math.floor(Math.random() * num)
+}
+
+const getNotEmptyOfCateg = (categName) => {
+  const objs = Object.values(utils.getObjs()).filter(obj => String(obj.json[categName]).length > 0)
+  return objs
 }
 
 const getRandomOfCateg = (categName, no, exclude=[]) => {
   exclude = exclude.map(e => String(e))
   const arr = []
   const excludedArr = []
-  const objs = Object.values(utils.getObjs())
+  const objs = getNotEmptyOfCateg(categName).filter(obj => !(exclude.includes(obj.json[categName])))
   if (no > objs.length) no = objs.length
+  for (let i = 0; i < exclude.length; i++) {
+    const randomElement = randomIndexFrRange(no)
+    console.log(randomElement)
+    excludedArr.push(randomElement)
+  }
   for (let i = 0; i < no; i++) {
-    const index = randomIndex(objs)
+    if (excludedArr.includes(i)) {
+      arr.push(null)
+      continue
+    }
+    const index = randomIndexFrRange(objs.length)
     let val = objs[index].json[categName]
     objs.splice(index, 1)
-    if (val.constructor === String && val.length === 0) continue
-    if (exclude.includes(val)) {
-      val = null
-      excludedArr.push(arr.length)
-    }
     arr.push(val)
   }
   return [ arr, excludedArr ]

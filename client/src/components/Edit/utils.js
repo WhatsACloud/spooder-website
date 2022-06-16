@@ -232,8 +232,8 @@ const delFromSilks = (silkId) => {
 export { delFromSilks }
 
 const getObjById = (id=null) => {
-  if (id === null) return false
   const objs = getObjs() 
+  if (id === null || !objs) return false
   return objs[id]
 }
 export { getObjById }
