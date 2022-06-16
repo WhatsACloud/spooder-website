@@ -57,30 +57,82 @@ function Given({ text, type }) {
   )
 }
 
+const randomOfNum10 = (total) => {
+  const val = Math.floor(Math.random() * total * 10) / 10
+  return val
+}
+
+const getRandEleByLink = (objIds, ctt) => { // ctt: current times tested
+  let total = 0
+  const _links = {}
+  for (const objId of objIds) {
+    const obj = utils.getObjById(objId)
+    const link = obj.json.link
+    total += link
+    _links[objId] = link
+  }
+  const links = Object.entries(_links)
+    .sort((a, b) => {
+      return a[1] - b[1]
+    })
+  if (total / objIds.length < 0.3) total = 5
+  while (true) {
+    for (let [ objId, link ] of links) {
+      let num = randomOfNum10(total)
+      const obj = utils.getObjById(objId)
+      const tst = obj.tst
+      const ceil = 2
+      if (ctt - tst > ceil) obj.tst = 0
+      if (tst > 0 && ctt - tst < ceil) num += ctt - tst
+      if (link === 0) link = 0.1
+      if (link > num) {
+        obj.tst = ctt
+        return objId
+      }
+    }
+  }
+}
+
 function MultiChoiceBtn({ val, correct, setAnswer }) {
   return (
     <button className={styles.btn} onClick={() => setAnswer(correct)}>{val}</button>
   )
 }
 
-function AnswerHandler({ answer }) {
+function AnswerHandler({ answer, triggerRerender, globalTsts, viewing, setViewing }) {
   useEffect(() => {
-    console.log(answer)
+    if (answer) {
+      const obj = utils.getObjById(viewing)
+      const attachedTos = obj.attachedTos
+      console.log(attachedTos)
+      const chosen = getRandEleByLink(attachedTos, globalTsts)
+      console.log(chosen)
+      setViewing(chosen)
+    }
+    triggerRerender()
   }, [ answer ])
   return <></>
 }
 
 const multiChoiceAmt = 4
 
-function Train({ startedTraining, viewing }) {
+function Train({ startedTraining, viewing, setViewing }) {
   const [ multiChoices, setMultiChoices ] = useState()
   const [ answer, setAnswer ] = useState(null)
+  const [ rerender, plsRerender ] = useState(false)
+  const [ globalTsts, setGlobalTsts ] = useState(0) // tsts: time since test started
+  const triggerRerender = () => {
+    setAnswer(null)
+    plsRerender(!rerender)
+  }
   useEffect(() => {
     if (startedTraining) {
+      setGlobalTsts(globalTsts+1)
       const viewingVal = utils.getObjById(viewing).json.definition
-      const [ multiChoiceArr, excluded ] = getRandomOfCateg('definition', multiChoiceAmt, [viewingVal])
-      const renderedMultiChoiceArr = []
+      console.log(viewing)
+      const [ multiChoiceArr ] = getRandomOfCateg('definition', multiChoiceAmt, [viewingVal])
       console.log(multiChoiceArr)
+      const renderedMultiChoiceArr = []
       for (let i = 0; i < multiChoiceAmt; i++) {
         renderedMultiChoiceArr.push(
           <MultiChoiceBtn
@@ -93,19 +145,25 @@ function Train({ startedTraining, viewing }) {
       }
       setMultiChoices(renderedMultiChoiceArr)
     }
-  }, [ startedTraining, answer ])
+  }, [ startedTraining, rerender ])
   return (
     <>
-      <AnswerHandler answer={answer}></AnswerHandler>
+      <AnswerHandler
+        answer={answer}
+        triggerRerender={triggerRerender}
+        globalTsts={globalTsts}
+        viewing={viewing}
+        setViewing={setViewing}
+        ></AnswerHandler>
       <div className={startedTraining ? styles.train : styles.none}>
-        <Given text={'text test'} type={'word'}></Given>
+        <Given text={viewing ? utils.getObjById(viewing).json.word : ''} type={'word'}></Given>
         {multiChoices}
       </div>
     </>
   )
 }
 
-function TrainWrapper({ selectedObj, setSelectedObj, setStartedTraining, startedTraining, viewing }) {
+function TrainWrapper({ selectedObj, setSelectedObj, setStartedTraining, startedTraining, viewing, setViewing }) {
   const [ currentObj, setCurrentObj ] = useState()
   const [ openedTrain, setOpenedTrain ] = useState(false)
   const [ trainingCols, setTrainingCols ] = useState({
@@ -119,7 +177,7 @@ function TrainWrapper({ selectedObj, setSelectedObj, setStartedTraining, started
   }, [ answered, startedTraining, currentObj ])
   return (
     <>
-      <Train startedTraining={startedTraining} viewing={viewing}></Train>
+      <Train startedTraining={startedTraining} viewing={viewing} setViewing={setViewing}></Train>
       <div className={startedTraining ? styles.none : ''}>
         <button
           className={styles.openTrainSettings}

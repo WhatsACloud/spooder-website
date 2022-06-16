@@ -69,6 +69,7 @@ function BudView({ selectedObj, setSelectedObj }) {
           startedTraining={startedTraining}
           setStartedTraining={setStartedTraining}
           viewing={viewing}
+          setViewing={setViewing}
           ></TrainWrapper>
         <Viewer viewing={viewing} startedTraining={startedTraining}></Viewer>
       </div>
