@@ -31,8 +31,8 @@ const getRandomOfCateg = (categName, no, exclude=[]) => {
   const objs = getNotEmptyOfCateg(categName).filter(obj => !(exclude.includes(obj.json[categName])))
   if (no > objs.length) no = objs.length
   for (let i = 0; i < exclude.length; i++) {
-    const randomElement = randomIndexFrRange(no)
-    console.log(randomElement)
+    const randomElement = randomIndexFrRange(no, excludedArr)
+    // console.log(randomElement)
     excludedArr.push(randomElement)
   }
   for (let i = 0; i < no; i++) {
@@ -62,12 +62,12 @@ const randomOfNum10 = (total) => {
   return val
 }
 
-const getRandEleByLink = (objIds, ctt) => { // ctt: current times tested
+const getRandEleByLink = (objIds, ctt, categName=null) => { // ctt: current times tested
   let total = 0
   const _links = {}
   for (const objId of objIds) {
     const obj = utils.getObjById(objId)
-    const link = obj.json.link
+    const link = 1 - obj.json.link
     total += link
     _links[objId] = link
   }
@@ -86,6 +86,7 @@ const getRandEleByLink = (objIds, ctt) => { // ctt: current times tested
       if (tst > 0 && ctt - tst < ceil) num += ctt - tst
       if (link === 0) link = 0.1
       if (link > num) {
+        if (categName !== null && String(obj.json[categName]).length === 0) continue
         obj.tst = ctt
         return objId
       }
@@ -104,9 +105,12 @@ function AnswerHandler({ answer, triggerRerender, globalTsts, viewing, setViewin
     if (answer) {
       const obj = utils.getObjById(viewing)
       const attachedTos = obj.attachedTos
-      console.log(attachedTos)
-      const chosen = getRandEleByLink(attachedTos, globalTsts)
+      const chosen = getRandEleByLink(attachedTos, globalTsts, "definition")
       console.log(chosen)
+      if (Number(chosen) === 9) {
+        console.log(utils.getObjById(chosen).json.definition, utils.getObjById(chosen).json.definition.length)
+        throw new Error
+      }
       setViewing(chosen)
     }
     triggerRerender()
@@ -129,9 +133,7 @@ function Train({ startedTraining, viewing, setViewing }) {
     if (startedTraining) {
       setGlobalTsts(globalTsts+1)
       const viewingVal = utils.getObjById(viewing).json.definition
-      console.log(viewing)
       const [ multiChoiceArr ] = getRandomOfCateg('definition', multiChoiceAmt, [viewingVal])
-      console.log(multiChoiceArr)
       const renderedMultiChoiceArr = []
       for (let i = 0; i < multiChoiceAmt; i++) {
         renderedMultiChoiceArr.push(

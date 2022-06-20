@@ -1,9 +1,9 @@
 const objs = {
-  1: { json: { link: 0.2 }, tst: 0 },
-  2: { json: { link: 0 }, tst: 0 },
-  3: { json: { link: 0 }, tst: 0 },
-  4: { json: { link: 0.9 }, tst: 0 },
-  5: { json: { link: 0 }, tst: 0 },
+  1: { json: { link: 0.2, word: 'a' }, tst: 0 },
+  2: { json: { link: 0, word: 'a' }, tst: 0 },
+  3: { json: { link: 0, word: 'a' }, tst: 0 },
+  4: { json: { link: 0.9, word: 'a' }, tst: 0 },
+  5: { json: { link: 0, word: '' }, tst: 0 },
   6: { json: { link: 0 }, tst: 0 },
   7: { json: { link: 0 }, tst: 0 },
   8: { json: { link: 0 }, tst: 0 },
@@ -26,12 +26,12 @@ const randomOfNum10 = (total) => {
   return val
 }
 
-const getRandEleByLink = (objIds, ctt) => { // ctt: current times tested
+const getRandEleByLink = (objIds, ctt, categName=null) => { // ctt: current times tested
   let total = 0
   const _links = {}
   for (const objId of objIds) {
     const obj = utils.getObjById(objId)
-    const link = obj.json.link
+    const link = 1 - obj.json.link
     total += link
     _links[objId] = link
   }
@@ -50,6 +50,7 @@ const getRandEleByLink = (objIds, ctt) => { // ctt: current times tested
       if (tst > 0 && ctt - tst < ceil) num += ctt - tst
       if (link === 0) link = 0.1
       if (link > num) {
+        if (categName !== null && String(obj.json[categName]).length === 0) continue
         obj.tst = ctt
         return objId
       }
@@ -72,12 +73,15 @@ test('Tests whether getRandEleByLink works.', () => {
   const distribution = [0, 0, 0, 0, 0]
   const iters = 1000
   for (let i = 0; i < iters; i++) {
-    const result = getRandEleByLink(indexArr, i)
+    const result = getRandEleByLink(indexArr, i, "word")
     distribution[result-1]++
   }
   console.log(distribution)
   const spread = distribution.map(e => e / iters)
   console.log(spread)
   const supposedSpread = indexArr.map(e => utils.getObjById(e).json.link)
+  const a = indexArr.map(e => utils.getObjById(e).json.word)
+  console.log(a)
   console.log(supposedSpread)
+  expect(spread[4]).toBe(0)
 })
