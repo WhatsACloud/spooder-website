@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import styles from '../select.module'
 import * as utils from '../../utils'
 
@@ -18,6 +18,22 @@ const setLink = (objId, val, isObj=false) => {
 const randomIndexFrRange = (num) => {
   return Math.floor(Math.random() * num)
 }
+
+const randIndexFrArr = (arr) => {
+  return arr[randomIndexFrRange(arr.length)]
+}
+
+const range = (start, stop, step=1) => 
+  Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step))
+
+const randRGB = (min=0, max=255) => {
+  const rgb = []
+  for (let i = 0; i < 3; i++) {
+    rgb.push(randIndexFrArr(range(min, max)))
+  }
+  return rgb
+}
+
 
 const getNotEmptyOfCateg = (categName) => {
   const objs = Object.values(utils.getObjs()).filter(obj => String(obj.json[categName]).length > 0)
@@ -94,9 +110,33 @@ const getRandEleByLink = (objIds, ctt, categName=null) => { // ctt: current time
   }
 }
 
-function MultiChoiceBtn({ val, correct, setAnswer }) {
+const colorMap = [
+  "#db9600",
+  "#07cddb",
+  "#0ad100",
+  "#7d00d1",
+]
+
+function MultiChoiceBtn({ i, val, correct, setAnswer }) {
+  const [ font_size, set_font_size ] = useState(40)
+  const button = useRef(null)
+  useEffect(() => {
+    const func = () => {
+      console.log('resized')
+      const buttonWidth = button.current.offsetWidth
+      const length = val.length || 1
+      const lefontSize = 30
+      const mult = (buttonWidth / (lefontSize * length))
+      let fontSize = lefontSize * mult
+      if (fontSize > lefontSize) fontSize = lefontSize
+      console.log(fontSize)
+      set_font_size(fontSize)
+    }
+    window.onresize = func
+    func()
+  }, [])
   return (
-    <button className={styles.btn} onClick={() => setAnswer(correct)}>{val}</button>
+    <button ref={button} style={{backgroundColor: colorMap[i], fontSize: font_size}} className={styles.btn} onClick={() => setAnswer(correct)}>{val}</button>
   )
 }
 
@@ -139,6 +179,7 @@ function Train({ startedTraining, viewing, setViewing }) {
         renderedMultiChoiceArr.push(
           <MultiChoiceBtn
             key={i}
+            i={i}
             val={multiChoiceArr[i] === null ? viewingVal : multiChoiceArr[i]}
             correct={multiChoiceArr[i] === null}
             setAnswer={setAnswer}
@@ -159,7 +200,9 @@ function Train({ startedTraining, viewing, setViewing }) {
         ></AnswerHandler>
       <div className={startedTraining ? styles.train : styles.none}>
         <Given text={viewing ? utils.getObjById(viewing).json.word : ''} type={'word'}></Given>
-        {multiChoices}
+        <div className={styles.input}>
+          {multiChoices}
+        </div>
       </div>
     </>
   )
