@@ -44,8 +44,9 @@ const getRandomOfCateg = (categName, no, exclude=[]) => {
   exclude = exclude.map(e => String(e))
   const arr = []
   const excludedArr = []
+  console.log(categName)
   const objs = getNotEmptyOfCateg(categName).filter(obj => !(exclude.includes(obj.json[categName])))
-  if (no > objs.length) no = objs.length
+  if (no > objs.length) return [ false, false ]
   for (let i = 0; i < exclude.length; i++) {
     const randomElement = randomIndexFrRange(no, excludedArr)
     // console.log(randomElement)
@@ -91,23 +92,70 @@ const getRandEleByLink = (objIds, ctt, categName=null) => { // ctt: current time
     .sort((a, b) => {
       return a[1] - b[1]
     })
+  let containsCateg = false
+  for (let [ objId ] of links) {
+    const obj = utils.getObjById(objId)
+    if (amtFilledCategs(obj).includes(categName)) {
+      containsCateg = true
+      break
+    }
+  }
+  if (!containsCateg) return false
   if (total / objIds.length < 0.3) total = 5
   while (true) {
     for (let [ objId, link ] of links) {
       let num = randomOfNum10(total)
       const obj = utils.getObjById(objId)
-      const tst = obj.tst
+      const tst = obj.tsts
       const ceil = 2
-      if (ctt - tst > ceil) obj.tst = 0
+      if (ctt - tst > ceil) obj.tsts = 0
       if (tst > 0 && ctt - tst < ceil) num += ctt - tst
       if (link === 0) link = 0.1
       if (link > num) {
+        console.log(link, num, ctt, tst, obj.json[categName], categName)
         if (categName !== null && String(obj.json[categName]).length === 0) continue
-        obj.tst = ctt
+        obj.tsts = ctt
         return objId
       }
     }
   }
+}
+
+const categs = [
+  "word",
+  "definition",
+  "sound",
+  "example",
+]
+
+const givenCategs = [
+  "word",
+  "definition",
+  "sound",
+]
+
+const testedCategs = [
+  "word",
+  "definition",
+  "sound",
+  "example",
+]
+
+const randGivenTested = () => {
+    const givenCateg = randIndexFrArr(givenCategs)
+    let testedCateg = givenCateg
+    while (testedCateg === givenCateg) {
+      testedCateg = randIndexFrArr(testedCategs)
+    }
+    return [ givenCateg, testedCateg ]
+}
+
+const amtFilledCategs = (obj) => {
+  let included = []
+  for (const categ of categs) {
+    if (obj.json[categ]) included.push(categ)
+  }
+  return included
 }
 
 const colorMap = [
@@ -140,17 +188,26 @@ function MultiChoiceBtn({ i, val, correct, setAnswer }) {
   )
 }
 
-function AnswerHandler({ answer, triggerRerender, globalTsts, viewing, setViewing }) {
+function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, setViewing, setStartedTraining }) {
   useEffect(() => {
     if (answer) {
-      const obj = utils.getObjById(viewing)
-      const attachedTos = obj.attachedTos
-      const chosen = getRandEleByLink(attachedTos, globalTsts, "definition")
-      console.log(chosen)
-      if (Number(chosen) === 9) {
-        console.log(utils.getObjById(chosen).json.definition, utils.getObjById(chosen).json.definition.length)
-        throw new Error
+      let obj = utils.getObjById(viewing)
+      let attachedTos = [...obj.attachedTos]
+      if (attachedTos.length === 0) setStartedTraining(false)
+      let chosen = getRandEleByLink(attachedTos, globalTsts, categ)
+      let i = utils.getGlobals().testedPath.length
+      while (chosen === false) {
+        for (let index = 0; index < attachedTos.length; index++) {
+          chosen = getRandEleByLink([attachedTos[index]], globalTsts, categ)
+          console.log(utils.getObjById(attachedTos[index]).objId, categ) // needs to change categ eventually
+          if (chosen) break
+        }
+        if (i === 0) { setStartedTraining(false); console.log('stopped', viewing)}
+        obj = utils.getGlobals().testedPath[i]
+        i--
+        attachedTos = [...obj.attachedTos]
       }
+      utils.getGlobals().testedPath.push(chosen)
       setViewing(chosen)
     }
     triggerRerender()
@@ -160,10 +217,12 @@ function AnswerHandler({ answer, triggerRerender, globalTsts, viewing, setViewin
 
 const multiChoiceAmt = 4
 
-function Train({ startedTraining, viewing, setViewing }) {
+function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
   const [ multiChoices, setMultiChoices ] = useState()
   const [ answer, setAnswer ] = useState(null)
   const [ rerender, plsRerender ] = useState(false)
+  const [ testedCateg, setTestedCateg ] = useState()
+  const [ givenCateg, setGivenCateg ] = useState()
   const [ globalTsts, setGlobalTsts ] = useState(0) // tsts: time since test started
   const triggerRerender = () => {
     setAnswer(null)
@@ -172,15 +231,29 @@ function Train({ startedTraining, viewing, setViewing }) {
   useEffect(() => {
     if (startedTraining) {
       setGlobalTsts(globalTsts+1)
-      const viewingVal = utils.getObjById(viewing).json.definition
-      const [ multiChoiceArr ] = getRandomOfCateg('definition', multiChoiceAmt, [viewingVal])
+      let [ leGivenCateg, leTestedCateg ] = randGivenTested()
+      setGivenCateg(leGivenCateg)
+      setTestedCateg(leTestedCateg)
+      const viewingJson = utils.getObjById(viewing).json
+      let [ multiChoiceArr ] = getRandomOfCateg('example', multiChoiceAmt, [ leTestedCateg ])
+      while (multiChoiceArr === false) {
+        let _
+        [ _, leTestedCateg ] = randGivenTested()
+        console.log(leTestedCateg)
+        console.log(viewingJson[leTestedCateg])
+        if (leTestedCateg === leGivenCateg) continue
+        [ multiChoiceArr ] = getRandomOfCateg(leTestedCateg, multiChoiceAmt, [viewingJson[leTestedCateg]])
+        console.log(multiChoiceArr)
+      }
+      console.log(leGivenCateg, leTestedCateg) // known issue with completely empty fields like example
+      console.log(multiChoiceArr)
       const renderedMultiChoiceArr = []
       for (let i = 0; i < multiChoiceAmt; i++) {
         renderedMultiChoiceArr.push(
           <MultiChoiceBtn
             key={i}
             i={i}
-            val={multiChoiceArr[i] === null ? viewingVal : multiChoiceArr[i]}
+            val={multiChoiceArr[i] === null ? viewingJson[leTestedCateg] : multiChoiceArr[i]}
             correct={multiChoiceArr[i] === null}
             setAnswer={setAnswer}
             ></MultiChoiceBtn>
@@ -193,13 +266,15 @@ function Train({ startedTraining, viewing, setViewing }) {
     <>
       <AnswerHandler
         answer={answer}
+        setStartedTraining={setStartedTraining}
         triggerRerender={triggerRerender}
         globalTsts={globalTsts}
         viewing={viewing}
         setViewing={setViewing}
+        categ={testedCateg}
         ></AnswerHandler>
       <div className={startedTraining ? styles.train : styles.none}>
-        <Given text={viewing ? utils.getObjById(viewing).json.word : ''} type={'word'}></Given>
+        <Given text={viewing ? utils.getObjById(viewing).json[givenCateg] : ''} type={givenCateg}></Given>
         <div className={styles.input}>
           {multiChoices}
         </div>
@@ -222,7 +297,7 @@ function TrainWrapper({ selectedObj, setSelectedObj, setStartedTraining, started
   }, [ answered, startedTraining, currentObj ])
   return (
     <>
-      <Train startedTraining={startedTraining} viewing={viewing} setViewing={setViewing}></Train>
+      <Train startedTraining={startedTraining} setStartedTraining={setStartedTraining} viewing={viewing} setViewing={setViewing}></Train>
       <div className={startedTraining ? styles.none : ''}>
         <button
           className={styles.openTrainSettings}

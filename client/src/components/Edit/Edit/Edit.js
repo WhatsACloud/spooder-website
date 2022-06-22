@@ -149,6 +149,7 @@ function Edit() {
     }
     globals.lastMousePos = null
     globals.dragging = false
+    globals.testedPath = []
 
     const keybinds = new Keybinds(true)
     globals.keybinds = keybinds

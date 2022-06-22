@@ -1,17 +1,17 @@
 const utils = {
   getObjs: () => {
     return {
-      1: { json: {word: '1'} },
-      2: { json: {word: '2'} },
-      3: { json: {word: '3'} },
-      4: { json: {word: '4'} },
-      5: { json: {word: ''} },
-      6: { json: {word: ''} },
-      7: { json: {word: ''} },
+      1: { json: {word: '', sound: 'bro1'} },
+      2: { json: {word: '', sound: 'bro2'} },
+      3: { json: {word: '', sound: 'bro3'} },
+      4: { json: {word: '', sound: 'bro4'} },
+      5: { json: {word: '', sound: 'bro5'} },
+      6: { json: {word: '', sound: 'bro6'} },
+      7: { json: {word: '', sound: 'bro7'} },
       8: { json: {word: ''} },
-      9: { json: {word: '5'} },
-      10: { json: {word: '6'} },
-      11: { json: {word: '7'} },
+      9: { json: {word: ''} },
+      10: { json: {word: ''} },
+      11: { json: {word: ''} },
     }
   }
 }
@@ -34,7 +34,7 @@ const getRandomOfCateg = (categName, no, exclude=[]) => {
   const arr = []
   const excludedArr = []
   const objs = getNotEmptyOfCateg(categName).filter(obj => !(exclude.includes(obj.json[categName])))
-  if (no > objs.length) no = objs.length
+  if (no > objs.length) return [ false, false ]
   for (let i = 0; i < exclude.length; i++) {
     const randomElement = randomIndexFrRange(no, excludedArr)
     // console.log(randomElement)
@@ -54,14 +54,14 @@ const getRandomOfCateg = (categName, no, exclude=[]) => {
 }
 
 test('Tests whether getRandomOfCateg will retrieve the specified number of values from that category.', () => {
-  // const [ result1 ] = getRandomOfCateg('word', 3)
-  // // console.log(result1)
-  // const [ result2 ] = getRandomOfCateg('word', 10)
-  // // console.log(result2)
-  // const [ result3 ] = getRandomOfCateg('word', 5)
-  // // console.log(result3)
+  const [ result1 ] = getRandomOfCateg('word', 3)
+  console.log(result1)
+  const [ result2 ] = getRandomOfCateg('word', 10)
+  console.log(result2)
+  const [ result3 ] = getRandomOfCateg('word', 5)
+  console.log(result3)
   // const [ result4, excluded1 ] = getRandomOfCateg('word', 5, ["1", "2"])
-  // // console.log(result4, excluded1)
+  // console.log(result4, excluded1)
   // expect(excluded1.length).toBe(2)
   // for (const x of excluded1) {
   //   expect(result4[x]).toBe(null)
@@ -72,9 +72,9 @@ test('Tests whether getRandomOfCateg will retrieve the specified number of value
   // for (const x of excluded2) {
   //   expect(result5[x]).toBe(null)
   // }
-  const count = 1000
-  for (let i = 0; i < count; i++){
-    const [ result, exclude ] = getRandomOfCateg('word', 5, [1, 2])
-    expect([...new Set(exclude)].length === 2).toBe(true)
-  }
+  // const count = 1000
+  // for (let i = 0; i < count; i++){
+  //   const [ result, exclude ] = getRandomOfCateg('word', 5, [1, 2])
+  //   expect([...new Set(exclude)].length === 2).toBe(true)
+  // }
 })
