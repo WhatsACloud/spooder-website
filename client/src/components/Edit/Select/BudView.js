@@ -36,6 +36,7 @@ function Viewer({ viewing, startedTraining }) {
   useEffect(() => {
     const object = utils.getObjById(viewing)
     if (object) {
+      console.log(object.json.json, object.tsts, object.json.link)
     }
     setObj(object)
   }, [ viewing ])

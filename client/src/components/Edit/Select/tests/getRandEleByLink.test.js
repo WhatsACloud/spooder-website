@@ -1,9 +1,9 @@
 const objs = {
-  1: { json: { link: 1, word: 'a' }, tst: 0 },
-  2: { json: { link: 1, word: 'a' }, tst: 0 },
-  3: { json: { link: 1, word: 'a' }, tst: 0 },
-  4: { json: { link: 1, word: 'a' }, tst: 0 },
-  5: { json: { link: 1, word: '' }, tst: 0 },
+  1: { json: { link: 1, word: 'a' }, tsts: null },
+  2: { json: { link: 1, word: 'a' }, tsts: null },
+  3: { json: { link: 1, word: 'a' }, tsts: null },
+  4: { json: { link: 1, word: 'a' }, tsts: null },
+  5: { json: { link: 0, word: '' }, tsts: null },
   6: { json: { link: 0 }, tst: 0 },
   7: { json: { link: 0 }, tst: 0 },
   8: { json: { link: 0 }, tst: 0 },
@@ -46,14 +46,35 @@ const getRandEleByLink = (objIds, ctt, categName=null) => { // ctt: current time
   const _links = {}
   for (const objId of objIds) {
     const obj = utils.getObjById(objId)
-    const link = 1 - obj.json.link
-    total += link
+    const leLink = 1 - obj.json.link
+    const link = leLink === 0 ? 0.1 : leLink
     _links[objId] = link
   }
-  const links = Object.entries(_links)
+  const ceil = 5
+  const leLinks = Object.entries(_links)
     .sort((a, b) => {
       return a[1] - b[1]
     })
+  let links = leLinks.filter(([ objId ]) => {
+      const obj = utils.getObjById(objId)
+      const tsts = obj.tsts
+      console.log(objId, obj)
+      if (tsts === null) return true
+      const diff = ctt - tsts
+      if (diff > ceil) {
+        obj.tsts = null
+        return true
+      }
+      if (diff <= 2) return false
+      const can = Math.random() < ceil / diff
+      return can
+    })
+  for (const [ _, link ] of links) {
+    console.log(link)
+    total += link
+  }
+  console.log(links)
+  if (links.length === 0) links = leLinks
   if (categName !== null) {
     let containsCateg = false
     for (let [ objId ] of links) {
@@ -65,22 +86,19 @@ const getRandEleByLink = (objIds, ctt, categName=null) => { // ctt: current time
     }
     if (!containsCateg) return false
   }
-  if (total / objIds.length < 0.3) total = 5
-  while (true) {
-    for (let [ objId, link ] of links) {
-      let num = randomOfNum10(total)
-      const obj = utils.getObjById(objId)
-      const tst = obj.tsts
-      const ceil = 2
-      if (ctt - tst > ceil) obj.tsts = 0
-      if (tst > 0 && ctt - tst < ceil) num += ctt - tst
-      if (link === 0) link = 0.1
-      if (link > num) {
-        console.log(link, num, ctt, tst, obj.json[categName], categName)
-        obj.tsts = ctt
-        return objId
-      }
+  let start = 0
+  console.log('what', total)
+  const num = randomOfNum10(total)
+  for (let [ objId, link ] of links) {
+    const obj = utils.getObjById(objId)
+    const tst = obj.tsts
+    if (ctt - tst > ceil) obj.tsts = null
+    console.log(start, link + start, num)
+    if (num >= start && num <= link + start) {
+      obj.tsts = ctt
+      return objId
     }
+    start += link
   }
 }
 
@@ -97,11 +115,14 @@ const indexArr = [1, 2, 3, 4, 5]
 
 test('Tests whether getRandEleByLink works.', () => {
   const distribution = [0, 0, 0, 0, 0]
-  const iters = 1000
+  const iters = 100
+  const results = []
   for (let i = 0; i < iters; i++) {
     const result = getRandEleByLink(indexArr, i)
+    results.push(result)
     distribution[result-1]++
   }
+  console.log(results)
   console.log(distribution)
   const spread = distribution.map(e => e / iters)
   console.log(spread)
@@ -109,5 +130,4 @@ test('Tests whether getRandEleByLink works.', () => {
   const a = indexArr.map(e => utils.getObjById(e).json.word)
   console.log(a)
   console.log(supposedSpread)
-  expect(spread[4]).toBe(0)
 })

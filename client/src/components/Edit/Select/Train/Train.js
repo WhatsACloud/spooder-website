@@ -44,12 +44,10 @@ const getRandomOfCateg = (categName, no, exclude=[]) => {
   exclude = exclude.map(e => String(e))
   const arr = []
   const excludedArr = []
-  console.log(categName)
   const objs = getNotEmptyOfCateg(categName).filter(obj => !(exclude.includes(obj.json[categName])))
   if (no > objs.length) return [ false, false ]
   for (let i = 0; i < exclude.length; i++) {
     const randomElement = randomIndexFrRange(no, excludedArr)
-    // console.log(randomElement)
     excludedArr.push(randomElement)
   }
   for (let i = 0; i < no; i++) {
@@ -84,14 +82,35 @@ const getRandEleByLink = (objIds, ctt, categName=null) => { // ctt: current time
   const _links = {}
   for (const objId of objIds) {
     const obj = utils.getObjById(objId)
-    const link = 1 - obj.json.link
-    total += link
+    const leLink = 1 - obj.json.link
+    const link = leLink === 0 ? 0.1 : leLink
     _links[objId] = link
   }
-  const links = Object.entries(_links)
+  const ceil = 5
+  const leLinks = Object.entries(_links)
     .sort((a, b) => {
       return a[1] - b[1]
     })
+  let links = leLinks.filter(([ objId ]) => {
+      const obj = utils.getObjById(objId)
+      const tsts = obj.tsts
+      console.log(objId, obj)
+      if (tsts === null) return true
+      const diff = ctt - tsts
+      if (diff > ceil) {
+        obj.tsts = null
+        return true
+      }
+      if (diff <= 2) return false
+      const can = Math.random() < ceil / diff
+      return can
+    })
+  for (const [ _, link ] of links) {
+    console.log(link)
+    total += link
+  }
+  console.log(links)
+  if (links.length === 0) links = leLinks
   if (categName !== null) {
     let containsCateg = false
     for (let [ objId ] of links) {
@@ -103,23 +122,19 @@ const getRandEleByLink = (objIds, ctt, categName=null) => { // ctt: current time
     }
     if (!containsCateg) return false
   }
-  if (total / objIds.length < 0.3) total = 5
-  while (true) {
-    for (let [ objId, link ] of links) {
-      let num = randomOfNum10(total)
-      const obj = utils.getObjById(objId)
-      const tst = obj.tsts
-      const ceil = 3
-      if (ctt - tst > ceil) obj.tsts = null
-      if (obj.tsts !== null && tst > 0 && ctt - tst < ceil) num += ctt - tst
-      if (link === 0) link = 0.1
-      console.log(ctt, tst, link, num)
-      if (link > num) {
-        console.log(link, num, ctt, tst, obj.json[categName], categName)
-        obj.tsts = ctt
-        return objId
-      }
+  let start = 0
+  console.log('what', total)
+  const num = randomOfNum10(total)
+  for (let [ objId, link ] of links) {
+    const obj = utils.getObjById(objId)
+    const tst = obj.tsts
+    if (ctt - tst > ceil) obj.tsts = null
+    console.log(start, link + start, num)
+    if (num >= start && num <= link + start) {
+      obj.tsts = ctt
+      return objId
     }
+    start += link
   }
 }
 
@@ -188,14 +203,12 @@ function MultiChoiceBtn({ i, val, correct, setAnswer }) {
   const button = useRef(null)
   useEffect(() => {
     const func = () => {
-      console.log('resized')
       const buttonWidth = button.current.offsetWidth
       const length = val.length || 1
       const lefontSize = 30
       const mult = (buttonWidth / (lefontSize * length))
       let fontSize = lefontSize * mult
       if (fontSize > lefontSize) fontSize = lefontSize
-      console.log(fontSize)
       set_font_size(fontSize)
     }
     window.onresize = func
@@ -213,15 +226,15 @@ const ifBudsHaveNcategs = (n, categ) => {
     if (obj.json[categ] && obj.json[categ].length > 0) n--
   }
   if (n === 0) return true
-  console.log(n, categ)
   return false
 }
 
 function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, setViewing, setStartedTraining, setGivenCateg, setTestedCateg }) {
   useEffect(() => {
     let leGivenCateg, leTestedCateg
+    let obj = utils.getObjById(viewing)
     if (answer) {
-      let obj = utils.getObjById(viewing)
+      if (obj) obj.json.link += 0.1
       let attachedTos = [...obj.attachedTos]
       if (attachedTos.length === 0) setStartedTraining(false)
       let chosen = getRandEleByLink(attachedTos, globalTsts)
@@ -241,15 +254,18 @@ function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, se
         if (leGivenCateg) break
         if (i === 0) {
           chosen = getRandEleByLink(Object.keys(utils.getObjs()), globalTsts)
-          console.log('stopped', viewing)
           break
         }
         obj = utils.getObjById(utils.getGlobals().testedPath[i])
         i--
         attachedTos = [...obj.attachedTos]
       }
+      const leObj = utils.getObjById(chosen)
+      console.log(leObj.json.json, leObj.tsts, leObj.json.link)
       utils.getGlobals().testedPath.push(chosen.objId)
       setViewing(chosen)
+    } else {
+      if (obj) obj.json.link -= 0.1
     }
     if (answer !== null) {
       setGivenCateg(leGivenCateg)
@@ -280,7 +296,6 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
       let leGivenCateg, leTestedCateg
       if (globalTsts === 0) {
         [ leGivenCateg, leTestedCateg ] = startedTraining ? randGivenTested(utils.getObjById(viewing)) : [ false, false ]
-        console.log(leGivenCateg, leTestedCateg)
         setTestedCateg(leTestedCateg)
         setGivenCateg(leGivenCateg)
       }
@@ -288,7 +303,6 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
       const viewingJson = utils.getObjById(viewing).json
       let [ multiChoiceArr ] = getRandomOfCateg(testedCateg || leTestedCateg, multiChoiceAmt, [ viewingJson[testedCateg || leTestedCateg] ])
       // known issue with example cause there isnt enough of em
-      console.log(multiChoiceArr, viewingJson, testedCateg, viewingJson[testedCateg || leTestedCateg])
       const renderedMultiChoiceArr = []
       for (let i = 0; i < multiChoiceAmt; i++) {
         renderedMultiChoiceArr.push(

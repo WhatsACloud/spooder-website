@@ -145,7 +145,12 @@ class BudJson {
   set sound(sound) { this.json.sound = sound; this.checkForUpdate('sound') }
   set context(context) { this.json.context = context; this.checkForUpdate('context') }
   set example(example) { this.json.example = example; this.checkForUpdate('example') }
-  set link(link) { this.json.link = link; this.checkForUpdate('link') }
+  set link(link) {
+    if (link >= 0 && link <= 1) {
+      this.json.link = link
+      this.checkForUpdate('link')
+    }
+  }
   set attachedTos(attachedTos) { this.json.attachedTos = new Proxy(attachedTos, this.attachedTosProxyConfig) }
   set position(position) { this.json.position = new Proxy(position, this.objProxyConfig) }
   set objId(objId) { this.json.objId = objId; this.checkForUpdate('objId') }
