@@ -230,7 +230,7 @@ const ifBudsHaveNcategs = (n, categ) => {
 }
 
 function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, setViewing, setStartedTraining, setGivenCateg, setTestedCateg }) {
-  useEffect(() => {
+  useEffect(() => { // to fix issue with given not displaying
     let leGivenCateg, leTestedCateg
     let obj = utils.getObjById(viewing)
     if (answer) {
