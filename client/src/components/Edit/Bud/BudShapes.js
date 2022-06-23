@@ -177,7 +177,7 @@ class Bud {
   selected = false
   _followMouse = false
   textObj = null
-  tsts = 0 // time since test started
+  tsts = null // time since test started
   mouseFollower = (e) => {
     const { x, y } = utils.getCanvasMousePos(e.clientX, e.clientY)
     this.konvaObj.setX(x)

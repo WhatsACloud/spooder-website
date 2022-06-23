@@ -21,9 +21,24 @@ const utils = {
   }
 }
 
+const categs = [
+  "word",
+  "definition",
+  "sound",
+  "example",
+]
+
 const randomOfNum10 = (total) => {
   const val = Math.floor(Math.random() * total * 10) / 10
   return val
+}
+
+const amtFilledCategs = (obj) => {
+  let included = []
+  for (const categ of categs) {
+    if (obj.json[categ]) included.push(categ)
+  }
+  return included
 }
 
 const getRandEleByLink = (objIds, ctt, categName=null) => { // ctt: current times tested
@@ -39,19 +54,30 @@ const getRandEleByLink = (objIds, ctt, categName=null) => { // ctt: current time
     .sort((a, b) => {
       return a[1] - b[1]
     })
+  if (categName !== null) {
+    let containsCateg = false
+    for (let [ objId ] of links) {
+      const obj = utils.getObjById(objId)
+      if (amtFilledCategs(obj).includes(categName)) {
+        containsCateg = true
+        break
+      }
+    }
+    if (!containsCateg) return false
+  }
   if (total / objIds.length < 0.3) total = 5
   while (true) {
     for (let [ objId, link ] of links) {
       let num = randomOfNum10(total)
       const obj = utils.getObjById(objId)
-      const tst = obj.tst
+      const tst = obj.tsts
       const ceil = 2
-      if (ctt - tst > ceil) obj.tst = 0
+      if (ctt - tst > ceil) obj.tsts = 0
       if (tst > 0 && ctt - tst < ceil) num += ctt - tst
       if (link === 0) link = 0.1
       if (link > num) {
-        if (categName !== null && String(obj.json[categName]).length === 0) continue
-        obj.tst = ctt
+        console.log(link, num, ctt, tst, obj.json[categName], categName)
+        obj.tsts = ctt
         return objId
       }
     }
@@ -73,7 +99,7 @@ test('Tests whether getRandEleByLink works.', () => {
   const distribution = [0, 0, 0, 0, 0]
   const iters = 1000
   for (let i = 0; i < iters; i++) {
-    const result = getRandEleByLink(indexArr, i, "word")
+    const result = getRandEleByLink(indexArr, i)
     distribution[result-1]++
   }
   console.log(distribution)
