@@ -94,23 +94,21 @@ const getRandEleByLink = (objIds, ctt, categName=null) => { // ctt: current time
   let links = leLinks.filter(([ objId ]) => {
       const obj = utils.getObjById(objId)
       const tsts = obj.tsts
-      console.log(objId, obj)
       if (tsts === null) return true
       const diff = ctt - tsts
       if (diff > ceil) {
         obj.tsts = null
         return true
       }
-      if (diff <= 2) return false
-      const can = Math.random() < ceil / diff
+      if (diff < 2) return false
+      const rand = Math.random()
+      const can = rand < diff / ceil
       return can
     })
+  if (links.length === 0) return false
   for (const [ _, link ] of links) {
-    console.log(link)
     total += link
   }
-  console.log(links)
-  if (links.length === 0) links = leLinks
   if (categName !== null) {
     let containsCateg = false
     for (let [ objId ] of links) {
@@ -123,15 +121,12 @@ const getRandEleByLink = (objIds, ctt, categName=null) => { // ctt: current time
     if (!containsCateg) return false
   }
   let start = 0
-  console.log('what', total)
   const num = randomOfNum10(total)
   for (let [ objId, link ] of links) {
     const obj = utils.getObjById(objId)
     const tst = obj.tsts
     if (ctt - tst > ceil) obj.tsts = null
-    console.log(start, link + start, num)
     if (num >= start && num <= link + start) {
-      obj.tsts = ctt
       return objId
     }
     start += link
@@ -229,23 +224,34 @@ const ifBudsHaveNcategs = (n, categ) => {
   return false
 }
 
+const ceil = 5
+
 function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, setViewing, setStartedTraining, setGivenCateg, setTestedCateg }) {
   useEffect(() => { // to fix issue with given not displaying
     let leGivenCateg, leTestedCateg
     let obj = utils.getObjById(viewing)
-    if (answer) {
-      if (obj) obj.json.link += 0.1
+    let amt = 0.1 * ((answer - 0.5) * 2)
+    if (obj && answer !== null) {
+      console.log('ran')
+      obj.json.link += amt
+      if (answer) obj.tsts = globalTsts
       let attachedTos = [...obj.attachedTos]
       if (attachedTos.length === 0) setStartedTraining(false)
       let chosen = getRandEleByLink(attachedTos, globalTsts)
-      let i = 0
-      const givenTested = randGivenTested(obj)
-      leGivenCateg = givenTested[0]
-      leTestedCateg = givenTested[1]
+      let i = utils.getGlobals().testedPath.length
+      // let i = 0
+      if (chosen !== false) {
+        obj = utils.getObjById(chosen)
+        const givenTested = randGivenTested(obj)
+        leGivenCateg = givenTested[0]
+        leTestedCateg = givenTested[1]
+      }
       while (!leGivenCateg) {
         attachedTos = attachedTos.sort((a, b) => utils.getObjById(b).json.link - utils.getObjById(a).json.link)
         for (let index = 0; index < attachedTos.length; index++) {
-          chosen = getRandEleByLink([attachedTos[index]], globalTsts)
+          if (globalTsts - utils.getObjById(attachedTos[index]).tsts < ceil) continue
+          chosen = attachedTos[index]
+          obj = utils.getObjById(chosen)
           const givenTested = randGivenTested(obj)
           leGivenCateg = givenTested[0]
           leTestedCateg = givenTested[1]
@@ -254,24 +260,32 @@ function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, se
         if (leGivenCateg) break
         if (i === 0) {
           chosen = getRandEleByLink(Object.keys(utils.getObjs()), globalTsts)
-          break
+          console.log(chosen)
+          obj = utils.getObjById(chosen)
+          console.log(obj)
+          const givenTested = randGivenTested(obj)
+          console.log(givenTested)
+          leGivenCateg = givenTested[0]
+          leTestedCateg = givenTested[1]
+          attachedTos = obj.attachedTos
+          continue
         }
-        obj = utils.getObjById(utils.getGlobals().testedPath[i])
+        obj = utils.getObjById(utils.getGlobals().testedPath[i-1])
         i--
         attachedTos = [...obj.attachedTos]
       }
-      const leObj = utils.getObjById(chosen)
-      console.log(leObj.json.json, leObj.tsts, leObj.json.link)
-      utils.getGlobals().testedPath.push(chosen.objId)
+      console.log(utils.getObjById(chosen).json, leGivenCateg, leTestedCateg)
+      utils.getGlobals().testedPath.push(chosen)
+      if (!(utils.getObjById(chosen).json[leGivenCateg])) {
+        throw new Error
+      }
       setViewing(chosen)
-    } else {
-      if (obj) obj.json.link -= 0.1
+      if (answer !== null) {
+        setGivenCateg(leGivenCateg)
+        setTestedCateg(leTestedCateg)
+      }
+      triggerRerender()
     }
-    if (answer !== null) {
-      setGivenCateg(leGivenCateg)
-      setTestedCateg(leTestedCateg)
-    }
-    triggerRerender()
   }, [ answer ])
   return <></>
 }
