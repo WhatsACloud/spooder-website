@@ -49,30 +49,44 @@ const getCanvasMousePos = (x, y) => {
     x: (
       x
       - window.innerWidth * 0.15
-      + divCanvas.scrollLeft
     ),
     y: (
       y
       - 40
-      + divCanvas.scrollTop
       - window.innerHeight * 0.1
     )
   }
 }
 export { getCanvasMousePos }
 
-const withinRect = (mousePos, startX, startY, endX, endY) => {
-  const x = mousePos.x
-  const y = mousePos.y
-  const xStartIn = x > startX
-  const yStartIn = y > startY
-  const xEndIn = x < endX
-  const yEndIn = y < endY
+const calcScreenBounds = () => {
+  const rootPos = getRootPos()
+  const bound1 = getCanvasMousePos(-rootPos.x, -rootPos.y)
+  bound1.x = -rootPos.x
+  const divCanvas = document.getElementById('divCanvas')
+  const bound2 = { x: bound1.x + divCanvas.offsetWidth, y: bound1.y + divCanvas.offsetHeight }
+  const padding = 0
+  bound1.x -= padding
+  bound1.y -= padding
+  bound2.x += padding
+  bound2.y += padding
+  return [ bound1, bound2 ]
+}
+export { calcScreenBounds }
+
+const withinRect = (start, end, point) => {
+  const x = point.x
+  const y = point.y
+  const xStartIn = x > start.x
+  const yStartIn = y > start.y
+  const xEndIn = x < end.x
+  const yEndIn = y < end.y
   if (xStartIn && yStartIn && xEndIn && yEndIn) {
     return true
   }
   return false
 }
+export { withinRect }
 
 const setNextObjId = (amt) => {
   getGlobals().nextObjId = amt
@@ -98,7 +112,6 @@ const getNextHighestAttr = (arr, attrName) => {
 export { getNextHighestAttr }
 
 const addToNewObjs = (objId) => {
-  console.log(objId)
   if (objId === null) throw new Error
   const newObjs = getGlobals().newObjs
   if (!(newObjs.includes(objId))) {
@@ -145,6 +158,17 @@ const setCursor = (cursorType) => {
   document.getElementById('root').style.cursor = cursorType
 }
 export { setCursor }
+
+const reloadObjs = () => {
+  console.log('reloaded')
+  const [ bound1, bound2 ] = calcScreenBounds()
+  for (const [ objId, obj ] of Object.entries(getObjs())) {
+    const inRect = withinRect(bound1, bound2, obj.position)
+    if (!inRect) obj.unload()
+    if (inRect) obj.load()
+  }
+}
+export { reloadObjs }
 
 import * as BudUtils from './Bud/BudUtils'
 

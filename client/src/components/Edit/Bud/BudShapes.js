@@ -183,6 +183,7 @@ class Bud {
   _followMouse = false
   textObj = null
   tsts = null // time since test started
+  loaded = false
   mouseFollower = (e) => {
     const { x, y } = utils.getCanvasMousePos(e.clientX, e.clientY)
     this.konvaObj.setX(x)
@@ -377,6 +378,7 @@ class Bud {
     utils.selectObj(this, utils.ObjType.Bud, budShape, selectFunc, unselectFunc)
   }
   init = (position) => {
+    this.loaded = true
     const radius = 40
     let pos
     if (position) {
@@ -384,7 +386,8 @@ class Bud {
     } else {
       pos = {x: this.x, y: this.y}
     }
-    const budGroup = new Konva.Group(drawConfig.budGroupConfig(pos.x, pos.y))
+    const konvaPos = utils.calcKonvaPosByPos({x: pos.x, y: pos.y})
+    const budGroup = new Konva.Group(drawConfig.budGroupConfig(konvaPos.x, konvaPos.y))
     budGroup.on('dragmove', this.dragMove)
     budGroup.on('dragend', this.dragEnd)
     budGroup.on('click', this.click)
@@ -399,6 +402,29 @@ class Bud {
   delete = () => {
     this.undo()
     utils.addToHistory(this.redo, this.undo)
+  }
+  unload = () => {
+    if (this.loaded) {
+      this.konvaObj.destroy()
+      this.textObj = null
+      const [ bounds1, bounds2 ] = utils.calcScreenBounds()
+      for (const silk of Object.values(this.attachedSilk)) {
+        const pos1in = utils.withinRect(bounds1, bounds2, silk.pos1)
+        const pos2in = utils.withinRect(bounds1, bounds2, silk.pos2)
+        if (pos1in || pos2in) continue
+        silk.unload()
+      }
+      this.loaded = false
+    }
+  }
+  load = () => {
+    if (!this.loaded) {
+      this.init()
+      this.setText(this.json.word)
+      for (const silk of Object.values(this.attachedSilk)) {
+        silk.init()
+      }
+    }
   }
   undo = () => {
     this.konvaObj.destroy()

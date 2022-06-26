@@ -208,7 +208,7 @@ function MultiChoiceBtn({ i, val, correct, setAnswer }) {
     }
     window.onresize = func
     func()
-  }, [])
+  }, [ val ])
   return (
     <button ref={button} style={{backgroundColor: colorMap[i], fontSize: font_size}} className={styles.btn} onClick={() => setAnswer(correct)}>{val}</button>
   )

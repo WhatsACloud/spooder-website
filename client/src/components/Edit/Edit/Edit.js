@@ -75,11 +75,13 @@ function SetGlobal() {
 }
 
 const scrollRight = (amt) => {
+  utils.getGlobals().scrolling = true
   const rootPos = utils.getRootPos()
   utils.setRootPos({x: rootPos.x - amt, y: rootPos.y})
 }
 
 const scrollDown = (amt) => {
+  utils.getGlobals().scrolling = true
   const rootPos = utils.getRootPos()
   utils.setRootPos({x: rootPos.x, y: rootPos.y - amt})
 }
@@ -100,6 +102,17 @@ function Edit() {
     utils.getStage().on('mousedown', evt => {
       utils.getReactNamespace('renderTrain').setVal(utils.getReactNamespace('renderTrain').val)
     })
+    document.getElementById('divCanvas').addEventListener('wheel', e => {
+      scrollDown(e.deltaY)
+      scrollRight(e.deltaX)
+    })
+    setInterval(() => {
+      if (utils.getGlobals().scrolling) {
+        utils.getGlobals().scrolling = false
+        utils.reloadObjs()
+        return
+      }
+    }, 1000);
     const urlString = window.location.search
     let paramString = urlString.split('?')[1];
     let queryString = new URLSearchParams(paramString);
@@ -150,6 +163,8 @@ function Edit() {
     globals.lastMousePos = null
     globals.dragging = false
     globals.testedPath = []
+    globals.scrolling = false
+    globals.wasScrolling = false
 
     const keybinds = new Keybinds(true)
     globals.keybinds = keybinds
@@ -159,12 +174,20 @@ function Edit() {
     utils.getMainLayer().add(budGroup, silkGroup)
     budGroup.setZIndex(1)
     silkGroup.setZIndex(0)
+    const tempObjs = []
     for (const [ objId, obj ] of Object.entries(spoodawebData)) {
       const bud = new BudShapes.Bud(obj.objId)
-      bud.init({x: obj.x, y: obj.y})
+      bud.init(obj.position)
       bud.fromJson(obj)
+      const screenBounds = utils.calcScreenBounds()
+      const inRect = utils.withinRect(screenBounds[0], screenBounds[1], obj.position)
+      if (!(inRect)) {
+        bud.unload()
+        continue
+      }
+      tempObjs.push(bud)
     }
-    for (const leObj of Object.values(utils.getObjs())) {
+    for (const leObj of tempObjs) {
       for (const attachedTo of leObj.attachedTos) {
         new SilkShapes.Silk(utils.getNextSilkId(), leObj, utils.getObjById(attachedTo), true)
       }

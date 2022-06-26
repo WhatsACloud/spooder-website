@@ -14,6 +14,7 @@ class Silk {
   silkId = null
   _bud1 = null
   _bud2 = null
+  loaded = false
   get bud1() {return this._bud1}
   get bud2() {return this._bud2}
   // set bud1(id) { this._setBud('_bud1Id', '_pos1', id) }
@@ -114,7 +115,13 @@ class Silk {
     }
     utils.selectObj(this, utils.ObjType.Silk, this.konvaObj, selectFunc, unselectFunc)
   }
+  unload = () => {
+    if (!this.loaded) return
+    this.loaded = false
+    this.konvaObj.destroy()
+  }
   init = () => {
+    if (this.loaded) return
     const group = new Konva.Group()
     group.on('mousedown', this.mouseDown)
     const line = new Konva.Line({
@@ -128,6 +135,7 @@ class Silk {
     this.silkObj = line
     utils.getSilkGroup().add(group)
     utils.addToSilks(this)
+    this.loaded = true
   }
   constructor(silkId, bud1, bud2, initialising=false) {
     if (bud2.objId in bud1.attachedSilk || bud1.objId in bud2.attachedSilk) return
