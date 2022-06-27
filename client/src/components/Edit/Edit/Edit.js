@@ -17,6 +17,8 @@ import { mouseDown, mouseUp, mouseMove } from '../Events'
 import * as OtherElements from '../OtherElements'
 import { Background } from '../Background'
 
+import { ContextMenu } from './ContextMenu'
+
 import api from '../../../services/api'
 
 import * as SilkShapes from '../Silk'
@@ -96,6 +98,8 @@ function Edit() {
   const [ settings, setSettings ] = useState({
     Background: false
   })
+  const [ contextMenuOn, setContextMenuOn ] = useState(false)
+  const [ contextMenuPos, setContextMenuPos ] = useState({x: 0, y: 0})
   useEffect(async () => {
     const width = utils.getStage().getAttr('width')
     const height = utils.getStage().getAttr('height')
@@ -162,6 +166,7 @@ function Edit() {
       document.removeEventListener('mousemove', isDrag)
     }
     document.getElementById('divCanvas').addEventListener('mousedown', e => {
+      if (e.button !== 0) return
       boxEnd = null
       boxStart = utils.getCanvasMousePos(e.clientX, e.clientY)
       const selectBox = new Konva.Rect({
@@ -177,6 +182,7 @@ function Edit() {
       document.addEventListener('mousemove', isDrag)
     })
     document.addEventListener('mouseup', e => {
+      if (e.button !== 0) return
       const selectBox = utils.getMainLayer().find('#selectBox')[0]
       selectBox.destroy()
       document.removeEventListener('mousemove', mousemove)
@@ -309,8 +315,24 @@ function Edit() {
           document.addEventListener('mouseup', stopDrag)
         }
         document.addEventListener('mousemove', func)
-      } else if (e.evt.button == 0) {
+        const otherFunc = () => {
+          utils.setCursor("default")
+          document.removeEventListener('mouseup', otherFunc)
+          document.removeEventListener('mousemove', func)
+          document.removeEventListener('mousemove', mouseMoveFunc)
+        }
+        document.addEventListener('mouseup', otherFunc)
       }
+    })
+    utils.getStage().on('click', (e) => {
+      if (utils.getGlobals().dragging) {
+        utils.getGlobals().dragging = false
+        return
+      }
+      if (e.evt.button === 0) setContextMenuOn(false)
+      if (!(e.evt.button === 2)) return
+      setContextMenuOn(true)
+      setContextMenuPos({x: e.evt.clientX, y: e.evt.clientY})
     })
     return () => {
       document.removeEventListener('keydown', preventZoom)
@@ -331,6 +353,9 @@ function Edit() {
       <TaskBar
         setInSettings={setInSettings}
         ></TaskBar>
+      <ContextMenu
+        on={contextMenuOn}
+        pos={contextMenuPos}></ContextMenu>
       <div className={styles.wrapper}>
         <OtherElements.ObjectDrawer
           setDragging={setDragging}

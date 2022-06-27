@@ -57,6 +57,7 @@ class Silk {
   }
   click = (e) => {
     e.cancelBubble = true
+    if (e.button !== 0) return
     this.select(true)
   }
   delete = () => {

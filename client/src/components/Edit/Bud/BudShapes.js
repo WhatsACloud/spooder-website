@@ -251,6 +251,7 @@ class Bud {
   }
   click = (e) => {
     e.cancelBubble = true
+    if(e.button !== 0) return
     const modes = utils.getGlobals().modes
     if (modes.autoDrag) {
       this.konvaObj.setDraggable(false)
