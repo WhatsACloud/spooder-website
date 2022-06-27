@@ -177,6 +177,9 @@ class BudJson {
 
 class Bud {
   konvaObj = null
+  get shapeObj() {
+    return this.konvaObj.findOne('#budShape')
+  }
   dragging = false
   new = false
   selected = false
@@ -184,6 +187,8 @@ class Bud {
   textObj = null
   tsts = null // time since test started
   loaded = false
+  viewing = false
+
   mouseFollower = (e) => {
     const { x, y } = utils.getCanvasMousePos(e.clientX, e.clientY)
     this.konvaObj.setX(x)
@@ -244,7 +249,8 @@ class Bud {
   dragStart = () => {
     this.dragging = true
   }
-  click = () => {
+  click = (e) => {
+    e.cancelBubble = true
     const modes = utils.getGlobals().modes
     if (modes.autoDrag) {
       this.konvaObj.setDraggable(false)
@@ -266,7 +272,7 @@ class Bud {
         new Silk(silkId, bud, this)
       }
     } else {
-      this.select()
+      this.view()
     }
   }
   setText = (word) => {
@@ -364,20 +370,31 @@ class Bud {
   fromJson = (leJson) => {
     this.json = new BudJson(this, leJson)
   }
-  select = () => {
-    this.selected = true
+  view = () => {
     utils.viewObj(this.objId)
-    const budShape = this.konvaObj.children[0]
-    const selectFunc = () => {
-      budShape.setStrokeWidth(5)
-      budShape.setStroke('black')
-    }
-    const unselectFunc = () => {
-      budShape.setStrokeWidth(0)
-    }
-    utils.selectObj(this, utils.ObjType.Bud, budShape, selectFunc, unselectFunc)
+    this.viewing = true
+    this.select(true)
   }
-  init = (position) => {
+  _select = () => {
+    this.selected = true
+    const highlight = new Konva.Shape(drawConfig.budShapeConfig())
+    highlight.id('highlight')
+    const offset = 5
+    highlight.setAttr('radius', 40 + offset)
+    highlight.setAttr('fill', 'black')
+    this.konvaObj.add(highlight)
+    highlight.setZIndex(0)
+  }
+  unselect = () => {
+    this.selected = false
+    const highlight = this.konvaObj.findOne('#highlight')
+    highlight.destroy()
+  }
+  select = (clear=false) => {
+    const budShape = this.shapeObj
+    utils.selectObj(this, utils.ObjType.Bud, this._select, this._unselect, clear)
+  }
+  init = (position, _objId) => {
     this.loaded = true
     const radius = 40
     let pos
@@ -386,8 +403,14 @@ class Bud {
     } else {
       pos = {x: this.x, y: this.y}
     }
+    let objId
+    if (_objId) {
+      objId = _objId
+    } else {
+      objId = this.objId
+    }
     const konvaPos = utils.calcKonvaPosByPos({x: pos.x, y: pos.y})
-    const budGroup = new Konva.Group(drawConfig.budGroupConfig(konvaPos.x, konvaPos.y))
+    const budGroup = new Konva.Group(drawConfig.budGroupConfig(konvaPos.x, konvaPos.y, objId))
     budGroup.on('dragmove', this.dragMove)
     budGroup.on('dragend', this.dragEnd)
     budGroup.on('click', this.click)
@@ -424,6 +447,7 @@ class Bud {
       for (const silk of Object.values(this.attachedSilk)) {
         silk.init()
       }
+      if (this.objId in utils.getGlobals().selected) this.select()
     }
   }
   undo = () => {

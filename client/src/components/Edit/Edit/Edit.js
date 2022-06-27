@@ -106,6 +106,83 @@ function Edit() {
       scrollDown(e.deltaY)
       scrollRight(e.deltaX)
     })
+    let boxStart = null
+    let boxEnd = null
+    const mouseclickUnselectAll = () => {
+      console.log(utils.getGlobals().selecting)
+      if (!utils.getGlobals().selecting) {
+        for (const { obj, type } of Object.values(utils.getGlobals().selected)) {
+          console.log(obj)
+          obj.unselect()
+        }
+        utils.getGlobals().selected = {}
+      }
+    }
+    utils.getStage().on('click', mouseclickUnselectAll)
+    const mousemove = (e) => {
+      boxEnd = utils.getCanvasMousePos(e.clientX, e.clientY)
+      const selectBox = utils.getMainLayer().find('#selectBox')[0]
+      selectBox.setAttr('width', boxEnd.x - boxStart.x)
+      selectBox.setAttr('height', boxEnd.y - boxStart.y)
+      for (const bud of utils.getBudGroup().children) {
+        const objId = bud.getAttr('objId')
+        const budObj = utils.getObjById(objId)
+        if (budObj.selected) continue
+        const pos = {x: bud.getX(), y: bud.getY()}
+        const inside = utils.withinRect(boxStart, boxEnd, pos)
+        if (inside) {
+          budObj.select()
+        }
+      }
+      for (const _silk of utils.getSilkGroup().children) {
+        const silkId = _silk.getAttr('silkId')
+        const silkObj = utils.getSilkById(silkId)
+        if (silkObj.selected) continue
+        const silk = silkObj.silkObj
+        const points = silk.getPoints()
+
+        const pos1 = {x: points[0], y: points[1]}
+        const pos2 = {x: points[2], y: points[3]}
+
+        for (const pos of [boxStart, boxEnd]) {
+          const in1x = pos1.x <= pos.x && pos.x <= pos2.x
+          const in1y = pos1.y <= pos.y && pos.y <= pos2.y
+          // if (String(silkObj.silkId) === '3') console.log(in1x, in1y)
+
+          const in2x = pos2.x <= pos.x && pos.x <= pos1.x
+          const in2y = pos2.y <= pos.y && pos.y <= pos1.y
+          // if (String(silkObj.silkId) === '3') console.log(in2x, in2y)
+          if ((in1x || in2x) && (in1y || in2y)) { silkObj.select(); break }
+        }
+      }
+    }
+    const isDrag = () => {
+      document.addEventListener('mousemove', mousemove)
+      utils.getGlobals().selecting = true
+      document.removeEventListener('mousemove', isDrag)
+    }
+    document.getElementById('divCanvas').addEventListener('mousedown', e => {
+      boxEnd = null
+      boxStart = utils.getCanvasMousePos(e.clientX, e.clientY)
+      const selectBox = new Konva.Rect({
+        x: boxStart.x,
+        y: boxStart.y,
+        width: 0,
+        height: 0,
+        fill: 'black',
+        opacity: 0.4,
+        id: 'selectBox',
+      })
+      utils.getMainLayer().add(selectBox)
+      document.addEventListener('mousemove', isDrag)
+    })
+    document.addEventListener('mouseup', e => {
+      const selectBox = utils.getMainLayer().find('#selectBox')[0]
+      selectBox.destroy()
+      document.removeEventListener('mousemove', mousemove)
+      utils.getGlobals().selecting = false
+      document.removeEventListener('mousemove', isDrag)
+    })
     setInterval(() => {
       if (utils.getGlobals().scrolling) {
         utils.getGlobals().scrolling = false
@@ -152,7 +229,7 @@ function Edit() {
     globals.historyIndex = -1
     globals.triggerDragLine = false
     globals.draggingLine = false
-    globals.selected = null
+    globals.selected = {}
     globals.viewing = null
     globals.unselectFunc = null
     globals.silkObjs = {}
@@ -162,6 +239,7 @@ function Edit() {
     }
     globals.lastMousePos = null
     globals.dragging = false
+    globals.selecting = false
     globals.testedPath = []
     globals.scrolling = false
     globals.wasScrolling = false
@@ -177,7 +255,7 @@ function Edit() {
     const tempObjs = []
     for (const [ objId, obj ] of Object.entries(spoodawebData)) {
       const bud = new BudShapes.Bud(obj.objId)
-      bud.init(obj.position)
+      bud.init(obj.position, objId)
       bud.fromJson(obj)
       const screenBounds = utils.calcScreenBounds()
       const inRect = utils.withinRect(screenBounds[0], screenBounds[1], obj.position)

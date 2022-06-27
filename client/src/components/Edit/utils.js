@@ -25,6 +25,12 @@ const getSilkGroup = () => {
 }
 export { getSilkGroup }
 
+const getSilkById = (id) => {
+  const silks = getGlobals().silkObjs
+  return silks[Number(id)]
+}
+export { getSilkById }
+
 const getObjs = () => {
   return getGlobals().objs
 }
@@ -65,7 +71,7 @@ const calcScreenBounds = () => {
   bound1.x = -rootPos.x
   const divCanvas = document.getElementById('divCanvas')
   const bound2 = { x: bound1.x + divCanvas.offsetWidth, y: bound1.y + divCanvas.offsetHeight }
-  const padding = 0
+  const padding = 500
   bound1.x -= padding
   bound1.y -= padding
   bound2.x += padding
@@ -77,6 +83,21 @@ export { calcScreenBounds }
 const withinRect = (start, end, point) => {
   const x = point.x
   const y = point.y
+  if (end.x < start.x && end.y < start.y) {
+    const leStart = start
+    start = end
+    end = leStart
+  }
+  if (start.x - end.x >= 0) {
+    const leStart = {...start}
+    start = {x: end.x, y: start.y}
+    end = {x: leStart.x, y: end.y}
+  }
+  if (start.y - end.y >= 0) {
+    const leStart = {...start}
+    start = {x: start.x, y: end.y}
+    end = {x: end.x, y: leStart.y}
+  }
   const xStartIn = x > start.x
   const yStartIn = y > start.y
   const xEndIn = x < end.x
@@ -196,27 +217,15 @@ const viewObj = (objId=null) => {
 }
 export { viewObj }
 
-const selectObj = (obj, type, konvaObj, selectFunc, unselectFunc) => {
-  getGlobals().selected = {obj: obj, type: type}
+const selectObj = (obj, type, selectFunc, clear=false) => {
+  const objId = obj.objId || obj.silkId
+  if (clear) {
+    getGlobals().selected = {[objId]: {obj: obj, type: type}}
+  } else {
+    getGlobals().selected[objId] = {obj: obj, type: type}
+  }
   console.log('selected', getGlobals().selected)
   selectFunc()
-  const click = () => {
-    if (getGlobals().dragging) {
-      getGlobals().dragging = false
-      return
-    }
-    console.log('unselected')
-    getGlobals().selected = null
-    unselectFunc()
-    document.getElementById('divCanvas').removeEventListener('click', click)
-  }
-  const mouseleave = () => {
-    console.log('left')
-    document.getElementById('divCanvas').addEventListener('click', click)
-    konvaObj.off('mouseleave', mouseleave)
-  }
-  getGlobals().unselectFunc = click
-  konvaObj.on('mouseleave', mouseleave)
 }
 export { selectObj }
 

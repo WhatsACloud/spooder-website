@@ -3,12 +3,12 @@ import Konva from 'konva'
 
 import * as SilkUtils from './SilkUtils'
 import * as utils from '../utils'
-import { select } from '../Select'
 
 class Silk {
   konvaObj = null
   silkObj = null
   highlight = null
+  selected = false
   pos1 = {x: null, y: null}
   pos2 = {x: null, y: null}
   silkId = null
@@ -55,8 +55,9 @@ class Silk {
     this.silkObj.setPoints(this.getKonvaPoints())
     this.highlight?.setPoints(this.getKonvaPoints())
   }
-  mouseDown = () => {
-    this.select()
+  click = (e) => {
+    e.cancelBubble = true
+    this.select(true)
   }
   delete = () => {
     const redoFunc = () => {
@@ -95,7 +96,13 @@ class Silk {
     this.initSilkInBud(this.bud2, this.bud1)
     this.init()
   }
-  select = () => {
+  unselect = () => {
+    this.selected = false
+    this.highlight.destroy()
+    this.highlight = null
+  }
+  select = (clear=false) => {
+    this.selected = true
     const highlight = new Konva.Line({
         points: this.getKonvaPoints(),
         stroke: 'blue',
@@ -109,11 +116,7 @@ class Silk {
       this.silkObj.setZIndex(1)
       highlight.setZIndex(0)
     }
-    const unselectFunc = () => {
-      this.highlight = null
-      highlight.destroy()
-    }
-    utils.selectObj(this, utils.ObjType.Silk, this.konvaObj, selectFunc, unselectFunc)
+    utils.selectObj(this, utils.ObjType.Silk, selectFunc, clear)
   }
   unload = () => {
     if (!this.loaded) return
@@ -122,8 +125,8 @@ class Silk {
   }
   init = () => {
     if (this.loaded) return
-    const group = new Konva.Group()
-    group.on('mousedown', this.mouseDown)
+    const group = new Konva.Group({silkId: this.silkId})
+    group.on('click', this.click)
     const line = new Konva.Line({
         points: this.getKonvaPoints(),
         stroke: 'black',

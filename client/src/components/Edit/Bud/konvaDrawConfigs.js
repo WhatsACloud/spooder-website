@@ -1,9 +1,10 @@
 import * as BudUtils from './BudUtils'
 
-const budGroupConfig = (x, y) => {
+const budGroupConfig = (x, y, objId) => {
   return {
     x: x,
     y: y,
+    objId: objId,
     draggable: true,
   }
 }
@@ -27,6 +28,7 @@ const budShapeConfig = () => {
     shadowBlur: 10,
     shadowOffset: { x: 10, y: 10 },
     shadowOpacity: 0.5,
+    id: 'budShape',
   }
 }
 export { budShapeConfig }
