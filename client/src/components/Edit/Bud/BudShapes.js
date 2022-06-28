@@ -188,6 +188,7 @@ class Bud {
   tsts = null // time since test started
   loaded = false
   viewing = false
+  oldAttachedSilk = null
 
   mouseFollower = (e) => {
     const { x, y } = utils.getCanvasMousePos(e.clientX, e.clientY)
@@ -251,7 +252,7 @@ class Bud {
   }
   click = (e) => {
     e.cancelBubble = true
-    if(e.button !== 0) return
+    if(e.evt.button !== 0) return
     const modes = utils.getGlobals().modes
     if (modes.autoDrag) {
       this.konvaObj.setDraggable(false)
@@ -389,11 +390,12 @@ class Bud {
   unselect = () => {
     this.selected = false
     const highlight = this.konvaObj.findOne('#highlight')
-    highlight.destroy()
+    highlight?.destroy()
   }
   select = (clear=false) => {
     const budShape = this.shapeObj
-    utils.selectObj(this, utils.ObjType.Bud, this._select, this._unselect, clear)
+    utils.clearSelected()
+    utils.selectObj(this, utils.ObjType.Bud, this._select, clear)
   }
   init = (position, _objId) => {
     this.loaded = true
@@ -423,6 +425,9 @@ class Bud {
     utils.getBudGroup().add(budGroup)
     this.konvaObj = budGroup
   }
+  _delete = () => { // for polymorphism
+    this.undo()
+  }
   delete = () => {
     this.undo()
     utils.addToHistory(this.redo, this.undo)
@@ -442,7 +447,7 @@ class Bud {
     }
   }
   load = () => {
-    if (!this.loaded) {
+    if (!this.loaded && !(this.del)) {
       this.init()
       this.setText(this.json.word)
       for (const silk of Object.values(this.attachedSilk)) {
@@ -453,6 +458,8 @@ class Bud {
   }
   undo = () => {
     this.konvaObj.destroy()
+    this.textObj = null
+    this.oldAttachedSilk = {...this.attachedSilk}
     for (const silk of Object.values(this.attachedSilk)) {
       silk._delete()
     }
@@ -461,14 +468,23 @@ class Bud {
       return
     }
     this.del = true
+    this.loaded = false
   }
+  restore = () => { this.redo() } // for polymorphism
   redo = () => {
     this.del = false
     this.init()
-    this.updateKonvaObj()
+    this.setText(this.json.word)
+    for (const silk of Object.values(this.oldAttachedSilk)) {
+      console.log(silk)
+      silk.restore()
+    }
     if (this.new) {
       utils.addToNewObjs(this.objId)
     }
+  }
+  initSilk = () => {
+    console.log(this.json.attachedTos)
   }
   constructor(nextObjId, x=null, y) {
     utils.addObjs({[nextObjId]: this})

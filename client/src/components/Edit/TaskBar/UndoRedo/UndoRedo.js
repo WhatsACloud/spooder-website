@@ -24,6 +24,7 @@ const undo = () => {
     last.undo(undo)
   }
 }
+export { undo }
 
 const redo = () => {
   const historyIndex = getHistoryIndex()
@@ -35,6 +36,7 @@ const redo = () => {
     last.redo(redo)
   }
 }
+export { redo }
 
 function UndoRedo() {
   return (

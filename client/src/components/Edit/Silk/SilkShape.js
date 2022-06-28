@@ -15,6 +15,7 @@ class Silk {
   _bud1 = null
   _bud2 = null
   loaded = false
+  del = false
   get bud1() {return this._bud1}
   get bud2() {return this._bud2}
   // set bud1(id) { this._setBud('_bud1Id', '_pos1', id) }
@@ -56,8 +57,9 @@ class Silk {
     this.highlight?.setPoints(this.getKonvaPoints())
   }
   click = (e) => {
+    console.log('what')
     e.cancelBubble = true
-    if (e.button !== 0) return
+    if (e.evt.button !== 0) return
     this.select(true)
   }
   delete = () => {
@@ -71,6 +73,7 @@ class Silk {
     redoFunc()
   }
   _delete = () => {
+    this.del = true
     const attachedTos1 = this.bud1.json.attachedTos
     for (let i = 0; i < attachedTos1.length; i++) {
       if (attachedTos1[i] === this.bud2.objId) {
@@ -96,13 +99,17 @@ class Silk {
     this.initSilkInBud(this.bud1, this.bud2)
     this.initSilkInBud(this.bud2, this.bud1)
     this.init()
+    this.del = false
   }
   unselect = () => {
     this.selected = false
-    this.highlight.destroy()
-    this.highlight = null
+    if (this.highlight) {
+      this.highlight.destroy()
+      this.highlight = null
+    }
   }
   select = (clear=false) => {
+    utils.clearSelected()
     this.selected = true
     const highlight = new Konva.Line({
         points: this.getKonvaPoints(),
@@ -125,7 +132,7 @@ class Silk {
     this.konvaObj.destroy()
   }
   init = () => {
-    if (this.loaded) return
+    if (this.loaded && !(this.del)) return
     const group = new Konva.Group({silkId: this.silkId})
     group.on('click', this.click)
     const line = new Konva.Line({

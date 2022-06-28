@@ -11,13 +11,18 @@ import React, { memo, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Authorizer from '../../Shared/Authorizer'
 import styles from '../edit.module'
+import { Operation, Operations } from './Operations'
 
 import { preventZoom, preventZoomScroll } from '../PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from '../Events'
 import * as OtherElements from '../OtherElements'
 import { Background } from '../Background'
+import { undo, redo } from '../TaskBar/UndoRedo'
 
 import { ContextMenu } from './ContextMenu'
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBackspace } from '@fortawesome/free-solid-svg-icons'
 
 import api from '../../../services/api'
 
@@ -112,14 +117,15 @@ function Edit() {
     })
     let boxStart = null
     let boxEnd = null
-    const mouseclickUnselectAll = () => {
+    const mouseclickUnselectAll = (e) => {
+      if (e.evt.button !== 0) return
       console.log(utils.getGlobals().selecting)
       if (!utils.getGlobals().selecting) {
         for (const { obj, type } of Object.values(utils.getGlobals().selected)) {
           console.log(obj)
           obj.unselect()
         }
-        utils.getGlobals().selected = {}
+        utils.clearSelected()
       }
     }
     utils.getStage().on('click', mouseclickUnselectAll)
@@ -165,6 +171,15 @@ function Edit() {
       utils.getGlobals().selecting = true
       document.removeEventListener('mousemove', isDrag)
     }
+    const stopSelecting = e => {
+      if (e.button !== 0) return
+      const selectBox = utils.getMainLayer().find('#selectBox')[0]
+      selectBox.destroy()
+      document.removeEventListener('mousemove', mousemove)
+      utils.getGlobals().selecting = false
+      document.removeEventListener('mousemove', isDrag)
+      document.removeEventListener('mouseup', stopSelecting)
+    }
     document.getElementById('divCanvas').addEventListener('mousedown', e => {
       if (e.button !== 0) return
       boxEnd = null
@@ -180,14 +195,7 @@ function Edit() {
       })
       utils.getMainLayer().add(selectBox)
       document.addEventListener('mousemove', isDrag)
-    })
-    document.addEventListener('mouseup', e => {
-      if (e.button !== 0) return
-      const selectBox = utils.getMainLayer().find('#selectBox')[0]
-      selectBox.destroy()
-      document.removeEventListener('mousemove', mousemove)
-      utils.getGlobals().selecting = false
-      document.removeEventListener('mousemove', isDrag)
+      document.addEventListener('mouseup', stopSelecting)
     })
     setInterval(() => {
       if (utils.getGlobals().scrolling) {
@@ -253,6 +261,48 @@ function Edit() {
     const keybinds = new Keybinds(true)
     globals.keybinds = keybinds
 
+    const operations = new Operations()
+    globals.operations = operations
+
+    const deleteFunc = () => {
+      const selected = {...utils.getGlobals().selected}
+      const redoFunc = () => {
+        for (const { obj, type } of Object.values(selected)) {
+          obj._delete()
+        }
+      }
+      const undoFunc = () => {
+        for (const { obj, type } of Object.values(selected)) {
+          obj.restore()
+        }
+      }
+      utils.addToHistory(undoFunc, redoFunc)
+      redoFunc()
+    }
+    const del = new Operation(
+      'Delete',
+      deleteFunc,
+      [['Backspace', <FontAwesomeIcon icon={faBackspace} />]],
+      utils.ObjType.All
+    )
+    operations.add(del)
+
+    const leUndo = new Operation(
+      'Undo',
+      undo,
+      [['Control', 'ctrl'], ['z']],
+      utils.ObjType.Default
+    )
+    operations.add(leUndo)
+
+    const leRedo = new Operation(
+      'Redo',
+      redo,
+      [['Control', 'ctrl'], ['Shift', 'shift'], ['z']],
+      utils.ObjType.Default
+    )
+    operations.add(leRedo)
+
     const budGroup = new Konva.Group()
     const silkGroup = new Konva.Group()
     utils.getMainLayer().add(budGroup, silkGroup)
@@ -281,10 +331,10 @@ function Edit() {
 
     utils.setRootPos({x: 0, y: 0})
     const scrollAmt = 20
-    keybinds.add('ArrowUp', () => scrollDown(-scrollAmt))
-    keybinds.add('ArrowDown', () => scrollDown(scrollAmt))
-    keybinds.add('ArrowLeft', () => scrollRight(-scrollAmt))
-    keybinds.add('ArrowRight', () => scrollRight(scrollAmt))
+    keybinds.add(['ArrowUp'], () => scrollDown(-scrollAmt))
+    keybinds.add(['ArrowDown'], () => scrollDown(scrollAmt))
+    keybinds.add(['ArrowLeft'], () => scrollRight(-scrollAmt))
+    keybinds.add(['ArrowRight'], () => scrollRight(scrollAmt))
     const mouseMoveFunc = (e) => {
       const pos = {x: e.screenX, y: e.screenY}
       const globals = utils.getGlobals()
@@ -297,7 +347,11 @@ function Edit() {
       scrollRight(-diff.x * multiplier)
       utils.getGlobals().lastMousePos = pos
     }
-    document.getElementById('divCanvas').addEventListener('contextmenu', (e) => e.preventDefault())
+    document.getElementById('divCanvas').addEventListener('contextmenu', (e) => {
+      e.preventDefault()
+      setContextMenuOn(true)
+      setContextMenuPos({x: e.clientX, y: e.clientY})
+    })
     const stopDrag = () => {
       const globals = utils.getGlobals()
       utils.setCursor("default")
@@ -324,15 +378,15 @@ function Edit() {
         document.addEventListener('mouseup', otherFunc)
       }
     })
-    utils.getStage().on('click', (e) => {
-      if (utils.getGlobals().dragging) {
-        utils.getGlobals().dragging = false
-        return
+    document.getElementById('divCanvas').addEventListener('mousedown', (e) => {
+      // if (utils.getGlobals().dragging) {
+      //   utils.getGlobals().dragging = false
+      //   return
+      // }
+      if (e.button === 0) {
+        setContextMenuOn(false)
       }
-      if (e.evt.button === 0) setContextMenuOn(false)
-      if (!(e.evt.button === 2)) return
-      setContextMenuOn(true)
-      setContextMenuPos({x: e.evt.clientX, y: e.evt.clientY})
+      if (e.button !== 2) return
     })
     return () => {
       document.removeEventListener('keydown', preventZoom)
@@ -355,7 +409,8 @@ function Edit() {
         ></TaskBar>
       <ContextMenu
         on={contextMenuOn}
-        pos={contextMenuPos}></ContextMenu>
+        pos={contextMenuPos}
+        setContextMenuOn={setContextMenuOn}></ContextMenu>
       <div className={styles.wrapper}>
         <OtherElements.ObjectDrawer
           setDragging={setDragging}

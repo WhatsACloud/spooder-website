@@ -6,15 +6,26 @@ class Keybinds {
 
   binds = {}
   down = {}
-  add(key, func, type=Keybinds.keyDown) {
-    // if (!type) type = Keybinds.keyDown
-    console.log(type)
-    if (!this.binds[key]) {
-      this.binds[key] = [{func: func, type: type}]
-      return
+  add(keys, func, type=Keybinds.keyDown) {
+    const single = keys.length === 1
+    if (!single) {
+      for (const key of keys) {
+        this.down[key] = false
+        if (!this.binds[key]) {
+          this.binds[key] = [{func: func, type: type, keyCombi: single ? null : [...keys]}]
+          continue
+        }
+        this.binds[key].push({func: func, type: type, keyCombi: single ? null : [...keys]})
+      }
+    } else {
+      const key = keys
+      if (!this.binds[key]) {
+        this.binds[key] = [{func: func, type: type, keyCombi: single ? null : [...keys]}]
+        return
+      }
+      this.binds[key].push({func: func, type: type, keyCombi: single ? null : [...keys]})
+      this.down[key] = false
     }
-    this.binds[key].push({func: func, type: type})
-    this.down[key] = false
   }
   del(key, func) {
     if (!this.binds[key])
@@ -29,14 +40,26 @@ class Keybinds {
   isDown(key) { return this.down[key] }
   constructor(debugMode) {
     document.addEventListener('keydown', (e) => {
-      if (e.key in this.binds) {
-        console.log(this.binds[e.key])
-        for (const { func, type } of this.binds[e.key]) {
+      const keyPressed = e.key.length > 1 ? e.key : e.key.toLowerCase()
+      if (keyPressed in this.binds) {
+        this.down[keyPressed] = true
+        for (const { func, type, keyCombi } of this.binds[keyPressed]) {
           if (type === Keybinds.keyDown) {
-            func(e)
+            let all = true
+            if (keyCombi !== null) {
+              console.log(this.down, keyCombi)
+              for (const leKey of keyCombi) {
+                if (!(this.down[leKey])) {
+                  all = false
+                  break
+                }
+              }
+            } else {
+              func(e)
+            }
+            if (all) func(e)
           }
         }
-        this.down[e.key] = true
       } else if (debugMode) {
         console.log(e.key)
       }

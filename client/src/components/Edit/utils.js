@@ -209,6 +209,8 @@ export { setRootPos }
 class ObjType {
   static Bud = Symbol("bud")
   static Silk = Symbol("Silk")
+  static All = Symbol("All")
+  static Default = Symbol("Default")
 }
 export { ObjType }
 
@@ -217,11 +219,20 @@ const viewObj = (objId=null) => {
 }
 export { viewObj }
 
+const clearSelected = () => {
+  for (const { obj } of Object.values(getGlobals().selected)) {
+    obj.unselect()
+  }
+  getGlobals().selected = {}
+}
+export { clearSelected }
+
 const selectObj = (obj, type, selectFunc, clear=false) => {
   const objId = obj.objId || obj.silkId
   if (clear) {
     getGlobals().selected = {[objId]: {obj: obj, type: type}}
   } else {
+    clearSelected()
     getGlobals().selected[objId] = {obj: obj, type: type}
   }
   console.log('selected', getGlobals().selected)

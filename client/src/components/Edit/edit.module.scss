@@ -90,6 +90,50 @@ div.wrapper {
 }
 
 div.contextMenu {
+  display: flex;
+  flex-direction: column;
   position: absolute;
-  background-color: bisque;
+  background-color: white;
+  z-index: 10;
+  box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.63);
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border-radius: 3px;
+  div.btn {
+    font-size: 15px;
+    display: flex;
+    flex-direction: row;
+    background-color: white;
+    @include std-button;
+    border-radius: 0;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    margin: 0;
+    width: 250px;
+    p {
+      margin: 0;
+      margin-top: -2px;
+    }
+    @mixin keybindBtn() {
+      $font-size: 15px;
+      font-size: $font-size;
+      $color: rgb(210, 210, 210);
+      padding: 5px;
+      margin-top: -7px;
+      margin-right: 0;
+      border-style: solid;
+      border-radius: 7.5px;
+      border-width: 1px;
+      border-color: $color;
+      color: $color;
+    }
+    div.firstKeybindBtn {
+      margin-left: auto;
+      @include keybindBtn;
+    }
+    div.keybindBtn {
+      @include keybindBtn;
+    }
+  }
 }
