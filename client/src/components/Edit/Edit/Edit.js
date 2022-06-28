@@ -291,6 +291,7 @@ function Edit() {
       'Undo',
       undo,
       [['Control', 'ctrl'], ['z']],
+      // [['u']], // vim keybindings lmao
       utils.ObjType.Default
     )
     operations.add(leUndo)
@@ -299,6 +300,7 @@ function Edit() {
       'Redo',
       redo,
       [['Control', 'ctrl'], ['Shift', 'shift'], ['z']],
+      // [['Control', 'ctrl'], ['r']],
       utils.ObjType.Default
     )
     operations.add(leRedo)
