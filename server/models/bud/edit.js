@@ -3,6 +3,7 @@ const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
 const AttachedTo = require('../../databaseModels/AttachedTo')(sequelize, DataTypes)
 const error = require('../../middleware/error')
 const Utils = require('./Utils')
+const categories = require('./categories')
 
 async function findBud(spoodawebId, objId, deleted=Utils.DelType.NotDel, transaction) {
   const query = {
@@ -50,7 +51,7 @@ async function markBudForDeletion(spoodawebId, budId, transaction) {
   await obj.update({"deletedAt": Date.now()}, {transaction: transaction})
 }
 
-async function createBud(spoodawebId, objId, obj, transaction) {
+async function createBud(spoodawebId, objId, obj, categId, transaction) {
   const possibleDbBud = await findBud(spoodawebId, objId, transaction)
   if (possibleDbBud !== false) return false
   const _bud = await Bud.create({
@@ -63,6 +64,7 @@ async function createBud(spoodawebId, objId, obj, transaction) {
     definition: obj.definition,
     sound: obj.sound,
     context: obj.context,
+    categ_id: categId,
     link: obj.link,
   }, {transaction: transaction})
   return _bud
@@ -91,7 +93,7 @@ async function editAttachedTo(budId, attachedTo, transaction) {
   return _attachedTos
 }
 
-async function editBud(spoodawebId, objId, obj, transaction) {
+async function editBud(spoodawebId, objId, obj, categId, transaction) {
   const bud = await findBud(spoodawebId, objId, Utils.DelType.Both, transaction)
   if (bud === false) return false 
   // const bud = await Bud.findOne({ where: { fk_spoodaweb_id: spoodawebId, objId: objId }})
@@ -104,6 +106,7 @@ async function editBud(spoodawebId, objId, obj, transaction) {
     sound: obj.sound,
     context: obj.context,
     example: obj.example,
+    categ: categId,
     link: obj.link,
   }
   if (obj.restore) {
@@ -113,8 +116,8 @@ async function editBud(spoodawebId, objId, obj, transaction) {
   return bud 
 }
 
-const addBud = async (spoodawebId, obj, objId, transaction) => {
-  const _budId = await createBud(spoodawebId, objId, obj, transaction)
+const addBud = async (spoodawebId, obj, objId, categ, transaction) => {
+  const _budId = await createBud(spoodawebId, objId, obj, categ, transaction)
   if (_budId === false) throw error.create(`object ${objId-1} (bud) already exists within database.`)
   objId += 1
   const budId = _budId.dataValues.id
@@ -123,9 +126,9 @@ const addBud = async (spoodawebId, obj, objId, transaction) => {
   }
 }
 
-const completeEditBud = async (spoodawebId, clientObjId, objId, obj, transaction) => {
+const completeEditBud = async (spoodawebId, clientObjId, objId, obj, categ, transaction) => {
   if (!obj.del) {
-    const bud = await editBud(spoodawebId, clientObjId, obj, transaction)
+    const bud = await editBud(spoodawebId, clientObjId, obj, categ, transaction)
     if (bud === false) {
       return false
     }
@@ -145,12 +148,14 @@ module.exports = { // please add support for positions, budId
       const data = req.body.spoodawebData
       const spoodawebId = req.body.spoodawebId
       transaction = await sequelize.transaction()
+      const categs = await categories.updateCategories(spoodawebId, req.body.categories, transaction)
       let objId = await Utils.getNextObjId(spoodawebId)
       if (await Utils.findSpoodaweb(spoodawebId) === false) throw error.create('The spoodaweb you are editing does not exist or has been deleted.')
       for (const [ clientObjId, obj ] of Object.entries(data)) {
-        const bud = await completeEditBud(spoodawebId, clientObjId, objId, obj, transaction)
+        const categ = categs[obj.category].id
+        const bud = await completeEditBud(spoodawebId, clientObjId, objId, obj, categ, transaction)
         if (bud === false) {
-          await addBud(spoodawebId, obj, objId, transaction)
+          await addBud(spoodawebId, obj, objId, categ, transaction)
           objId++
         }
       }

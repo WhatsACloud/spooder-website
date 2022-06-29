@@ -11,6 +11,15 @@ module.exports = (sequelize, DataTypes) => {
           key: 'id'
         }
       },
+      categ_id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        foreignKey: true,
+        references: {
+          model: 'Category',
+          key: 'id'
+        }
+      },
       word: {
         type: DataTypes.STRING,
         allowNull: false
@@ -56,6 +65,7 @@ module.exports = (sequelize, DataTypes) => {
   Bud.associate = (models) => {
     Bud.belongsTo(models.Spoodawebs)
     Bud.hasMany(models.AttachedTo, {foreignKey: DataTypes.UUID})
+    Bud.hasMany(models.Category, {foreignKey: DataTypes.UUID})
   }
   return Bud
 }
