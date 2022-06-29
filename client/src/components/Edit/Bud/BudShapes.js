@@ -378,7 +378,8 @@ class Bud {
   view = () => {
     utils.viewObj(this.objId)
     this.viewing = true
-    this.select(true)
+    // this.select(true)
+    this.unselect()
   }
   _select = () => {
     this.selected = true

@@ -11,7 +11,7 @@ function KeybindBtn({ num, text, icon }) {
   )
 }
 
-function OpBtn({ operation, setContextMenuOn }) {
+function OpBtn({ operation, setContextMenuOn, last }) {
   const [ keys, setKeys ] = useState()
   useEffect(() => {
     const _keys = []
@@ -26,7 +26,7 @@ function OpBtn({ operation, setContextMenuOn }) {
   }, [])
   return (
     <div
-      className={styles.btn}
+      className={last ? styles.lastBtn : styles.btn}
       onClick={e => {
         operation.func()
         setContextMenuOn(false)
@@ -55,15 +55,21 @@ function ContextMenu({ on, pos, setContextMenuOn }) {
         leTypes.push(...types, utils.ObjType.All)
       }
       let i = 0
+      let lastOp = null
       for (const type of leTypes) {
         console.log(type, operations.operations)
         for (const operation of operations.operations[type]) {
           toRender.push(
-            <OpBtn key={i} operation={operation} setContextMenuOn={setContextMenuOn}></OpBtn>
+            <OpBtn key={i} last={false} operation={operation} setContextMenuOn={setContextMenuOn}></OpBtn>
           )
+          lastOp = operation
           i++
         }
       }
+      toRender.pop()
+      toRender.push(
+        <OpBtn key={i} last={true} operation={lastOp} setContextMenuOn={setContextMenuOn}></OpBtn>
+      )
     }
     setRendered(toRender)
   }, [ on ])

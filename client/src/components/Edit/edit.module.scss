@@ -99,41 +99,54 @@ div.contextMenu {
   padding-top: 5px;
   padding-bottom: 5px;
   border-radius: 3px;
-  div.btn {
-    font-size: 15px;
-    display: flex;
-    flex-direction: row;
-    background-color: white;
-    @include std-button;
-    border-radius: 0;
-    padding-left: 5px;
-    padding-right: 5px;
-    padding-bottom: 5px;
-    margin: 0;
-    width: 250px;
-    p {
+  @mixin keybindBtn() {
+    $font-size: 15px;
+    font-size: $font-size;
+    $color: rgb(210, 210, 210);
+    padding: 5px;
+    margin-top: -7px;
+    margin-left: 1px;
+    margin-right: 0;
+    border-style: solid;
+    border-radius: 7.5px;
+    border-width: 1px;
+    border-color: $color;
+    color: $color;
+  }
+  @mixin operationBtn {
+      font-size: 15px;
+      display: flex;
+      flex-direction: row;
+      background-color: white;
+      @include std-button;
+      border-radius: 0;
+      border-bottom-color: rgb(199, 199, 199);
+      border-bottom-style: solid;
+      border-bottom-width: 1px;
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-bottom: 5px;
       margin: 0;
-      margin-top: -2px;
+      width: 250px;
+      p {
+        margin: 0;
+        margin-top: -2px;
+      }
+      div.firstKeybindBtn {
+        @include keybindBtn;
+        margin-left: auto;
+      }
+      div.keybindBtn {
+        @include keybindBtn;
+      }
     }
-    @mixin keybindBtn() {
-      $font-size: 15px;
-      font-size: $font-size;
-      $color: rgb(210, 210, 210);
-      padding: 5px;
-      margin-top: -7px;
-      margin-right: 0;
-      border-style: solid;
-      border-radius: 7.5px;
-      border-width: 1px;
-      border-color: $color;
-      color: $color;
-    }
-    div.firstKeybindBtn {
-      margin-left: auto;
-      @include keybindBtn;
-    }
-    div.keybindBtn {
-      @include keybindBtn;
+    div {
+      &.btn {
+        @include operationBtn;
+      }
+      &.lastBtn {
+        @include operationBtn;
+        border-bottom-style: none;
+      }
     }
   }
-}
