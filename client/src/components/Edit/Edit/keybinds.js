@@ -47,7 +47,6 @@ class Keybinds {
           if (type === Keybinds.keyDown) {
             let all = true
             if (keyCombi !== null) {
-              console.log(this.down, keyCombi)
               for (const leKey of keyCombi) {
                 if (!(this.down[leKey])) {
                   all = false
@@ -56,6 +55,7 @@ class Keybinds {
               }
             } else {
               func(e)
+              continue
             }
             if (all) func(e)
           }

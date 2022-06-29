@@ -394,7 +394,6 @@ class Bud {
   }
   select = (clear=false) => {
     const budShape = this.shapeObj
-    utils.clearSelected()
     utils.selectObj(this, utils.ObjType.Bud, this._select, clear)
   }
   init = (position, _objId) => {
@@ -493,7 +492,7 @@ class Bud {
     this.json.initialising = true
     this.new = true
     nextObjId = Number(nextObjId)
-    this.init()
+    this.init(null, nextObjId)
     this.x = x
     this.y = y
     this.objId = nextObjId

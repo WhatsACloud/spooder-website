@@ -2,7 +2,6 @@
 ISSUES
 
 1. select not consistent
-2. Add mass select
 3. Redo backclickdetector so can share one div
 
 */
@@ -44,31 +43,12 @@ Konva.hitOnDragEnabled = true
 const gridLink = "http://phrogz.net/tmp/grid.gif"
 
 function MouseMoveDetector() {
-  const [ middleMouseDown, setMiddleMouseDown ] = useState(false)
-  const [ mousePos, setMousePos ] = useState({
-    x: null,
-    y: null
-  })
   useEffect(() => {
     const mousePosWrapper = (e) => {
-      mouseMove(e, middleMouseDown, mousePos, setMousePos)
-    }
-    const mouseDownWrapper = (e) => {
-      mouseDown(e, setMiddleMouseDown)
-    }
-    const mouseUpWrapper = (e) => {
-      // mouseUp(e, setMiddleMouseDown, setDragging)
-      mouseUp(e, setMiddleMouseDown)
+      utils.getGlobals().mousePos = {x: e.pageX, y: e.pageY}
     }
     document.addEventListener('mousemove', mousePosWrapper)
-    document.addEventListener('mouseup', mouseUpWrapper)
-    document.addEventListener('mousedown', mouseDownWrapper)
-    return () => {
-      document.removeEventListener('mousemove', mousePosWrapper)
-      document.removeEventListener('mousedown', mouseDownWrapper)
-      document.removeEventListener('mouseup', mouseUpWrapper)
-    }
-  }, [ mousePos, middleMouseDown ])
+  }, [])
   return <></>
 }
 
@@ -154,16 +134,37 @@ function Edit() {
         const pos1 = {x: points[0], y: points[1]}
         const pos2 = {x: points[2], y: points[3]}
 
-        for (const pos of [boxStart, boxEnd]) {
-          const in1x = pos1.x <= pos.x && pos.x <= pos2.x
-          const in1y = pos1.y <= pos.y && pos.y <= pos2.y
-          // if (String(silkObj.silkId) === '3') console.log(in1x, in1y)
+        const inRect1 = utils.withinRect(boxStart, boxEnd, pos1)
+        if (inRect1) console.log("inRect1", inRect1)
+        if (inRect1) { silkObj.select(); continue }
+        const inRect2 = utils.withinRect(boxStart, boxEnd, pos2)
+        if (inRect2) console.log("inRect2", inRect2)
+        if (inRect2) { silkObj.select(); continue }
 
-          const in2x = pos2.x <= pos.x && pos.x <= pos1.x
-          const in2y = pos2.y <= pos.y && pos.y <= pos1.y
-          // if (String(silkObj.silkId) === '3') console.log(in2x, in2y)
-          if ((in1x || in2x) && (in1y || in2y)) { silkObj.select(); break }
-        }
+        const topIntersectsLine = utils.linesIntersect(
+          [boxStart, {x: boxEnd.x, y: boxStart.y}],
+          [pos1, pos2],
+        )
+        if (topIntersectsLine) console.log("topIntersectsLine", topIntersectsLine)
+        if (topIntersectsLine) { silkObj.select(); continue }
+        const bottomIntersectsLine = utils.linesIntersect(
+          [boxEnd, {x: boxStart.x, y: boxEnd.y}],
+          [pos1, pos2],
+        )
+        if (bottomIntersectsLine) console.log("bottomIntersectsLine", bottomIntersectsLine, boxEnd, {x: boxStart.x, y: boxEnd.y}, pos1, pos2)
+        if (bottomIntersectsLine) { silkObj.select(); continue }
+        const leftIntersectsLine = utils.linesIntersect(
+          [boxStart, {x: boxStart.x, y: boxEnd.y}],
+          [pos1, pos2],
+        )
+        if (leftIntersectsLine) console.log("leftIntersectsLine", leftIntersectsLine)
+        if (leftIntersectsLine) { silkObj.select(); continue }
+        const rightIntersectsLine = utils.linesIntersect(
+          [boxEnd, {x: boxEnd.x, y: boxStart.y}],
+          [pos1, pos2],
+        )
+        if (rightIntersectsLine) console.log("rightIntersectsLine", rightIntersectsLine)
+        if (rightIntersectsLine) { silkObj.select(); continue }
       }
     }
     const isDrag = () => {
@@ -252,6 +253,7 @@ function Edit() {
       gluing: false,
     }
     globals.lastMousePos = null
+    globals.mousePos = null
     globals.dragging = false
     globals.selecting = false
     globals.testedPath = []
@@ -266,8 +268,14 @@ function Edit() {
 
     const deleteFunc = () => {
       const selected = {...utils.getGlobals().selected}
+      const buds = Object.values(selected).filter(e => e.type === utils.ObjType.Bud)
+      const silks = Object.values(selected).filter(e => e.type === utils.ObjType.Silk)
       const redoFunc = () => {
-        for (const { obj, type } of Object.values(selected)) {
+        for (const { obj } of buds) {
+          console.log(obj)
+          obj._delete()
+        }
+        for (const { obj } of silks) {
           obj._delete()
         }
       }
@@ -304,6 +312,23 @@ function Edit() {
       utils.ObjType.Default
     )
     operations.add(leRedo)
+
+    const _newBud = () => {
+      const contextMenu = document.getElementById('contextMenu').getBoundingClientRect()
+      const pos = contextMenu.left ?
+        {x: contextMenu.left, y: contextMenu.top}
+        : utils.getGlobals().mousePos
+      const canvasPos = utils.getCanvasMousePos(pos.x, pos.y)
+      const actualPos = utils.calcPosByKonvaPos(canvasPos.x, canvasPos.y)
+      setBud(actualPos)
+    }
+    const newBud = new Operation(
+      'Insert new bud',
+      _newBud,
+      [['t']],
+      utils.ObjType.Default,
+    )
+    operations.add(newBud)
 
     const budGroup = new Konva.Group()
     const silkGroup = new Konva.Group()

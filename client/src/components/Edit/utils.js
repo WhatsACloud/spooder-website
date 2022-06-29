@@ -109,6 +109,33 @@ const withinRect = (start, end, point) => {
 }
 export { withinRect }
 
+const inRange = (start, end, num) => {
+  const within1 = start <= num && end >= num
+  const within2 = end <= num && start >= num
+  return within1 || within2
+}
+
+const linesIntersect = (line1, line2) => {
+  const slope1 = (line1[0].y - line1[1].y) / (line1[0].x - line1[1].x)
+  const c1 = line1[0].y - (slope1 * line1[0].x)
+  const slope2 = (line2[0].y - line2[1].y) / (line2[0].x - line2[1].x)
+  const c2 = line2[0].y - (slope2 * line2[0].x)
+  // 0 = slope1 * x + c1 - y
+  // 0 = slope2 * x + c2 - y
+  // (slope1 * x) + c1 = (slope2 * x) + c2
+  // (slope1 - slope2) * x =  c2 - c1
+  const x = (c2 - c1) / (slope1 - slope2)
+  const y = slope1 * x + c1
+
+  const within1x = inRange(line1[0].x, line1[1].x, x)
+  const within2x = inRange(line2[0].x, line2[1].x, x)
+
+  const within1y = inRange(line1[0].y, line1[1].y, y)
+  const within2y = inRange(line2[0].y, line2[1].y, y)
+  return within1x && within2x && within1y && within2y
+}
+export { linesIntersect }
+
 const setNextObjId = (amt) => {
   getGlobals().nextObjId = amt
 }
@@ -229,12 +256,8 @@ export { clearSelected }
 
 const selectObj = (obj, type, selectFunc, clear=false) => {
   const objId = obj.objId || obj.silkId
-  if (clear) {
-    getGlobals().selected = {[objId]: {obj: obj, type: type}}
-  } else {
-    clearSelected()
-    getGlobals().selected[objId] = {obj: obj, type: type}
-  }
+  if (clear) clearSelected()
+  getGlobals().selected[objId] = {obj: obj, type: type}
   console.log('selected', getGlobals().selected)
   selectFunc()
 }
@@ -252,7 +275,7 @@ const isInCanvas = (mousePos) => {
   const startY = 0
   const endX = window.innerWidth
   const endY = window.innerHeight
-  return withinRect(mousePos, startX, startY, endX, endY)
+  return withinRect({x: startX, y: startY}, {x: endX, y: endY}, mousePos)
 }
 export { isInCanvas as isInCanvas }
 

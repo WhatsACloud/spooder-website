@@ -109,7 +109,6 @@ class Silk {
     }
   }
   select = (clear=false) => {
-    utils.clearSelected()
     this.selected = true
     const highlight = new Konva.Line({
         points: this.getKonvaPoints(),

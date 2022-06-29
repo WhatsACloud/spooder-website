@@ -69,7 +69,10 @@ function ContextMenu({ on, pos, setContextMenuOn }) {
   }, [ on ])
   return (
     <>
-      <div style={{top: pos.y, left: pos.x}} className={on ? styles.contextMenu : styles.none}
+      <div
+        style={{top: pos.y, left: pos.x}}
+        className={on ? styles.contextMenu : styles.none}
+        id='contextMenu'
         >
         {rendered}
       </div>
