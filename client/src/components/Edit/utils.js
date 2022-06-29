@@ -243,6 +243,7 @@ export { ObjType }
 
 const viewObj = (objId=null) => {
   getReactNamespace('viewing').setVal(objId)
+  getGlobals().viewing = objId
 }
 export { viewObj }
 

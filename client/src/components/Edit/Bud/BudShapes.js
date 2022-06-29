@@ -274,8 +274,11 @@ class Bud {
         new Silk(silkId, bud, this)
       }
     } else {
-      this.view()
+      this.select(true)
     }
+  }
+  dblclick = () => {
+    this.view()
   }
   setText = (word) => {
     const fontSize = 50
@@ -416,6 +419,7 @@ class Bud {
     budGroup.on('dragmove', this.dragMove)
     budGroup.on('dragend', this.dragEnd)
     budGroup.on('click', this.click)
+    budGroup.on('dblclick', this.dblclick)
     budGroup.on('dragstart', this.dragStart)
     budGroup.on('mousedown', this.mouseDown)
     budGroup.on('mouseup', (e) => { e.cancelBubble = true })

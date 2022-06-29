@@ -267,6 +267,7 @@ function Edit() {
     globals.operations = operations
 
     const deleteFunc = () => {
+      if (utils.getGlobals().viewing) return
       const selected = {...utils.getGlobals().selected}
       const buds = Object.values(selected).filter(e => e.type === utils.ObjType.Bud)
       const silks = Object.values(selected).filter(e => e.type === utils.ObjType.Silk)
