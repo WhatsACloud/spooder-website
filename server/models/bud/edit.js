@@ -1,5 +1,6 @@
 const { sequelize, DataTypes, Op } = require('../../database')
 const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
+const Spoodaweb = require('../../databaseModels/spoodaweb')(sequelize, DataTypes)
 const AttachedTo = require('../../databaseModels/AttachedTo')(sequelize, DataTypes)
 const error = require('../../middleware/error')
 const Utils = require('./Utils')
@@ -140,6 +141,16 @@ const completeEditBud = async (spoodawebId, clientObjId, objId, obj, categ, tran
   }
 }
 
+const spoodawebExists = async (spoodawebId) => {
+  const spoodaweb = await Spoodaweb.findOne({
+    where: {
+      id: spoodawebId,
+      deletedAt: { [Op.is]: null }
+    }
+  })
+  return (!!spoodaweb)
+}
+
 module.exports = { // please add support for positions, budId
   async edit (req, res, next) {
     let transaction
@@ -148,6 +159,7 @@ module.exports = { // please add support for positions, budId
       const data = req.body.spoodawebData
       const spoodawebId = req.body.spoodawebId
       transaction = await sequelize.transaction()
+      if (!(await spoodawebExists(spoodawebId))) throw error.create('The spoodaweb editing either does not exist or has been deleted.')
       const categs = await categories.updateCategories(spoodawebId, req.body.categories, transaction)
       let objId = await Utils.getNextObjId(spoodawebId)
       if (await Utils.findSpoodaweb(spoodawebId) === false) throw error.create('The spoodaweb you are editing does not exist or has been deleted.')

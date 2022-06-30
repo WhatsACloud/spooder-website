@@ -1,10 +1,20 @@
-const { sequelize, DataTypes } = require('../database')
+const { sequelize, DataTypes, Op } = require('../database')
+const error = require('../middleware/error')
 const spoodaweb = require("../databaseModels/spoodaweb")(sequelize, DataTypes)
+const User = require("../databaseModels/user")(sequelize, DataTypes)
 
 module.exports = {
   async create (req, res, next) {
     const userId = req.body.jwtTokenData.userId
+    console.log(userId)
     try {
+      const user = await User.findOne({
+        where: {
+          id: userId,
+          deletedAt: { [Op.is]: null }
+        }
+      })
+      if (!user) throw error.create('User does not exist or has been deleted.')
       const web = await spoodaweb.create({
         fk_user_id: userId,
         title: req.body.title,

@@ -1,16 +1,22 @@
 const { sequelize, DataTypes, Op } = require('../../database')
 const Category = require('../../databaseModels/categories')(sequelize, DataTypes)
+const error = require('../../middleware/error')
 
 module.exports.Category = Category
 
 const getCategories = async (spoodawebId) => {
-  const dbCategs = await Category.findAll({
-    where: {
-      fk_spoodaweb_id: spoodawebId,
-      deletedAt: {[Op.not]: null},
-    }
-  })
-  return dbCategs
+  try {
+    const dbCategs = await Category.findAll({
+      where: {
+        fk_spoodaweb_id: spoodawebId,
+        deletedAt: {[Op.not]: null},
+      }
+    })
+    return dbCategs
+  } catch(err) {
+    console.log(err)
+    throw error.create('User does not exist.')
+  }
 }
 module.exports.getCategories = getCategories
 
@@ -35,9 +41,10 @@ const getNextCategId = async (spoodawebId) => {
 const updateCategories = async (spoodawebId, categs, transaction) => {
   const newCategs = {}
   const dbCategs = await getCategories(spoodawebId)
-  const nextCategId = await getNextCategId(spoodawebId)
+  let nextCategId = await getNextCategId(spoodawebId)
   for (const [ categId, categ ] of Object.entries(categs)) {
     const contains = await containsCategId(dbCategs, categId)
+    console.log(contains)
     let dbCateg
     if (!contains) {
       dbCateg = await Category.create({
@@ -53,6 +60,7 @@ const updateCategories = async (spoodawebId, categs, transaction) => {
           categId: categId
         }
       })
+      console.log(dbCateg)
       if (categ.del) {
         dbCateg.update({
           deletedAt: Date.now()
