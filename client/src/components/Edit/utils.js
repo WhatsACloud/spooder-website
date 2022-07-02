@@ -343,11 +343,11 @@ const save = async () => {
       spoodawebData: toSend,
     }
     const result = await api.post('/webs/edit', req)
+    getGlobals().newObjs = []
   } catch(err) {
     err = err.response
     console.log(err)
   }
-  getGlobals().newObjs = []
   // below simulates the thing reloading
 
   // const rootPos = getRootPos()

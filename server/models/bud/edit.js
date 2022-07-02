@@ -165,8 +165,7 @@ module.exports = { // please add support for positions, budId
       let objId = await Utils.getNextObjId(spoodawebId)
       if (await Utils.findSpoodaweb(spoodawebId) === false) throw error.create('The spoodaweb you are editing does not exist or has been deleted.')
       for (const [ clientObjId, obj ] of Object.entries(data)) {
-        console.log(obj)
-        const categ = categs[obj.categId].id
+        const categ = obj.categId !== 0 ? categs[obj.categId].id : null
         const bud = await completeEditBud(spoodawebId, clientObjId, objId, obj, categ, transaction)
         if (bud === false) {
           await addBud(spoodawebId, obj, objId, categ, transaction)

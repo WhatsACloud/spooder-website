@@ -52,7 +52,7 @@ class BudJson {
     attachedTos: [],
     position: {x: 0, y: 0},
     objId: null,
-    categId: null,
+    categId: 0,
     del: false,
   }
   

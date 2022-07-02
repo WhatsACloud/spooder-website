@@ -86,7 +86,7 @@ async function get (req, res, next) {
           context: objData.context,
           example: objData.example,
           link: objData.link,
-          categId: objData.categ_id,
+          categId: objData.categ_id || 0,
           position: {x: objData.x, y: objData.y},
           objId: objId,
         })

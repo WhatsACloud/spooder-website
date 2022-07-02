@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       categ_id: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
         foreignKey: true,
         references: {
           model: 'Categories',
