@@ -161,6 +161,7 @@ module.exports = { // please add support for positions, budId
       transaction = await sequelize.transaction()
       if (!(await spoodawebExists(spoodawebId))) throw error.create('The spoodaweb editing either does not exist or has been deleted.')
       const categs = await categories.updateCategories(spoodawebId, req.body.categories, transaction)
+      console.log(categs)
       let objId = await Utils.getNextObjId(spoodawebId)
       if (await Utils.findSpoodaweb(spoodawebId) === false) throw error.create('The spoodaweb you are editing does not exist or has been deleted.')
       for (const [ clientObjId, obj ] of Object.entries(data)) {

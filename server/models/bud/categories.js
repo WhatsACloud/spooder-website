@@ -8,8 +8,7 @@ const getCategories = async (spoodawebId) => {
   try {
     const dbCategs = await Category.findAll({
       where: {
-        fk_spoodaweb_id: spoodawebId,
-        deletedAt: {[Op.not]: null},
+        fk_spoodaweb_id: spoodawebId
       }
     })
     return dbCategs
@@ -20,7 +19,7 @@ const getCategories = async (spoodawebId) => {
 }
 module.exports.getCategories = getCategories
 
-const containsCategId = async (dbCategs, categId) => {
+const containsCategId = (dbCategs, categId) => {
   for (const dbCateg of dbCategs) {
     if (dbCateg.dataValues.categId === Number(categId)) return true
   }
@@ -43,10 +42,16 @@ const updateCategories = async (spoodawebId, categs, transaction) => {
   const dbCategs = await getCategories(spoodawebId)
   let nextCategId = await getNextCategId(spoodawebId)
   for (const [ categId, categ ] of Object.entries(categs)) {
-    const contains = await containsCategId(dbCategs, categId)
-    console.log(contains)
+    const contains = containsCategId(dbCategs, categId)
     let dbCateg
     if (!contains) {
+      categ.color = categ.color.toLowerCase()
+      if (categ.color.length !== 7 || categ.color.substring(0,1) !== "#") throw error.create('Invalid color given.')
+      for (const letter of categ.color.substring(1)) {
+        if (isNaN(letter) && !(['a', 'b', 'c', 'd', 'e', 'f'].includes(letter))) {
+          throw error.create('Invalid color given.')
+        }
+      }
       dbCateg = await Category.create({
         fk_spoodaweb_id: spoodawebId,
         categId: nextCategId,
@@ -73,6 +78,7 @@ const updateCategories = async (spoodawebId, categs, transaction) => {
         dbCateg.update({
           color: categ.color,
           name: categ.name,
+          deletedAt: null
         }, { transaction: transaction })
       }
     }
