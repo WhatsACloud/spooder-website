@@ -336,9 +336,11 @@ const save = async () => {
     console.log(objJson._originalJson, objJson.json)
   }
   try {
+    console.log(getGlobals().categories.toJSON())
     const req = {
       spoodawebId: getGlobals().spoodawebId,
-      spoodawebData: toSend
+      categories: getGlobals().categories.toJSON(),
+      spoodawebData: toSend,
     }
     const result = await api.post('/webs/edit', req)
   } catch(err) {

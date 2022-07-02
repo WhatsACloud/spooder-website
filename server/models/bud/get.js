@@ -9,6 +9,8 @@ const Spoodaweb = require('../../databaseModels/spoodaweb')(sequelize, DataTypes
 const Bud = require('../../databaseModels/bud')(sequelize, DataTypes)
 const AttachedTo = require('../../databaseModels/AttachedTo')(sequelize, DataTypes)
 
+const { getCategories } = require('./categories')
+
 const { Cbud } = require('../../utils/bud')
 
 async function getBudsWithinRange(spoodawebId, startPos, endPos) {
@@ -84,6 +86,7 @@ async function get (req, res, next) {
           context: objData.context,
           example: objData.example,
           link: objData.link,
+          categId: objData.categ_id,
           position: {x: objData.x, y: objData.y},
           objId: objId,
         })
@@ -105,6 +108,14 @@ async function get (req, res, next) {
       }
     }
     req.body.spoodawebData = toResObjs
+    const categories = await getCategories(spoodawebId)
+    req.body.categories = {}
+    for (const category of categories) {
+      req.body.categories[category.dataValues.categId] = {
+        color: category.dataValues.color,
+        name: category.dataValues.name,
+      }
+    }
     req.body.nextObjId = await Utils.getNextObjId(spoodawebId)
     console.log(toResObjs)
     next()

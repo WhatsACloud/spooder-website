@@ -1,7 +1,6 @@
 /*
 ISSUES
 
-1. select not consistent
 3. Redo backclickdetector so can share one div
 
 */
@@ -37,6 +36,8 @@ import Konva from 'konva'
 import { BudView } from '../Select/BudView'
 import { setBud } from '../Bud/BudUtils'
 import { Keybinds } from './keybinds'
+
+import { Categories, Category } from '../Category'
 
 Konva.hitOnDragEnabled = true
 
@@ -205,37 +206,8 @@ function Edit() {
         return
       }
     }, 1000);
-    const urlString = window.location.search
-    let paramString = urlString.split('?')[1];
-    let queryString = new URLSearchParams(paramString);
-    const globals = utils.getGlobals()
-    globals.spoodawebId = queryString.get('id')
-    let objs = {
-      data: {
-        spoodawebData: {},
-        nextObjId: 0
-      }
-    }
     const rootPos = utils.getRootPos() || {x: 0, y: 0}
-    try {
-      objs = await api.post('/webs/get/objects', {
-        spoodawebId: globals.spoodawebId,
-        startPos: [
-          rootPos.x - width,
-          rootPos.y - height,
-        ],
-        endPos: [
-          width * 2,
-          height * 2 
-        ]
-      })
-    } catch(err) {
-      console.log(err)
-      console.log('Unable to retrieve objects.')
-    }
-    const spoodawebData = objs.data.spoodawebData
-    console.log(objs.data)
-    globals.nextObjId = objs.data.nextObjId
+    const globals = utils.getGlobals()
     globals.newObjs = []
     globals.addedObj = false
     globals.objs = {}
@@ -259,6 +231,8 @@ function Edit() {
     globals.testedPath = []
     globals.scrolling = false
     globals.wasScrolling = false
+
+    globals.categories = new Categories()
 
     const keybinds = new Keybinds(true)
     globals.keybinds = keybinds
@@ -331,29 +305,6 @@ function Edit() {
     )
     operations.add(newBud)
 
-    const budGroup = new Konva.Group()
-    const silkGroup = new Konva.Group()
-    utils.getMainLayer().add(budGroup, silkGroup)
-    budGroup.setZIndex(1)
-    silkGroup.setZIndex(0)
-    const tempObjs = []
-    for (const [ objId, obj ] of Object.entries(spoodawebData)) {
-      const bud = new BudShapes.Bud(obj.objId)
-      bud.init(obj.position, objId)
-      bud.fromJson(obj)
-      const screenBounds = utils.calcScreenBounds()
-      const inRect = utils.withinRect(screenBounds[0], screenBounds[1], obj.position)
-      if (!(inRect)) {
-        bud.unload()
-        continue
-      }
-      tempObjs.push(bud)
-    }
-    for (const leObj of tempObjs) {
-      for (const attachedTo of leObj.attachedTos) {
-        new SilkShapes.Silk(utils.getNextSilkId(), leObj, utils.getObjById(attachedTo), true)
-      }
-    }
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
 
@@ -416,10 +367,53 @@ function Edit() {
       }
       if (e.button !== 2) return
     })
-    return () => {
-      document.removeEventListener('keydown', preventZoom)
-      document.removeEventListener('wheel', preventZoomScroll)
+    const budGroup = new Konva.Group()
+    const silkGroup = new Konva.Group()
+    utils.getMainLayer().add(budGroup, silkGroup)
+    budGroup.setZIndex(1)
+    silkGroup.setZIndex(0)
+    const urlString = window.location.search
+    let paramString = urlString.split('?')[1];
+    let queryString = new URLSearchParams(paramString);
+    globals.spoodawebId = queryString.get('id')
+    let objs = {
+      data: {
+        spoodawebData: {},
+        nextObjId: 0
+      }
     }
+    try {
+      objs = await api.post('/webs/get/objects', {
+        spoodawebId: globals.spoodawebId,
+      })
+    } catch(err) {
+      console.log(err)
+      console.log('Unable to retrieve objects.')
+    }
+    globals.nextObjId = objs.data.nextObjId
+    const spoodawebData = objs.data.spoodawebData
+    const tempObjs = []
+    for (const [ objId, obj ] of Object.entries(spoodawebData)) {
+      const bud = new BudShapes.Bud(obj.objId)
+      bud.init(obj.position, objId)
+      bud.fromJson(obj)
+      const screenBounds = utils.calcScreenBounds()
+      const inRect = utils.withinRect(screenBounds[0], screenBounds[1], obj.position)
+      if (!(inRect)) {
+        bud.unload()
+        continue
+      }
+      tempObjs.push(bud)
+    }
+    for (const leObj of tempObjs) {
+      for (const attachedTo of leObj.attachedTos) {
+        new SilkShapes.Silk(utils.getNextSilkId(), leObj, utils.getObjById(attachedTo), true)
+      }
+    }
+    for (const [ categId, categ ] of Object.entries(objs.data.categories)) {
+      globals.categories.add(new Category(categ.name, categ.color))
+    }
+    console.log(globals.categories)
   }, [])
   return (
     <>

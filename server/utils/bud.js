@@ -4,6 +4,7 @@ const baseBud = {
   sound: '',
   context: '',
   example: '',
+  categId: 1,
   link: 0,
   attachedTos: [],
   position: null,
@@ -13,7 +14,8 @@ const baseBud = {
 
 class Bud {
   _json = {}
-  fromJSON = ({ word, definition, sound, context, example, link, attachedTos, position, objId }) => {
+  fromJSON = ({ word, definition, sound, context, example, link, attachedTos, position, objId, categId }) => {
+    console.log('what is this garbage', categId)
     this._json = {
       word: word,
       definition: definition,
@@ -21,6 +23,7 @@ class Bud {
       context: context,
       example: example,
       link: link,
+      categId: categId,
       attachedTos: attachedTos,
       position: position,
       objId: objId,
@@ -54,6 +57,7 @@ class Bud {
       context: obj.context,
       example: obj.example,
       link: obj.link,
+      categId: obj.categId,
       attachedTos: obj.attachedTos,
       position: obj.position,
       objId: obj.objId

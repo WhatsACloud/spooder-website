@@ -52,6 +52,7 @@ class BudJson {
     attachedTos: [],
     position: {x: 0, y: 0},
     objId: null,
+    categId: null,
     del: false,
   }
   
@@ -135,6 +136,7 @@ class BudJson {
   get attachedTos() { return this.json.attachedTos }
   get position() { return this.json.position }
   get objId() { return this.json.objId }
+  get categId() { return this.json.categId }
   get del() { return this.json.del }
   set word(word) {
     this.bud.setText(word)
@@ -154,6 +156,7 @@ class BudJson {
   set attachedTos(attachedTos) { this.json.attachedTos = new Proxy(attachedTos, this.attachedTosProxyConfig) }
   set position(position) { this.json.position = new Proxy(position, this.objProxyConfig) }
   set objId(objId) { this.json.objId = objId; this.checkForUpdate('objId') }
+  set categId(categId) { this.json.categId = categId; this.checkForUpdate('categId') }
   set del(del) { this.json.del = del; this.checkForUpdate('del')}
   json = JSON.parse(JSON.stringify(BudJson.base))
   _originalJson = null
