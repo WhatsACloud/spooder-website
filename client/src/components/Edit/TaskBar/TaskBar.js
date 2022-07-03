@@ -7,6 +7,8 @@ import { faGear, faFileLines } from '@fortawesome/free-solid-svg-icons'
 
 import { SearchBar, SearchResult } from './Search'
 import { UndoRedo } from './UndoRedo'
+import { Categories } from './categories'
+
 import { Debugger } from './debug'
 import * as utils from '../utils'
 
@@ -83,6 +85,7 @@ function TaskBar({ setInSettings }) {
           setSearchVal={setSearchVal}>
           {renderedSearchResults}
         </SearchBar>
+        <Categories></Categories>
         {/* <Debugger></Debugger> */}
         <UndoRedo></UndoRedo>
       </div>
