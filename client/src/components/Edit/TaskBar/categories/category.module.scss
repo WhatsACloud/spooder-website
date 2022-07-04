@@ -53,6 +53,8 @@ div.wrapCategories {
         filter: brightness(0.92);
       }
     }
+    $length: 3em;
+    $topMargin: calc(#{$height} / 2 - #{$length} / 2);
     div.category {
       @include categoryBtn;
       background-color: white;
@@ -66,18 +68,24 @@ div.wrapCategories {
         font-size: 20px;
         margin-top: calc(#{$height} / 2 - 0.75em);
       }
-      div.colorDisplayer {
-        border-radius: 3px;
-        border-width: 1px;
-        border-color: grey;
-        border-style: solid;
-        $length: 3em;
-        width: $length;
-        height: $length;
-        margin-left: auto;
-        margin-right: 1em;
-        margin-top: calc(#{$height} / 2 - #{$length} / 2);
+      div {
+        &.colorDisplayer {
+          border-radius: 3px;
+          border-width: 1px;
+          border-color: grey;
+          border-style: solid;
+          width: $length;
+          height: $length;
+          margin-left: auto;
+          margin-right: 1em;
+          margin-top: $topMargin;
+        }
       }
     }
+  }
+  div.colorPicker {
+    position: absolute;
+    left: auto;
+    right: 1em;
   }
 }
