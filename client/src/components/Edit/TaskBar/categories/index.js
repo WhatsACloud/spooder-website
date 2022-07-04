@@ -1,2 +1,2 @@
-import { Categories } from "./categories"
-export { Categories }
+import { DisplayCategories, Categories } from "./categories"
+export { DisplayCategories, Categories }

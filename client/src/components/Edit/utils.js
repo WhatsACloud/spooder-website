@@ -389,6 +389,9 @@ function SetGlobalReactSetter({ val, setVal, namespace }) {
 export { SetGlobalReactSetter }
 
 const getReactNamespace = (namespace) => {
-  return getGlobals().react[namespace]
+  if (getGlobals()) {
+    return getGlobals().react[namespace]
+  }
+  return false
 }
 export { getReactNamespace }

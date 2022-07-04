@@ -1,6 +1,7 @@
 /*
 ISSUES
 
+2. Fix backend and fronend categories to check if got duplicates
 3. Redo backclickdetector so can share one div
 
 */
@@ -233,6 +234,7 @@ function Edit() {
     globals.wasScrolling = false
 
     globals.categories = new Categories()
+    globals.selectedCategory = null
 
     const keybinds = new Keybinds(true)
     globals.keybinds = keybinds

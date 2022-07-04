@@ -111,7 +111,7 @@ class BudJson {
     const var1 = this._originalJson[attr]
     const var2 = this.json[attr]
     let check = false
-    if (var1.constructor !== var2.constructor) throw new Error(`WARNING: setting ${var1} of type ${typeof var1} as ${var2} which is of type ${typeof var2}`)
+    if (var2 !== null && var1.constructor !== var2.constructor) throw new Error(`WARNING: setting ${var1} of type ${typeof var1} as ${var2} which is of type ${typeof var2}`)
     if (isArray(var1)) {
       if (!(compareArrays(var1, var2))) check = true
     } else if (isObject(var1)) {

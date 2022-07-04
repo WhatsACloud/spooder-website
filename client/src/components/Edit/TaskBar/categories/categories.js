@@ -11,13 +11,23 @@ import * as classCategory from '../../Category'
 
 import * as utils from '../../utils'
 
-function Category({ category }) {
+function Category({ category, selected, setSelected }) {
   const [ text, setText ] = useState(category.name)
   useEffect(() => {
     category.name = text
   }, [ text ])
   return (
-    <div className={styles.category}>
+    <div
+      style={{
+        borderColor: category.categId === selected ?
+        'rgba(200, 200, 200, 1)' : 
+        'rgba(200, 200, 200, 0)'
+      }}
+      className={styles.category}
+      onClick={() => {
+        setSelected(category.categId)
+      }}
+      >
       <input
         type='text'
         onChange={e => {
@@ -40,6 +50,8 @@ function AddCategoryBtn({ display, setDisplay }) {
           <Category
             key={category.categId}
             category={category}
+            selected={selected}
+            setSelected={setSelected}
             ></Category>
         )
         const newDisplay = [newElement, ...display]
@@ -50,11 +62,18 @@ function AddCategoryBtn({ display, setDisplay }) {
       </div>
     </>
   )
+}
 
+function UpdateSelected({ selected }) {
+  useEffect(() => {
+    utils.getGlobals().selectedCategory = selected
+  }, [ selected ])
+  return <></>
 }
 
 function DisplayCategories({ on }) {
   const [ display, setDisplay ] = useState()
+  const [ selected, setSelected ] = useState(null)
   useEffect(() => {
     if (on) {
       const categClass = utils.getGlobals().categories
@@ -65,25 +84,31 @@ function DisplayCategories({ on }) {
             <Category
               key={categId}
               category={category}
+              selected={selected}
+              setSelected={setSelected}
               ></Category>
           )
         }
         setDisplay(toDisplay)
       }
     }
-  }, [ on ])
+  }, [ on, selected ])
   return (
     <div className={on ? styles.wrapCategories : styles.none}>
+      <UpdateSelected selected={selected}></UpdateSelected>
       <div className={styles.viewCategories}>
         <AddCategoryBtn 
           display={display}
           setDisplay={setDisplay}
+          selected={selected}
+          setSelected={setSelected}
           ></AddCategoryBtn>
         {display}
       </div>
     </div>
   )
 }
+export { DisplayCategories }
 
 function CategoryBtn({ setOpen }) {
   return (
@@ -97,7 +122,7 @@ function Categories() {
     <>
       <BackgroundClickDetector
         on={open}
-        zIndex={7}
+        zIndex={9}
         mousedown={() => setOpen(false)}
         ></BackgroundClickDetector>
       <CategoryBtn setOpen={setOpen}></CategoryBtn>

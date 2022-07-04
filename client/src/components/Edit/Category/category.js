@@ -52,7 +52,7 @@ class Categories {
     this.nextCategId += 1
     this._isChanged = true
   }
-  getById = (id) => this.categories[id]
+  getById = (id) => id !== null ? this.categories[id] : this.categories[0]
   toJSON = () => {
     const categs = {}
     for (const [ categId, category ] of Object.entries(this.categories)) {

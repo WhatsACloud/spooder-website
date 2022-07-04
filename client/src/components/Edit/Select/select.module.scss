@@ -47,6 +47,24 @@ div.budView {
   input.inputBox {
     @include inputBox();
   }
+  div.category {
+    background-color: rgb(228, 226, 226);
+    margin: 10px;
+    width: 40%;
+    height: 10%;
+    border-radius: 3px;
+    transition: filter 0.2s;
+    &:hover {
+      filter: brightness(0.95);
+    }
+    div.wrapCategs {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+  }
   div.train {
     div.given {
       p {

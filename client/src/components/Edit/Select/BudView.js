@@ -5,10 +5,12 @@ import * as utils from '../utils'
 import { TrainWrapper } from './Train'
 
 import { BackgroundClickDetector } from '../../BackgroundClickDetector'
+import { DisplayCategories } from '../TaskBar/categories'
 
 function InputIniter({ obj, setText, attr }) {
   useEffect(() => {
-    if (obj && obj.json[attr]) setText(obj.json[attr])
+    console.log(obj?.json?.json, obj?.json?.json[attr], attr)
+    if (obj) setText(obj.json[attr])
   }, [ obj ])
   return <></>
 }
@@ -31,29 +33,57 @@ function InputBox({ obj, attr }) {
   )
 }
 
-function CategoryBox({ obj }) {
-  const [ text, setText ] = useState('')
+function UpdateCategory({ obj, setCateg }) {
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!obj) return
-      for (const [ categId, category ] of Object.entries(utils.getGlobals().categories.categories)) {
-        if (text === category.name) { // TO DO: change and optimise this, also add fuzzy searching
-          obj.json.categId = Number(categId)
-          console.log('added')
-          break
-        }
-      }
-    }, 1000)
-    return () => {
-      clearTimeout(timeout)
+    if (obj) {
+      const leCateg = utils.getGlobals().categories.getById(obj.json.categId)
+      setCateg(leCateg)
     }
-  }, [ text ])
+  }, [ obj ])
+  return <></>
+}
+
+function CategoryBox({ obj }) {
+  const [ categ, setCateg ] = useState(null)
+  const [ dropdown, setDropdown ] = useState(false)
+  const [ name, setName ] = useState('')
+  useEffect(() => {
+    // const timeout = setTimeout(() => {
+    //   if (!obj) return
+    //   for (const [ categId, category ] of Object.entries(utils.getGlobals().categories.categories)) {
+    //     if (text === category.name) { // TO DO: change and optimise this, also add fuzzy searching
+    //       obj.json.categId = Number(categId)
+    //       console.log('added')
+    //       break
+    //     }
+    //   }
+    // }, 1000)
+    // return () => {
+    //   clearTimeout(timeout)
+    // }
+    setName(categ?.name)
+  }, [ categ ])
   return (
     <>
-      <p className={styles.subtitle}>
-        Category
-      </p>
-      <input className={styles.inputBox} value={text} onChange={(e) => setText(e.target.value)}></input>
+      <UpdateCategory obj={obj} setCateg={setCateg}></UpdateCategory>
+      <div
+        className={styles.category}
+        onClick={() => {
+          setDropdown(true)
+        }}
+        >
+        <p>{name}</p>
+        {/* <input className={styles.inputBox} value={text} onChange={(e) => setText(e.target.value)}></input> */}
+      </div>
+      <div className={styles.wrapCategs}>
+        <BackgroundClickDetector on={dropdown} zIndex={10} mousedown={() => {
+          setDropdown(false)
+          const selectedCateg = utils.getGlobals().selectedCategory
+          obj.json.categId = selectedCateg
+          setCateg(utils.getGlobals().categories.getById(selectedCateg))
+        }}></BackgroundClickDetector>
+        <DisplayCategories on={dropdown}></DisplayCategories>
+      </div>
     </>
   )
 }
