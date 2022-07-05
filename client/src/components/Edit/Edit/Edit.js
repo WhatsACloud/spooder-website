@@ -415,7 +415,7 @@ function Edit() {
     for (const [ categId, categ ] of Object.entries(objs.data.categories)) {
       globals.categories.add(new Category(categ.name, categ.color))
     }
-    console.log(globals.categories)
+    globals.categIds = Object.keys(globals.categories.categories)
   }, [])
   return (
     <>

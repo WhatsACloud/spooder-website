@@ -20,6 +20,7 @@ div.wrapCategories {
   border-radius: 3px;
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
   div.viewCategories {
+    pointer-events: all;
     $margin: 30px;
     $percent: calc(100% - #{$margin});
     width: $percent;
@@ -28,6 +29,7 @@ div.wrapCategories {
     border-radius: 5px;
     padding: 10px;
     overflow-y: scroll;
+    overflow-x: hidden;
     background-color: rgb(234, 234, 234);
     $height: 50px;
     @mixin categoryBtn {
@@ -87,5 +89,6 @@ div.wrapCategories {
     position: absolute;
     left: auto;
     right: 1em;
+    z-index: 100;
   }
 }

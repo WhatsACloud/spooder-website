@@ -43,7 +43,7 @@ function UpdateCategory({ obj, setCateg }) {
   return <></>
 }
 
-function CategoryBox({ obj }) {
+function CategoryBox({ obj, viewing }) {
   const [ categ, setCateg ] = useState(null)
   const [ dropdown, setDropdown ] = useState(false)
   const [ name, setName ] = useState('')
@@ -69,6 +69,7 @@ function CategoryBox({ obj }) {
       <div
         className={styles.category}
         onClick={() => {
+          utils.getGlobals().selectedCategory = utils.getObjById(viewing).json.categId
           setDropdown(true)
         }}
         >
@@ -76,12 +77,14 @@ function CategoryBox({ obj }) {
         {/* <input className={styles.inputBox} value={text} onChange={(e) => setText(e.target.value)}></input> */}
       </div>
       <div className={styles.wrapCategs}>
-        <BackgroundClickDetector on={dropdown} zIndex={10} mousedown={() => {
+        <BackgroundClickDetector on={dropdown} zIndex={0} mousedown={() => {
           setDropdown(false)
           const selectedCateg = utils.getGlobals().selectedCategory
           obj.json.categId = selectedCateg
           setCateg(utils.getGlobals().categories.getById(selectedCateg))
         }}></BackgroundClickDetector>
+      </div>
+      <div className={styles.categs}>
         <DisplayCategories on={dropdown}></DisplayCategories>
       </div>
     </>
@@ -100,7 +103,7 @@ function Viewer({ viewing, startedTraining }) {
   return (
     <div className={startedTraining ? styles.none : ''}>
       <InputBox obj={obj} attr='word'></InputBox>
-      <CategoryBox obj={obj}></CategoryBox>
+      <CategoryBox obj={obj} viewing={viewing}></CategoryBox>
       <InputBox obj={obj} attr='definition'></InputBox>
       <InputBox obj={obj} attr='sound'></InputBox>
       <InputBox obj={obj} attr='context'></InputBox>

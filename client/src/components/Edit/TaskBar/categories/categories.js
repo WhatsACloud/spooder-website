@@ -13,7 +13,7 @@ import * as classCategory from '../../Category'
 
 import * as utils from '../../utils'
 
-function Category({ category, selected, setColorPos, setSelected, setSelectingColor, setColor }) {
+function Category({ category, selected, setColorPos, setSelected, setSelectingColor, setColor, color }) {
   const [ text, setText ] = useState(category.name)
   const colorDiv = useRef(null)
   useEffect(() => {
@@ -44,11 +44,10 @@ function Category({ category, selected, setColorPos, setSelected, setSelectingCo
           style={{backgroundColor: category.color}}
           className={styles.colorDisplayer}
           onClick={() => {
+            setColor(category ? category.color : '')
             const rect = colorDiv.current.getBoundingClientRect()
             console.log('picked', rect.top)
             setSelectingColor(category)
-            console.log(category.color)
-            setColor(category ? category.color : '')
             setColorPos(rect.top)
           }}
           ></div>
@@ -90,18 +89,32 @@ function UpdateSelected({ selected }) {
   return <></>
 }
 
+function UpdateColor({ selectingColor, color, update }) {
+  useEffect(() => {
+    if (selectingColor) {
+      selectingColor.color = color
+      update(color)
+    }
+  }, [ color ])
+  return <></>
+}
+
 function DisplayCategories({ on }) {
   const [ display, setDisplay ] = useState()
-  const [ selected, setSelected ] = useState(null)
+  const [ selected, setSelected ] = useState(false)
   const [ selectingColor, setSelectingColor ] = useState(false)
   const [ colorPos, setColorPos ] = useState(0)
   const [ color, setColor ] = useState('')
+  const [ toUpdate, update ] = useState(false)
   useEffect(() => {
     if (on) {
+      setSelected(utils.getGlobals().selectedCategory)
       const categClass = utils.getGlobals().categories
+      const categIds = categClass.categIds
       if (categClass.isChanged) {
         const toDisplay = []
-        for (const [ categId, category ] of Object.entries(categClass.categories)) {
+        for (const categId of categIds) {
+          const category = categClass.getById(categId)
           toDisplay.push(
             <Category
               key={categId}
@@ -116,10 +129,13 @@ function DisplayCategories({ on }) {
         }
         setDisplay(toDisplay)
       }
+    } else {
+      setSelected(false)
     }
-  }, [ on, selected ])
+  }, [ on, selected, toUpdate ])
   return (
     <>
+      <UpdateColor selectingColor={selectingColor} color={color} update={update}></UpdateColor>
       <div className={on ? styles.wrapCategories : styles.none}>
         <div
           style={{top: colorPos}}
@@ -130,9 +146,11 @@ function DisplayCategories({ on }) {
         <div
           className={styles.viewCategories}
           onClick={() => {
-            setSelectingColor(false)
-            setColorPos(0)
-            setColor(null)
+            if (selectingColor) {
+              setSelectingColor(false)
+              setColorPos(0)
+              setColor('')
+            }
           }}
           >
           <AddCategoryBtn 

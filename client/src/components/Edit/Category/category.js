@@ -43,11 +43,13 @@ class Categories {
   nextCategId = 1
   categories = null
   _isChanged = true
+  categIds = [0] // to be used in displaying categories
   get isChanged() {
     return this._isChanged
   }
   add = (category) => {
     this.categories[this.nextCategId] = category
+    this.categIds.unshift(this.nextCategId)
     category._categId = this.nextCategId
     this.nextCategId += 1
     this._isChanged = true
