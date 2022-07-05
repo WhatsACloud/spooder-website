@@ -395,3 +395,38 @@ const getReactNamespace = (namespace) => {
   return false
 }
 export { getReactNamespace }
+
+import { search } from 'fast-fuzzy'
+
+const searchInBud = (query, col) => {
+  return search(query, Object.values(getObjs()), { keySelector: (obj) => obj.json[col], returnMatchData: true })
+    .map(data => {
+      console.log(data)
+      return {obj: data.item, string: data.original, key: col}
+    })
+}
+
+const searchInCateg = (query, col) => {
+  return search(query, Object.values(getGlobals().categories.categories), { keySelector: (obj) => obj[col], returnMatchData: true })
+    .map(data => {
+      console.log(data)
+      return {obj: data.item, string: data.original, key: col}
+    })
+}
+
+const searchFor = (query) => {
+  if (query.length === 0) return getGlobals().recentlyViewed
+  const objSearch = [...new Set([
+    ...searchInBud(query, 'word'),
+    ...searchInBud(query, 'definition'),
+    ...searchInBud(query, 'sound'),
+    ...searchInBud(query, 'context'),
+    ...searchInBud(query, 'example'),
+  ])]
+  const categSearch = [
+    ...searchInCateg(query, 'name'),
+  ]
+  console.log(objSearch, categSearch)
+  return [...objSearch, ...categSearch]
+}
+export { searchFor }

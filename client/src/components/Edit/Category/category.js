@@ -14,6 +14,7 @@ const generateRandomColor = () => {
 
 class Category {
   static colorErrMsg = (color) => new Error(`The color ${color} is invalid, expected hex color (e.g. #100f1e)`)
+  type = 'category'
   name = ''
   color = ''
   _categId = null

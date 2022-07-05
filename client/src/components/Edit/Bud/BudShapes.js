@@ -192,6 +192,7 @@ class Bud {
   loaded = false
   viewing = false
   oldAttachedSilk = null
+  type = 'bud'
 
   mouseFollower = (e) => {
     const { x, y } = utils.getCanvasMousePos(e.clientX, e.clientY)

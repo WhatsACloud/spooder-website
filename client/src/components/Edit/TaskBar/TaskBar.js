@@ -16,29 +16,17 @@ function TaskBar({ setInSettings }) {
   const [ searchVal, setSearchVal ] = useState('')
   const [ renderedSearchResults, setRenderedSearchResults ] = useState()
   useEffect(() => {
-    const timeout = setTimeout(async () => {
+    const timeout = setTimeout(() => {
       console.log(searchVal)
-      const urlString = window.location.search
-      let paramString = urlString.split('?')[1];
-      let queryString = new URLSearchParams(paramString);
-      const result = await api.post('/search', {
-        spoodawebId: queryString.get('id'),
-        queryType: "text",
-        queryString: searchVal
-      })
-      const found = result.data.buds
-      const toRender = Object.keys(found).map((objId, index) => 
+      const found = utils.searchFor(searchVal)
+      const toRender = found.map((result, index) =>
         <>
           <SearchResult
             key={index}
             onMouseDown={e => {
                setSelectedObj(objId)
             }}
-            text={{
-              name: found[objId].word,
-              type: found[objId].found[0],
-              string: found[objId].found[1]
-            }}></SearchResult>
+            result={result}></SearchResult>
         </>
       )
       setRenderedSearchResults(toRender)
@@ -70,15 +58,6 @@ function TaskBar({ setInSettings }) {
             modes.gluing = !(modes.gluing)
           }}>
           glue
-        </button>
-        <button
-          className={styles.autoDragBtn}
-          onClick={() => {
-            const selected = utils.getGlobals().selected
-            selected?.obj.delete()
-            utils.unselect()
-          }}>
-          delete
         </button>
         <SearchBar
           searchVal={searchVal}

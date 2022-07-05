@@ -233,6 +233,8 @@ function Edit() {
     globals.scrolling = false
     globals.wasScrolling = false
 
+    globals.recentlyViewed = []
+
     globals.categories = new Categories()
     globals.selectedCategory = null
 

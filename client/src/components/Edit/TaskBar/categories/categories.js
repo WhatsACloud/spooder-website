@@ -99,6 +99,9 @@ function AddCategoryBtn({ display, setDisplay, selected, setSelected, setSelecti
 function UpdateSelected({ selected }) {
   useEffect(() => {
     utils.getGlobals().selectedCategory = selected
+    if (selected) {
+      utils.getGlobals().recentlyViewed.unshift(utils.getGlobals().categories.getById(selected))
+    }
   }, [ selected ])
   return <></>
 }
