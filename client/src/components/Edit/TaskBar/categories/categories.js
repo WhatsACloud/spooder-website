@@ -17,7 +17,21 @@ function Category({ category, selected, setColorPos, setSelected, setSelectingCo
   const [ text, setText ] = useState(category.name)
   const colorDiv = useRef(null)
   useEffect(() => {
-    category.name = text
+    const timeout = setTimeout(() => {
+      console.log('timout')
+      const original = text
+      category.name = text
+      for (const categ of Object.values(utils.getGlobals().categories.categories)) {
+        if (categ.categId !== category.categId && categ.name === category.name) {
+          console.log('error, bruh')
+          category.name = original
+          break
+        }
+      }
+    }, 1000)
+    return () => {
+      clearTimeout(timeout)
+    }
   }, [ text ])
   return (
     <>

@@ -40,8 +40,13 @@ const getNextCategId = async (spoodawebId) => {
 const updateCategories = async (spoodawebId, categs, transaction) => {
   const newCategs = {}
   const dbCategs = await getCategories(spoodawebId)
+  const categsByName = [
+    ...dbCategs.map(e => e.dataValues.name),
+    ...Object.values(categs).map(e => e.name)
+  ]
   let nextCategId = await getNextCategId(spoodawebId)
   for (const [ categId, categ ] of Object.entries(categs)) {
+    if (categsByName.includes(categ.name)) throw error.create(`Categories cannot have the same name (${categ.name}).`)
     const contains = containsCategId(dbCategs, categId)
     let dbCateg
     if (!contains) {
