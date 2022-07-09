@@ -17,11 +17,12 @@ function Settings({ inSettings, setInSettings, setSettings, settings }) {
           <button
             onClick={() => {
               const newSettings = {...settings}
-              newSettings[setting] = !(newSettings[setting])
+              newSettings[setting].value = !(newSettings[setting].value)
               setSettings(newSettings)
             }}>
-            { String(settings[setting]) }
+            { String(settings[setting].value) }
           </button>
+          {settings[setting].html}
         </div>
       )
     ) 

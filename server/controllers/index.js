@@ -4,7 +4,8 @@ const routes = {
     '/webs': require('./spoodaweb'),
     '/auth': require('./auth'),
     '/search': require('./search'),
-    '/logout': require('./logout')
+    '/logout': require('./logout'),
+    '/images': require('./images'),
   }
   
 function addApiRoutes(app) {

@@ -32,6 +32,7 @@ import * as utils from '../utils'
 import { DrawCanvas } from './DrawCanvas'
 import { TaskBar } from '../TaskBar'
 import { Settings } from '../Settings'
+import { FileInsert } from '../Shared/FileInsert'
 
 import Konva from 'konva'
 import { BudView } from '../Select/BudView'
@@ -83,7 +84,12 @@ function Edit() {
   const [ inSettings, setInSettings ] = useState(false)
   const [ renderTrain, setRenderTrain ] = useState(false)
   const [ settings, setSettings ] = useState({
-    Background: false
+    Background: {
+      value: false,
+      html: (
+        <FileInsert></FileInsert>
+      ),
+    }
   })
   const [ contextMenuOn, setContextMenuOn ] = useState(false)
   const [ contextMenuPos, setContextMenuPos ] = useState({x: 0, y: 0})
@@ -450,7 +456,7 @@ function Edit() {
             rendered={rendered}></DrawCanvas>
         </div>
         <BudView></BudView>
-        <Background canRender={settings.Background}></Background>
+        <Background canRender={settings.Background.value}></Background>
       </div>
     </>
   )
