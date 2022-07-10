@@ -31,11 +31,12 @@ const editImage = async (dbImg, name, transaction) => {
   }, { transaction: transaction })
 }
 
-const getOfType = async (userId, type) => {
+const getOfName = async (userId, name) => {
+  if (!name) return false
   const entry = await Images.findOne({
     where: {
       fk_user_id: userId,
-      type: type,
+      name: name
     }
   })
   return entry
@@ -48,7 +49,7 @@ const save = async (req, res, next) => {
   console.log('what', __dirname)
   let img
   try {
-    img = await getOfType(userId, 'background')
+    img = await getOfName(userId, req.body.name)
     console.log(img)
     if (img) {
       await editImage(img, filename, transaction)
@@ -59,7 +60,7 @@ const save = async (req, res, next) => {
     next()
   } catch(err) {
     await transaction.rollback()
-    await deleteFile(filename)
+    if (!img) await deleteFile(filename)
     console.log(err)
     next(err)
   }

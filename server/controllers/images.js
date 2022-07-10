@@ -1,3 +1,5 @@
+const { randomUUID } = require('crypto')
+
 const images = require('../controllerFuncs/images')
 const imagesModel = require('../models/images')
 const error = require('../middleware/error')
@@ -15,10 +17,9 @@ const storage = multer.diskStorage({
     cb(null, 'images')
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
     const sep = file.originalname.split('.')
     const extension = sep[sep.length-1]
-    cb(null, `${file.fieldname}-${uniqueSuffix}.${extension}`)
+    cb(null, `${randomUUID()}.${extension}`)
   }
 })
 
@@ -29,7 +30,7 @@ router.post(
   upload.single('image'),
   jwtToken.authenticateToken,
   imagesModel.save,
-  images.end,
+  images.setEnd,
   error.errorHandler,
 )
 
@@ -40,7 +41,17 @@ router.delete(
 )
 
 router.post(
-  '/get',
+  '/get/default',
+  jwtToken.authenticateToken,
+  images.getEnd,
+  error.errorHandler,
+)
+
+router.post(
+  '/get/backgrounds',
+  jwtToken.authenticateToken,
+  images.getEnd,
+  error.errorHandler,
 )
 
 module.exports = router

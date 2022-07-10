@@ -19,6 +19,11 @@ function FileInsert() {
                 const split = file.name.split('.')
                 const extension = split[split.length - 1]
                 console.log(extension)
+                const reader = new FileReader()
+                reader.onload = (e) => {
+                  console.log(e.currentTarget.result)
+                }
+                reader.readAsText(file)
                 if (!(['png', 'jpg', 'jpeg'].includes(extension))) throw Error(errMsg)
                 const formData = new FormData() 
                 formData.append('image', file)

@@ -40,6 +40,7 @@
     "fast-fuzzy": "^1.11.2",
     "jest": "^27.5.1",
     "konva": "^8.3.5",
+    "parse-png": "^2.1.0",
     "prop-types": "^15.8.1",
     "query-string": "^7.1.1",
     "react-colorful": "^5.5.1",

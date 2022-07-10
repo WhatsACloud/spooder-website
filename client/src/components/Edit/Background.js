@@ -4,6 +4,7 @@ import * as utils from './utils'
 import * as BudUtils from './Bud/BudUtils'
 
 import styles from './edit.module'
+import api from '../../services/api'
 
 const hexagonLineColor = 'black'
 
@@ -299,4 +300,45 @@ function Background({ canRender }) {
 
 */
 
-export { Background as Background }
+function ImageBackground({ src, canRender }) {
+  useEffect(() => {
+    console.log(src)
+  }, [ src ])
+  return (
+    <div className={canRender ? styles.divBackground : styles.none}>
+      <img src={src}></img>
+    </div>
+  )
+}
+
+function BackgroundWrapper({ canRender }) {
+  const [ img, setImg ] = useState('')
+  useEffect(async () => {
+    const images = localStorage.getItem('images')
+    try {
+      const name = 'c082e766-c679-44a8-8ea6-32503544e645.png'
+      const result = await api.post('/images/get/default', { name: name }, { responseType: 'blob' })
+      // console.log([...result.data])
+      // const data = Uint8Array.from([...result.data].map(e => e.charCodeAt()))
+      // console.log(data)
+      // const blob = new Blob(data, { type: 'image/png'})
+      console.log(result.data)
+      // const blob = new Blob([result.data], { type: 'image/png'})
+      // const url = URL.createObjectURL(blob)
+      const reader = new FileReader()
+      reader.onload = () => {
+        setImg(`${reader.result}`)
+      }
+      reader.readAsDataURL(result.data)
+    } catch(err) {
+      console.log(err)
+    }
+  }, [])
+  return (
+    <>
+      <ImageBackground src={img} canRender={true}></ImageBackground>
+      <Background canRender={canRender && (!img)}></Background>
+    </>
+  )
+}
+export { BackgroundWrapper as Background }
