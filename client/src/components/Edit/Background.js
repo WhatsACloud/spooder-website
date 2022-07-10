@@ -316,7 +316,7 @@ function BackgroundWrapper({ canRender }) {
   useEffect(async () => {
     const images = localStorage.getItem('images')
     try {
-      const name = 'c082e766-c679-44a8-8ea6-32503544e645.png'
+      const name = '73729cbb-1371-45f3-8aa5-357f4ec52ba1.png'
       const result = await api.post('/images/get/default', { name: name }, { responseType: 'blob' })
       // console.log([...result.data])
       // const data = Uint8Array.from([...result.data].map(e => e.charCodeAt()))

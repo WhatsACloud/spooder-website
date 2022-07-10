@@ -19,6 +19,10 @@ div.divCanvas {
 div.divBackground {
   @include canvas;
   z-index: 2;
+  img {
+    width: 100%;
+    height: 85%;
+  }
 }
 
 div.divLightBack {

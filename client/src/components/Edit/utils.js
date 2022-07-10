@@ -414,19 +414,35 @@ const searchInCateg = (query, col) => {
     })
 }
 
-const searchFor = (query) => {
+const filterOptions = {
+  word: true,
+  definition: true,
+  sound: true,
+  context: true,
+  example: true,
+  name: true,
+}
+export { filterOptions }
+
+const searchFor = (query, queryTypes) => {
   if (query.length === 0) return getGlobals().recentlyViewed
-  const objSearch = [...new Set([
-    ...searchInBud(query, 'word'),
-    ...searchInBud(query, 'definition'),
-    ...searchInBud(query, 'sound'),
-    ...searchInBud(query, 'context'),
-    ...searchInBud(query, 'example'),
-  ])]
-  const categSearch = [
-    ...searchInCateg(query, 'name'),
-  ]
-  console.log(objSearch, categSearch)
-  return [...objSearch, ...categSearch]
+  const searchSet = new Set()
+  for (const [ option, can ] of Object.entries(queryTypes)) {
+    console.log(option, can, searchSet)
+    if (!can) continue
+    if (!(Object.keys(filterOptions).includes(option))) {
+      throw new Error(`WARNING: queryType ( ${option} ) is not valid.`)
+    }
+    if (option === 'name') { searchSet.add(...searchInCateg(query, option)); continue }
+    console.log(option, can)
+    searchSet.add(...searchInBud(query, option))
+  }
+  const searchResults = [...searchSet]
+  const undefinedIndex = searchResults.indexOf(undefined)
+  if (undefinedIndex >= 0) {
+    searchResults.splice(undefinedIndex, 1)
+  }
+  console.log(searchResults)
+  return searchResults
 }
 export { searchFor }

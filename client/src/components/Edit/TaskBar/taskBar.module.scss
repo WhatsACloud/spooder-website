@@ -83,3 +83,20 @@ div.divSearchBar {
     }
   }
 }
+
+div.divFilterBtn {
+  @include std-button;
+  background-color: white;
+}
+
+div.divFilter {
+  position: absolute;
+  background-color: grey;
+  top: 100px;
+  left: 600px;
+  z-index: 10;
+  div.filterOption {
+    @include std-button;
+    background-color: white;
+  }
+}

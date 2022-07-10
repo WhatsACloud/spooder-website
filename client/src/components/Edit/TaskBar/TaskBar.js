@@ -13,28 +13,6 @@ import { Debugger } from './debug'
 import * as utils from '../utils'
 
 function TaskBar({ setInSettings }) {
-  const [ searchVal, setSearchVal ] = useState('')
-  const [ renderedSearchResults, setRenderedSearchResults ] = useState()
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      console.log(searchVal)
-      const found = utils.searchFor(searchVal)
-      const toRender = found.map((result, index) =>
-        <>
-          <SearchResult
-            key={index}
-            onMouseDown={e => {
-               setSelectedObj(objId)
-            }}
-            result={result}></SearchResult>
-        </>
-      )
-      setRenderedSearchResults(toRender)
-    }, 300)
-    return () => {
-      clearTimeout(timeout)
-    }
-  }, [ searchVal ])
   return (
     <>
       <div className={styles.taskBar}>
@@ -59,11 +37,7 @@ function TaskBar({ setInSettings }) {
           }}>
           glue
         </button>
-        <SearchBar
-          searchVal={searchVal}
-          setSearchVal={setSearchVal}>
-          {renderedSearchResults}
-        </SearchBar>
+        <SearchBar></SearchBar>
         <Categories></Categories>
         {/* <Debugger></Debugger> */}
         <UndoRedo></UndoRedo>
