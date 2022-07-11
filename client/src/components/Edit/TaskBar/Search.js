@@ -55,9 +55,10 @@ export { SearchResult }
 
 function FilterOption({ name, toggled, onClick }) {
   useEffect(() => {
+    console.log(name)
   }, [])
   return (
-    <div style={{ color: toggled ? 'grey' : 'white' }} className={styles.filterOption} onClick={onClick}>
+    <div style={{ backgroundColor: toggled ? 'grey' : 'white' }} className={styles.filterOption} onClick={onClick}>
       {name}
     </div>
   )
