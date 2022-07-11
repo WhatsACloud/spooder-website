@@ -1,5 +1,5 @@
 @import '../../../../scss/standard.module.scss';
 
-button {
+button.undo {
   @include std-button;
 }

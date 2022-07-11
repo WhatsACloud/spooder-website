@@ -45,7 +45,7 @@ function UndoRedo() {
         className={styles.undo}
         onClick={undo}>undo</button>
       <button
-        className={styles.redo}
+        className={styles.undo}
         onClick={redo}>redo</button>
     </>
   )

@@ -11,7 +11,6 @@ import app from './app.module'
 function App() {
   return (
     <Router>
-      <NavBar />
       <Routes>
         <Route exact path='/' element={<Front/>} />
         <Route exact path='/home' element={<Home/>} />

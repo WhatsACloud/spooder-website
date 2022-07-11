@@ -15,11 +15,14 @@ import * as utils from '../utils'
 function TaskBar({ setInSettings }) {
   return (
     <>
+      <div className={styles.sideBar}>
+
+      </div>
       <div className={styles.taskBar}>
         <button
           className={styles.settingsBtn}
           onClick={() => setInSettings(true)}>
-          <FontAwesomeIcon icon={faGear}></FontAwesomeIcon>
+          Settings
         </button>
         <button
           className={styles.autoDragBtn}

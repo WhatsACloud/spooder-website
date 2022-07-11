@@ -336,7 +336,7 @@ function BackgroundWrapper({ canRender }) {
   }, [])
   return (
     <>
-      <ImageBackground src={img} canRender={true}></ImageBackground>
+      <ImageBackground src={img} canRender={canRender}></ImageBackground>
       <Background canRender={canRender && (!img)}></Background>
     </>
   )

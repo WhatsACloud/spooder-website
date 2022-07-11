@@ -444,10 +444,6 @@ function Edit() {
         pos={contextMenuPos}
         setContextMenuOn={setContextMenuOn}></ContextMenu>
       <div className={styles.wrapper}>
-        <OtherElements.ObjectDrawer
-          setDragging={setDragging}
-          toggleCanDragLine={toggleCanDragLine}
-          setToggleCanDragLine={setToggleCanDragLine}></OtherElements.ObjectDrawer>
         <OtherElements.FakeDraggableObj
           dragging={dragging}
           setDragging={setDragging}></OtherElements.FakeDraggableObj>

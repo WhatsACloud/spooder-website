@@ -1,12 +1,11 @@
 @import '../../scss/standard.module.scss';
 
-$drawer-width: 15%;
-$canvas-width: 100% - $drawer-width;
+$canvas-width: 100%;
 
 @mixin canvas {
   width: $canvas-width;
   height: 95%;
-  left: $drawer-width;
+  left: 0;
   position: absolute;
 }
 
@@ -21,7 +20,7 @@ div.divBackground {
   z-index: 2;
   img {
     width: 100%;
-    height: 85%;
+    height: 87%;
   }
 }
 
@@ -50,7 +49,6 @@ div.wrapper {
     z-index: 2;
     box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     height: 100vh;
-    width: $drawer-width;
     border-radius: 7px;
     background-color: aliceblue;
     div.box {
