@@ -3,7 +3,11 @@
 }
 
 button.openBtn {
-  margin: 1px;
+  display: inline-block;
+  margin: 7px;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-overflow: unset;
 }
 
 div.wrapCategories {

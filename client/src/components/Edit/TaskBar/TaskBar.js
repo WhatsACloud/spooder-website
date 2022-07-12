@@ -20,12 +20,12 @@ function TaskBar({ setInSettings }) {
       </div>
       <div className={styles.taskBar}>
         <button
-          className={styles.settingsBtn}
+          className={styles.stdButton}
           onClick={() => setInSettings(true)}>
           Settings
         </button>
         <button
-          className={styles.autoDragBtn}
+          className={styles.stdButton}
           onClick={() => {
             const modes = utils.getGlobals().modes
             modes.autoDrag = !(modes.autoDrag)
@@ -33,7 +33,7 @@ function TaskBar({ setInSettings }) {
           <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
         </button>
         <button
-          className={styles.autoDragBtn}
+          className={styles.stdButton}
           onClick={() => {
             const modes = utils.getGlobals().modes
             modes.gluing = !(modes.gluing)

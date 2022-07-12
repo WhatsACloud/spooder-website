@@ -22,19 +22,30 @@ div.sideBar {
 }
 
 div.taskBar {
+  $height: 10vh;
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 10vh;
+  height: $height;
   // background-color: cornflowerblue;
-  background-color: rgb(224, 224, 224);
+  background-color: #7f53ac;
+  background-image: linear-gradient(315deg, #7f53ac 0%, #647dee 74%);
+  // background-color: rgb(224, 224, 224);
   z-index: 3;
-  button {
-    &.settingsBtn {
-      @include btn;
-    }
-    &.autoDragBtn {
-      @include btn;
+  button.stdButton {
+    $padding: 10px;
+    border-style: none;
+    font-size: 17.5px;
+    color: white;
+    margin: 7.5px;
+    margin-top: calc(#{$height} / 2 - 1em / 2 - #{$padding});
+    padding: $padding;
+    height: fit-content;
+    border-radius: 3px;
+    background-color: rgba($color: #000000, $alpha: 0);
+    transition: background-color 0.2s;
+    &:hover {
+      background-color: rgba($color: #ffffff, $alpha: 0.2);
     }
   }
 }
