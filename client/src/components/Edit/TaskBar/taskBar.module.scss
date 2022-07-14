@@ -21,24 +21,36 @@ div.sideBar {
 
 }
 
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
 div.taskBar {
-  $height: 10vh;
+  $height: 8vh;
   display: flex;
   flex-direction: row;
   width: 100%;
   height: $height;
   // background-color: cornflowerblue;
-  background-color: #7f53ac;
-  background-image: linear-gradient(315deg, #7f53ac 0%, #647dee 74%);
-  // background-color: rgb(224, 224, 224);
+  background-color: #abe9cd;
+  background-image: linear-gradient(315deg, #abe9cd 0%, #3eadcf 74%);
   z-index: 3;
   button.stdButton {
-    $padding: 10px;
+    display: flex;
+    flex-direction: row;
+    $padding: 5px;
+    font-family: 'Quicksand', sans-serif;
     border-style: none;
-    font-size: 17.5px;
+    font-size: 20px;
     color: white;
-    margin: 7.5px;
-    margin-top: calc(#{$height} / 2 - 1em / 2 - #{$padding});
+    margin-top: calc(#{$height} / 2 / 2 - #{$padding});
+    // padding-left: $padding;
+    // padding-right: $padding;
     padding: $padding;
     height: fit-content;
     border-radius: 3px;
@@ -46,6 +58,16 @@ div.taskBar {
     transition: background-color 0.2s;
     &:hover {
       background-color: rgba($color: #ffffff, $alpha: 0.2);
+    }
+    svg {
+      margin-top: 0.2em;  
+      transition: all .2s;
+      &.on {
+        animation: rotation 2s infinite linear;
+      }
+    }
+    p {
+      margin-left: 10px;
     }
   }
 }
