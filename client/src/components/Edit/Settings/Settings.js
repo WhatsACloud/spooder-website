@@ -1,10 +1,40 @@
 import React, { useEffect, useState } from 'react'
+import { useSpring, animated, config } from 'react-spring'
 import styles from './Settings.module'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faClose } from '@fortawesome/free-solid-svg-icons'
+import { faRectangleXmark } from '@fortawesome/free-solid-svg-icons'
 
+function TransitionSettings({ inSettings, spring }) {
+  useEffect(() => {
+  spring.start({
+    opacity: inSettings ? 1 : 0,
+    top: inSettings ? 0 : -50
+  })
+  }, [ inSettings ])
+  return <></>
+}
+
+function CloseButton({ setInSettings }) {
+  const [ hover, setHover ] = useState(false)
+  return (
+    <button
+      className={styles.close}
+      onClick={() => setInSettings(false)}
+      onMouseOver={() => setHover(true)}
+      onMouseOut={() => setHover(false)}
+      >
+      <FontAwesomeIcon icon={faRectangleXmark}></FontAwesomeIcon> 
+      <p className={hover ? styles.see : styles.noSee}>close</p>
+    </button>
+  )
+}
+  
 function Settings({ inSettings, setInSettings, setSettings, settings }) {
+  const [ x, spring ] = useSpring(() => ({
+    opacity: 0,
+    top: -50
+  }))
   const [ renderedSettings, setRenderedSettings ] = useState()
   useEffect(() => {
     console.log(settings)
@@ -29,16 +59,17 @@ function Settings({ inSettings, setInSettings, setSettings, settings }) {
     setRenderedSettings(toSettings)
   }, [ settings ])
   return (
-    <div id='divSettings' className={inSettings ? styles.divSettings : styles.none}>
-      <button
-        className={styles.close}
-        onClick={() => setInSettings(false)}>
-        <FontAwesomeIcon icon={faClose}></FontAwesomeIcon> 
-      </button>
+    <animated.div
+      id='divSettings'
+      className={inSettings ? styles.divSettingsOpen : styles.divSettingsClose}
+      style={x}
+      >
+      <TransitionSettings inSettings={inSettings} spring={spring}></TransitionSettings>
+      <CloseButton setInSettings={setInSettings}></CloseButton>
       <div id='settings' className={styles.settings}>
         {renderedSettings}
       </div>
-    </div>
+    </animated.div>
   );
 }
 
