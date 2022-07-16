@@ -34,14 +34,16 @@ div.taskBar {
   $height: 8vh;
   display: flex;
   flex-direction: row;
+  justify-content: flex-end;
   width: 100%;
   height: $height;
   // background-color: cornflowerblue;
   background-color: #abe9cd;
-  background-image: linear-gradient(315deg, #abe9cd 0%, #3eadcf 74%);
+  background-image: linear-gradient(315deg, #51c993 0%, #3eadcf 74%);
   z-index: 3;
   button.stdButton {
     display: flex;
+    margin-right: 10px;
     flex-direction: row;
     $padding: 5px;
     font-family: 'Quicksand', sans-serif;
@@ -52,7 +54,7 @@ div.taskBar {
     // padding-left: $padding;
     // padding-right: $padding;
     padding: $padding;
-    height: fit-content;
+    height: 70%;
     border-radius: 3px;
     background-color: rgba($color: #000000, $alpha: 0);
     transition: background-color 0.2s;

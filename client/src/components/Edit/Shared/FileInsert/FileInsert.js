@@ -8,9 +8,10 @@ const errMsg = 'File provided is not valid. Please select an image file.'
 function FileInsert() {
   return (
     <>
-      <div>
+      <div className={styles.fileInsert}>
         <input
           type='file'
+          id='file'
           name='imageFile'
           onChange={async e => {
             switch (e.target.name) {
@@ -42,6 +43,7 @@ function FileInsert() {
           }}
           >
         </input>
+        <label for="file" className={styles.selectFileLabel}>Select file</label>
       </div>
     </>
   )

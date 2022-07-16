@@ -29,6 +29,19 @@ function CloseButton({ setInSettings }) {
     </button>
   )
 }
+
+function SwitchButton({ on, onClick }) {
+  return (
+    <div
+      className={styles.switchButton}
+      onClick={onClick}
+    >
+      <button className={on ? styles.on : styles.off}>
+        {on ? 'on' : 'off'}
+      </button>
+    </div>
+  )
+}
   
 function Settings({ inSettings, setInSettings, setSettings, settings }) {
   const [ x, spring ] = useSpring(() => ({
@@ -41,17 +54,19 @@ function Settings({ inSettings, setInSettings, setSettings, settings }) {
     const toSettings = Object.keys(settings).map((setting, index) => 
       (
         <div key={index} className={styles.setting}>
-          <p>
-            { setting }
-          </p>
-          <button
-            onClick={() => {
-              const newSettings = {...settings}
-              newSettings[setting].value = !(newSettings[setting].value)
-              setSettings(newSettings)
-            }}>
-            { String(settings[setting].value) }
-          </button>
+          <div className={styles.firstRow}>
+            <p>
+              { setting }
+            </p>
+            <SwitchButton
+              onClick={() => {
+                const newSettings = { ...settings }
+                newSettings[setting].value = !(newSettings[setting].value)
+                setSettings(newSettings)
+              }}
+              on={settings[setting].value}
+              ></SwitchButton>
+          </div>
           {settings[setting].html}
         </div>
       )

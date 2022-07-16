@@ -3,7 +3,7 @@ import styles from './taskBar.module'
 import api from '../../../services/api'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faGear } from '@fortawesome/free-solid-svg-icons'
+import { faGear, faScrewdriverWrench } from '@fortawesome/free-solid-svg-icons'
 
 import { SearchBar, SearchResult } from './Search'
 import { UndoRedo } from './UndoRedo'
@@ -16,9 +16,6 @@ function TaskBar({ setInSettings }) {
   const [ hover, setHover ] = useState(false)
   return (
     <>
-      <div className={styles.sideBar}>
-
-      </div>
       <div className={styles.taskBar}>
         {/* <button
           className={styles.stdButton}
@@ -33,8 +30,10 @@ function TaskBar({ setInSettings }) {
           onClick={() => {
             const modes = utils.getGlobals().modes
             modes.gluing = !(modes.gluing)
-          }}>
-          glue
+          }}
+          >
+          <FontAwesomeIcon icon={faScrewdriverWrench}></FontAwesomeIcon>
+          <p>Tools</p>
         </button>
         {/* <SearchBar></SearchBar>
         <Categories></Categories> */}
