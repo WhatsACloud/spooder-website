@@ -4,6 +4,7 @@ import styles from './Settings.module'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faRectangleXmark } from '@fortawesome/free-solid-svg-icons'
+import { BackgroundClickDetector } from '../../BackgroundClickDetector'
 
 function TransitionSettings({ inSettings, spring }) {
   useEffect(() => {
@@ -74,17 +75,25 @@ function Settings({ inSettings, setInSettings, setSettings, settings }) {
     setRenderedSettings(toSettings)
   }, [ settings ])
   return (
-    <animated.div
-      id='divSettings'
-      className={inSettings ? styles.divSettingsOpen : styles.divSettingsClose}
-      style={x}
-      >
-      <TransitionSettings inSettings={inSettings} spring={spring}></TransitionSettings>
-      <CloseButton setInSettings={setInSettings}></CloseButton>
-      <div id='settings' className={styles.settings}>
-        {renderedSettings}
-      </div>
-    </animated.div>
+    <>
+      <animated.div
+        id='divSettings'
+        className={inSettings ? styles.divSettingsOpen : styles.divSettingsClose}
+        style={x}
+        >
+        <TransitionSettings inSettings={inSettings} spring={spring}></TransitionSettings>
+        <CloseButton setInSettings={setInSettings}></CloseButton>
+        <div id='settings' className={styles.settings}>
+          {renderedSettings}
+        </div>
+      </animated.div>
+      <BackgroundClickDetector
+        on={inSettings}
+        zIndex={14}
+        mousedown={() => setInSettings(false)}
+        blur={true}
+        ></BackgroundClickDetector>
+    </>
   );
 }
 
