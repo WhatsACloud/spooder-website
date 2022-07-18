@@ -1,10 +1,6 @@
-.none {
-  display: none;
-}
-
-div.toolDropDown {
+@mixin dropDown {
   display: flex;
-  z-index: 21;
+  z-index: 8;
   border-radius: 5px;
   flex-direction: column;
   position: absolute;
@@ -14,22 +10,58 @@ div.toolDropDown {
   color: black;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   margin-left: -1.25vw;
-  div.toolElement {
-    display: flex;
-    z-index: 20;
-    flex-direction: row;
-    border-radius: 5px;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-    padding: 5px;
-    padding-left: 5px;
-    padding-right: 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    div.spacer {
-      width: 2.5vw;
-    }
-    &:hover {
-      filter: brightness(0.8);
-    }
+}
+
+@mixin toolElement {
+  display: flex;
+  z-index: 20;
+  flex-direction: row;
+  border-radius: 5px;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  padding: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  transition: .2s;
+  background-color: white;
+  div.spacer {
+    transition: background-color .2s;
+    width: 2.5vw;
+  }
+  &:hover {
+    filter: brightness(0.8);
+  }
+}
+
+.none {
+  @include dropDown();
+  // margin-left: -1.25vw;
+  // opacity: 0;
+  div.toolElementOff {
+    @include toolElement();
+  }
+  div.toolElementFalse {
+    @include toolElement();
+  }
+  div.toolElementTrue {
+    @include toolElement();
+    background-color: grey;
+  }
+}
+
+div.toolDropDown {
+  @include dropDown();
+  opacity: 1;
+  div.toolElementOff {
+    @include toolElement();
+    margin: 0;
+  }
+  div.toolElementFalse {
+    @include toolElement();
+  }
+  div.toolElementTrue {
+    @include toolElement();
+    background-color: grey;
   }
 }

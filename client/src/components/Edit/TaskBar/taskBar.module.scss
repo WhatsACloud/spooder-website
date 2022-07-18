@@ -40,7 +40,7 @@ div.taskBar {
   // background-color: cornflowerblue;
   background-color: #abe9cd;
   background-image: linear-gradient(315deg, #51c993 0%, #3eadcf 74%);
-  z-index: 3;
+  z-index: 9;
   button.stdButton {
     display: flex;
     margin-right: 10px;
@@ -80,7 +80,7 @@ div.taskBar {
 
 div.divSearchBar {
   width: 80%;
-  z-index: 4;
+  z-index: 9;
   input {
     transition: background-color 0.1s;
     &.focused {
