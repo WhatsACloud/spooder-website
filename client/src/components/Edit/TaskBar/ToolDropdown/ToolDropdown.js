@@ -25,7 +25,6 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
     fontSize: 3,
     config: config.stiff
   }))
-  useChain([])
   useEffect(() => {
     spacerSpring.start({
       // width: on ? 20 : 0
@@ -57,59 +56,82 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
   )
 }
 
-function ToolDropdown({ on, setOn }) {
-  // const [ springStyle, spring ] = useSpring(() => ({
-  //   marginLeft: '0vw',
-  //   opacity: 1,
-  //   config: config.stiff
-  //   // config: {
-  //   //   duration: 200,
-  //   //   easing: easings.easeOutQuad
-  //   // }
-  // }))
-  const data = [
-    {
-      name: 'Glue',
-      onClick: () => {
-        const modes = utils.getGlobals().modes
-        modes.gluing = !(modes.gluing)
-      },
-      icon: {faLink}
+const data = [
+  {
+    name: 'Glue',
+    onClick: () => {
+      const modes = utils.getGlobals().modes
+      modes.gluing = !(modes.gluing)
     },
-    {
-      name: 'Testing',
-      icon: {faLink}
-    }
-  ]
-  const elems = useTransition(
-    data,
-    {
-      config: config.stiff
-    }
-  )
+    icon: faLink
+  },
+  {
+    name: 'Testing',
+    onClick: () => {
+      const modes = utils.getGlobals().modes
+      modes.gluing = !(modes.gluing)
+    },
+    icon: faLink
+  },
+]
+
+const elemsInitial = data.map((elemData, index) => (
+  <ToolElement
+    name={elemData.name}
+    onClick={elemData.onClick}
+    on={false}
+    toggle={true}
+    icon={elemData.icon}
+    key={index}
+  ></ToolElement>
+))
+
+function ToolDropdown({ on, setOn }) {
+  const [ springStyle, spring ] = useSpring(() => ({
+    marginLeft: '0vw',
+    opacity: 1,
+    config: config.stiff,
+  }))
+  const [ elems, setElems ] = useState(elemsInitial)
   useEffect(() => {
-    // spring.start({
-    //   marginLeft: on ? '0px' : '20px'
-    //   // opacity: on ? 1 : 0,
-    // })
+    spring.start({
+      marginLeft: on ? '0px' : '20px',
+      delay: 150
+      // opacity: on ? 1 : 0,
+    })
+    let leElems = [...elems]
+    let index = 0
+    const interval = setInterval(() => {
+      const elemData = data[index]
+      leElems.splice(index, 1, (
+        <ToolElement
+          name={elemData.name}
+          onClick={elemData.onClick}
+          on={on}
+          toggle={true}
+          icon={elemData.icon}
+          key={index}
+        ></ToolElement>
+      ))
+      setElems(leElems)
+      if (index >= data.length - 1) {
+        clearInterval(interval)
+        index = 0
+        return
+      }
+      index++
+      leElems = [...leElems]
+    }, 150)
   }, [ on ])
   return (
     <>
       <BackgroundClickDetector on={on} mousedown={() => setOn(false)} zIndex={7}></BackgroundClickDetector>
       {/* <div className={styles.toolDropDown}> */}
         <animated.div
-          // style={springStyle}
+          style={springStyle}
           className={on ? styles.toolDropDown : styles.none}
           >
-          {elems((style, item, t, index) => (
-            <ToolElement
-              name={item.name}
-              onClick={item.onClick}
-              on={on}
-              toggle={true}
-              icon={item.icon}
-            ></ToolElement>
-          ))}
+          {elems}
           {/* <ToolElement
             name='Glue'
             onClick={() => {
