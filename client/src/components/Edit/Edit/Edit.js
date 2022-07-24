@@ -118,6 +118,11 @@ function Edit() {
     }
     utils.getStage().on('click', mouseclickUnselectAll)
     const mousemove = (e) => {
+      if (utils.getGlobals().dragging) {
+        document.removeEventListener('mousemove', mousemove)
+        stopSelecting({button: 0})
+        return
+      }
       boxEnd = utils.getCanvasMousePos(e.clientX, e.clientY)
       const selectBox = utils.getMainLayer().find('#selectBox')[0]
       selectBox.setAttr('width', boxEnd.x - boxStart.x)
@@ -203,8 +208,11 @@ function Edit() {
         id: 'selectBox',
       })
       utils.getMainLayer().add(selectBox)
-      document.addEventListener('mousemove', isDrag)
-      document.addEventListener('mouseup', stopSelecting)
+      console.log(utils.getGlobals().dragging)
+      if (!utils.getGlobals().dragging) {
+        document.addEventListener('mousemove', isDrag)
+        document.addEventListener('mouseup', stopSelecting)
+      }
     })
     setInterval(() => {
       if (utils.getGlobals().scrolling) {
@@ -238,6 +246,7 @@ function Edit() {
     globals.testedPath = []
     globals.scrolling = false
     globals.wasScrolling = false
+    globals.dragging = false // to tell if to use the box select
 
     globals.recentlyViewed = []
 
@@ -310,7 +319,7 @@ function Edit() {
     const newBud = new Operation(
       'Insert new bud',
       _newBud,
-      [['t']],
+      [['Control', 'ctrl'], ['m']],
       utils.ObjType.Default,
     )
     operations.add(newBud)
@@ -353,7 +362,7 @@ function Edit() {
         utils.setCursor("grab")
         document.addEventListener('mousemove', mouseMoveFunc)
         const func = () => {
-          utils.getGlobals().dragging = true
+          // utils.getGlobals().dragging = true
           document.removeEventListener('mousemove', func)
           document.addEventListener('mouseup', stopDrag)
         }

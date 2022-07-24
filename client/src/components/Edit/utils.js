@@ -57,8 +57,7 @@ const getCanvasMousePos = (x, y) => {
     ),
     y: (
       y
-      - 40
-      - window.innerHeight * 0.1
+      - window.innerHeight * 0.08
     )
   }
 }

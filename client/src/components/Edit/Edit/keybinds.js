@@ -46,9 +46,17 @@ class Keybinds {
         for (const { func, type, keyCombi } of this.binds[keyPressed]) {
           if (type === Keybinds.keyDown) {
             let all = true
+            console.log(keyCombi)
+            console.log(this.down['z'], this.down['Control'], this.down['Shift'])
             if (keyCombi !== null) {
               for (const leKey of keyCombi) {
                 if (!(this.down[leKey])) {
+                  all = false
+                  break
+                }
+              }
+              for (const key of Object.keys(this.down)) {
+                if (!(keyCombi.includes(key)) && this.down[key]) {
                   all = false
                   break
                 }
@@ -57,6 +65,7 @@ class Keybinds {
               func(e)
               continue
             }
+            console.log(all)
             if (all) func(e)
           }
         }
@@ -65,11 +74,12 @@ class Keybinds {
       }
     })
     document.addEventListener('keyup', (e) => {
-      if (e.key in this.binds) {
-        for (const { func, type } of this.binds[e.key]) {
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key
+      if (key in this.binds) {
+        for (const { func, type } of this.binds[key]) {
           if (type === Keybinds.keyUp) func(e)
         }
-        this.down[e.key] = false
+        this.down[key] = false
       }
     })
   }

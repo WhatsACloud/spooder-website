@@ -21,13 +21,11 @@ const budShapeConfig = () => {
       BudUtils.drawHexagon(ctx, points)
       ctx.fillStrokeShape(shape)
     },
-    fillLinearGradientStartPoint: { x: -100, y: 0 },
-    fillLinearGradientEndPoint: { x: 100, y: 150 },
-    fillLinearGradientColorStops: [0, "#000046", 0.5, "#1CB5E0"],
-    shadowColor: 'black',
+    // fill: 'blue',
+    // shadowColor: 'blue',
     shadowBlur: 10,
-    shadowOffset: { x: 10, y: 10 },
-    shadowOpacity: 0.5,
+    // shadowOffset: { x: 10, y: 10 },
+    shadowOpacity: 0.8,
     id: 'budShape',
   }
 }

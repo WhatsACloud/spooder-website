@@ -156,7 +156,19 @@ class BudJson {
   set attachedTos(attachedTos) { this.json.attachedTos = new Proxy(attachedTos, this.attachedTosProxyConfig) }
   set position(position) { this.json.position = new Proxy(position, this.objProxyConfig) }
   set objId(objId) { this.json.objId = objId; this.checkForUpdate('objId') }
-  set categId(categId) { this.json.categId = categId; this.checkForUpdate('categId') }
+  set categId(categId) {
+    this.json.categId = categId
+    const color = utils.getGlobals().categories.getById(categId).color
+    const interval = setInterval(() => {
+      if (this.bud.konvaObj) {
+        this.bud.konvaObj.findOne('#budShape').setAttr('fill', color)
+        this.bud.konvaObj.findOne('#budShape').setAttr('shadowColor', color)
+        clearInterval(interval)
+      }
+    }, 100)
+    console.log(this.bud.konvaObj, color)
+    this.checkForUpdate('categId')
+  }
   set del(del) { this.json.del = del; this.checkForUpdate('del')}
   json = JSON.parse(JSON.stringify(BudJson.base))
   _originalJson = null
@@ -193,6 +205,10 @@ class Bud {
   viewing = false
   oldAttachedSilk = null
   type = 'bud'
+
+  get categColor() {
+    return utils.getGlobals().categories.getById(this.json?.categId)?.color
+  }
 
   mouseFollower = (e) => {
     const { x, y } = utils.getCanvasMousePos(e.clientX, e.clientY)
@@ -253,6 +269,7 @@ class Bud {
   }
   dragStart = () => {
     this.dragging = true
+    utils.getGlobals().dragging = true
   }
   click = (e) => {
     e.cancelBubble = true
@@ -360,6 +377,7 @@ class Bud {
   }
   dragEnd = () => {
     this.dragging = false
+    utils.getGlobals().dragging = false
     const oldX = this.x
     const oldY = this.y
     const { newX, newY } = this.calcNewPos()
@@ -429,6 +447,8 @@ class Bud {
     budGroup.on('mousedown', this.mouseDown)
     budGroup.on('mouseup', (e) => { e.cancelBubble = true })
     const budShape = new Konva.Shape(drawConfig.budShapeConfig())
+    budShape.setAttr('fill', this.categColor)
+    budShape.setAttr('shadowColor', this.categColor)
     budGroup.add(budShape)
     utils.getBudGroup().add(budGroup)
     this.konvaObj = budGroup
