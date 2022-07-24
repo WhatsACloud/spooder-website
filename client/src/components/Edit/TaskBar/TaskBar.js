@@ -26,7 +26,7 @@ function ToolButton() {
         >
         <FontAwesomeIcon
           icon={faScrewdriverWrench}
-          className={hovering ? styles.enlarged : ''}
+          className={hovering ? styles.enlarged : styles.notEnlarged}
           ></FontAwesomeIcon>
         <p>Tools</p>
         <ToolDropdown on={on} setOn={setOn}></ToolDropdown>
@@ -49,8 +49,7 @@ function TaskBar({ setInSettings }) {
           <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
         </button> */}
         <ToolButton></ToolButton>
-        {/* <SearchBar></SearchBar>
-        <Categories></Categories> */}
+        {/* <Categories></Categories> */}
         {/* <Debugger></Debugger> */}
         {/* <UndoRedo></UndoRedo> */}
         <button
@@ -62,6 +61,7 @@ function TaskBar({ setInSettings }) {
           <FontAwesomeIcon className={hover ? styles.on : ''} icon={faGear}></FontAwesomeIcon>
           <p>Settings</p>
         </button>
+        <SearchBar></SearchBar>
       </div>
     </>
   )

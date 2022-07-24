@@ -23,6 +23,8 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
     height: 10,
     padding: 0,
     fontSize: 3,
+    marginLeft: '0vw',
+    opacity: 0,
     config: config.stiff
   }))
   useEffect(() => {
@@ -33,7 +35,9 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
       width: on ? 100 : 30,
       height: on ? 40 : 10,
       padding: on ? 5 : 3,
-      fontSize: on ? 20 : 3,
+      fontSize: on ? 15 : 3,
+      marginLeft: on ? '-3vw' : '0vw',
+      opacity: on ? 1 : 0
     })
   }, [ on ])
   return (
@@ -47,7 +51,7 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
       style={outerDivStyle}
       className={on ? (toggled ? styles.toolElementTrue : styles.toolElementFalse) : styles.toolElementOff}
       >
-      <FontAwesomeIcon icon={icon}></FontAwesomeIcon>
+      <FontAwesomeIcon icon={icon} className={styles.dropDownIcon}></FontAwesomeIcon>
       <animated.div 
         style={spacerStyle}
         className={styles.spacer}></animated.div>
@@ -87,18 +91,8 @@ const elemsInitial = data.map((elemData, index) => (
 ))
 
 function ToolDropdown({ on, setOn }) {
-  const [ springStyle, spring ] = useSpring(() => ({
-    marginLeft: '0vw',
-    opacity: 1,
-    config: config.stiff,
-  }))
   const [ elems, setElems ] = useState(elemsInitial)
   useEffect(() => {
-    spring.start({
-      marginLeft: on ? '0px' : '20px',
-      delay: 150
-      // opacity: on ? 1 : 0,
-    })
     let leElems = [...elems]
     let index = 0
     const interval = setInterval(() => {
@@ -121,14 +115,13 @@ function ToolDropdown({ on, setOn }) {
       }
       index++
       leElems = [...leElems]
-    }, 150)
+    }, 50)
   }, [ on ])
   return (
     <>
       <BackgroundClickDetector on={on} mousedown={() => setOn(false)} zIndex={7}></BackgroundClickDetector>
       {/* <div className={styles.toolDropDown}> */}
-        <animated.div
-          style={springStyle}
+        <div
           className={on ? styles.toolDropDown : styles.none}
           >
           {elems}
@@ -142,7 +135,7 @@ function ToolDropdown({ on, setOn }) {
             toggle={true}
             icon={faLink}
             ></ToolElement> */}
-        </animated.div>
+        </div>
       {/* </div> */}
     </>
   )

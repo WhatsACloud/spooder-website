@@ -1,6 +1,7 @@
 import styles from '../edit.module'
 import React, { useState, useEffect } from 'react'
 import * as utils from '../utils'
+import { useSpring } from 'react-spring'
 
 function KeybindBtn({ num, text, icon }) {
   return (
@@ -11,8 +12,7 @@ function KeybindBtn({ num, text, icon }) {
   )
 }
 
-function OpBtn({ operation, setContextMenuOn, last }) {
-  const [ keys, setKeys ] = useState()
+function KeySetter({ operation, setKeys }) {
   useEffect(() => {
     const _keys = []
     let i = 0
@@ -24,14 +24,36 @@ function OpBtn({ operation, setContextMenuOn, last }) {
     }
     setKeys(_keys)
   }, [])
+  return <></>
+}
+
+function OpBtn({ on, operation, setContextMenuOn, last }) {
+  const [ keys, setKeys ] = useState()
+  const [ menuStyle, menuSpring ] = useSpring(() => ({
+    width: 100,
+    height: 25,
+    opacity: 1,
+    duration: 1000,
+  }))
+  useEffect(() => {
+    console.log(on)
+    menuSpring.start({
+      width: on ? 250 : 100,
+      height: on ? 100 : 25,
+      opacity: on ? 0 : 1,
+      duration: 1000,
+    })
+  }, [ on ])
   return (
     <div
+      style={menuStyle}
       className={last ? styles.lastBtn : styles.btn}
       onClick={e => {
         operation.func()
         setContextMenuOn(false)
       }}
       >
+      <KeySetter operation={operation} setKeys={setKeys}></KeySetter>
       <p
         onMouseOver={e => console.log('siofuifubdfibuefhy')}>{operation.name}</p>
       {keys}
@@ -60,7 +82,7 @@ function ContextMenu({ on, pos, setContextMenuOn }) {
         console.log(type, operations.operations)
         for (const operation of operations.operations[type]) {
           toRender.push(
-            <OpBtn key={i} last={false} operation={operation} setContextMenuOn={setContextMenuOn}></OpBtn>
+            <OpBtn key={i} on={on} last={false} operation={operation} setContextMenuOn={setContextMenuOn}></OpBtn>
           )
           lastOp = operation
           i++
@@ -68,7 +90,7 @@ function ContextMenu({ on, pos, setContextMenuOn }) {
       }
       toRender.pop()
       toRender.push(
-        <OpBtn key={i} last={true} operation={lastOp} setContextMenuOn={setContextMenuOn}></OpBtn>
+        <OpBtn key={i} on={on} last={true} operation={lastOp} setContextMenuOn={setContextMenuOn}></OpBtn>
       )
     }
     setRendered(toRender)

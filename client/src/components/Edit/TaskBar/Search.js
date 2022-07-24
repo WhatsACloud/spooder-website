@@ -4,6 +4,9 @@ import * as utils from '../utils'
 
 import { BackgroundClickDetector } from '../../BackgroundClickDetector'
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
+
 function BudSearchResult({ obj, str }) {
   return (
     <>
@@ -99,6 +102,7 @@ function SearchBar() {
   const [ renderedSearchResults, setRenderedSearchResults ] = useState()
   const [ filters, setFilters ] = useState({...utils.filterOptions})
   const [ focused, setFocused ] = useState(false)
+  const [ hover, setHover ] = useState(false)
   useEffect(() => {
     const timeout = setTimeout(() => {
       console.log(searchVal)
@@ -121,26 +125,39 @@ function SearchBar() {
   }, [ searchVal ])
   return (
     <>
-      <div id='divSearchBar' className={styles.divSearchBar}>
+      <div
+        id='divSearchBar'
+        className={styles.divSearchBar}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        >
+        <FontAwesomeIcon
+          icon={faMagnifyingGlass}
+          className={focused ? styles.focused : styles.unfocused}
+          onClick={() => {
+            setFocused(true)
+            document.getElementById('searchInput').focus()
+          }}
+          ></FontAwesomeIcon>
         <input
+          id='searchInput'
+          // style={{filter: `brightness(${hover ? 0.8 : 1})`}}
           className={focused ? styles.focused : styles.unfocused}
           onFocus={e => setFocused(true)}
           onBlur={e => {
-            setTimeout(() => {
-              setFocused(false)
-            }, 200)
+            setFocused(false)
           }}
           value={searchVal}
           type='text'
           onChange={(evt) => setSearchVal(evt.target.value)}
-          placeholder='Search'></input>
+          placeholder={focused ? 'Search' : ''}></input>
         <div
           id='searchResults'
-          className={focused && renderedSearchResults ? styles.searchResults : styles.none}>
+          className={focused && renderedSearchResults.length > 0 ? styles.searchResults : styles.none}>
             {renderedSearchResults}
           </div>
       </div>
-      <Filter filters={filters} setFilters={setFilters}></Filter>
+      {/* <Filter filters={filters} setFilters={setFilters}></Filter> */}
     </>
   )
 }

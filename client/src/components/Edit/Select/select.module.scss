@@ -5,17 +5,17 @@
 }
 
 @mixin inputBox {
-  display: inline-block;
+  // display: inline-block;
   box-sizing: border-box;
-  padding: 12px 40px;
-  margin: 8px;
-  border-style: solid;
-  border-radius: 5px;
-  border-color: rgba(0, 0, 0, 0);
-  box-shadow: 0 5px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  border-width: 1px;
-  width: 40%;
-  height: 3em;
+  // padding: 12px 40px;
+  margin: 1.5vw;
+  top: 50%;
+  border-style: none;
+  border-bottom-style: solid;
+  border-bottom-color: black;
+  border-bottom-width: 1px;
+  // width: 40%;
+  // height: 3em;
   font-size: 15px;
   font-family: 'Courier New', Courier, monospace;
   outline: none;
