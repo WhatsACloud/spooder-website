@@ -444,3 +444,28 @@ const searchFor = (query, queryTypes) => {
   return searchResults
 }
 export { searchFor }
+
+import { Silk } from './Silk/SilkShape'
+
+const link = () => {
+  const leSelectedItems = getGlobals().selected
+  for (const [ objId, selected1 ] of Object.entries(leSelectedItems)) {
+    const selectedItems = {...leSelectedItems}
+    console.log(selectedItems, objId)
+    delete selectedItems[objId]
+    console.log(selectedItems, objId)
+    for (const selected2 of Object.values(selectedItems)) {
+      if (selected1.type === ObjType.Bud && selected2.type === ObjType.Bud) {
+        const bud1 = selected1.obj
+        const bud2 = selected2.obj
+        const objId2 = bud2.objId
+        console.log(objId2, bud1.json.attachedTos)
+        if (!(bud1.json.attachedTos.includes(objId2))) {
+          const silkId = getNextSilkId()
+          new Silk(silkId, bud1, bud2)
+        }
+      }
+    }
+  }
+}
+export { link }

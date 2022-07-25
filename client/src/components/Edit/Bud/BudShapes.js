@@ -288,11 +288,13 @@ class Bud {
       document.addEventListener('mouseup', mouseup)
       document.addEventListener('mousemove', mousemove)
     } else if (modes.gluing && (this !== utils.getGlobals().selected.obj)) {
-      const selected = utils.getGlobals().selected
-      if (selected.type === utils.ObjType.Bud) {
-        const bud = selected.obj
-        const silkId = utils.getNextSilkId()
-        new Silk(silkId, bud, this)
+      const selectedItems = utils.getGlobals().selected
+      for (const selected of Object.values(selectedItems)) {
+        if (selected.type === utils.ObjType.Bud) {
+          const bud = selected.obj
+          const silkId = utils.getNextSilkId()
+          new Silk(silkId, bud, this)
+        }
       }
     } else {
       this.select(true)

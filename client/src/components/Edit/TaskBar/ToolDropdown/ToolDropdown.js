@@ -4,8 +4,9 @@ import styles from './toolDropdown.module'
 import * as utils from '../../utils'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faLink } from '@fortawesome/free-solid-svg-icons'
+import { faLink, faPaperclip } from '@fortawesome/free-solid-svg-icons'
 import { BackgroundClickDetector } from '../../../BackgroundClickDetector'
+import { setBud } from '../../Bud/BudUtils'
 
 const toolElementConf = {
   duration: 200,
@@ -67,15 +68,24 @@ const data = [
       const modes = utils.getGlobals().modes
       modes.gluing = !(modes.gluing)
     },
+    toggle: true,
     icon: faLink
   },
   {
-    name: 'Testing',
+    name: 'Link',
     onClick: () => {
-      const modes = utils.getGlobals().modes
-      modes.gluing = !(modes.gluing)
+      utils.link()
     },
-    icon: faLink
+    icon: faPaperclip
+  },
+  {
+    name: 'New Bud',
+    onClick: () => {
+      const width = window.innerWidth / 2
+      const height = window.innerHeight / 2
+      const pos = utils.calcPosByKonvaPos(width, height)
+      setBud(pos)
+    },
   },
 ]
 
