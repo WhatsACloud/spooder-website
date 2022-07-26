@@ -70,6 +70,7 @@ div.taskBar {
 }
 
 div.divSearchBar {
+  position: relative;
   display: flex;
   justify-content: flex-end;
   // width: 80%;
@@ -77,6 +78,7 @@ div.divSearchBar {
   width: fit-content;
   height: fit-content;
   cursor: pointer;
+  $marginLeft: 35vw;
   svg {
     transition: .2s;
     position: absolute;
@@ -84,7 +86,7 @@ div.divSearchBar {
     margin-top: 18px;
     right: 18px;
     &.focused {
-      margin-right: calc(20vw - 40px);
+      margin-right: calc(#{$marginLeft} - 40px);
       transform: rotate(90deg);
       color: rgb(0, 110, 255);
     }
@@ -103,7 +105,7 @@ div.divSearchBar {
     background-color: rgba(0, 0, 0, 0);
     &.focused {
       // background-color: rgb(255, 255, 255);
-      width: 20vw;
+      width: $marginLeft;
       font-size: 20px;
       &::placeholder {
         color: white;
@@ -121,7 +123,7 @@ div.divSearchBar {
       outline: none;
     }
   }
-  div {
+  div.searchResults {
     transition: .2s;
     display: flex;
     flex-direction: column;
@@ -172,16 +174,52 @@ div.divSearchBar {
   }
 }
 
+div.filterOn {
+  transition: .2s;
+  position: absolute;
+  right: 10px;
+  top: 7.5px;
+  opacity: 1;
+}
+
+div.filterOff {
+  transition: .2s;
+  position: absolute;
+  right: 10px;
+  top: 0px;
+  opacity: 0;
+  pointer-events: none
+}
+
 div.divFilterBtn {
-  @include std-button;
-  background-color: white;
+  transition: .2s;
+  // display: flex;
+  // flex-direction: row;
+  // flex-wrap: wrap;
+  // justify-content: space-between;
+  background-color: rgb(240, 240, 240);
+  border-style: none;
+  padding: 7.5px;
+  // padding-left: 25px;
+  // padding-right: 25px;
+  svg {
+    color: grey;
+    left: 5px;
+    top: -7.5px;
+  }
+  p {
+    margin-left: 25px;
+    font-size: 15px;
+  }
+  &:hover {
+    filter: brightness(0.8);
+  }
 }
 
 div.divFilter {
   position: absolute;
   background-color: grey;
-  top: 100px;
-  left: 600px;
+  left: -100px;
   z-index: 10;
   div.filterOption {
     @include std-button;

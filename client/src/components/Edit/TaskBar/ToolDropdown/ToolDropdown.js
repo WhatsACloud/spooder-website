@@ -61,7 +61,7 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
   )
 }
 
-const data = [
+const theData = [
   {
     name: 'Glue',
     onClick: () => {
@@ -89,7 +89,9 @@ const data = [
   },
 ]
 
-const elemsInitial = data.map((elemData, index) => (
+
+function ToolDropdown({ on, setOn, leData }) {
+  const [ elems, setElems ] = useState((leData ? leData : theData).map((elemData, index) => (
   <ToolElement
     name={elemData.name}
     onClick={elemData.onClick}
@@ -98,14 +100,12 @@ const elemsInitial = data.map((elemData, index) => (
     icon={elemData.icon}
     key={index}
   ></ToolElement>
-))
-
-function ToolDropdown({ on, setOn }) {
-  const [ elems, setElems ] = useState(elemsInitial)
+)))
   useEffect(() => {
     let leElems = [...elems]
     let index = 0
     const interval = setInterval(() => {
+      const data = leData ? leData : theData
       const elemData = data[index]
       leElems.splice(index, 1, (
         <ToolElement
@@ -130,23 +130,11 @@ function ToolDropdown({ on, setOn }) {
   return (
     <>
       <BackgroundClickDetector on={on} mousedown={() => setOn(false)} zIndex={7}></BackgroundClickDetector>
-      {/* <div className={styles.toolDropDown}> */}
         <div
           className={on ? styles.toolDropDown : styles.none}
           >
           {elems}
-          {/* <ToolElement
-            name='Glue'
-            onClick={() => {
-              const modes = utils.getGlobals().modes
-              modes.gluing = !(modes.gluing)
-            }}
-            on={on}
-            toggle={true}
-            icon={faLink}
-            ></ToolElement> */}
         </div>
-      {/* </div> */}
     </>
   )
 }

@@ -5,7 +5,9 @@ import * as utils from '../utils'
 import { BackgroundClickDetector } from '../../BackgroundClickDetector'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
+import { faMagnifyingGlass, faFilter } from '@fortawesome/free-solid-svg-icons'
+
+import { ToolDropdown } from './ToolDropdown'
 
 function BudSearchResult({ obj, str }) {
   return (
@@ -67,20 +69,26 @@ function FilterOption({ name, toggled, onClick }) {
   )
 }
 
-function Filter({ filters, setFilters }) {
+function Filter({ filters, setFilters, on }) {
+  const filterData = Object.entries(filters).map(e => ({
+    name: e[0],
+    onClick: () => {
+      const newFilters = { ...filters, [e[0]]: !(filters[e[0]]) }
+      setFilters(newFilters)
+    },
+    toggle: true,
+  }))
   const [ showFilter, setShowFilter ] = useState(false)
-  useEffect(() => {
-    console.log(filters)
-  }, [])
   return (
-    <>
-      <BackgroundClickDetector on={showFilter} zIndex={9} mousedown={() => setShowFilter(false)}></BackgroundClickDetector>
+    <div className={on ? styles.filterOn : styles.filterOff}>
+      <BackgroundClickDetector on={showFilter} zIndex={7} mousedown={() => setShowFilter(false)}></BackgroundClickDetector>
       <div className={styles.divFilterBtn} onClick={() => setShowFilter(true)}>
-        filter
+        <FontAwesomeIcon icon={faFilter}></FontAwesomeIcon>
+        <p>filter</p>
       </div>
-      <div className={showFilter ? styles.divFilter : styles.none}>
-        {
-          Object.keys(filters).map(e => {
+      {/* <div className={showFilter ? styles.divFilter : styles.none}> */}
+        <ToolDropdown on={showFilter} setOn={setShowFilter} leData={filterData}>
+          {/* Object.keys(filters).map(e => {
             return <FilterOption
               key={e}
               name={e}
@@ -90,10 +98,10 @@ function Filter({ filters, setFilters }) {
                 setFilters(newFilters)
               }}
               ></FilterOption>
-          })
-        }
-      </div>
-    </>
+          }) */}
+        </ToolDropdown>
+      {/* </div> */}
+    </div>
   )
 }
 
@@ -124,7 +132,7 @@ function SearchBar() {
     }
   }, [ searchVal ])
   return (
-    <>
+    <div>
       <div
         id='divSearchBar'
         className={styles.divSearchBar}
@@ -143,10 +151,6 @@ function SearchBar() {
           id='searchInput'
           // style={{filter: `brightness(${hover ? 0.8 : 1})`}}
           className={focused ? styles.focused : styles.unfocused}
-          onFocus={e => setFocused(true)}
-          onBlur={e => {
-            setFocused(false)
-          }}
           value={searchVal}
           type='text'
           onChange={(evt) => setSearchVal(evt.target.value)}
@@ -156,9 +160,10 @@ function SearchBar() {
           className={focused && renderedSearchResults.length > 0 ? styles.searchResults : styles.none}>
             {renderedSearchResults}
           </div>
+        <Filter filters={filters} setFilters={setFilters} on={focused}></Filter>
       </div>
-      {/* <Filter filters={filters} setFilters={setFilters}></Filter> */}
-    </>
+      <BackgroundClickDetector on={focused} mousedown={() => setFocused(false)} zIndex={8}></BackgroundClickDetector>
+    </div>
   )
 }
 export { SearchBar }
