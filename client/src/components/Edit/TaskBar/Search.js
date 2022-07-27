@@ -9,6 +9,8 @@ import { faMagnifyingGlass, faFilter } from '@fortawesome/free-solid-svg-icons'
 
 import { ToolDropdown } from './ToolDropdown'
 
+import { Hexagon } from '../../../services/icons'
+
 function BudSearchResult({ obj, str }) {
   return (
     <>
@@ -48,6 +50,7 @@ function SearchResult({ onMouseDown, result }) {
   }, [])
   return (
     <>
+      <Hexagon></Hexagon>
       <button
         className={styles.searchFind}
         onMouseDown={onMouseDown}>
@@ -105,6 +108,36 @@ function Filter({ filters, setFilters, on }) {
   )
 }
 
+function SetSlashKeybind({ setFocused, setSearchVal }) {
+  useEffect(() => {
+    document.addEventListener('keydown', e => {
+      if (e.key === '/') {
+        if (!(document.getElementById('searchInput') === document.activeElement)) {
+          setFocused(true)
+          document.getElementById('searchInput').focus()
+          if (document.getElementById('searchInput').value === '') {
+            setTimeout(() => {
+              setSearchVal('')
+              document.getElementById('searchInput').value = ''
+            }, 100)
+          } else {
+            setTimeout(() => {
+              const newVal = document.getElementById('searchInput').value.slice(0, -1)
+              setSearchVal(newVal)
+              document.getElementById('searchInput').value = newVal
+            }, 100)
+          }
+        }
+      }
+      else if (e.key === 'Escape') {
+        setFocused(false)
+        document.getElementById('searchInput').blur()
+      }
+    })
+  }, [])
+  return <></>
+}
+
 function SearchBar() {
   const [ searchVal, setSearchVal ] = useState('')
   const [ renderedSearchResults, setRenderedSearchResults ] = useState()
@@ -112,27 +145,24 @@ function SearchBar() {
   const [ focused, setFocused ] = useState(false)
   const [ hover, setHover ] = useState(false)
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      console.log(searchVal)
-      const found = utils.searchFor(searchVal, filters)
-      const toRender = found.map((result, index) =>
-        <>
-          <SearchResult
-            key={index}
-            onMouseDown={e => {
-               setSelectedObj(objId)
-            }}
-            result={result}></SearchResult>
-        </>
-      )
-      setRenderedSearchResults(toRender)
-    }, 300)
-    return () => {
-      clearTimeout(timeout)
-    }
+    console.log(searchVal)
+    const found = utils.searchFor(searchVal, filters)
+    if (!found) return
+    const toRender = found.map((result, index) =>
+      <>
+        <SearchResult
+          key={index}
+          onMouseDown={e => {
+              setSelectedObj(objId)
+          }}
+          result={result}></SearchResult>
+      </>
+    )
+    setRenderedSearchResults(toRender)
   }, [ searchVal ])
   return (
     <div>
+      <SetSlashKeybind setFocused={setFocused} setSearchVal={setSearchVal}></SetSlashKeybind>
       <div
         id='divSearchBar'
         className={styles.divSearchBar}
@@ -157,7 +187,7 @@ function SearchBar() {
           placeholder={focused ? 'Search' : ''}></input>
         <div
           id='searchResults'
-          className={focused && renderedSearchResults.length > 0 ? styles.searchResults : styles.none}>
+          className={focused ? styles.searchResults : styles.searchResultsNone}>
             {renderedSearchResults}
           </div>
         <Filter filters={filters} setFilters={setFilters} on={focused}></Filter>

@@ -394,10 +394,15 @@ const getReactNamespace = (namespace) => {
 }
 export { getReactNamespace }
 
+const isFocused = () => {
+  return document.activeElement === document.getElementById('root').parentElement
+}
+export { isFocused }
+
 import { search } from 'fast-fuzzy'
 
 const searchInBud = (query, col) => {
-  return search(query, Object.values(getObjs()), { keySelector: (obj) => obj.json[col], returnMatchData: true })
+  return search(query, Object.values(getObjs()), { keySelector: (obj) => obj.json[col], returnMatchData: true, ignoreSymbols: false })
     .map(data => {
       console.log(data)
       return {obj: data.item, string: data.original, key: col}
@@ -425,6 +430,7 @@ export { filterOptions }
 const searchFor = (query, queryTypes) => {
   if (query.length === 0) return getGlobals().recentlyViewed
   const searchSet = new Set()
+  console.log(query)
   for (const [ option, can ] of Object.entries(queryTypes)) {
     console.log(option, can, searchSet)
     if (!can) continue

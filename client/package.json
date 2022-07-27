@@ -20,6 +20,7 @@
     "babel-loader": "^8.2.3",
     "css-loader": "^6.7.0",
     "html-webpack-plugin": "^5.5.0",
+    "react-svg-loader": "^3.0.3",
     "sass": "^1.52.1",
     "sass-loader": "^13.0.0",
     "style-loader": "^3.3.1",

@@ -1,3 +1,4 @@
+import * as utils from "../utils"
 
 class Keybinds {
   // enums
@@ -40,14 +41,14 @@ class Keybinds {
   isDown(key) { return this.down[key] }
   constructor(debugMode) {
     document.addEventListener('keydown', (e) => {
+      console.log(!utils.isFocused())
+      if (!utils.isFocused()) return
       const keyPressed = e.key.length > 1 ? e.key : e.key.toLowerCase()
       if (keyPressed in this.binds) {
         this.down[keyPressed] = true
         for (const { func, type, keyCombi } of this.binds[keyPressed]) {
           if (type === Keybinds.keyDown) {
             let all = true
-            console.log(keyCombi)
-            console.log(this.down['z'], this.down['Control'], this.down['Shift'])
             if (keyCombi !== null) {
               for (const leKey of keyCombi) {
                 if (!(this.down[leKey])) {
@@ -74,6 +75,7 @@ class Keybinds {
       }
     })
     document.addEventListener('keyup', (e) => {
+      if (!utils.isFocused()) return
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key
       if (key in this.binds) {
         for (const { func, type } of this.binds[key]) {

@@ -9,7 +9,7 @@
   // background-color: white;
   color: black;
   // box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-  margin-left: 2.8vw;
+  margin-left: 2vw;
 }
 
 @mixin toolElement {
@@ -23,7 +23,6 @@
   // padding-right: 5px;
   // margin-top: 5px;
   // margin-bottom: 5px;
-  background-color: white;
   transition: filter 0.2s;
   // div.spacer {
   //   width: 2.5vw;
@@ -48,7 +47,6 @@
   }
   div.toolElementTrue {
     @include toolElement();
-    background-color: grey;
   }
 }
 
@@ -64,6 +62,5 @@ div.toolDropDown {
   }
   div.toolElementTrue {
     @include toolElement();
-    background-color: grey;
   }
 }

@@ -26,6 +26,8 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
     fontSize: 3,
     marginLeft: '0vw',
     opacity: 0,
+    backgroundColor: 'white',
+    color: 'rgb(0, 102, 255)',
     config: config.stiff
   }))
   useEffect(() => {
@@ -36,11 +38,13 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
       width: on ? 100 : 30,
       height: on ? 40 : 10,
       padding: on ? 5 : 3,
-      fontSize: on ? 15 : 3,
+      fontSize: on ? 18 : 3,
       marginLeft: on ? '-3vw' : '0vw',
-      opacity: on ? 1 : 0
+      opacity: on ? 1 : 0,
+      backgroundColor: toggled ? 'rgb(0, 102, 255)' : 'white',
+      color: toggled ? 'white' : 'rgb(0, 102, 255)',
     })
-  }, [ on ])
+  }, [ on, toggled ])
   return (
     <animated.div
       onClick={() => {
