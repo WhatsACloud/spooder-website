@@ -5,17 +5,19 @@ import * as utils from '../utils'
 import { BackgroundClickDetector } from '../../BackgroundClickDetector'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMagnifyingGlass, faFilter } from '@fortawesome/free-solid-svg-icons'
+import { faMagnifyingGlass, faFilter, faSquare } from '@fortawesome/free-solid-svg-icons'
 
 import { ToolDropdown } from './ToolDropdown'
 
 import { Hexagon } from '../../../services/icons'
 
 function BudSearchResult({ obj, str }) {
+  console.log(utils.getGlobals().categories.getById(obj.json.categId))
   return (
     <>
-      <p className={styles.searchFindName}>{obj.json.name || ''}</p>
-      <p className={styles.searchFindType}>{obj.json.type || ''}</p>
+      <Hexagon style={{fill: utils.getGlobals().categories.getById(obj.json.categId).color}} className={styles.svg}></Hexagon>
+      <p className={styles.searchFindName}>{obj.json.word || ''}</p>
+      <p className={styles.searchFindType}>Bud</p>
       <p className={styles.searchFindString}>{str || ''}</p>
     </>
   )
@@ -24,8 +26,9 @@ function BudSearchResult({ obj, str }) {
 function CategSearchResult({ obj, str }) {
   return (
     <>
+      <div style={{backgroundColor: obj.color}} className={styles.roundSquare}></div>
       <p className={styles.searchFindName}>{obj.name || ''}</p>
-      <p className={styles.searchFindType}>{obj.color || ''}</p>
+      <p className={styles.searchFindType}>Category</p>
       <p className={styles.searchFindString}>{str || ''}</p>
     </>
   )
@@ -34,7 +37,7 @@ function CategSearchResult({ obj, str }) {
 function SearchResult({ onMouseDown, result }) {
   const [ rendered, setRendered ] = useState()
   useEffect(() => {
-    console.log(result.obj)
+    console.log(result)
     switch (result.obj.type) {
       case "bud":
         setRendered(
@@ -50,7 +53,6 @@ function SearchResult({ onMouseDown, result }) {
   }, [])
   return (
     <>
-      <Hexagon></Hexagon>
       <button
         className={styles.searchFind}
         onMouseDown={onMouseDown}>
@@ -147,6 +149,7 @@ function SearchBar() {
   useEffect(() => {
     console.log(searchVal)
     const found = utils.searchFor(searchVal, filters)
+    console.log(found)
     if (!found) return
     const toRender = found.map((result, index) =>
       <>

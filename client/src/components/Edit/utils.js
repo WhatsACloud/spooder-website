@@ -451,6 +451,11 @@ const searchFor = (query, queryTypes) => {
 }
 export { searchFor }
 
+const addToRecentlyViewed = (object, string) => {
+  getGlobals().recentlyViewed.unshift({ obj: object, string: string })
+}
+export { addToRecentlyViewed }
+
 import { Silk } from './Silk/SilkShape'
 
 const link = () => {

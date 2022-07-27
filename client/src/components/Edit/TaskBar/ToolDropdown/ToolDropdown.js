@@ -56,10 +56,10 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
       style={outerDivStyle}
       className={on ? (toggled ? styles.toolElementTrue : styles.toolElementFalse) : styles.toolElementOff}
       >
-      <FontAwesomeIcon icon={icon} className={styles.dropDownIcon}></FontAwesomeIcon>
       <animated.div 
         style={spacerStyle}
         className={styles.spacer}></animated.div>
+      <FontAwesomeIcon icon={icon} className={styles.dropDownIcon}></FontAwesomeIcon>
       <p>{name}</p>
     </animated.div>
   )

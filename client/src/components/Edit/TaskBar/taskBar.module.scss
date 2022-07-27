@@ -93,6 +93,28 @@ div.divSearchBar {
     &.unfocused {
       color: white;
     }
+    @mixin searchResultSvg() {
+      position: static;
+      font-size: 0;
+      margin-top: 0;
+      right: 0;
+    }
+    &.svg {
+      @include searchResultSvg();
+      $size: 25px;
+      height: $size;
+      width: $size;
+    }
+  }
+  div.roundSquare {
+    border-radius: 3px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+    $size: 20px;
+    width: $size;
+    height: $size;
+    margin: 5px;
   }
   input {
     transition: .2s;

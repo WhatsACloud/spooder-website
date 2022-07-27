@@ -100,7 +100,8 @@ function UpdateSelected({ selected }) {
   useEffect(() => {
     utils.getGlobals().selectedCategory = selected
     if (selected) {
-      utils.getGlobals().recentlyViewed.unshift(utils.getGlobals().categories.getById(selected))
+      const categ = utils.getGlobals().categories.getById(selected)
+      utils.addToRecentlyViewed(categ, categ.name)
     }
   }, [ selected ])
   return <></>

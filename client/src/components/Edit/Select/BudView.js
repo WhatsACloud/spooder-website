@@ -95,8 +95,8 @@ function Viewer({ viewing, startedTraining }) {
   const [ obj, setObj ] = useState(null)
   useEffect(() => {
     const object = utils.getObjById(viewing)
-    if (utils.getGlobals().recentlyViewed) {
-      utils.getGlobals().recentlyViewed.unshift(object)
+    if (utils.getGlobals().recentlyViewed && object) {
+      utils.addToRecentlyViewed(object, object.json.word)
     }
     if (object) {
       console.log(object.json.json, object.tsts, object.json.link)
