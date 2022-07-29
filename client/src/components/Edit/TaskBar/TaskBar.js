@@ -49,7 +49,7 @@ function TaskBar({ setInSettings }) {
           <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
         </button> */}
         <ToolButton></ToolButton>
-        {/* <Categories></Categories> */}
+        <Categories outerStyle={styles}></Categories>
         {/* <Debugger></Debugger> */}
         {/* <UndoRedo></UndoRedo> */}
         <button

@@ -249,6 +249,7 @@ function Edit() {
     globals.dragging = false // to tell if to use the box select
 
     globals.recentlyViewed = []
+    globals.inRecentlyViewed = {bud: {}, category: {}}
 
     globals.categories = new Categories()
     globals.selectedCategory = null

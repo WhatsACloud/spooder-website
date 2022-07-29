@@ -175,15 +175,43 @@ div.divSearchBar {
       &:hover {
         filter: brightness(0.8);
       }
-      p {
-        padding-right: 10px;
-        &.searchFindName {
-        }
-        &.searchFindType {
-
-        }
-        &.searchFindString {
-
+      div.budIcon {
+        margin-top: 10px;
+      }
+      div.categIcon {
+        margin-top: 7.5px;
+        font-size: 9px;
+      }
+      div.wrap {
+        display: flex;
+        flex-direction: column;
+        p {
+          padding-right: 5px;
+          margin: 0;
+          text-align: left;
+          color: rgb(190, 190, 190);
+          margin-top: -10px;
+          font-size: 15px;
+          &.searchFindName {
+            margin-left: 10px;
+          }
+          &.searchFindString {
+            margin-left: 5px;
+            margin-bottom: 6px;
+            font-size: 20px;
+            color: black;
+          }
+          &.searchFindType {
+            margin-left: 5px;
+            margin-top: -5px;
+            margin-bottom: 5px;
+            font-size: 10.5px;
+          }
+          &.searchFindTypeOff {
+            margin-left: 5px;
+            margin-top: -5px;
+            height: calc(5px + 10.5px);
+          }
         }
       }
     }

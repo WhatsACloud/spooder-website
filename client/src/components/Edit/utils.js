@@ -428,17 +428,14 @@ const filterOptions = {
 export { filterOptions }
 
 const searchFor = (query, queryTypes) => {
-  if (query.length === 0) return getGlobals().recentlyViewed
+  if (query.length === 0) return getGlobals()?.recentlyViewed
   const searchSet = new Set()
-  console.log(query)
   for (const [ option, can ] of Object.entries(queryTypes)) {
-    console.log(option, can, searchSet)
     if (!can) continue
     if (!(Object.keys(filterOptions).includes(option))) {
       throw new Error(`WARNING: queryType ( ${option} ) is not valid.`)
     }
     if (option === 'name') { searchSet.add(...searchInCateg(query, option)); continue }
-    console.log(option, can)
     searchSet.add(...searchInBud(query, option))
   }
   const searchResults = [...searchSet]
@@ -451,8 +448,21 @@ const searchFor = (query, queryTypes) => {
 }
 export { searchFor }
 
-const addToRecentlyViewed = (object, string) => {
-  getGlobals().recentlyViewed.unshift({ obj: object, string: string })
+const addToRecentlyViewed = (object) => {
+  switch (object.type) {
+    case "bud":
+      if (getGlobals().inRecentlyViewed.bud[object.json.objId]) return
+      getGlobals().inRecentlyViewed.bud[object.json.objId] = true
+      break
+    case "category":
+      if (getGlobals().inRecentlyViewed.category[object.categId]) return
+      getGlobals().inRecentlyViewed.category[object.categId] = true
+      break
+  }
+  getGlobals().recentlyViewed.unshift({ obj: object, string: object.json ? object.json.word : object.name })
+  if (getGlobals().recentlyViewed.length > 5) {
+    getGlobals().recentlyViewed.pop()
+  }
 }
 export { addToRecentlyViewed }
 

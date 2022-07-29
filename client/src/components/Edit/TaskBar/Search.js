@@ -11,25 +11,35 @@ import { ToolDropdown } from './ToolDropdown'
 
 import { Hexagon } from '../../../services/icons'
 
-function BudSearchResult({ obj, str }) {
-  console.log(utils.getGlobals().categories.getById(obj.json.categId))
+import uuid from 'react-uuid'
+
+function BudSearchResult({ obj, str, type }) {
   return (
     <>
-      <Hexagon style={{fill: utils.getGlobals().categories.getById(obj.json.categId).color}} className={styles.svg}></Hexagon>
-      <p className={styles.searchFindName}>{obj.json.word || ''}</p>
-      <p className={styles.searchFindType}>Bud</p>
-      <p className={styles.searchFindString}>{str || ''}</p>
+      <div className={styles.budIcon}>
+        <Hexagon style={{fill: utils.getGlobals().categories.getById(obj.json.categId).color}} className={styles.svg}></Hexagon>
+        <p>{obj.json.word || ''}</p>
+      </div>
+      <div className={styles.wrap}>
+        <p className={type ? styles.searchFindType : styles.searchFindTypeOff}>{type || ''}</p>
+        <p className={styles.searchFindString}>{str || ''}</p>
+      </div>
     </>
   )
 }
 
-function CategSearchResult({ obj, str }) {
+function CategSearchResult({ obj, str, type }) {
+  console.log(obj)
   return (
     <>
-      <div style={{backgroundColor: obj.color}} className={styles.roundSquare}></div>
-      <p className={styles.searchFindName}>{obj.name || ''}</p>
-      <p className={styles.searchFindType}>Category</p>
-      <p className={styles.searchFindString}>{str || ''}</p>
+      <div className={styles.categIcon}>
+        <div style={{backgroundColor: obj.color}} className={styles.roundSquare}></div>
+        <p>{obj.name || ''}</p>
+      </div>
+      <div className={styles.wrap}>
+        <p className={styles.searchFindType}>{type || ''}</p>
+        <p className={styles.searchFindString}>{str || ''}</p>
+      </div>
     </>
   )
 }
@@ -41,12 +51,12 @@ function SearchResult({ onMouseDown, result }) {
     switch (result.obj.type) {
       case "bud":
         setRendered(
-          <BudSearchResult obj={result.obj} str={result.string}></BudSearchResult>
+          <BudSearchResult obj={result.obj} str={result.string} type={result.key}></BudSearchResult>
         )
         break
       case "category":
         setRendered(
-          <CategSearchResult obj={result.obj} str={result.string}></CategSearchResult>
+          <CategSearchResult obj={result.obj} str={result.string} type={result.key}></CategSearchResult>
         )
         break
     }
@@ -147,14 +157,12 @@ function SearchBar() {
   const [ focused, setFocused ] = useState(false)
   const [ hover, setHover ] = useState(false)
   useEffect(() => {
-    console.log(searchVal)
     const found = utils.searchFor(searchVal, filters)
-    console.log(found)
     if (!found) return
-    const toRender = found.map((result, index) =>
+    const toRender = found.map((result) =>
       <>
         <SearchResult
-          key={index}
+          key={uuid()}
           onMouseDown={e => {
               setSelectedObj(objId)
           }}
@@ -162,7 +170,7 @@ function SearchBar() {
       </>
     )
     setRenderedSearchResults(toRender)
-  }, [ searchVal ])
+  }, [ searchVal, focused ])
   return (
     <div>
       <SetSlashKeybind setFocused={setFocused} setSearchVal={setSearchVal}></SetSlashKeybind>

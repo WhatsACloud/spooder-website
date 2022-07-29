@@ -101,7 +101,7 @@ function UpdateSelected({ selected }) {
     utils.getGlobals().selectedCategory = selected
     if (selected) {
       const categ = utils.getGlobals().categories.getById(selected)
-      utils.addToRecentlyViewed(categ, categ.name)
+      utils.addToRecentlyViewed(categ)
     }
   }, [ selected ])
   return <></>
