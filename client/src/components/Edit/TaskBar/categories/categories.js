@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react'
 import styles from './category.module'
 
+import { useSpring, animated } from 'react-spring'
+
 import { BackgroundClickDetector } from '../../../BackgroundClickDetector'
 import { SearchBar } from '../Search'
 
 import { HexColorPicker } from 'react-colorful'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faLayerGroup } from '@fortawesome/free-solid-svg-icons'
 
 import * as classCategory from '../../Category'
 
@@ -124,6 +126,10 @@ function DisplayCategories({ on }) {
   const [ colorPos, setColorPos ] = useState(0)
   const [ color, setColor ] = useState('')
   const [ toUpdate, update ] = useState(false)
+  const [ outerDivSpring, spring ] = useSpring(() => ({
+    opacity: 0,
+    marginTop: -50
+  }))
   useEffect(() => {
     if (on) {
       setSelected(utils.getGlobals().selectedCategory)
@@ -150,11 +156,15 @@ function DisplayCategories({ on }) {
     } else {
       setSelected(false)
     }
+    spring.start({
+      opacity: on ? 1 : 0,
+      marginTop: on ? 0 : -50,
+    })
   }, [ on, selected, toUpdate ])
   return (
     <>
       <UpdateColor selectingColor={selectingColor} color={color} update={update}></UpdateColor>
-      <div className={on ? styles.wrapCategories : styles.none}>
+      <animated.div style={outerDivSpring} className={on ? styles.wrapCategoriesOn : styles.wrapCategoriesOff }>
         <div
           style={{top: colorPos}}
           className={selectingColor !== false ? styles.colorPicker : styles.none}>
@@ -180,28 +190,32 @@ function DisplayCategories({ on }) {
             ></AddCategoryBtn>
           {display}
         </div>
-      </div>
+      </animated.div>
     </>
   )
 }
 export { DisplayCategories }
 
-function CategoryBtn({ setOpen }) {
+function CategoryBtn({ setOpen, outerStyle }) {
   return (
-    <button className={styles.openBtn} onClick={() => setOpen(true)}>View categories</button>
+    <button className={outerStyle.stdButton} onClick={() => setOpen(true)}>
+      <FontAwesomeIcon icon={faLayerGroup}></FontAwesomeIcon>
+      <p>Categories</p>
+    </button>
   )
 }
 
-function Categories() {
+function Categories({ outerStyle }) {
   const [ open, setOpen ] = useState(false)
   return (
     <>
       <BackgroundClickDetector
         on={open}
         zIndex={9}
+        blur={true}
         mousedown={() => setOpen(false)}
         ></BackgroundClickDetector>
-      <CategoryBtn setOpen={setOpen}></CategoryBtn>
+      <CategoryBtn outerStyle={outerStyle} setOpen={setOpen}></CategoryBtn>
       <DisplayCategories on={open}></DisplayCategories>
     </>
   )

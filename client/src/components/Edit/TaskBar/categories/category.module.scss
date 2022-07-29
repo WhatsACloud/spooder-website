@@ -9,7 +9,89 @@ button.openBtn {
   white-space: nowrap;
 }
 
-div.wrapCategories {
+$height: 50px;
+@mixin categoryBtn {
+  transition: .2s;
+  display: flex;
+  border-radius: 3px;
+  width: 100%;
+  padding-left: 10px;
+  margin: 5px;
+  height: $height;
+}
+
+@mixin viewCategories {
+  pointer-events: all;
+  $margin: 30px;
+  $percent: calc(100% - #{$margin});
+  width: $percent;
+  height: $percent;
+  margin: $margin;
+  border-radius: 5px;
+  padding: 10px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  background-color: rgb(234, 234, 234);
+  div.addCategoryBtn {
+    @include categoryBtn;
+    display: flex;
+    cursor: default;
+    background-color: rgb(240, 240, 240);
+    justify-content: center;
+    align-items: center;
+    font-size: 17px;
+    p {
+      margin-left: 8px;
+    }
+    &:hover {
+      filter: brightness(0.92);
+    }
+  }
+  $length: 3em;
+  $topMargin: calc(#{$height} / 2 - #{$length} / 2);
+  div.category {
+    @include categoryBtn;
+    background-color: white;
+    transition: border-color filter 0.2s;
+    border-width: 2px;
+    border-style: solid;
+    &:hover {
+      filter: brightness(0.92);
+    }
+    p {
+      font-size: 20px;
+      margin-top: calc(#{$height} / 2 - 0.75em);
+    }
+    input {
+      transition: .1s;
+      border-radius: 3px;
+      border-style: solid;
+      border-width: 1px;
+      border-color: rgba(0, 0, 0, 0);
+      box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+      margin: 5px;
+      &:focus {
+        outline: none;
+        border-color: rgb(44, 156, 255);
+      }
+    }
+    div {
+      &.colorDisplayer {
+        border-radius: 3px;
+        border-width: 1px;
+        border-color: grey;
+        border-style: solid;
+        width: $length;
+        height: $length;
+        margin-left: auto;
+        margin-right: 1em;
+        margin-top: $topMargin;
+      }
+    }
+  }
+}
+
+@mixin wrapCategories {
   display: flex;
   justify-content: center;
   $width: 50%;
@@ -22,76 +104,27 @@ div.wrapCategories {
   background-color: whitesmoke;
   border-radius: 3px;
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
-  div.viewCategories {
-    pointer-events: all;
-    $margin: 30px;
-    $percent: calc(100% - #{$margin});
-    width: $percent;
-    height: $percent;
-    margin: $margin;
-    border-radius: 5px;
-    padding: 10px;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    background-color: rgb(234, 234, 234);
-    $height: 50px;
-    @mixin categoryBtn {
-      display: flex;
-      border-radius: 3px;
-      width: 100%;
-      padding-left: 10px;
-      margin: 5px;
-      height: $height;
-    }
-    div.addCategoryBtn {
-      @include categoryBtn;
-      display: flex;
-      background-color: rgb(240, 240, 240);
-      transition: filter 0.2s;
-      justify-content: center;
-      align-items: center;
-      font-size: 17px;
-      p {
-        margin-left: 8px;
-      }
-      &:hover {
-        filter: brightness(0.92);
-      }
-    }
-    $length: 3em;
-    $topMargin: calc(#{$height} / 2 - #{$length} / 2);
-    div.category {
-      @include categoryBtn;
-      background-color: white;
-      transition: border-color filter 0.2s;
-      border-width: 2px;
-      border-style: solid;
-      &:hover {
-        filter: brightness(0.92);
-      }
-      p {
-        font-size: 20px;
-        margin-top: calc(#{$height} / 2 - 0.75em);
-      }
-      div {
-        &.colorDisplayer {
-          border-radius: 3px;
-          border-width: 1px;
-          border-color: grey;
-          border-style: solid;
-          width: $length;
-          height: $length;
-          margin-left: auto;
-          margin-right: 1em;
-          margin-top: $topMargin;
-        }
-      }
-    }
-  }
   div.colorPicker {
     position: absolute;
     left: auto;
     right: 1em;
     z-index: 100;
+  }
+}
+
+div {
+  &.wrapCategoriesOn {
+    @include wrapCategories();
+    div.viewCategories {
+      @include viewCategories();
+    }
+  }
+  &.wrapCategoriesOff {
+    @include wrapCategories();
+    pointer-events: none;
+    div.viewCategories {
+      @include viewCategories();
+      pointer-events: none;
+    }
   }
 }
