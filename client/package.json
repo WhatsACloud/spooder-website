@@ -53,6 +53,7 @@
     "react-transition-group": "^4.4.2",
     "react-uuid": "^1.0.2",
     "regenerator-runtime": "^0.13.9",
+    "resolve-url-loader": "^5.0.0",
     "semantic-ui-react": "^2.1.2",
     "yup": "^0.32.11"
   }

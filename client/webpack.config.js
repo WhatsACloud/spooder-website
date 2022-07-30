@@ -45,14 +45,19 @@ module.exports = {
             options: {
                 sourceMap: true,
                 modules: true,
+                // url: false,
             }
+          },
+          {
+            loader: 'resolve-url-loader'
           },
           {
             loader: "sass-loader",
             options: {
-                sourceMap: true
+              sourceMap: true
+            },
           }
-        }]
+        ]
       },
       {
         test: /\.svg$/,

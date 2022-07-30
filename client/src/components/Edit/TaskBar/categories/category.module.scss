@@ -11,7 +11,7 @@ button.openBtn {
 
 $height: 50px;
 @mixin categoryBtn {
-  transition: .2s;
+  // transition: .2s;
   display: flex;
   border-radius: 3px;
   width: 100%;
@@ -56,7 +56,7 @@ $height: 50px;
     border-width: 2px;
     border-style: solid;
     &:hover {
-      filter: brightness(0.92);
+      filter: brightness(0.96);
     }
     p {
       font-size: 20px;
@@ -70,6 +70,7 @@ $height: 50px;
       border-color: rgba(0, 0, 0, 0);
       box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
       margin: 5px;
+      width: 70%;
       &:focus {
         outline: none;
         border-color: rgb(44, 156, 255);
@@ -81,11 +82,16 @@ $height: 50px;
         border-width: 1px;
         border-color: grey;
         border-style: solid;
-        width: $length;
-        height: $length;
+        margin: 1.5px;
+        margin-top: 2.5px;
+        // width: $length;
+        // height: $length;
+        // $width: calc(#{$height} - 2 * 3px);
+        // $width: 10px;
+        // width: $width;
+        // height: $width;
         margin-left: auto;
         margin-right: 1em;
-        margin-top: $topMargin;
       }
     }
   }

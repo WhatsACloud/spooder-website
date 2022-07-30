@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import styles from './taskBar.module'
 import api from '../../../services/api'
 
@@ -35,6 +36,15 @@ function ToolButton() {
   )
 }
 
+function ToHomeBtn() {
+  const navigate = useNavigate()
+  return (
+    <p className={styles.websiteIcon} onClick={() => navigate('/home')}>
+      Spooderweb
+    </p>
+  )
+}
+
 function TaskBar({ setInSettings }) {
   const [ hover, setHover ] = useState(false)
   return (
@@ -48,6 +58,7 @@ function TaskBar({ setInSettings }) {
           }}>
           <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
         </button> */}
+        <ToHomeBtn></ToHomeBtn>
         <ToolButton></ToolButton>
         <Categories outerStyle={styles}></Categories>
         {/* <Debugger></Debugger> */}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import styles from './category.module'
 
-import { useSpring, animated } from 'react-spring'
+import { useSpring, animated, config } from 'react-spring'
 
 import { BackgroundClickDetector } from '../../../BackgroundClickDetector'
 import { SearchBar } from '../Search'
@@ -15,9 +15,48 @@ import * as classCategory from '../../Category'
 
 import * as utils from '../../utils'
 
-function Category({ category, selected, setColorPos, setSelected, setSelectingColor, setColor, color }) {
+function StartDivSpring({ on, firstOn, outerDivSpring, colorDivSpring }) {
+  useEffect(() => {
+    console.log(on)
+    outerDivSpring.start({
+      width: on ? 100 : 30,
+      height: on ? 50 : 0,
+      paddingLeft: on ? 10 : 3,
+      // margin: on ? 5 : 1,
+      marginLeft: on ? 0 : 40,
+      fontSize: on ? 18 : 3,
+      opacity: on ? 1 : 1,
+      // backgroundColor: toggled ? 'rgb(0, 102, 255)' : 'white',
+      // color: toggled ? 'white' : 'rgb(0, 102, 255)',
+    })
+    colorDivSpring.start({
+      width: on ? 40 : 10,
+      height: on ? 40 : 0,
+    })
+  }, [ on ])
+  return <></>
+}
+
+function Category({ on, firstOn, category, selected, setColorPos, setSelected, setSelectingColor, setColor, color }) {
   const [ text, setText ] = useState(category.name)
   const colorDiv = useRef(null)
+  const [ outerDivStyle, outerDivSpring ] = useSpring(() => ({
+    width: (on && !firstOn) ? 100 : 30,
+    height: (on && !firstOn) ? 50 : 0,
+    paddingLeft: (on && !firstOn) ? 10 : 3,
+    marginLeft: (on && !firstOn) ? 0 : 40,
+    fontSize: (on && !firstOn) ? 18 : 3,
+    opacity: (on && !firstOn) ? 1 : 1,
+    backgroundColor: 'white',
+    color: 'rgb(0, 102, 255)',
+    config: config.gentle,
+  }))
+  console.log(outerDivStyle.width)
+  const [ colorDivStyle, colorDivSpring ] = useSpring(() => ({
+    width: (on && !firstOn) ? 40 : 10,
+    height: (on && !firstOn) ? 40 : 0,
+    config: config.gentle,
+  }))
   useEffect(() => {
     const timeout = setTimeout(() => {
       console.log('timout')
@@ -37,11 +76,20 @@ function Category({ category, selected, setColorPos, setSelected, setSelectingCo
   }, [ text ])
   return (
     <>
-      <div
+      <StartDivSpring firstOn={firstOn} on={on} outerDivSpring={outerDivSpring} colorDivSpring={colorDivSpring}></StartDivSpring>
+      <animated.div
         style={{
-          borderColor: category.categId === selected ?
-          'rgba(200, 200, 200, 1)' : 
-          'rgba(200, 200, 200, 0)'
+          width: outerDivStyle.width.to(v => v + "%"),
+          height: outerDivStyle.height.to(v => v),
+          // paddingLeft: outerDivStyle.paddingLeft.to(v => v),
+          fontSize: outerDivStyle.fontSize.to(v => v),
+          marginLeft: outerDivStyle.marginLeft.to(v => v + '%'),
+          opacity: outerDivStyle.opacity.to(v => v),
+          backgroundColor: outerDivStyle.backgroundColor.to(v => v),
+          borderColor: (category.categId === selected ?
+            'rgba(200, 200, 200, 1)' :
+            'rgba(200, 200, 200, 0)'),
+          color: outerDivStyle.color.to(v => v),
         }}
         className={styles.category}
         onClick={() => {
@@ -55,9 +103,13 @@ function Category({ category, selected, setColorPos, setSelected, setSelectingCo
           }}
           value={text}
         ></input>
-        <div
+        <animated.div
           ref={colorDiv}
-          style={{backgroundColor: category.color}}
+          style={{
+            width: colorDivStyle.width.to(v => v),
+            height: colorDivStyle.height.to(v => v),
+            backgroundColor: category.color
+          }}
           className={styles.colorDisplayer}
           onClick={() => {
             setColor(category ? category.color : '')
@@ -66,13 +118,13 @@ function Category({ category, selected, setColorPos, setSelected, setSelectingCo
             setSelectingColor(category)
             setColorPos(rect.top)
           }}
-          ></div>
-      </div>
+          ></animated.div>
+      </animated.div>
     </>
   )
 }
 
-function AddCategoryBtn({ display, setDisplay, selected, setSelected, setSelectingColor, selectingColor }) {
+function AddCategoryBtn({ on, display, setDisplay, selected, setSelected, setSelectingColor, selectingColor }) {
   return (
     <>
       <div className={styles.addCategoryBtn} onClick={() => {
@@ -80,12 +132,14 @@ function AddCategoryBtn({ display, setDisplay, selected, setSelected, setSelecti
         utils.getGlobals().categories.add(category)
         const newElement = (
           <Category
+            on={on}
             key={category.categId}
             category={category}
             selected={selected}
             setSelected={setSelected}
             setSelectingColor={setSelectingColor}
             selectingColor={selectingColor}
+            firstOn={true}
             ></Category>
         )
         const newDisplay = [newElement, ...display]
@@ -119,6 +173,53 @@ function UpdateColor({ selectingColor, color, update }) {
   return <></>
 }
 
+function StartCategorySpring({ on, firstOn, setFirstOn, setDisplay, selected, setSelected, setColorPos, setColor, setSelectingColor }) {
+  useEffect(() => {
+    const categClass = utils.getGlobals().categories
+    if (!categClass) return
+    const categIds = categClass.categIds
+    if (categClass.isChanged) {
+      const toDisplay = []
+      let index = 0
+      const setCategories = (interval) => {
+        const categId = categIds[index]
+        console.log(categId, categIds)
+        if (isNaN(categId)) {
+          clearInterval(interval)
+          return
+        }
+        const category = categClass.getById(categId)
+        toDisplay.push(
+          <Category
+            key={categId}
+            on={on}
+            category={category}
+            selected={selected}
+            setSelected={setSelected}
+            setColorPos={setColorPos}
+            setColor={setColor}
+            firstOn={firstOn}
+            setSelectingColor={setSelectingColor}
+            ></Category>
+        )
+        setDisplay([...toDisplay])
+        index++
+      }
+      if (firstOn) {
+        const interval = setInterval(() => {
+          setCategories(interval)
+        }, 40)
+      } else {
+        for (const categId of categIds) {
+          setCategories()
+        }
+      }
+    }
+    setFirstOn(false)
+  }, [ on, selected ])
+  return <></>
+}
+
 function DisplayCategories({ on }) {
   const [ display, setDisplay ] = useState()
   const [ selected, setSelected ] = useState(false)
@@ -130,39 +231,28 @@ function DisplayCategories({ on }) {
     opacity: 0,
     marginTop: -50
   }))
+  const [ firstOn, setFirstOn ] = useState(false)
   useEffect(() => {
-    if (on) {
-      setSelected(utils.getGlobals().selectedCategory)
-      const categClass = utils.getGlobals().categories
-      const categIds = categClass.categIds
-      if (categClass.isChanged) {
-        const toDisplay = []
-        for (const categId of categIds) {
-          const category = categClass.getById(categId)
-          toDisplay.push(
-            <Category
-              key={categId}
-              category={category}
-              selected={selected}
-              setSelected={setSelected}
-              setColorPos={setColorPos}
-              setColor={setColor}
-              setSelectingColor={setSelectingColor}
-              ></Category>
-          )
-        }
-        setDisplay(toDisplay)
-      }
-    } else {
-      setSelected(false)
-    }
+    setSelected(on ? utils.getGlobals().selectedCategory : false)
     spring.start({
       opacity: on ? 1 : 0,
       marginTop: on ? 0 : -50,
     })
+    if (!on) setFirstOn(true)
   }, [ on, selected, toUpdate ])
   return (
     <>
+      <StartCategorySpring
+        on={on}
+        selected={selected}
+        setDisplay={setDisplay}
+        setSelected={setSelected}
+        setColorPos={setColorPos}
+        setColor={setColor}
+        setSelectingColor={setSelectingColor}
+        firstOn={firstOn}
+        setFirstOn={setFirstOn}
+        ></StartCategorySpring>
       <UpdateColor selectingColor={selectingColor} color={color} update={update}></UpdateColor>
       <animated.div style={outerDivSpring} className={on ? styles.wrapCategoriesOn : styles.wrapCategoriesOff }>
         <div
@@ -182,6 +272,7 @@ function DisplayCategories({ on }) {
           }}
           >
           <AddCategoryBtn 
+            on={on}
             display={display}
             setDisplay={setDisplay}
             selected={selected}

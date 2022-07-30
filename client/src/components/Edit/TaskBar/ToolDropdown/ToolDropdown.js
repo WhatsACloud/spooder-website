@@ -8,16 +8,15 @@ import { faLink, faPaperclip } from '@fortawesome/free-solid-svg-icons'
 import { BackgroundClickDetector } from '../../../BackgroundClickDetector'
 import { setBud } from '../../Bud/BudUtils'
 
-const toolElementConf = {
-  duration: 200,
-  easing: easings.easeOutQuad
-}
-
 function ToolElement({ name, onClick, icon, toggle, on }) {
   const [ toggled, setToggled ] = useState(false)
   const [ spacerStyle, spacerSpring ] = useSpring(() => ({
     // width: 10,
-    config: config.stiff
+    config: {
+      mass: 1,
+      tension: 300,
+      friction: 14,
+    },
   }))
   const [ outerDivStyle, outerDivSpring ] = useSpring(() => ({
     width: 10,
@@ -28,7 +27,11 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
     opacity: 0,
     backgroundColor: 'white',
     color: 'rgb(0, 102, 255)',
-    config: config.stiff
+    config: {
+      mass: 1,
+      tension: 300,
+      friction: 14,
+    },
   }))
   useEffect(() => {
     spacerSpring.start({

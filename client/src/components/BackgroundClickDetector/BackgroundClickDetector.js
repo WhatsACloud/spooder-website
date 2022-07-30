@@ -57,7 +57,7 @@ function BackgroundClickDetector({ on, zIndex, mousedown, blur=false }) {
   useEffect(() => {
     document.addEventListener('backClickDetectorChange', e => {
       e = e.detail
-      if (e.currentId === id) console.log(e.currentId, zIndex)
+      if (e.currentId === id) console.log('ok i think there is an infinite loop here')
       setActive(e.currentId === id)
     })
   }, [ active ])
