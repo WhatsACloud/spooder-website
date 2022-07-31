@@ -5,28 +5,41 @@
 }
 
 @mixin inputBox {
+  transition: .2s;
   // display: inline-block;
   box-sizing: border-box;
   // padding: 12px 40px;
   margin: 1.5vw;
   top: 50%;
-  border-style: none;
-  border-bottom-style: solid;
-  border-bottom-color: black;
-  border-bottom-width: 1px;
-  // width: 40%;
-  // height: 3em;
+  border-style: solid;
+  border-color: rgba(77, 172, 255, 0);
+  border-radius: 3px;
+  width: 90%;
+  height: 3em;
   font-size: 15px;
   font-family: 'Courier New', Courier, monospace;
   outline: none;
+  &:focus {
+    border-color: rgb(77, 172, 255);
+  }
 }
 
 button.btn {
   @include std-button;
 }
 
+@mixin viewBox {
+  p.subtitle {
+    margin: 0;
+    color:rgb(141, 141, 141);
+  }
+  input.inputBox {
+    @include inputBox();
+  }
+}
+
 div.budView {
-  overflow-y: scroll;
+  // overflow-y: scroll;
   $minWidth: 60%;
   $leftMargin: calc(100% - #{$minWidth});
   display: flex;
@@ -40,12 +53,17 @@ div.budView {
   background-color: rgba(243, 243, 243, 1);
   // filter: blur(2px);
   flex-direction: column;
-  p.subtitle {
-    margin: 0;
-    color:rgb(141, 141, 141);
-  }
-  input.inputBox {
-    @include inputBox();
+  div.word {
+    @include viewBox;
+    display: flex;
+    justify-content: center;
+    p.subtitle {
+      text-align: center;
+    }
+    input.inputBox {
+      width: 30%;
+      text-align: center;
+    }
   }
   div.category {
     background-color: rgb(228, 226, 226);

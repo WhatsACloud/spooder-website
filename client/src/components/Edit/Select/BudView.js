@@ -15,7 +15,7 @@ function InputIniter({ obj, setText, attr }) {
   return <></>
 }
 
-function InputBox({ obj, attr }) {
+function InputBox({ obj, attr, styleName }) {
   const [ text, setText ] = useState('')
   useEffect(() => {
     if (obj) {
@@ -23,13 +23,13 @@ function InputBox({ obj, attr }) {
     }
   }, [ text ])
   return (
-    <>
+    <div className={styles[styleName]}>
       <InputIniter obj={obj} setText={setText} attr={attr}></InputIniter>
       <p className={styles.subtitle}>
         {`${attr[0].toUpperCase()}${attr.substring(1)}`}
       </p>
       <input className={styles.inputBox} value={text} onChange={(e) => setText(e.target.value)}></input>
-    </>
+    </div>
   )
 }
 
@@ -105,12 +105,12 @@ function Viewer({ viewing, startedTraining }) {
   }, [ viewing ])
   return (
     <div className={startedTraining ? styles.none : ''}>
-      <InputBox obj={obj} attr='word'></InputBox>
+      <InputBox obj={obj} attr='word' styleName='word'></InputBox>
       <CategoryBox obj={obj} viewing={viewing}></CategoryBox>
-      <InputBox obj={obj} attr='definition'></InputBox>
+      {/* <InputBox obj={obj} attr='definition'></InputBox>
       <InputBox obj={obj} attr='sound'></InputBox>
       <InputBox obj={obj} attr='context'></InputBox>
-      <InputBox obj={obj} attr='example'></InputBox>
+      <InputBox obj={obj} attr='example'></InputBox> */}
     </div>
   )
 }
