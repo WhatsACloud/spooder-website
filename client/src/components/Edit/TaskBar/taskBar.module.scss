@@ -30,18 +30,26 @@ div.taskBar {
   background-color: #abe9cd;
   background-image: linear-gradient(315deg, #51c993 0%, #3eadcf 74%);
   z-index: 9;
-  p.websiteIcon {
-    transition: color .2s;
+  @mixin websiteIcon {
+    transition: .2s;
     margin-top: 5px;
     margin-right: auto;
     margin-left: 10px;
     font-size: 30px;
     color: white;
     font-family: 'curvy';
+    opacity: 1;
     cursor: pointer;
     &:hover {
       color: rgb(172, 217, 254);
     }
+  }
+  p.websiteIcon {
+    @include websiteIcon();
+  }
+  p.websiteIconExtended {
+    @include websiteIcon();
+    opacity: 0;
   }
   button.stdButton {
     display: flex;

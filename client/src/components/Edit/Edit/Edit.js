@@ -252,7 +252,7 @@ function Edit() {
     globals.inRecentlyViewed = {bud: {}, category: {}}
 
     globals.categories = new Categories()
-    globals.selectedCategory = null
+    globals.selectedCategory = false
 
     const keybinds = new Keybinds(true)
     globals.keybinds = keybinds

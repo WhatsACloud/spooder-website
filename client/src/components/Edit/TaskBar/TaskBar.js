@@ -36,10 +36,10 @@ function ToolButton() {
   )
 }
 
-function ToHomeBtn() {
+function ToHomeBtn({ focusedSearch }) {
   const navigate = useNavigate()
   return (
-    <p className={styles.websiteIcon} onClick={() => navigate('/home')}>
+    <p className={focusedSearch ? styles.websiteIconExtended : styles.websiteIcon} onClick={() => navigate('/home')}>
       Spooderweb
     </p>
   )
@@ -47,6 +47,7 @@ function ToHomeBtn() {
 
 function TaskBar({ setInSettings }) {
   const [ hover, setHover ] = useState(false)
+  const [ focused, setFocused ] = useState(false) // for search bar
   return (
     <>
       <div className={styles.taskBar}>
@@ -58,7 +59,7 @@ function TaskBar({ setInSettings }) {
           }}>
           <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
         </button> */}
-        <ToHomeBtn></ToHomeBtn>
+        <ToHomeBtn focusedSearch={focused}></ToHomeBtn>
         <ToolButton></ToolButton>
         <Categories outerStyle={styles}></Categories>
         {/* <Debugger></Debugger> */}
@@ -72,7 +73,7 @@ function TaskBar({ setInSettings }) {
           <FontAwesomeIcon className={hover ? styles.on : ''} icon={faGear}></FontAwesomeIcon>
           <p>Settings</p>
         </button>
-        <SearchBar></SearchBar>
+        <SearchBar focused={focused} setFocused={setFocused}></SearchBar>
       </div>
     </>
   )

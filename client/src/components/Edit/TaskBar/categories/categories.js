@@ -51,7 +51,6 @@ function Category({ on, firstOn, category, selected, setColorPos, setSelected, s
     color: 'rgb(0, 102, 255)',
     config: config.gentle,
   }))
-  console.log(outerDivStyle.width)
   const [ colorDivStyle, colorDivSpring ] = useSpring(() => ({
     width: (on && !firstOn) ? 40 : 10,
     height: (on && !firstOn) ? 40 : 0,
@@ -74,6 +73,7 @@ function Category({ on, firstOn, category, selected, setColorPos, setSelected, s
       clearTimeout(timeout)
     }
   }, [ text ])
+  console.log(firstOn, on)
   return (
     <>
       <StartDivSpring firstOn={firstOn} on={on} outerDivSpring={outerDivSpring} colorDivSpring={colorDivSpring}></StartDivSpring>
@@ -87,12 +87,13 @@ function Category({ on, firstOn, category, selected, setColorPos, setSelected, s
           opacity: outerDivStyle.opacity.to(v => v),
           backgroundColor: outerDivStyle.backgroundColor.to(v => v),
           borderColor: (category.categId === selected ?
-            'rgba(200, 200, 200, 1)' :
-            'rgba(200, 200, 200, 0)'),
+            'rgba(0, 162, 255, 1)' :
+            'rgba(0, 162, 255, 0)'),
           color: outerDivStyle.color.to(v => v),
         }}
         className={styles.category}
-        onClick={() => {
+        onClick={e => {
+          e.stopPropagation()
           setSelected(category.categId)
         }}
         >
@@ -186,6 +187,7 @@ function StartCategorySpring({ on, firstOn, setFirstOn, setDisplay, selected, se
         console.log(categId, categIds)
         if (isNaN(categId)) {
           clearInterval(interval)
+          setFirstOn(false)
           return
         }
         const category = categClass.getById(categId)
@@ -215,7 +217,6 @@ function StartCategorySpring({ on, firstOn, setFirstOn, setDisplay, selected, se
         }
       }
     }
-    setFirstOn(false)
   }, [ on, selected ])
   return <></>
 }
@@ -231,9 +232,9 @@ function DisplayCategories({ on }) {
     opacity: 0,
     marginTop: -50
   }))
-  const [ firstOn, setFirstOn ] = useState(false)
+  const [ firstOn, setFirstOn ] = useState(true)
   useEffect(() => {
-    setSelected(on ? utils.getGlobals().selectedCategory : false)
+    setSelected(on ?? utils.getGlobals().selectedCategory ? utils.getGlobals().selectedCategory : false)
     spring.start({
       opacity: on ? 1 : 0,
       marginTop: on ? 0 : -50,
@@ -268,6 +269,9 @@ function DisplayCategories({ on }) {
               setSelectingColor(false)
               setColorPos(0)
               setColor('')
+            }
+            if (selected !== false) {
+              setSelected(false)
             }
           }}
           >

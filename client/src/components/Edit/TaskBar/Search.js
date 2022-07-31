@@ -150,11 +150,10 @@ function SetSlashKeybind({ setFocused, setSearchVal }) {
   return <></>
 }
 
-function SearchBar() {
+function SearchBar({ focused, setFocused }) {
   const [ searchVal, setSearchVal ] = useState('')
   const [ renderedSearchResults, setRenderedSearchResults ] = useState()
   const [ filters, setFilters ] = useState({...utils.filterOptions})
-  const [ focused, setFocused ] = useState(false)
   const [ hover, setHover ] = useState(false)
   useEffect(() => {
     const found = utils.searchFor(searchVal, filters)
