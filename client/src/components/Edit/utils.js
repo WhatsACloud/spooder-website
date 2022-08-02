@@ -157,10 +157,32 @@ const getNextHighestAttr = (arr, attrName) => {
 }
 export { getNextHighestAttr }
 
+const triggerSaveEvent = (state) => {
+  const evt = new CustomEvent('save', {
+    detail: {
+      state: state
+    }
+  })
+  document.dispatchEvent(evt)
+}
+
+let timeout
+
+const setTimerForSave = () => {
+  clearTimeout(timeout)
+  timeout = setTimeout(async () => {
+    console.log('saved!')
+    triggerSaveEvent(true)
+    await save()
+    triggerSaveEvent(false)
+  }, 1000)
+}
+
 const addToNewObjs = (objId) => {
   if (objId === null) throw new Error
   const newObjs = getGlobals().newObjs
   if (!(newObjs.includes(objId))) {
+    setTimerForSave()
     newObjs.push(objId)
   }
 }
@@ -171,6 +193,7 @@ const delFromNewObjs = (objId) => {
   for (let i = 0; i < newObjs.length; i++) {
     const id = newObjs[i]
     if (id === objId) {
+      setTimerForSave()
       newObjs.splice(i, 1)
     }
   }

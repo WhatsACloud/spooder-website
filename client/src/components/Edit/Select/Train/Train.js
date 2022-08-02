@@ -5,6 +5,8 @@ import * as utils from '../../utils'
 import { TrainSettings, potentialGiven, potentialTested } from './TrainSettings'
 import { BackgroundClickDetector } from '../../../BackgroundClickDetector'
 
+import { useSpring, animated, config } from 'react-spring'
+
 const getLink = (objId, isObj=false) => {
   const obj = isObj ? objId : utils.getObjById(objId) 
   return obj.json.link
@@ -291,17 +293,65 @@ function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, se
   return <></>
 }
 
+function UpdateBuffers({
+    viewing,
+    setMultiChoicesBuffer,
+    setTestedCategBuffer,
+    setGivenCategBuffer,
+    setViewingBuffer,
+    multiChoices,
+    testedCateg,
+    givenCateg,
+    setAnswerBuffer,
+    seenDivSpring,
+    answer,
+    triggerRerender,
+  }) {
+  useEffect(() => {
+    seenDivSpring({
+      left: answer === null ? 0 : -300,
+      right: answer === null ? 0 : 300,
+      opacity: answer === null ? 1 : 0,
+      config: {
+        duration: answer === null ? 0 : 200,
+      }
+    })
+    setViewingBuffer(viewing)
+    setTimeout(() => {
+      setMultiChoicesBuffer(multiChoices)
+      setTestedCategBuffer(testedCateg)
+      setGivenCategBuffer(givenCateg)
+      setAnswerBuffer(answer)
+    }, 600)
+  }, [ answer, multiChoices, viewing ])
+  return <></>
+}
+
 const multiChoiceAmt = 4
 
 function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
+  // NOTE: buffer here means whats being shown, not the state BEFORE all the what not
   const [ multiChoices, setMultiChoices ] = useState()
+  const [ multiChoicesBuffer, setMultiChoicesBuffer ] = useState()
   const [ answer, setAnswer ] = useState(null)
+  const [ answerBuffer, setAnswerBuffer ] = useState(null)
   const [ rerender, plsRerender ] = useState(false)
 
   const [ testedCateg, setTestedCateg ] = useState()
   const [ givenCateg, setGivenCateg ] = useState()
+  const [ testedCategBuffer, setTestedCategBuffer ] = useState()
+  const [ givenCategBuffer, setGivenCategBuffer ] = useState()
+
+  const [ viewingBuffer, setViewingBuffer ] = useState()
 
   const [ globalTsts, setGlobalTsts ] = useState(0) // tsts: time since test started
+
+  const [ seenDivStyle, seenDivSpring ] = useSpring(() => ({
+    left: 0,
+    opacity: 1,
+    // config: config.gentle
+    // duration: 100,
+  }))
   const triggerRerender = () => {
     setAnswer(null)
     plsRerender(!rerender)
@@ -318,6 +368,7 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
       const viewingJson = utils.getObjById(viewing).json
       let [ multiChoiceArr ] = getRandomOfCateg(testedCateg || leTestedCateg, multiChoiceAmt, [ viewingJson[testedCateg || leTestedCateg] ])
       // known issue with example cause there isnt enough of em
+      console.log(multiChoiceArr, testedCategBuffer, givenCategBuffer, viewingJson[testedCategBuffer], viewingJson[givenCategBuffer], globalTsts)
       const renderedMultiChoiceArr = []
       for (let i = 0; i < multiChoiceAmt; i++) {
         renderedMultiChoiceArr.push(
@@ -335,23 +386,45 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
   }, [ startedTraining, rerender ])
   return (
     <>
-      <AnswerHandler
+      <UpdateBuffers
+        viewing={viewing}
+        setMultiChoicesBuffer={setMultiChoicesBuffer}
+        setTestedCategBuffer={setTestedCategBuffer}
+        setGivenCategBuffer={setGivenCategBuffer}
+        setViewingBuffer={setViewingBuffer}
+        multiChoices={multiChoices}
+        testedCateg={testedCateg}
+        givenCateg={givenCateg}
+        seenDivSpring={seenDivSpring}
+        setAnswerBuffer={setAnswerBuffer}
+        triggerRerender={triggerRerender}
         answer={answer}
+      ></UpdateBuffers>
+      <AnswerHandler
+        answer={answerBuffer}
         setStartedTraining={setStartedTraining}
         triggerRerender={triggerRerender}
         globalTsts={globalTsts}
-        viewing={viewing}
+        viewing={viewingBuffer}
         setViewing={setViewing}
-        categ={testedCateg}
+        categ={testedCategBuffer}
         setGivenCateg={setGivenCateg}
         setTestedCateg={setTestedCateg}
         ></AnswerHandler>
-      <div className={startedTraining ? styles.train : styles.none}>
+      <animated.div
+        style={seenDivStyle}
+        className={startedTraining ? styles.train : styles.none}>
+        <Given text={viewing ? utils.getObjById(viewing).json[givenCategBuffer] : ''} type={givenCategBuffer}></Given>
+        <div className={styles.input}>
+          {multiChoicesBuffer}
+        </div>
+      </animated.div>
+      {/* <animated.div className={startedTraining ? styles.train : styles.none}>
         <Given text={viewing ? utils.getObjById(viewing).json[givenCateg] : ''} type={givenCateg}></Given>
         <div className={styles.input}>
           {multiChoices}
         </div>
-      </div>
+      </animated.div> */}
     </>
   )
 }
