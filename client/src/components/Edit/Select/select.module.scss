@@ -48,7 +48,7 @@ button.btn {
 
 div.budView {
   // overflow-y: scroll;
-  $minWidth: 60vw;
+  $minWidth: 60%;
   $leftMargin: calc(100% - #{$minWidth});
   display: flex;
   position: absolute;
@@ -57,7 +57,6 @@ div.budView {
   box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   height: 100vh;
   min-width: $minWidth;
-  overflow-x: hidden;
   border-radius: 7px;
   background-color: rgba(243, 243, 243, 1);
   // filter: blur(2px);
@@ -124,13 +123,9 @@ div.budView {
     pointer-events: none;
   }
   div.train {
-    position: absolute;
-    // margin-right: 200px;
     div.given {
       p {
-        text-align: center;
         &.givenText {
-          margin-top: 50px;
           font-size: 30px;
           margin-bottom: 0;
         }
@@ -142,17 +137,14 @@ div.budView {
       }
     }
     div.input {
-      margin-top: calc(50px + 20vh);
       width: 100%;
       display: flex;
-      bottom: 0;
       flex-direction: row;
       flex-wrap: wrap;
       button {
         border-radius: 0;
-        width: 29.5vw;
         color: white;
-        // width: 50%;
+        width: 50%;
         margin: 0;
         padding: 30px;
       }

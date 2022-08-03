@@ -4,7 +4,7 @@ import styles from './taskBar.module'
 import api from '../../../services/api'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faGear, faScrewdriverWrench, faCloud, faCloudUpload  } from '@fortawesome/free-solid-svg-icons'
+import { faGear, faScrewdriverWrench  } from '@fortawesome/free-solid-svg-icons'
 
 import { SearchBar, SearchResult } from './Search'
 import { UndoRedo } from './UndoRedo'
@@ -36,26 +36,6 @@ function ToolButton() {
   )
 }
 
-function SaveIcon() {
-  const [ state, setState ] = useState(false) // true for saving false for default
-  useEffect(() => {
-    document.addEventListener('save', ({ detail }) => {
-      setState(detail.state)
-    })
-  }, [])
-  return (
-    <div className={styles.saveIcon}>
-      <FontAwesomeIcon icon={state ? faCloudUpload : faCloud}></FontAwesomeIcon>
-      <p>
-        {state ?
-        "saving..."
-        : "Saved!"
-        }
-      </p>
-    </div>
-  )
-}
-
 function ToHomeBtn({ focusedSearch }) {
   const navigate = useNavigate()
   return (
@@ -80,7 +60,6 @@ function TaskBar({ setInSettings }) {
           <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
         </button> */}
         <ToHomeBtn focusedSearch={focused}></ToHomeBtn>
-        <SaveIcon></SaveIcon>
         <ToolButton></ToolButton>
         <Categories outerStyle={styles}></Categories>
         {/* <Debugger></Debugger> */}
