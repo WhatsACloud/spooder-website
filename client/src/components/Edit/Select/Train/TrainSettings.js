@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import styles from '../select.module'
 import * as utils from '../../utils'
+import { BackgroundClickDetector } from '../../../BackgroundClickDetector'
 
 const potentialGiven = [
   ["word", false],
@@ -33,16 +34,47 @@ function SettingBtn({ arr, setArr, index, children }) {
   )
 }
 
+function SetCanTrain({ viewing, setCanTrain }) {
+  useEffect(() => {
+    const object = utils.getObjById(viewing)
+    if (object?.attachedTos?.length === 0) {
+      setCanTrain(false)
+    } else {
+      setCanTrain(true)
+    }
+  }, [ viewing ])
+  return <></>
+}
+
+function Prompt({ on, children }) {
+  const [ promptOn, setPromptOn ] = useState(false)
+  useEffect(() => {
+    setPromptOn(on)
+  }, [ on ])
+  return (
+    <div
+      className={promptOn ? styles.prompt : styles.invisiPrompt}
+      >
+      {children}
+    </div>
+  )
+}
+
 function TrainSettings({
   openedTrain,
   setStartedTraining,
+  startedTraining,
   toGive,
   setToGive,
   toTest,
   setToTest,
+  viewing,
  }) {
   const [ renderedGive, setRenderedGive ] = useState()
   const [ renderedTest, setRenderedTest ] = useState()
+  const [ canTrain, setCanTrain ] = useState(false)
+  const [ hovering, setHovering ] = useState(false)
+  console.log(canTrain)
   useEffect(() => {
     const toRenderGive = potentialGiven.map((type, index) => {
       return (
@@ -58,25 +90,35 @@ function TrainSettings({
   return (
     <div
       className={openedTrain ? styles.trainSettings : styles.none}>
+      <SetCanTrain setCanTrain={setCanTrain} viewing={viewing}></SetCanTrain>
       <div className={styles.trainSettingsInner}>
         <div className={styles.givenCol}>
+          <p>Given</p>
           {renderedGive}
         </div>
         <div className={styles.testedCol}>
+          <p>Tested</p>
           {renderedTest}
         </div>
       </div>
       <button
-        className={styles.trainBtn}
+        className={canTrain ? styles.trainBtn : styles.trainBtnDisabled}
         onMouseDown={() => {
-          setStartedTraining(true)
-          const func = e => {
-            setStartedTraining(false)
-            document.getElementById('divCanvas').removeEventListener('click', func)
-          }
-          document.getElementById('divCanvas').addEventListener('click', func)
-        }}>
+          if (canTrain) setStartedTraining(true)
+        }}
+        onMouseEnter={() => {
+          if (!canTrain) setHovering(true)
+        }}
+        onMouseLeave={() => {
+          setHovering(false)
+        }}
+        >
         start
+        <Prompt on={hovering}>
+          <p>
+            Woah, don't start training right yet. This bud needs some friends first. Link some buds to it with silks.
+          </p>
+        </Prompt>
       </button>
     </div>
   )
