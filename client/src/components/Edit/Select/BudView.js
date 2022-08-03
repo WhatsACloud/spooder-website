@@ -9,6 +9,7 @@ import { DisplayCategories } from '../TaskBar/categories'
 
 function InputIniter({ obj, setText, attr }) {
   useEffect(() => {
+    console.log(obj?.json?.json, obj?.json?.json[attr], attr)
     if (obj) setText(obj.json[attr])
   }, [ obj ])
   return <></>
@@ -57,6 +58,7 @@ function CategoryBox({ obj, viewing }) {
     //   for (const [ categId, category ] of Object.entries(utils.getGlobals().categories.categories)) {
     //     if (text === category.name) { // TO DO: change and optimise this, also add fuzzy searching
     //       obj.json.categId = Number(categId)
+    //       console.log('added')
     //       break
     //     }
     //   }
@@ -98,8 +100,12 @@ function Viewer({ viewing, startedTraining }) {
   const [ obj, setObj ] = useState(null)
   useEffect(() => {
     const object = utils.getObjById(viewing)
+    console.log(object)
     if (utils.getGlobals().recentlyViewed && object) {
       utils.addToRecentlyViewed(object)
+    }
+    if (object) {
+      console.log(object.json.json, object.tsts, object.json.link)
     }
     setObj(object)
   }, [ viewing ])

@@ -41,6 +41,7 @@ const addToHistory = (undoFunc, redoFunc) => {
   const history = globals.history
   const historyIndex = globals.historyIndex
   if (history.length > 0 && history[historyIndex+1]) {
+    console.log(historyIndex+1, history.length-historyIndex)
     history.splice(historyIndex+1, history.length-historyIndex)
   }
   history.push({undo: undoFunc, redo: redoFunc})
@@ -279,6 +280,7 @@ const selectObj = (obj, type, selectFunc, clear=false) => {
   const objId = obj.objId || obj.silkId
   if (clear) clearSelected()
   getGlobals().selected[objId] = {obj: obj, type: type}
+  console.log('selected', getGlobals().selected)
   selectFunc()
 }
 export { selectObj }
@@ -307,6 +309,7 @@ export { getNextSilkId }
 const addToSilks = (silk) => {
   const silks = getGlobals().silkObjs
   // silk.silkId = Object.keys(silks).length
+  // console.log(silk)
   silks[silk.silkId] = silk
 }
 export { addToSilks }
@@ -346,12 +349,15 @@ import { select } from './Select'
 const save = async () => {
   const newObjs = getGlobals().newObjs
   const toSend = {}
+  console.log(newObjs)
   for (const objId of newObjs) {
     const objJson = getObjById(objId).json
     toSend[objId] = objJson.json
     objJson._originalJson = JSON.parse(JSON.stringify(objJson.json))
+    console.log(objJson._originalJson, objJson.json)
   }
   try {
+    console.log(getGlobals().categories.toJSON())
     const req = {
       spoodawebId: getGlobals().spoodawebId,
       categories: getGlobals().categories.toJSON(),
@@ -361,6 +367,7 @@ const save = async () => {
     getGlobals().newObjs = []
   } catch(err) {
     err = err.response
+    console.log(err)
   }
   // below simulates the thing reloading
 
@@ -420,6 +427,7 @@ import { search } from 'fast-fuzzy'
 const searchInBud = (query, col) => {
   return search(query, Object.values(getObjs()), { keySelector: (obj) => obj.json[col], returnMatchData: true, ignoreSymbols: false })
     .map(data => {
+      console.log(data)
       return {obj: data.item, string: data.original, key: col}
     })
 }
@@ -427,6 +435,7 @@ const searchInBud = (query, col) => {
 const searchInCateg = (query, col) => {
   return search(query, Object.values(getGlobals().categories.categories), { keySelector: (obj) => obj[col], returnMatchData: true })
     .map(data => {
+      console.log(data)
       return {obj: data.item, string: data.original, key: col}
     })
 }
@@ -457,6 +466,7 @@ const searchFor = (query, queryTypes) => {
   if (undefinedIndex >= 0) {
     searchResults.splice(undefinedIndex, 1)
   }
+  console.log(searchResults)
   return searchResults
 }
 export { searchFor }
@@ -485,12 +495,15 @@ const link = () => {
   const leSelectedItems = getGlobals().selected
   for (const [ objId, selected1 ] of Object.entries(leSelectedItems)) {
     const selectedItems = {...leSelectedItems}
+    console.log(selectedItems, objId)
     delete selectedItems[objId]
+    console.log(selectedItems, objId)
     for (const selected2 of Object.values(selectedItems)) {
       if (selected1.type === ObjType.Bud && selected2.type === ObjType.Bud) {
         const bud1 = selected1.obj
         const bud2 = selected2.obj
         const objId2 = bud2.objId
+        console.log(objId2, bud1.json.attachedTos)
         if (!(bud1.json.attachedTos.includes(objId2))) {
           const silkId = getNextSilkId()
           new Silk(silkId, bud1, bud2)

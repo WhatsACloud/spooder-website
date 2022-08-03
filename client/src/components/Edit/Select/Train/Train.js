@@ -213,14 +213,7 @@ function MultiChoiceBtn({ i, val, correct, setAnswer }) {
     func()
   }, [ val ])
   return (
-    <button
-      ref={button}
-      style={{backgroundColor: colorMap[i], fontSize: font_size}}
-      className={styles.btn}
-      onClick={() => {
-        setAnswer(correct)
-      }}
-      >{val}</button>
+    <button ref={button} style={{backgroundColor: colorMap[i], fontSize: font_size}} className={styles.btn} onClick={() => setAnswer(correct)}>{val}</button>
   )
 }
 
@@ -242,6 +235,7 @@ function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, se
     let obj = utils.getObjById(viewing)
     let amt = 0.1 * ((answer - 0.5) * 2)
     if (obj && answer !== null) {
+      console.log('ran')
       obj.json.link += amt
       if (answer) obj.tsts = globalTsts
       let attachedTos = [...obj.attachedTos]
@@ -269,8 +263,11 @@ function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, se
         if (leGivenCateg) break
         if (i === 0) {
           chosen = getRandEleByLink(Object.keys(utils.getObjs()), globalTsts)
+          console.log(chosen)
           obj = utils.getObjById(chosen)
+          console.log(obj)
           const givenTested = randGivenTested(obj)
+          console.log(givenTested)
           leGivenCateg = givenTested[0]
           leTestedCateg = givenTested[1]
           attachedTos = obj.attachedTos
@@ -280,6 +277,7 @@ function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, se
         i--
         attachedTos = [...obj.attachedTos]
       }
+      console.log(utils.getObjById(chosen).json, leGivenCateg, leTestedCateg)
       utils.getGlobals().testedPath.push(chosen)
       if (!(utils.getObjById(chosen).json[leGivenCateg])) {
         throw new Error
@@ -295,8 +293,6 @@ function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, se
   return <></>
 }
 
-const timeoutDuration = 150
-
 function UpdateBuffers({
     viewing,
     setMultiChoicesBuffer,
@@ -306,34 +302,27 @@ function UpdateBuffers({
     multiChoices,
     testedCateg,
     givenCateg,
+    setAnswerBuffer,
     seenDivSpring,
-    newDivSpring,
     answer,
     triggerRerender,
   }) {
   useEffect(() => {
+    seenDivSpring({
+      left: answer === null ? 0 : -300,
+      right: answer === null ? 0 : 300,
+      opacity: answer === null ? 1 : 0,
+      config: {
+        duration: answer === null ? 0 : 200,
+      }
+    })
+    setViewingBuffer(viewing)
     setTimeout(() => {
-      seenDivSpring({
-        left: answer === null ? 0 : -300,
-        right: answer === null ? 0 : 300,
-        opacity: answer === null ? 1 : 0,
-        config: {
-          duration: answer === null ? 0 : timeoutDuration,
-        }
-      })
-      newDivSpring({
-        left: answer === null ? 60 : 0,
-        right: answer === null ? -60 : 0,
-        opacity: answer === null ? 0 : 1,
-        config: {
-          duration: answer === null ? 0 : timeoutDuration,
-        }
-      })
-      setViewingBuffer(viewing)
       setMultiChoicesBuffer(multiChoices)
-      setGivenCategBuffer(givenCateg)
       setTestedCategBuffer(testedCateg)
-    }, answer === null ? timeoutDuration : 0)
+      setGivenCategBuffer(givenCateg)
+      setAnswerBuffer(answer)
+    }, 600)
   }, [ answer, multiChoices, viewing ])
   return <></>
 }
@@ -345,6 +334,7 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
   const [ multiChoices, setMultiChoices ] = useState()
   const [ multiChoicesBuffer, setMultiChoicesBuffer ] = useState()
   const [ answer, setAnswer ] = useState(null)
+  const [ answerBuffer, setAnswerBuffer ] = useState(null)
   const [ rerender, plsRerender ] = useState(false)
 
   const [ testedCateg, setTestedCateg ] = useState()
@@ -359,13 +349,6 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
   const [ seenDivStyle, seenDivSpring ] = useSpring(() => ({
     left: 0,
     opacity: 1,
-    // config: config.gentle
-    // duration: 100,
-  }))
-  const [ newDivStyle, newDivSpring ] = useSpring(() => ({
-    left: 60, // vw
-    right: 0,
-    opacity: 0,
     // config: config.gentle
     // duration: 100,
   }))
@@ -385,6 +368,7 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
       const viewingJson = utils.getObjById(viewing).json
       let [ multiChoiceArr ] = getRandomOfCateg(testedCateg || leTestedCateg, multiChoiceAmt, [ viewingJson[testedCateg || leTestedCateg] ])
       // known issue with example cause there isnt enough of em
+      console.log(multiChoiceArr, testedCategBuffer, givenCategBuffer, viewingJson[testedCategBuffer], viewingJson[givenCategBuffer], globalTsts)
       const renderedMultiChoiceArr = []
       for (let i = 0; i < multiChoiceAmt; i++) {
         renderedMultiChoiceArr.push(
@@ -412,12 +396,12 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
         testedCateg={testedCateg}
         givenCateg={givenCateg}
         seenDivSpring={seenDivSpring}
-        newDivSpring={newDivSpring}
+        setAnswerBuffer={setAnswerBuffer}
         triggerRerender={triggerRerender}
         answer={answer}
       ></UpdateBuffers>
       <AnswerHandler
-        answer={answer}
+        answer={answerBuffer}
         setStartedTraining={setStartedTraining}
         triggerRerender={triggerRerender}
         globalTsts={globalTsts}
@@ -430,23 +414,17 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
       <animated.div
         style={seenDivStyle}
         className={startedTraining ? styles.train : styles.none}>
-        <Given text={viewingBuffer ? utils.getObjById(viewingBuffer).json[givenCategBuffer] : ''} type={givenCategBuffer}></Given>
+        <Given text={viewing ? utils.getObjById(viewing).json[givenCategBuffer] : ''} type={givenCategBuffer}></Given>
         <div className={styles.input}>
           {multiChoicesBuffer}
         </div>
       </animated.div>
-      <animated.div
-        style={{
-          left: newDivStyle.left.to(v => v+"vw"),
-          right: newDivStyle.right.to(v => v+"vw"),
-          opacity: newDivStyle.opacity.to(v => v)
-        }}
-       className={startedTraining ? styles.train : styles.none}>
+      {/* <animated.div className={startedTraining ? styles.train : styles.none}>
         <Given text={viewing ? utils.getObjById(viewing).json[givenCateg] : ''} type={givenCateg}></Given>
         <div className={styles.input}>
           {multiChoices}
         </div>
-      </animated.div>
+      </animated.div> */}
     </>
   )
 }

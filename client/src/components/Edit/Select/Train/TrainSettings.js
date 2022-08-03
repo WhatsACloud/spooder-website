@@ -19,6 +19,9 @@ export { potentialGiven, potentialTested }
 
 function SettingBtn({ arr, setArr, index, children }) {
   const [ clicked, setClicked ] = useState(arr[index][1])
+  useEffect(() => {
+    console.log(clicked)
+  }, [ clicked ])
   return (
     <button
       className={clicked ? styles.trainSettingsBtnClose : styles.trainSettingsBtnOpen}
@@ -71,6 +74,7 @@ function TrainSettings({
   const [ renderedTest, setRenderedTest ] = useState()
   const [ canTrain, setCanTrain ] = useState(false)
   const [ hovering, setHovering ] = useState(false)
+  console.log(canTrain)
   useEffect(() => {
     const toRenderGive = potentialGiven.map((type, index) => {
       return (
