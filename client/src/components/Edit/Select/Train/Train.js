@@ -2,8 +2,13 @@ import React, { useEffect, useState, useRef } from 'react'
 import styles from '../select.module'
 import * as utils from '../../utils'
 
+import { useSpring, animated } from 'react-spring'
+
 import { TrainSettings, potentialGiven, potentialTested } from './TrainSettings'
 import { BackgroundClickDetector } from '../../../BackgroundClickDetector'
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCircleCheck, faCircleXmark } from '@fortawesome/free-solid-svg-icons'
 
 const getLink = (objId, isObj=false) => {
   const obj = isObj ? objId : utils.getObjById(objId) 
@@ -280,12 +285,14 @@ function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, se
       if (!(utils.getObjById(chosen).json[leGivenCateg])) {
         throw new Error
       }
-      setViewing(chosen)
-      if (answer !== null) {
-        setGivenCateg(leGivenCateg)
-        setTestedCateg(leTestedCateg)
-      }
-      triggerRerender()
+      setTimeout(() => {
+        setViewing(chosen)
+        if (answer !== null) {
+          setGivenCateg(leGivenCateg)
+          setTestedCateg(leTestedCateg)
+        }
+        triggerRerender()
+      }, 1000)
     }
   }, [ answer ])
   return <></>
@@ -346,8 +353,21 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
         setGivenCateg={setGivenCateg}
         setTestedCateg={setTestedCateg}
         ></AnswerHandler>
-      <div className={startedTraining ? styles.train : styles.none}>
+      <div
+        style={{
+          boxShadow: `inset 0px 0px 25px 25px ${
+            answer === null ? 'rgba(0, 0, 0, 0)' : (answer === false ? 'red' : 'green')
+          }`
+        }}
+        className={startedTraining ? styles.train : styles.none}>
         <Given text={viewing ? utils.getObjById(viewing).json[givenCateg] : ''} type={givenCateg}></Given>
+        <FontAwesomeIcon
+          style={{
+            color: answer === false ? 'red' : 'green',
+          }}
+          className={answer === null ? styles.invisiAnswerIcon : styles.answerIcon}
+          icon={answer === false ? faCircleXmark : faCircleCheck}
+          ></FontAwesomeIcon>
         <div className={styles.input}>
           {multiChoices}
         </div>

@@ -123,10 +123,13 @@ div.budView {
     pointer-events: none;
   }
   div.train {
+    transition: box-shadow .2s;
     div.given {
       p {
+        text-align: center;
         &.givenText {
           font-size: 30px;
+          margin-top: 40px;
           margin-bottom: 0;
         }
         &.givenType {
@@ -136,9 +139,23 @@ div.budView {
         }
       }
     }
+    svg {
+      position: absolute;
+      top: 40%;
+      left: 40%;
+      font-size: 50px;
+      &.invisiAnswerIcon {
+        opacity: 0;
+      }
+      &.answerIcon {
+        opacity: 1;
+        transition: opacity .2s;
+      }
+    }
     div.input {
       width: 100%;
       display: flex;
+      margin-top: 40vh;
       flex-direction: row;
       flex-wrap: wrap;
       button {
