@@ -15,7 +15,7 @@ function InputIniter({ obj, setText, attr }) {
   return <></>
 }
 
-function InputBox({ obj, attr, styleName, display=true, textarea=false }) {
+function InputBox({ obj, attr, styleName }) {
   const [ text, setText ] = useState('')
   useEffect(() => {
     if (obj) {
@@ -26,14 +26,9 @@ function InputBox({ obj, attr, styleName, display=true, textarea=false }) {
     <div className={styles[styleName]}>
       <InputIniter obj={obj} setText={setText} attr={attr}></InputIniter>
       <p className={styles.subtitle}>
-        {display ? `${attr[0].toUpperCase()}${attr.substring(1)}` : ''}
+        {`${attr[0].toUpperCase()}${attr.substring(1)}`}
       </p>
-      {
-        textarea ?
-        <textarea className={styles.inputBox} value={text} onChange={(e) => setText(e.target.value)}></textarea>
-        :
-        <input className={styles.inputBox} value={text} onChange={(e) => setText(e.target.value)}></input>
-      }
+      <input className={styles.inputBox} value={text} onChange={(e) => setText(e.target.value)}></input>
     </div>
   )
 }
@@ -100,7 +95,6 @@ function Viewer({ viewing, startedTraining }) {
   const [ obj, setObj ] = useState(null)
   useEffect(() => {
     const object = utils.getObjById(viewing)
-    console.log(object)
     if (utils.getGlobals().recentlyViewed && object) {
       utils.addToRecentlyViewed(object)
     }
@@ -111,14 +105,12 @@ function Viewer({ viewing, startedTraining }) {
   }, [ viewing ])
   return (
     <div className={startedTraining ? styles.none : ''}>
-      <InputBox obj={obj} attr='word' styleName='word' display={false}></InputBox>
-      <InputBox obj={obj} attr='definition' styleName='definition'></InputBox>
-      <div className={styles.side}>
-        <InputBox obj={obj} attr='context' styleName='word'></InputBox>
-        <InputBox obj={obj} attr='sound' styleName='word'></InputBox>
-      </div>
-      <CategoryBox obj={obj} viewing={viewing} styleName='word'></CategoryBox>
-      <InputBox obj={obj} attr='example' styleName='word' textarea={true}></InputBox>
+      <InputBox obj={obj} attr='word' styleName='word'></InputBox>
+      <CategoryBox obj={obj} viewing={viewing}></CategoryBox>
+      {/* <InputBox obj={obj} attr='definition'></InputBox>
+      <InputBox obj={obj} attr='sound'></InputBox>
+      <InputBox obj={obj} attr='context'></InputBox>
+      <InputBox obj={obj} attr='example'></InputBox> */}
     </div>
   )
 }

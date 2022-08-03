@@ -3,7 +3,6 @@ import styles from '../select.module'
 import * as utils from '../../utils'
 
 import { TrainSettings, potentialGiven, potentialTested } from './TrainSettings'
-import { BackgroundClickDetector } from '../../../BackgroundClickDetector'
 
 const getLink = (objId, isObj=false) => {
   const obj = isObj ? objId : utils.getObjById(objId) 
@@ -200,7 +199,7 @@ function MultiChoiceBtn({ i, val, correct, setAnswer }) {
   useEffect(() => {
     const func = () => {
       const buttonWidth = button.current.offsetWidth
-      const length = val?.length || 1
+      const length = val.length || 1
       const lefontSize = 30
       const mult = (buttonWidth / (lefontSize * length))
       let fontSize = lefontSize * mult
@@ -370,18 +369,8 @@ function TrainWrapper({ selectedObj, setSelectedObj, setStartedTraining, started
   }, [ answered, startedTraining, currentObj ])
   return (
     <>
-      <Train
-        startedTraining={startedTraining}
-        setStartedTraining={setStartedTraining}
-        viewing={viewing}
-        setViewing={setViewing}
-        ></Train>
-      <div className={startedTraining ? styles.none : styles.trainWrapper}>
-        <BackgroundClickDetector
-          zIndex={5}
-          on={openedTrain}
-          mousedown={() => setOpenedTrain(false)}
-          ></BackgroundClickDetector>
+      <Train startedTraining={startedTraining} setStartedTraining={setStartedTraining} viewing={viewing} setViewing={setViewing}></Train>
+      <div className={startedTraining ? styles.none : ''}>
         <button
           className={styles.openTrainSettings}
           onClick={() => {
@@ -399,7 +388,6 @@ function TrainWrapper({ selectedObj, setSelectedObj, setStartedTraining, started
           setToGive={setToGive}
           toTest={toTest}
           setToTest={setToTest}
-          viewing={viewing}
         ></TrainSettings>
       </div>
     </>
