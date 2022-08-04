@@ -33,7 +33,6 @@ div.taskBar {
   @mixin websiteIcon {
     transition: .2s;
     margin-top: 5px;
-    margin-right: auto;
     margin-left: 10px;
     font-size: 30px;
     color: white;
@@ -50,6 +49,14 @@ div.taskBar {
   p.websiteIconExtended {
     @include websiteIcon();
     opacity: 0;
+  }
+  svg.saveIcon {
+    color: white;
+    margin-right: auto;
+    $svgHeight: 20px;
+    height: $svgHeight;
+    margin-top: calc(#{$height} / 2 - #{$svgHeight} / 2);
+    margin-left: 10px;
   }
   button.stdButton {
     display: flex;

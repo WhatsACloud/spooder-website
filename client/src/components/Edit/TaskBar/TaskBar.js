@@ -4,7 +4,7 @@ import styles from './taskBar.module'
 import api from '../../../services/api'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faGear, faScrewdriverWrench  } from '@fortawesome/free-solid-svg-icons'
+import { faGear, faScrewdriverWrench, faCloud, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons'
 
 import { SearchBar, SearchResult } from './Search'
 import { UndoRedo } from './UndoRedo'
@@ -45,6 +45,20 @@ function ToHomeBtn({ focusedSearch }) {
   )
 }
 
+function SaveIcon() {
+  const [ saving, setSaving ] = useState(false)
+  useEffect(() => {
+    document.addEventListener('save', async () => {
+      setSaving(true)
+      await utils.save()
+      setSaving(false)
+    })
+  }, [])
+  return (
+    <FontAwesomeIcon className={styles.saveIcon} icon={saving ? faCloudArrowUp : faCloud}></FontAwesomeIcon>
+  )
+}
+
 function TaskBar({ setInSettings }) {
   const [ hover, setHover ] = useState(false)
   const [ focused, setFocused ] = useState(false) // for search bar
@@ -60,6 +74,7 @@ function TaskBar({ setInSettings }) {
           <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
         </button> */}
         <ToHomeBtn focusedSearch={focused}></ToHomeBtn>
+        <SaveIcon></SaveIcon>
         <ToolButton></ToolButton>
         <Categories outerStyle={styles}></Categories>
         {/* <Debugger></Debugger> */}
