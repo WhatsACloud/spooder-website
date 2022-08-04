@@ -32,7 +32,7 @@ const getSilkById = (id) => {
 export { getSilkById }
 
 const getObjs = () => {
-  return getGlobals().objs
+  return getGlobals()?.objs
 }
 export { getObjs }
 

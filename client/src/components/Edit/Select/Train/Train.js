@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react'
 import styles from '../select.module'
 import * as utils from '../../utils'
 
+import uuid from 'react-uuid'
+
 import { useSpring, animated } from 'react-spring'
 
 import { TrainSettings, potentialGiven, potentialTested } from './TrainSettings'
@@ -199,10 +201,28 @@ const colorMap = [
   "#7d00d1",
 ]
 
-function MultiChoiceBtn({ i, val, correct, setAnswer }) {
+function MultiChoiceBtn({ i, val, correct, setAnswer, isAnimated=false }) {
   const [ font_size, set_font_size ] = useState(40)
+  const [ firstTime, setFirstTime ] = useState(true)
   const button = useRef(null)
+  const [ divStyle, divSpring ] = useSpring(() => ({
+    padding: 30,
+    opacity: 1,
+    config: {
+      duration: 600,
+    },
+  }))
   useEffect(() => {
+    if (isAnimated) {
+      console.log(correct, firstTime, isAnimated)
+    }
+    if (firstTime && isAnimated) {
+      setFirstTime(false)
+      divSpring.start({
+        padding: correct ? 100 : 30,
+        opacity: correct ? 1 : 0,
+      })
+    }
     const func = () => {
       const buttonWidth = button.current.offsetWidth
       const length = val?.length || 1
@@ -216,7 +236,14 @@ function MultiChoiceBtn({ i, val, correct, setAnswer }) {
     func()
   }, [ val ])
   return (
-    <button ref={button} style={{backgroundColor: colorMap[i], fontSize: font_size}} className={styles.btn} onClick={() => setAnswer(correct)}>{val}</button>
+    <animated.button ref={button} style={{
+      position: isAnimated ? 'absolute' : 'static',
+      // width: isAnimated ? divStyle.width.to(v => v+"%") : '',
+      padding: isAnimated ? divStyle.padding.to(v => v) : '',
+      opacity: isAnimated ? divStyle.opacity.to(v => v) : '',
+      backgroundColor: colorMap[i],
+      fontSize: font_size,
+    }} className={styles.btn} onClick={() => setAnswer(correct)}>{val}</animated.button>
   )
 }
 
@@ -232,89 +259,176 @@ const ifBudsHaveNcategs = (n, categ) => {
 
 const ceil = 5
 
-function AnswerHandler({ answer, categ, triggerRerender, globalTsts, viewing, setViewing, setStartedTraining, setGivenCateg, setTestedCateg }) {
-  useEffect(() => { // to fix issue with given not displaying
-    let leGivenCateg, leTestedCateg
-    let obj = utils.getObjById(viewing)
-    let amt = 0.1 * ((answer - 0.5) * 2)
-    if (obj && answer !== null) {
-      console.log('ran')
-      obj.json.link += amt
-      if (answer) obj.tsts = globalTsts
-      let attachedTos = [...obj.attachedTos]
-      if (attachedTos.length === 0) setStartedTraining(false)
-      let chosen = getRandEleByLink(attachedTos, globalTsts)
-      let i = utils.getGlobals().testedPath.length
-      // let i = 0
-      if (chosen !== false) {
+const getNextSet = (answer, viewing, globalTsts, setStartedTraining, setShowCorrectAnswer, callback, delay=true) => {
+  let leGivenCateg, leTestedCateg
+  let obj = utils.getObjById(viewing)
+  let amt = 0.1 * ((answer - 0.5) * 2)
+  if (obj && answer !== null) {
+    console.log('ran')
+    obj.json.link += amt
+    if (answer) obj.tsts = globalTsts
+    let attachedTos = [...obj.attachedTos]
+    if (attachedTos.length === 0) setStartedTraining(false)
+    let chosen = getRandEleByLink(attachedTos, globalTsts)
+    let i = utils.getGlobals().testedPath.length
+    // let i = 0
+    if (chosen !== false) {
+      obj = utils.getObjById(chosen)
+      const givenTested = randGivenTested(obj)
+      leGivenCateg = givenTested[0]
+      leTestedCateg = givenTested[1]
+    }
+    while (!leGivenCateg) {
+      attachedTos = attachedTos.sort((a, b) => utils.getObjById(b).json.link - utils.getObjById(a).json.link)
+      for (let index = 0; index < attachedTos.length; index++) {
+        if (globalTsts - utils.getObjById(attachedTos[index]).tsts < ceil) continue
+        chosen = attachedTos[index]
         obj = utils.getObjById(chosen)
         const givenTested = randGivenTested(obj)
         leGivenCateg = givenTested[0]
         leTestedCateg = givenTested[1]
-      }
-      while (!leGivenCateg) {
-        attachedTos = attachedTos.sort((a, b) => utils.getObjById(b).json.link - utils.getObjById(a).json.link)
-        for (let index = 0; index < attachedTos.length; index++) {
-          if (globalTsts - utils.getObjById(attachedTos[index]).tsts < ceil) continue
-          chosen = attachedTos[index]
-          obj = utils.getObjById(chosen)
-          const givenTested = randGivenTested(obj)
-          leGivenCateg = givenTested[0]
-          leTestedCateg = givenTested[1]
-          if (leGivenCateg) break
-        }
         if (leGivenCateg) break
-        if (i === 0) {
-          chosen = getRandEleByLink(Object.keys(utils.getObjs()), globalTsts)
-          console.log(chosen)
-          obj = utils.getObjById(chosen)
-          console.log(obj)
-          const givenTested = randGivenTested(obj)
-          console.log(givenTested)
-          leGivenCateg = givenTested[0]
-          leTestedCateg = givenTested[1]
-          attachedTos = obj.attachedTos
-          continue
-        }
-        obj = utils.getObjById(utils.getGlobals().testedPath[i-1])
-        i--
-        attachedTos = [...obj.attachedTos]
       }
-      console.log(utils.getObjById(chosen).json, leGivenCateg, leTestedCateg)
-      utils.getGlobals().testedPath.push(chosen)
-      if (!(utils.getObjById(chosen).json[leGivenCateg])) {
-        throw new Error
+      if (leGivenCateg) break
+      if (i === 0) {
+        chosen = getRandEleByLink(Object.keys(utils.getObjs()), globalTsts)
+        console.log(chosen)
+        obj = utils.getObjById(chosen)
+        console.log(obj)
+        const givenTested = randGivenTested(obj)
+        console.log(givenTested)
+        leGivenCateg = givenTested[0]
+        leTestedCateg = givenTested[1]
+        attachedTos = obj.attachedTos
+        continue
       }
-      setTimeout(() => {
-        setViewing(chosen)
-        if (answer !== null) {
-          setGivenCateg(leGivenCateg)
-          setTestedCateg(leTestedCateg)
-        }
-        triggerRerender()
-      }, 1000)
+      obj = utils.getObjById(utils.getGlobals().testedPath[i-1])
+      i--
+      attachedTos = [...obj.attachedTos]
     }
+    console.log(utils.getObjById(chosen).json, leGivenCateg, leTestedCateg)
+    utils.getGlobals().testedPath.push(chosen)
+    if (!(utils.getObjById(chosen).json[leGivenCateg])) {
+      throw new Error
+    }
+    setTimeout(() => {
+      if (answer) {
+        callback(chosen, leGivenCateg, leTestedCateg)
+        return
+      }
+      setShowCorrectAnswer(true)
+    }, delay ? 1000 : 0)
+  }
+}
+
+function AnswerHandler({ answer, triggerRerender, globalTsts, viewing, setViewing, setStartedTraining, setGivenCateg, setTestedCateg, setIsMultiChoice, setShowCorrectAnswer, isMultiChoice }) {
+  useEffect(() => { // to fix issue with given not displaying
+    getNextSet(answer, viewing, globalTsts, setStartedTraining, setShowCorrectAnswer, (chosen, leGivenCateg, leTestedCateg) => {
+      setViewing(chosen)
+      setGivenCateg(leGivenCateg)
+      setTestedCateg(leTestedCateg)
+      setIsMultiChoice(coinFlip())
+      triggerRerender()
+    })
   }, [ answer ])
   return <></>
+}
+
+const coinFlip = () => {
+  return Math.random() > 0.5
+}
+
+function FreeAnswer({ isMultiChoice, testedCateg, viewing, rerender, setAnswer, answer }) {
+  const [ val, setVal ] = useState("")
+  useEffect(() => {
+    setVal("")
+    document.getElementById('freeAnswer').focus()
+  }, [ rerender ])
+  return (
+    <div
+      style={{
+        opacity: answer === false ? 0 : 1
+      }}
+      className={isMultiChoice ? styles.none : styles.freeAnswer}>
+      <input
+        id="freeAnswer"
+        name="freeAnswer"
+        value={val}
+        onChange={e => setVal(e.target.value)}
+        ></input>
+      <button
+        onClick={() => {
+          setAnswer(val.toLowerCase() === String(utils.getObjById(viewing).json[testedCateg]).toLowerCase())
+        }}
+      >Check</button>
+    </div>
+  )
+}
+
+function CorrectAnswer({
+  showCorrectAnswer,
+  testedCateg,
+  answer,
+  triggerRerender,
+  globalTsts,
+  viewing,
+  setViewing,
+  setStartedTraining,
+  setGivenCateg,
+  setTestedCateg,
+  setIsMultiChoice,
+  setShowCorrectAnswer,
+  isMultiChoice,
+}) {
+  return (
+    <div
+      style={{
+        opacity: showCorrectAnswer ? 1 : 0,
+      }}
+      className={styles.correctAnswer}>
+      <p
+        style={{
+          opacity: !isMultiChoice ? 1 : 0
+        }}
+      >{utils.getObjById(viewing) ? utils.getObjById(viewing).json[testedCateg] : ''}</p>
+      <button
+        onClick={() => {
+          getNextSet(true, viewing, globalTsts, setStartedTraining, setShowCorrectAnswer, (chosen, leGivenCateg, leTestedCateg) => {
+            setViewing(chosen)
+            setGivenCateg(leGivenCateg)
+            setTestedCateg(leTestedCateg)
+            setIsMultiChoice(coinFlip())
+            triggerRerender()
+          }, false)
+          setShowCorrectAnswer(false)
+        }}
+      >Next</button>
+    </div>
+  )
 }
 
 const multiChoiceAmt = 4
 
 function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
   const [ multiChoices, setMultiChoices ] = useState()
+  const [ animatedMultiChoices, setAnimatedMultiChoices ] = useState()
   const [ answer, setAnswer ] = useState(null)
   const [ rerender, plsRerender ] = useState(false)
+
+  const [ showCorrectAnswer, setShowCorrectAnswer ] = useState(false)
 
   const [ testedCateg, setTestedCateg ] = useState()
   const [ givenCateg, setGivenCateg ] = useState()
 
   const [ globalTsts, setGlobalTsts ] = useState(0) // tsts: time since test started
+
+  const [ isMultiChoice, setIsMultiChoice ] = useState(true)
   const triggerRerender = () => {
     setAnswer(null)
     plsRerender(!rerender)
   }
   useEffect(() => {
-    if (startedTraining) {
+    if (startedTraining && !showCorrectAnswer) {
       let leGivenCateg, leTestedCateg
       if (globalTsts === 0) {
         [ leGivenCateg, leTestedCateg ] = startedTraining ? randGivenTested(utils.getObjById(viewing)) : [ false, false ]
@@ -323,27 +437,44 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
       }
       setGlobalTsts(globalTsts+1)
       const viewingJson = utils.getObjById(viewing).json
-      let [ multiChoiceArr ] = getRandomOfCateg(testedCateg || leTestedCateg, multiChoiceAmt, [ viewingJson[testedCateg || leTestedCateg] ])
-      // known issue with example cause there isnt enough of em
-      const renderedMultiChoiceArr = []
-      for (let i = 0; i < multiChoiceAmt; i++) {
-        renderedMultiChoiceArr.push(
-          <MultiChoiceBtn
-            key={i}
-            i={i}
-            val={multiChoiceArr[i] === null ? (viewingJson[testedCateg || leTestedCateg]) : multiChoiceArr[i]}
-            correct={multiChoiceArr[i] === null}
-            setAnswer={setAnswer}
-            ></MultiChoiceBtn>
-        )
+      if (isMultiChoice) {
+        let [ multiChoiceArr ] = getRandomOfCateg(testedCateg || leTestedCateg, multiChoiceAmt, [ viewingJson[testedCateg || leTestedCateg] ])
+        // known issue with example cause there isnt enough of em
+        const renderedMultiChoiceArr = []
+        const animatedMultiChoiceArr = []
+        for (let i = 0; i < multiChoiceAmt; i++) {
+          renderedMultiChoiceArr.push(
+            <MultiChoiceBtn
+              key={i}
+              i={i}
+              // aniamted={false}
+              val={multiChoiceArr[i] === null ? (viewingJson[testedCateg || leTestedCateg]) : multiChoiceArr[i]}
+              correct={multiChoiceArr[i] === null}
+              setAnswer={setAnswer}
+              ></MultiChoiceBtn>
+          )
+          animatedMultiChoiceArr.push(
+            <MultiChoiceBtn
+              key={uuid()}
+              i={i}
+              isAnimated={true}
+              val={multiChoiceArr[i] === null ? (viewingJson[testedCateg || leTestedCateg]) : multiChoiceArr[i]}
+              correct={multiChoiceArr[i] === null}
+              setAnswer={setAnswer}
+              ></MultiChoiceBtn>
+          )
+        }
+        setMultiChoices(renderedMultiChoiceArr)
+        setAnimatedMultiChoices(animatedMultiChoiceArr)
       }
-      setMultiChoices(renderedMultiChoiceArr)
     }
-  }, [ startedTraining, rerender ])
+  }, [ startedTraining, rerender, showCorrectAnswer ])
   return (
     <>
       <AnswerHandler
+        isMultiChoice={isMultiChoice}
         answer={answer}
+        setShowCorrectAnswer={setShowCorrectAnswer}
         setStartedTraining={setStartedTraining}
         triggerRerender={triggerRerender}
         globalTsts={globalTsts}
@@ -352,6 +483,7 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
         categ={testedCateg}
         setGivenCateg={setGivenCateg}
         setTestedCateg={setTestedCateg}
+        setIsMultiChoice={setIsMultiChoice}
         ></AnswerHandler>
       <div
         style={{
@@ -368,9 +500,32 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
           className={answer === null ? styles.invisiAnswerIcon : styles.answerIcon}
           icon={answer === false ? faCircleXmark : faCircleCheck}
           ></FontAwesomeIcon>
-        <div className={styles.input}>
-          {multiChoices}
+        <div className={isMultiChoice ? styles.multiChoice : styles.none}>
+          {showCorrectAnswer ? animatedMultiChoices : multiChoices}
         </div>
+        <FreeAnswer
+          isMultiChoice={isMultiChoice}
+          testedCateg={testedCateg}
+          viewing={viewing}
+          rerender={rerender}
+          setAnswer={setAnswer}
+          answer={answer}
+          ></FreeAnswer>
+        <CorrectAnswer
+          showCorrectAnswer={showCorrectAnswer}
+          testedCateg={testedCateg}
+          viewing={viewing}
+          answer={answer}
+          triggerRerender={triggerRerender}
+          globalTsts={globalTsts}
+          setViewing={setViewing}
+          setStartedTraining={setStartedTraining}
+          setGivenCateg={setGivenCateg}
+          setTestedCateg={setTestedCateg}
+          setIsMultiChoice={setIsMultiChoice}
+          setShowCorrectAnswer={setShowCorrectAnswer}
+          isMultiChoice={isMultiChoice}
+          ></CorrectAnswer>
       </div>
     </>
   )
