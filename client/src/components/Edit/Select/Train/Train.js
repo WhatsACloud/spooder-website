@@ -201,30 +201,40 @@ const colorMap = [
   "#7d00d1",
 ]
 
+const multiChoicePosMap = [
+  [0, 0],
+  [1, 0],
+  [0, 1],
+  [1, 1],
+]
+
 function MultiChoiceBtn({ i, val, correct, setAnswer, isAnimated=false }) {
   const [ font_size, set_font_size ] = useState(40)
   const [ firstTime, setFirstTime ] = useState(true)
   const button = useRef(null)
   const [ divStyle, divSpring ] = useSpring(() => ({
-    padding: 30,
+    width: 50,
+    height: 100,
     opacity: 1,
+    marginLeft: multiChoicePosMap[i][0] ? 50 : 0,
+    marginTop: multiChoicePosMap[i][1] ? 100 : 0,
     config: {
-      duration: 600,
+      duration: 200,
     },
   }))
   useEffect(() => {
-    if (isAnimated) {
-      console.log(correct, firstTime, isAnimated)
-    }
     if (firstTime && isAnimated) {
       setFirstTime(false)
       divSpring.start({
-        padding: correct ? 100 : 30,
+        width: correct ? 60 : 50,
+        height: correct ? 200 : 100,
         opacity: correct ? 1 : 0,
+        marginLeft: correct ? 20 : (multiChoicePosMap[i][0] ? 50 : 0),
+        marginTop: correct ? -90 : (multiChoicePosMap[i][1] ? 100 : 0),
       })
     }
     const func = () => {
-      const buttonWidth = button.current.offsetWidth
+      const buttonWidth = button.current.getBoundingClientRect().width
       const length = val?.length || 1
       const lefontSize = 30
       const mult = (buttonWidth / (lefontSize * length))
@@ -237,12 +247,13 @@ function MultiChoiceBtn({ i, val, correct, setAnswer, isAnimated=false }) {
   }, [ val ])
   return (
     <animated.button ref={button} style={{
-      position: isAnimated ? 'absolute' : 'static',
-      // width: isAnimated ? divStyle.width.to(v => v+"%") : '',
-      padding: isAnimated ? divStyle.padding.to(v => v) : '',
+      width: isAnimated ? divStyle.width.to(v => v+"%") : '',
+      height: isAnimated ? divStyle.height.to(v => v + 'px') : '',
       opacity: isAnimated ? divStyle.opacity.to(v => v) : '',
+      marginLeft: divStyle.marginLeft.to(v => v + '%'),
+      marginTop: divStyle.marginTop.to(v => v + 'px'),
       backgroundColor: colorMap[i],
-      fontSize: font_size,
+      fontSize: font_size + 'px',
     }} className={styles.btn} onClick={() => setAnswer(correct)}>{val}</animated.button>
   )
 }
@@ -317,7 +328,7 @@ const getNextSet = (answer, viewing, globalTsts, setStartedTraining, setShowCorr
         return
       }
       setShowCorrectAnswer(true)
-    }, delay ? 1000 : 0)
+    }, delay ? 500 : 0)
   }
 }
 
@@ -384,14 +395,25 @@ function CorrectAnswer({
     <div
       style={{
         opacity: showCorrectAnswer ? 1 : 0,
+        pointerEvents: showCorrectAnswer ? 'all' : 'none',
       }}
       className={styles.correctAnswer}>
       <p
         style={{
           opacity: !isMultiChoice ? 1 : 0
         }}
+        className={styles.ansText}
+      >Answer</p>
+      <p
+        style={{
+          opacity: !isMultiChoice ? 1 : 0
+        }}
+        className={styles.ans}
       >{utils.getObjById(viewing) ? utils.getObjById(viewing).json[testedCateg] : ''}</p>
       <button
+        style={{
+          marginTop: !isMultiChoice ? 0 : 120,
+        }}
         onClick={() => {
           getNextSet(true, viewing, globalTsts, setStartedTraining, setShowCorrectAnswer, (chosen, leGivenCateg, leTestedCateg) => {
             setViewing(chosen)
@@ -445,7 +467,7 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
         for (let i = 0; i < multiChoiceAmt; i++) {
           renderedMultiChoiceArr.push(
             <MultiChoiceBtn
-              key={i}
+              key={uuid()}
               i={i}
               // aniamted={false}
               val={multiChoiceArr[i] === null ? (viewingJson[testedCateg || leTestedCateg]) : multiChoiceArr[i]}

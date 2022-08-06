@@ -125,6 +125,35 @@ div.budView {
   div.train {
     transition: box-shadow .2s;
     height: 95%;
+    div.correctAnswer {
+      z-index: 11;
+      position: absolute;
+      p {
+        margin-left: 25.5vw;
+        &.ans {
+          font-size: 25px;
+        }
+        &.ansText {
+          margin-left: 26.5vw;
+          margin-top: -100px;
+          font-size: 15px;
+          color: grey;
+        }
+      }
+      button {
+        transition: filter .2s;
+        border-radius: 3px;
+        border-style: none;
+        box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+        background-color: white;
+        padding: 15px;
+        margin-left: 25vw;
+        font-size: 25px;
+        &:hover {
+          filter: brightness(0.8);
+        }
+      }
+    }
     div.given {
       p {
         text-align: center;
@@ -142,8 +171,8 @@ div.budView {
     }
     svg {
       position: absolute;
-      top: 40%;
-      left: 40%;
+      top: 30%;
+      left: 45%;
       font-size: 50px;
       &.invisiAnswerIcon {
         opacity: 0;
@@ -160,11 +189,12 @@ div.budView {
       flex-direction: row;
       flex-wrap: wrap;
       button {
+        position: absolute;
         border-radius: 0;
         color: white;
         width: 50%;
         margin: 0;
-        padding: 30px;
+        height: 100px;
       }
     }
     div.freeAnswer {
