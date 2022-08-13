@@ -19,7 +19,6 @@ function FileInsert() {
                 const file = e.target.files[0]
                 const split = file.name.split('.')
                 const extension = split[split.length - 1]
-                console.log(extension)
                 const reader = new FileReader()
                 reader.onload = (e) => {
                   console.log(e.currentTarget.result)
@@ -35,7 +34,6 @@ function FileInsert() {
                     'Content-Type': 'multipart/form-data'
                   }
                 })
-                console.log(res)
                 break
               default:
                 console.error('error in file insert')

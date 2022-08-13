@@ -17,7 +17,6 @@ import * as utils from '../../utils'
 
 function StartDivSpring({ on, firstOn, outerDivSpring, colorDivSpring }) {
   useEffect(() => {
-    console.log(on)
     outerDivSpring.start({
       width: on ? 100 : 30,
       height: on ? 50 : 0,
@@ -58,12 +57,10 @@ function Category({ on, firstOn, category, selected, setColorPos, setSelected, s
   }))
   useEffect(() => {
     const timeout = setTimeout(() => {
-      console.log('timout')
       const original = text
       category.name = text
       for (const categ of Object.values(utils.getGlobals().categories.categories)) {
         if (categ.categId !== category.categId && categ.name === category.name) {
-          console.log('error, bruh')
           category.name = original
           break
         }
@@ -73,7 +70,6 @@ function Category({ on, firstOn, category, selected, setColorPos, setSelected, s
       clearTimeout(timeout)
     }
   }, [ text ])
-  console.log(firstOn, on)
   return (
     <>
       <StartDivSpring firstOn={firstOn} on={on} outerDivSpring={outerDivSpring} colorDivSpring={colorDivSpring}></StartDivSpring>
@@ -115,7 +111,6 @@ function Category({ on, firstOn, category, selected, setColorPos, setSelected, s
           onClick={() => {
             setColor(category ? category.color : '')
             const rect = colorDiv.current.getBoundingClientRect()
-            console.log('picked', rect.top)
             setSelectingColor(category)
             setColorPos(rect.top)
           }}
@@ -184,7 +179,6 @@ function StartCategorySpring({ on, firstOn, setFirstOn, setDisplay, selected, se
       let index = 0
       const setCategories = (interval) => {
         const categId = categIds[index]
-        console.log(categId, categIds)
         if (isNaN(categId)) {
           clearInterval(interval)
           setFirstOn(false)

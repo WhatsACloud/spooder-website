@@ -65,15 +65,14 @@ function ContextMenu({ on, pos, setContextMenuOn }) {
   const [ rendered, setRendered ] = useState()
   useEffect(() => {
     const operations = utils.getGlobals().operations
-    const selected = utils.getGlobals().selected
+    const selectedBuds = utils.getGlobals().selected?.buds
+    const selectedSilks = utils.getGlobals().selected?.silks
     const types = []
     const toRender = []
     const leTypes = [utils.ObjType.Default]
-    if (selected) {
-      for (const obj of Object.values(selected)) {
-        if (!(types.includes(obj.type))) types.push(obj.type)
-      }
-      if (Object.values(selected).length !== 0) {
+    if (selectedBuds || selectedSilks) {
+      if (Object.values(selectedBuds).length !== 0
+          || Object.values(selectedSilks).length !== 0) {
         leTypes.push(...types, utils.ObjType.All)
       }
       let i = 0

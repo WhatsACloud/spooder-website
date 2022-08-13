@@ -2,10 +2,8 @@ const generateRandomColor = () => {
   const num = Math.floor(Math.random() * 16777216) // max hex number
   let hex = num.toString(16)
   const left = 6 - hex.length
-  console.log(left, hex, hex.length)
   if (left !== 0) {
     for (let i = 0; i < left; i++) {
-      console.log(i)
       hex += "0"
     }
   }
@@ -27,7 +25,6 @@ class Category {
       color = generateRandomColor()
     }
     color = color.toLowerCase()
-    console.log(color)
     if (color.length !== 7 || color.substring(0, 1) !== "#") throw Category.colorErrMsg(color)
     for (const letter of color.substring(1)) {
       if (isNaN(Number(letter)) && !(['a', 'b', 'c', 'd', 'e', 'f'].includes(letter))) {

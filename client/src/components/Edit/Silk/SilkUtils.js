@@ -40,7 +40,6 @@ export { startDragLine }
 
 const stopDragLine = (e, lineCircle) => { // todo: remove lineCircle, add mouseup event for border detectors and document
   if (e.button === 0) {
-    console.log('no')
     const stage = Konva.stages[0]
     if (stage && lineCircle) {
       const highlighter = stage.find('.highlighter')[0]
@@ -58,8 +57,6 @@ const snapLine = (selectedSilk, budObjId, x, y) => {
   // const line = utils.getKonvaObjById(selectedSilk.objId)
   const lineCircle = line.children[selectedSilk.innerIndex]
   // const attachedTo = utils.getKonvaObjById(budObjId)
-  // console.log(highlighter.getAttr('attachedObjId'))
-  // console.log(lineCircle.getX(), lineCircle.getY())
   lineCircle.setAttr('attachedToObjId', attachedTo.getAttr('objId'))
   const newAttachedSilkToBud = attachedTo.getAttr('attachedSilkObjId')
   if (!newAttachedSilkToBud[selectedSilk.objId]) {
@@ -75,7 +72,6 @@ const snapLine = (selectedSilk, budObjId, x, y) => {
   //   positions: offsetRootPoses,
   //   [`attachedTo${selectedSilk.innerIndex}`]: lineCircle.getAttr('attachedToObjId')
   // })
-  // // console.log(utils.getObjById(budObjId))
   // utils.updateObj(budObjId, {
   //   attachedTo: {...utils.getObjById(budObjId).attachedTo, [selectedSilk.objId]: selectedSilk.innerIndex}
   // })
@@ -86,8 +82,6 @@ const snapLineCircleToLine = (selectedSilk) => { // pls fix ltr it doesnt work i
   // const lineGroup = utils.getKonvaObjById(selectedSilk.objId)
   const line = lineGroup.children[0]
   const lineCircle = lineGroup.children[selectedSilk.innerIndex]
-  console.log(selectedSilk)
-  console.log('snap')
   if (selectedSilk.innerIndex === 1) {
     lineCircle.setX(line.getPoints()[0])
     lineCircle.setY(line.getPoints()[1])

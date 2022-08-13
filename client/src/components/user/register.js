@@ -13,7 +13,6 @@ import Authorizer from '../Shared/Authorizer'
 const registerEndpoint = "/register"
 
 async function signUp(errorStates, changeErrorState, changeServerErrorState, navigate, username, email, password) {
-  // console.log(canSend)
   try {
     const toSend = {
       "Username": username,

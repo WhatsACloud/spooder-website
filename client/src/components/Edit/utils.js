@@ -159,10 +159,8 @@ export { getNextHighestAttr }
 let timeout
 
 const sendSaveEvt = () => {
-  console.log('ran')
   clearTimeout(timeout)
   timeout = setTimeout(() => {
-    console.log('this is infuriating')
     const evt = new CustomEvent('save', {
       detail: {
         status: true,
@@ -262,17 +260,24 @@ const viewObj = (objId=null) => {
 export { viewObj }
 
 const clearSelected = () => {
-  for (const { obj } of Object.values(getGlobals().selected)) {
+  for (const { obj } of Object.values(getGlobals().selected.buds)) {
     obj.unselect()
   }
-  getGlobals().selected = {}
+  for (const { obj } of Object.values(getGlobals().selected.silks)) {
+    obj.unselect()
+  }
+  getGlobals().selected = {buds: {}, silks: {}}
 }
 export { clearSelected }
 
 const selectObj = (obj, type, selectFunc, clear=false) => {
   const objId = obj.objId || obj.silkId
   if (clear) clearSelected()
-  getGlobals().selected[objId] = {obj: obj, type: type}
+  if (type === ObjType.Bud) {
+    getGlobals().selected.buds[objId] = {obj: obj, type: type}
+  } else if (type === ObjType.Silk) {
+    getGlobals().selected.silks[objId] = {obj: obj, type: type}
+  }
   selectFunc()
 }
 export { selectObj }
@@ -476,8 +481,8 @@ export { addToRecentlyViewed }
 
 import { Silk } from './Silk/SilkShape'
 
-const link = () => {
-  const leSelectedItems = getGlobals().selected
+const link = () => { // pls test this
+  const leSelectedItems = getGlobals().selected.buds
   for (const [ objId, selected1 ] of Object.entries(leSelectedItems)) {
     const selectedItems = {...leSelectedItems}
     delete selectedItems[objId]

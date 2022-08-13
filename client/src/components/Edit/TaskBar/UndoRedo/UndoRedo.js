@@ -16,7 +16,6 @@ const setHistoryIndex = (histIndex) => {
 
 const undo = () => {
   const historyIndex = getHistoryIndex()
-  console.log(historyIndex)
   if (historyIndex >= 0) {
     const history = getHistory()
     const last = history[historyIndex]
@@ -30,7 +29,6 @@ const redo = () => {
   const historyIndex = getHistoryIndex()
   const history = getHistory()
   const last = history[historyIndex+1]
-  console.log(historyIndex+1, history)
   if (last) {
     setHistoryIndex(historyIndex+1)
     last.redo(redo)

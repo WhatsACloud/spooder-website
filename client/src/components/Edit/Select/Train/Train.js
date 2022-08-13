@@ -275,7 +275,6 @@ const getNextSet = (answer, viewing, globalTsts, setStartedTraining, setShowCorr
   let obj = utils.getObjById(viewing)
   let amt = 0.1 * ((answer - 0.5) * 2)
   if (obj && answer !== null) {
-    console.log('ran')
     obj.json.link += amt
     if (answer) obj.tsts = globalTsts
     let attachedTos = [...obj.attachedTos]
@@ -303,11 +302,8 @@ const getNextSet = (answer, viewing, globalTsts, setStartedTraining, setShowCorr
       if (leGivenCateg) break
       if (i === 0) {
         chosen = getRandEleByLink(Object.keys(utils.getObjs()), globalTsts)
-        console.log(chosen)
         obj = utils.getObjById(chosen)
-        console.log(obj)
         const givenTested = randGivenTested(obj)
-        console.log(givenTested)
         leGivenCateg = givenTested[0]
         leTestedCateg = givenTested[1]
         attachedTos = obj.attachedTos
@@ -317,7 +313,6 @@ const getNextSet = (answer, viewing, globalTsts, setStartedTraining, setShowCorr
       i--
       attachedTos = [...obj.attachedTos]
     }
-    console.log(utils.getObjById(chosen).json, leGivenCateg, leTestedCateg)
     utils.getGlobals().testedPath.push(chosen)
     if (!(utils.getObjById(chosen).json[leGivenCateg])) {
       throw new Error

@@ -6,7 +6,6 @@ const navBar = (props) => {
   const [ username, setUsername ] = useState()
   useEffect(() => {
     const Username = localStorage.getItem('Username')
-    console.log(Username)
     setUsername(Username)
   })
 

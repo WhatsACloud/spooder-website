@@ -76,7 +76,6 @@ function RenderSpoodawebPreviews({ navigate, spoodawebPreviews }) {
 }
 
 const ContextMenu = (props) => {
-  console.log('rerendered context menu')
   if (props.show) {
     return (
       <div style={{'top': props.y, 'left': props.x}} className={styles.contextMenu}>
@@ -98,14 +97,12 @@ const ContextMenu = (props) => {
 const handleContextMenu = (e, setAnchorPoint, setShow) => {
   let canShow = false
   const spoodawebPreviews = document.getElementsByClassName('spoodawebPreviews')
-  // console.log(spooderwebPreviews)
   for (const spoodawebPreview of spoodawebPreviews) {
     if (spoodawebPreview.matches(':hover')) {
       canShow = true
       break
     }
   }
-  console.log(canShow)
   if (canShow) {
     setAnchorPoint({ x: e.pageX, y: e.pageY })
     setShow(true)
@@ -119,13 +116,10 @@ async function createNewSpoodaweb (changeServerErrorState, changeTitleErrorState
   const title = document.getElementById("title").value
   try {
     const validateResult = await spoodawebSchema.validate({title: title}, {abortEarly: false})
-    console.log(validateResult)
     changeTitleErrorState('')
     try {
       const postResult = await api.post('/webs/create', {title: title})
       const spoodawebId = postResult.data.spoodawebId
-      console.log(spoodawebId)
-      console.log('success!')
       changeServerErrorState('')
       navigate(`/webs/edit/?${queryString.stringify({id: spoodawebId})}`)
     } catch(err) {
@@ -184,7 +178,6 @@ const Prompt = ({ prompted, titleErrorState, changeTitleErrorState, navigate }) 
 function GetSpoodawebPreviews({ setOriginalSpoodawebPreviews }) {
   useEffect(async () => {
     const webs = await getSpoodawebPreviews()
-    console.log(webs)
     setOriginalSpoodawebPreviews(webs)
   }, [])
   return <></>
@@ -215,7 +208,6 @@ const Home = () => { // to fix constant rerenders
       document.removeEventListener("click", handleClickWrapper);
     })
   })
-  console.log('rerendered home')
   return (
     <>
       <Authorizer requireAuth={true} navigate={navigate}></Authorizer>

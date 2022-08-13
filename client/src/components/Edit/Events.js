@@ -1,8 +1,6 @@
 const createBud = (e, buds, setBuds, Bud) => { // e.pageX - window.innerWidth * 0.15 + divCanvas.scrollLeft, e.pageY - 40 + divCanvas.scrollTop
-  console.log(buds)
   if (buds) {
     const budsCopy = [...buds]
-    console.log('hey')
     budsCopy.push(
       <Bud
         key={buds.length}

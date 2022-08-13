@@ -41,7 +41,6 @@ class Keybinds {
   isDown(key) { return this.down[key] }
   constructor(debugMode) {
     document.addEventListener('keydown', (e) => {
-      console.log(!utils.isFocused())
       if (!utils.isFocused()) return
       const keyPressed = e.key.length > 1 ? e.key : e.key.toLowerCase()
       if (keyPressed in this.binds) {
@@ -71,7 +70,6 @@ class Keybinds {
           }
         }
       } else if (debugMode) {
-        console.log(e.key)
       }
     })
     document.addEventListener('keyup', (e) => {

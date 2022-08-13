@@ -29,7 +29,6 @@ function BudSearchResult({ obj, str, type }) {
 }
 
 function CategSearchResult({ obj, str, type }) {
-  console.log(obj)
   return (
     <>
       <div className={styles.categIcon}>
@@ -47,7 +46,6 @@ function CategSearchResult({ obj, str, type }) {
 function SearchResult({ onMouseDown, result }) {
   const [ rendered, setRendered ] = useState()
   useEffect(() => {
-    console.log(result)
     switch (result.obj.type) {
       case "bud":
         setRendered(
@@ -75,7 +73,6 @@ export { SearchResult }
 
 function FilterOption({ name, toggled, onClick }) {
   useEffect(() => {
-    console.log(name)
   }, [])
   return (
     <div style={{ backgroundColor: toggled ? 'grey' : 'white' }} className={styles.filterOption} onClick={onClick}>

@@ -27,7 +27,6 @@ const LineDragUpdater = memo(({
       if (!utils.isInCanvas(canvasMousePos)) return
       setDraggingLine(true)
       const currentObjId = utils.getNextObjId()
-      console.log('what')
       const rootPos = utils.getRootPos()
       SilkUtils.setSilk(setObjsToUpdate, {positions: [
         {x: canvasMousePos.x - rootPos.x, y: canvasMousePos.y - rootPos.y},
@@ -41,7 +40,6 @@ const LineDragUpdater = memo(({
       startDragging(e, canvasMousePos)
     }
     if (triggerDragLine) {
-      console.log(triggerDragLine)
       const budPos = {x: triggerDragLine.getX(), y: triggerDragLine.getY()}
       startDragging({button: 0, pageX: budPos.x, pageY: budPos.y}, budPos)
       setTriggerDragLine(false)
@@ -49,7 +47,6 @@ const LineDragUpdater = memo(({
     const stopDragLineWrapper = e => SilkUtils.stopDragLine(e, lineCircle)
     const dragLineWrapper = e => SilkUtils.lineCircleMove(e, draggingLine, selectedSilk)
     const dropLine = (e) => { // wow! aMaZiNg CoDe!!!!!
-      console.log('dropped line')
       // const line = utils.getKonvaObjById(selectedSilk.objId)
       line.moveToBottom()
       if (!utils.isInCanvas({x: e.pageX, y: e.pageY})) SilkUtils.snapLineCircleToLine(selectedSilk) 
@@ -62,20 +59,17 @@ const LineDragUpdater = memo(({
       const mousePos = utils.getCanvasMousePos(e.pageX, e.pageY)
       const oldRootPos = utils.getRootPos()
       newOffsetRootPoses[Math.abs(selectedSilk.innerIndex-1)] = {x: mousePos.x - oldRootPos.x, y: mousePos.y - oldRootPos.y}
-      console.log(newOffsetRootPoses, offsetRootPoses)
       if (makingLine) {
         redoFunc = () => {
           SilkUtils.setSilk(setObjsToUpdate, {positions: newOffsetRootPoses}, selectedSilk.objId)
         }
         undoFunc = () => {
-          console.log(konvaObj, selectedSilk.objId)
           konvaObj.destroy()
           const obj = utils.getObjById(selectedSilk.objId)
           obj.del = true
         }
       } else {
         if (hoverBud) {
-          console.log(selectedSilk.innerIndex)
           SilkUtils.snapLine(selectedSilk, budId, x, y)
         } else { // detaches line
           const lineCircle = line.children[selectedSilk.innerIndex]

@@ -99,8 +99,9 @@ function CategoryBox({ obj, viewing }) {
 function Viewer({ viewing, startedTraining }) {
   const [ obj, setObj ] = useState(null)
   useEffect(() => {
+    console.log(viewing)
     const object = utils.getObjById(viewing)
-    console.log(object)
+    // console.log(object)
     if (utils.getGlobals().recentlyViewed && object) {
       utils.addToRecentlyViewed(object)
     }

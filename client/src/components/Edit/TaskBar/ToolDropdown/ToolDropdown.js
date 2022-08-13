@@ -62,7 +62,11 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
       <animated.div 
         style={spacerStyle}
         className={styles.spacer}></animated.div>
-      <FontAwesomeIcon icon={icon} className={styles.dropDownIcon}></FontAwesomeIcon>
+      {
+        icon ?
+        <FontAwesomeIcon icon={icon} className={styles.dropDownIcon}></FontAwesomeIcon>
+        : <></>
+      }
       <p>{name}</p>
     </animated.div>
   )

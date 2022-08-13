@@ -16,7 +16,6 @@ function SpoodawebSearchBar({ originalSpoodawebPreviews, setSpoodawebPreviews })
         originalSpoodawebPreviews,
         {keySelector: (obj) => obj.title}
       )
-      console.log(found)
       setSpoodawebPreviews(found)
     }, 300)
     return () => {

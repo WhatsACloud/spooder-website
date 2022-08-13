@@ -59,7 +59,6 @@ function SetGlobal() {
   useEffect(() => {
     window.spoodawebVars = {}
     window.spoodawebVars.react = {}
-    console.log('set spoodawebVars')
   }, [])
   return <></>
 }
@@ -107,12 +106,7 @@ function Edit() {
     let boxEnd = null
     const mouseclickUnselectAll = (e) => {
       if (e.evt.button !== 0) return
-      console.log(utils.getGlobals().selecting)
       if (!utils.getGlobals().selecting) {
-        for (const { obj, type } of Object.values(utils.getGlobals().selected)) {
-          console.log(obj)
-          obj.unselect()
-        }
         utils.clearSelected()
       }
     }
@@ -148,35 +142,29 @@ function Edit() {
         const pos2 = {x: points[2], y: points[3]}
 
         const inRect1 = utils.withinRect(boxStart, boxEnd, pos1)
-        if (inRect1) console.log("inRect1", inRect1)
         if (inRect1) { silkObj.select(); continue }
         const inRect2 = utils.withinRect(boxStart, boxEnd, pos2)
-        if (inRect2) console.log("inRect2", inRect2)
         if (inRect2) { silkObj.select(); continue }
 
         const topIntersectsLine = utils.linesIntersect(
           [boxStart, {x: boxEnd.x, y: boxStart.y}],
           [pos1, pos2],
         )
-        if (topIntersectsLine) console.log("topIntersectsLine", topIntersectsLine)
         if (topIntersectsLine) { silkObj.select(); continue }
         const bottomIntersectsLine = utils.linesIntersect(
           [boxEnd, {x: boxStart.x, y: boxEnd.y}],
           [pos1, pos2],
         )
-        if (bottomIntersectsLine) console.log("bottomIntersectsLine", bottomIntersectsLine, boxEnd, {x: boxStart.x, y: boxEnd.y}, pos1, pos2)
         if (bottomIntersectsLine) { silkObj.select(); continue }
         const leftIntersectsLine = utils.linesIntersect(
           [boxStart, {x: boxStart.x, y: boxEnd.y}],
           [pos1, pos2],
         )
-        if (leftIntersectsLine) console.log("leftIntersectsLine", leftIntersectsLine)
         if (leftIntersectsLine) { silkObj.select(); continue }
         const rightIntersectsLine = utils.linesIntersect(
           [boxEnd, {x: boxEnd.x, y: boxStart.y}],
           [pos1, pos2],
         )
-        if (rightIntersectsLine) console.log("rightIntersectsLine", rightIntersectsLine)
         if (rightIntersectsLine) { silkObj.select(); continue }
       }
     }
@@ -208,7 +196,6 @@ function Edit() {
         id: 'selectBox',
       })
       utils.getMainLayer().add(selectBox)
-      console.log(utils.getGlobals().dragging)
       if (!utils.getGlobals().dragging) {
         document.addEventListener('mousemove', isDrag)
         document.addEventListener('mouseup', stopSelecting)
@@ -231,7 +218,7 @@ function Edit() {
     globals.historyIndex = -1
     globals.triggerDragLine = false
     globals.draggingLine = false
-    globals.selected = {}
+    globals.selected = {buds: {}, silks: {}}
     globals.viewing = null
     globals.unselectFunc = null
     globals.silkObjs = {}
@@ -267,7 +254,6 @@ function Edit() {
       const silks = Object.values(selected).filter(e => e.type === utils.ObjType.Silk)
       const redoFunc = () => {
         for (const { obj } of buds) {
-          console.log(obj)
           obj._delete()
         }
         for (const { obj } of silks) {

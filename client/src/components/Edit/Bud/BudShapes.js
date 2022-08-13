@@ -166,7 +166,6 @@ class BudJson {
         clearInterval(interval)
       }
     }, 100)
-    console.log(this.bud.konvaObj, color)
     this.checkForUpdate('categId')
   }
   set del(del) { this.json.del = del; this.checkForUpdate('del')}
@@ -287,14 +286,11 @@ class Bud {
       }
       document.addEventListener('mouseup', mouseup)
       document.addEventListener('mousemove', mousemove)
-    } else if (modes.gluing && (this !== utils.getGlobals().selected.obj)) {
-      const selectedItems = utils.getGlobals().selected
-      for (const selected of Object.values(selectedItems)) {
-        if (selected.type === utils.ObjType.Bud) {
-          const bud = selected.obj
-          const silkId = utils.getNextSilkId()
-          new Silk(silkId, bud, this)
-        }
+    } else if (modes.gluing && (this !== utils.getGlobals().selected.buds[this.objId])) {
+      const selectedItems = utils.getGlobals().selected.buds
+      for (const { obj } of Object.values(selectedItems)) {
+        const silkId = utils.getNextSilkId()
+        new Silk(silkId, obj, this)
       }
     } else {
       this.select(true)
@@ -321,7 +317,6 @@ class Bud {
         })
         this.textObj = text
         this.konvaObj.add(text)
-        console.log(word, 'text', this.konvaObj)
         return
       }
       this.textObj.setText(word)
@@ -483,7 +478,7 @@ class Bud {
       for (const silk of Object.values(this.attachedSilk)) {
         silk.init()
       }
-      if (this.objId in utils.getGlobals().selected) this.select()
+      if (this.objId in utils.getGlobals().selected.buds) this.select()
     }
   }
   undo = () => {
@@ -506,7 +501,6 @@ class Bud {
     this.init()
     this.setText(this.json.word)
     for (const silk of Object.values(this.oldAttachedSilk)) {
-      console.log(silk)
       silk.restore()
     }
     if (this.new) {
@@ -514,7 +508,6 @@ class Bud {
     }
   }
   initSilk = () => {
-    console.log(this.json.attachedTos)
   }
   constructor(nextObjId, x=null, y) {
     utils.addObjs({[nextObjId]: this})

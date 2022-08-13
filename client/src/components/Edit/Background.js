@@ -302,7 +302,6 @@ function Background({ canRender }) {
 
 function ImageBackground({ src, canRender }) {
   useEffect(() => {
-    console.log(src)
   }, [ src ])
   return (
     <div className={canRender ? styles.divBackground : styles.none}>
@@ -318,11 +317,8 @@ function BackgroundWrapper({ canRender }) {
     try {
       const name = '73729cbb-1371-45f3-8aa5-357f4ec52ba1.png'
       const result = await api.post('/images/get/default', { name: name }, { responseType: 'blob' })
-      // console.log([...result.data])
       // const data = Uint8Array.from([...result.data].map(e => e.charCodeAt()))
-      // console.log(data)
       // const blob = new Blob(data, { type: 'image/png'})
-      console.log(result.data)
       // const blob = new Blob([result.data], { type: 'image/png'})
       // const url = URL.createObjectURL(blob)
       const reader = new FileReader()
