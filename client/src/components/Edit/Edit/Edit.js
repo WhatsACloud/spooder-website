@@ -14,6 +14,7 @@ import { Operation, Operations } from './Operations'
 
 import { preventZoom, preventZoomScroll } from '../PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from '../Events'
+import * as BudUtils from '../Bud/BudUtils'
 import * as OtherElements from '../OtherElements'
 import { Background } from '../Background'
 import { undo, redo } from '../TaskBar/UndoRedo'
@@ -125,10 +126,14 @@ function Edit() {
         const objId = bud.getAttr('objId')
         const budObj = utils.getObjById(objId)
         if (budObj.selected) continue
-        const pos = {x: bud.getX(), y: bud.getY()}
-        const inside = utils.withinRect(boxStart, boxEnd, pos)
-        if (inside) {
-          budObj.select()
+        const points = BudUtils.hexagonPoints(40, bud.getX(), bud.getY())
+        for (const point of points) {
+          const inside = utils.withinRect(boxStart, boxEnd, point)
+          // console.log("point", point, "pos", pos, inside)
+          if (inside) {
+            budObj.select()
+            break
+          }
         }
       }
       for (const _silk of utils.getSilkGroup().children) {

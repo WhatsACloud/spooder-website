@@ -7,8 +7,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faLink, faPaperclip } from '@fortawesome/free-solid-svg-icons'
 import { BackgroundClickDetector } from '../../../BackgroundClickDetector'
 import { setBud } from '../../Bud/BudUtils'
+import { Hexagon } from '../../../../services/icons'
 
-function ToolElement({ name, onClick, icon, toggle, on }) {
+function ToolElement({ name, onClick, icon, toggle, on, html, fontSize }) {
   const [ toggled, setToggled ] = useState(false)
   const [ spacerStyle, spacerSpring ] = useSpring(() => ({
     // width: 10,
@@ -48,6 +49,7 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
       color: toggled ? 'white' : 'rgb(0, 102, 255)',
     })
   }, [ on, toggled ])
+  console.log(html, toggle, name)
   return (
     <animated.div
       onClick={() => {
@@ -67,7 +69,10 @@ function ToolElement({ name, onClick, icon, toggle, on }) {
         <FontAwesomeIcon icon={icon} className={styles.dropDownIcon}></FontAwesomeIcon>
         : <></>
       }
-      <p>{name}</p>
+      {
+        html ? html : <></>
+      }
+      <p style={{fontSize: fontSize ? fontSize : ''}}>{name}</p>
     </animated.div>
   )
 }
@@ -97,21 +102,35 @@ const theData = [
       const pos = utils.calcPosByKonvaPos(width, height)
       setBud(pos)
     },
+    html: <Hexagon></Hexagon>,
+    toggle: false,
+    fontSize: 10,
+  },
+  {
+    name: 'Autodrag',
+    onClick: () => {
+      const modes = utils.getGlobals().modes
+      modes.autoDrag = !(modes.autoDrag)
+    },
   },
 ]
 
 
 function ToolDropdown({ on, setOn, leData }) {
-  const [ elems, setElems ] = useState((leData ? leData : theData).map((elemData, index) => (
-  <ToolElement
-    name={elemData.name}
-    onClick={elemData.onClick}
-    on={false}
-    toggle={true}
-    icon={elemData.icon}
-    key={index}
-  ></ToolElement>
-)))
+  const [ elems, setElems ] = useState((leData ? leData : theData).map((elemData, index) => {
+    return (
+      <ToolElement
+        name={elemData.name}
+        onClick={elemData.onClick}
+        on={false}
+        fontSize={elemData.fontSize}
+        toggle={elemData.toggle === undefined ? true : elemData.toggle}
+        html={elemData.html}
+        icon={elemData.icon}
+        key={index}
+      ></ToolElement>
+    )
+}))
   useEffect(() => {
     let leElems = [...elems]
     let index = 0
@@ -123,7 +142,9 @@ function ToolDropdown({ on, setOn, leData }) {
           name={elemData.name}
           onClick={elemData.onClick}
           on={on}
-          toggle={true}
+          fontSize={elemData.fontSize}
+          toggle={elemData.toggle === undefined ? true : elemData.toggle}
+          html={elemData.html}
           icon={elemData.icon}
           key={index}
         ></ToolElement>

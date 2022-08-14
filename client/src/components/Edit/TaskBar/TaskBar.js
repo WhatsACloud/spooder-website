@@ -65,14 +65,6 @@ function TaskBar({ setInSettings }) {
   return (
     <>
       <div className={styles.taskBar}>
-        {/* <button
-          className={styles.stdButton}
-          onClick={() => {
-            const modes = utils.getGlobals().modes
-            modes.autoDrag = !(modes.autoDrag)
-          }}>
-          <FontAwesomeIcon icon={faFileLines}></FontAwesomeIcon>
-        </button> */}
         <ToHomeBtn focusedSearch={focused}></ToHomeBtn>
         <SaveIcon></SaveIcon>
         <ToolButton></ToolButton>
