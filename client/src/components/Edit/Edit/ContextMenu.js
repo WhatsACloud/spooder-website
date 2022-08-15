@@ -1,5 +1,6 @@
 import styles from '../edit.module'
 import React, { useState, useEffect } from 'react'
+import uuid from 'react-uuid'
 import * as utils from '../utils'
 import { useSpring } from 'react-spring'
 
@@ -16,9 +17,10 @@ function KeySetter({ operation, setKeys }) {
   useEffect(() => {
     const _keys = []
     let i = 0
+    console.log(operation.name, operation.keys)
     for (const [ leKey, icon ] of operation.keys) {
       _keys.push(
-        <KeybindBtn key={i} num={i} text={icon ? icon : leKey}></KeybindBtn>
+        <KeybindBtn key={uuid()} num={i} text={icon ? icon : leKey}></KeybindBtn>
       )
       i++
     }
@@ -54,8 +56,7 @@ function OpBtn({ on, operation, setContextMenuOn, last }) {
       }}
       >
       <KeySetter operation={operation} setKeys={setKeys}></KeySetter>
-      <p
-        onMouseOver={e => console.log('siofuifubdfibuefhy')}>{operation.name}</p>
+      <p>{operation.name}</p>
       {keys}
     </div>
   )
@@ -67,21 +68,25 @@ function ContextMenu({ on, pos, setContextMenuOn }) {
     const operations = utils.getGlobals().operations
     const selectedBuds = utils.getGlobals().selected?.buds
     const selectedSilks = utils.getGlobals().selected?.silks
-    const types = []
     const toRender = []
     const leTypes = [utils.ObjType.Default]
     if (selectedBuds || selectedSilks) {
       if (Object.values(selectedBuds).length !== 0
           || Object.values(selectedSilks).length !== 0) {
-        leTypes.push(...types, utils.ObjType.All)
+        leTypes.push(utils.ObjType.All)
+      }
+      if (Object.values(selectedBuds).length > 1) {
+        leTypes.push(utils.ObjType.Selected)
+      }
+      if (Object.values(selectedBuds).length === 1) {
+        leTypes.push(utils.ObjType.Bud)
       }
       let i = 0
       let lastOp = null
       for (const type of leTypes) {
-        console.log(type, operations.operations)
         for (const operation of operations.operations[type]) {
           toRender.push(
-            <OpBtn key={i} on={on} last={false} operation={operation} setContextMenuOn={setContextMenuOn}></OpBtn>
+            <OpBtn key={uuid()} on={on} last={false} operation={operation} setContextMenuOn={setContextMenuOn}></OpBtn>
           )
           lastOp = operation
           i++
@@ -89,7 +94,7 @@ function ContextMenu({ on, pos, setContextMenuOn }) {
       }
       toRender.pop()
       toRender.push(
-        <OpBtn key={i} on={on} last={true} operation={lastOp} setContextMenuOn={setContextMenuOn}></OpBtn>
+        <OpBtn key={uuid()} on={on} last={true} operation={lastOp} setContextMenuOn={setContextMenuOn}></OpBtn>
       )
     }
     setRendered(toRender)

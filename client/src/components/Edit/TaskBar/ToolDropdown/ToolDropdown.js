@@ -4,13 +4,15 @@ import styles from './toolDropdown.module'
 import * as utils from '../../utils'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faLink, faPaperclip } from '@fortawesome/free-solid-svg-icons'
+import { faLink, faPaperclip, faHandBackFist } from '@fortawesome/free-solid-svg-icons'
 import { BackgroundClickDetector } from '../../../BackgroundClickDetector'
 import { setBud } from '../../Bud/BudUtils'
 import { Hexagon } from '../../../../services/icons'
 
-function ToolElement({ name, onClick, icon, toggle, on, html, fontSize }) {
-  const [ toggled, setToggled ] = useState(false)
+function ToolElement({ name, onClick, icon, toggle, on, html, fontSize, isToggled=null }) {
+  console.log(isToggled)
+  const [ toggled, setToggled ] = useState(isToggled !== null ? isToggled : false)
+  console.log(toggled)
   const [ spacerStyle, spacerSpring ] = useSpring(() => ({
     // width: 10,
     config: {
@@ -49,7 +51,6 @@ function ToolElement({ name, onClick, icon, toggle, on, html, fontSize }) {
       color: toggled ? 'white' : 'rgb(0, 102, 255)',
     })
   }, [ on, toggled ])
-  console.log(html, toggle, name)
   return (
     <animated.div
       onClick={() => {
@@ -72,19 +73,20 @@ function ToolElement({ name, onClick, icon, toggle, on, html, fontSize }) {
       {
         html ? html : <></>
       }
-      <p style={{fontSize: fontSize ? fontSize : ''}}>{name}</p>
+      <p style={{fontSize: fontSize ? fontSize : '', whiteSpace: 'nowrap'}}>{name}</p>
     </animated.div>
   )
 }
 
 const theData = [
   {
-    name: 'Glue',
+    name: 'Attach',
     onClick: () => {
       const modes = utils.getGlobals().modes
       modes.gluing = !(modes.gluing)
     },
     toggle: true,
+    getToggleFunc: () => utils.getGlobals().modes.gluing,
     icon: faLink
   },
   {
@@ -112,6 +114,11 @@ const theData = [
       const modes = utils.getGlobals().modes
       modes.autoDrag = !(modes.autoDrag)
     },
+    getToggleFunc: () => {
+      console.log(utils.getGlobals().modes.autoDrag)
+      return utils.getGlobals().modes.autoDrag
+    },
+    icon: faHandBackFist
   },
 ]
 
@@ -137,6 +144,7 @@ function ToolDropdown({ on, setOn, leData }) {
     const interval = setInterval(() => {
       const data = leData ? leData : theData
       const elemData = data[index]
+      console.log(elemData.name, elemData.getToggleFunc)
       leElems.splice(index, 1, (
         <ToolElement
           name={elemData.name}
@@ -144,6 +152,7 @@ function ToolDropdown({ on, setOn, leData }) {
           on={on}
           fontSize={elemData.fontSize}
           toggle={elemData.toggle === undefined ? true : elemData.toggle}
+          isToggled={elemData.getToggleFunc ? elemData.getToggleFunc() : undefined}
           html={elemData.html}
           icon={elemData.icon}
           key={index}

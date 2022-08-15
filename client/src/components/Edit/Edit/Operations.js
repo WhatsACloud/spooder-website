@@ -27,6 +27,7 @@ class Operations {
     [utils.ObjType.Bud]: [],
     [utils.ObjType.Silk]: [],
     [utils.ObjType.Default]: [],
+    [utils.ObjType.Selected]: [],
   }
   add(operation) {
     this.operations[operation.opType].push(operation)

@@ -272,6 +272,7 @@ class Bud {
   }
   click = (e) => {
     e.cancelBubble = true
+    console.log(e.evt.button)
     if(e.evt.button !== 0) return
     if (e.evt.shiftKey) {
       this.select()

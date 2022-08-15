@@ -250,6 +250,7 @@ class ObjType {
   static Silk = Symbol("Silk")
   static All = Symbol("All")
   static Default = Symbol("Default")
+  static Selected = Symbol("Selected") // for buds
 }
 export { ObjType }
 

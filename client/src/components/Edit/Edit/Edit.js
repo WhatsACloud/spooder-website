@@ -113,7 +113,7 @@ function Edit() {
     }
     utils.getStage().on('click', mouseclickUnselectAll)
     const mousemove = (e) => {
-      if (utils.getGlobals().dragging) {
+      if (utils.getGlobals().dragging || utils.getGlobals().modes.autoDrag) {
         document.removeEventListener('mousemove', mousemove)
         stopSelecting({button: 0})
         return
@@ -315,6 +315,38 @@ function Edit() {
       utils.ObjType.Default,
     )
     operations.add(newBud)
+
+    const _attach = () => {
+      const modes = utils.getGlobals().modes
+      modes.gluing = !(modes.gluing)
+    }
+    const attach = new Operation(
+      'Attach to bud',
+      _attach,
+      [['Control', 'ctrl'], ['v']],
+      utils.ObjType.Bud
+    )
+    operations.add(attach)
+
+    const link = new Operation(
+      'Link',
+      utils.link,
+      [['Control', 'ctrl'], ['Shift', 'shift'], ['l', 'L']],
+      utils.ObjType.Selected
+    )
+    operations.add(link)
+
+    const _autodrag = () => {
+      const modes = utils.getGlobals().modes
+      modes.autoDrag = !(modes.autoDrag)
+    }
+    const autodrag = new Operation(
+      'Autodrag',
+      _autodrag,
+      [['Control', 'ctrl'], ['Shift', 'shift'], ['u']],
+      utils.ObjType.Default
+    )
+    operations.add(autodrag)
 
     document.addEventListener('keydown', preventZoom)
     document.addEventListener('wheel', preventZoomScroll, { passive: false })
