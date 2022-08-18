@@ -9,10 +9,8 @@ import { BackgroundClickDetector } from '../../../BackgroundClickDetector'
 import { setBud } from '../../Bud/BudUtils'
 import { Hexagon } from '../../../../services/icons'
 
-function ToolElement({ name, onClick, icon, toggle, on, html, fontSize, isToggled=null }) {
-  console.log(isToggled)
-  const [ toggled, setToggled ] = useState(isToggled !== null ? isToggled : false)
-  console.log(toggled)
+function ToolElement({ name, onClick, icon, toggle, on, html, fontSize, getIsToggled=null, setIsToggled=null }) {
+  const [ triggerRerender, rerender ] = useState(false)
   const [ spacerStyle, spacerSpring ] = useSpring(() => ({
     // width: 10,
     config: {
@@ -37,6 +35,7 @@ function ToolElement({ name, onClick, icon, toggle, on, html, fontSize, isToggle
     },
   }))
   useEffect(() => {
+    // console.log(getIsToggled())
     spacerSpring.start({
       // width: on ? 20 : 0
     })
@@ -47,20 +46,20 @@ function ToolElement({ name, onClick, icon, toggle, on, html, fontSize, isToggle
       fontSize: on ? 18 : 3,
       marginLeft: on ? '-3vw' : '0vw',
       opacity: on ? 1 : 0,
-      backgroundColor: toggled ? 'rgb(0, 102, 255)' : 'white',
-      color: toggled ? 'white' : 'rgb(0, 102, 255)',
+      backgroundColor: (getIsToggled ? getIsToggled() : false) ? 'rgb(0, 102, 255)' : 'white',
+      color: (getIsToggled ? getIsToggled() : false) ? 'white' : 'rgb(0, 102, 255)',
     })
-  }, [ on, toggled ])
+  }, [ on, triggerRerender ])
   return (
     <animated.div
       onClick={() => {
         onClick()
         if (toggle) {
-          setToggled(!toggled)
+          rerender(!triggerRerender)
         }
       }}
       style={outerDivStyle}
-      className={on ? (toggled ? styles.toolElementTrue : styles.toolElementFalse) : styles.toolElementOff}
+      className={on ? ((getIsToggled ? getIsToggled() : false) ? styles.toolElementTrue : styles.toolElementFalse) : styles.toolElementOff}
       >
       <animated.div 
         style={spacerStyle}
@@ -87,6 +86,7 @@ const theData = [
     },
     toggle: true,
     getToggleFunc: () => utils.getGlobals().modes.gluing,
+    setToggleFunc: (toggle) => utils.getGlobals().modes.gluing = toggle,
     icon: faLink
   },
   {
@@ -114,10 +114,8 @@ const theData = [
       const modes = utils.getGlobals().modes
       modes.autoDrag = !(modes.autoDrag)
     },
-    getToggleFunc: () => {
-      console.log(utils.getGlobals().modes.autoDrag)
-      return utils.getGlobals().modes.autoDrag
-    },
+    getToggleFunc: () => utils.getGlobals().modes.autoDrag,
+    setToggleFunc: (toggle) => utils.getGlobals().modes.autoDrag = toggle,
     icon: faHandBackFist
   },
 ]
@@ -152,7 +150,8 @@ function ToolDropdown({ on, setOn, leData }) {
           on={on}
           fontSize={elemData.fontSize}
           toggle={elemData.toggle === undefined ? true : elemData.toggle}
-          isToggled={elemData.getToggleFunc ? elemData.getToggleFunc() : undefined}
+          setIsToggled={elemData.setToggleFunc ? elemData.setToggleFunc : undefined}
+          getIsToggled={elemData.getToggleFunc ? elemData.getToggleFunc : undefined}
           html={elemData.html}
           icon={elemData.icon}
           key={index}
