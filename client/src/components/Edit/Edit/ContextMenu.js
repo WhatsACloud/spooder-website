@@ -17,7 +17,6 @@ function KeySetter({ operation, setKeys }) {
   useEffect(() => {
     const _keys = []
     let i = 0
-    console.log(operation.name, operation.keys)
     for (const [ leKey, icon ] of operation.keys) {
       _keys.push(
         <KeybindBtn key={uuid()} num={i} text={icon ? icon : leKey}></KeybindBtn>
@@ -38,7 +37,6 @@ function OpBtn({ on, operation, setContextMenuOn, last }) {
     duration: 1000,
   }))
   useEffect(() => {
-    console.log(on)
     menuSpring.start({
       width: on ? 250 : 100,
       height: on ? 100 : 25,

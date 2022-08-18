@@ -35,7 +35,6 @@ function ToolElement({ name, onClick, icon, toggle, on, html, fontSize, getIsTog
     },
   }))
   useEffect(() => {
-    // console.log(getIsToggled())
     spacerSpring.start({
       // width: on ? 20 : 0
     })
@@ -142,7 +141,6 @@ function ToolDropdown({ on, setOn, leData }) {
     const interval = setInterval(() => {
       const data = leData ? leData : theData
       const elemData = data[index]
-      console.log(elemData.name, elemData.getToggleFunc)
       leElems.splice(index, 1, (
         <ToolElement
           name={elemData.name}

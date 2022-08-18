@@ -254,19 +254,22 @@ function Edit() {
 
     const deleteFunc = () => {
       if (utils.getGlobals().viewing) return
-      const selected = {...utils.getGlobals().selected}
-      const buds = Object.values(selected).filter(e => e.type === utils.ObjType.Bud)
-      const silks = Object.values(selected).filter(e => e.type === utils.ObjType.Silk)
+      const buds = utils.getGlobals().selected.buds
+      const silks = utils.getGlobals().selected.silks
+      console.log(buds, silks)
       const redoFunc = () => {
-        for (const { obj } of buds) {
+        for (const { obj } of Object.values(buds)) {
           obj._delete()
         }
-        for (const { obj } of silks) {
+        for (const { obj } of Object.values(silks)) {
           obj._delete()
         }
       }
       const undoFunc = () => {
-        for (const { obj, type } of Object.values(selected)) {
+        for (const { obj } of Object.values(buds)) {
+          obj.restore()
+        }
+        for (const { obj } of Object.values(silks)) {
           obj.restore()
         }
       }
@@ -450,6 +453,7 @@ function Edit() {
     }
     for (const leObj of tempObjs) {
       for (const attachedTo of leObj.attachedTos) {
+        console.log(leObj.objId, attachedTo)
         new SilkShapes.Silk(utils.getNextSilkId(), leObj, utils.getObjById(attachedTo), true)
       }
     }
