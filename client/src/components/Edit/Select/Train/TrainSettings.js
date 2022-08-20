@@ -8,7 +8,7 @@ const potentialGiven = [
   ["definition", false],
   ["sound", false],
   ["context", false],
-  ["examples", false],
+  ["example", false],
 ]
 const potentialTested = [
   ["word", false],
@@ -34,15 +34,50 @@ function SettingBtn({ arr, setArr, index, children }) {
   )
 }
 
-function SetCanTrain({ viewing, setCanTrain }) {
+const haveDetails = (bud) => {
+  let have = 0
+  for (const [ type ] of potentialGiven) {
+    if (have > 1) return true
+    console.log(bud.json, type)
+    if (bud.json[type].length > 0) have++
+  }
+  if (have > 1) return true
+  return false
+}
+
+const enoughDetails = (bud) => {
+  if (!haveDetails(bud)) return false
+  for (const attachedId of bud.attachedTos) {
+    const attachedTo = utils.getObjById(attachedId)
+    if (haveDetails(attachedTo)) return true
+  }
+  return false
+}
+
+const enoughRandoms = () => {
+  let have = 0
+  for (const bud of Object.values(utils.getObjs())) {
+    if (have > 4) return true
+    if (haveDetails(bud)) have++
+  }
+  if (have > 4) return true
+  return false
+  
+}
+
+function SetCanTrain({ viewing, setCanTrain, openedTrain }) {
   useEffect(() => {
     const object = utils.getObjById(viewing)
+    if (object === false) return
+    if (!enoughRandoms()) setCanTrain(3)
     if (object?.attachedTos?.length === 0) {
-      setCanTrain(false)
+      setCanTrain(1)
+    } else if (!enoughDetails(object)) {
+      setCanTrain(2)
     } else {
-      setCanTrain(true)
+      setCanTrain(0)
     }
-  }, [ viewing ])
+  }, [ viewing, openedTrain ])
   return <></>
 }
 
@@ -72,7 +107,7 @@ function TrainSettings({
  }) {
   const [ renderedGive, setRenderedGive ] = useState()
   const [ renderedTest, setRenderedTest ] = useState()
-  const [ canTrain, setCanTrain ] = useState(false)
+  const [ canTrain, setCanTrain ] = useState(0) // 0 = can train 1 = no connections 2 = insufficient words 3 = insufficient total data
   const [ hovering, setHovering ] = useState(false)
   useEffect(() => {
     const toRenderGive = potentialGiven.map((type, index) => {
@@ -89,7 +124,7 @@ function TrainSettings({
   return (
     <div
       className={openedTrain ? styles.trainSettings : styles.none}>
-      <SetCanTrain setCanTrain={setCanTrain} viewing={viewing}></SetCanTrain>
+      <SetCanTrain setCanTrain={setCanTrain} viewing={viewing} openedTrain={openedTrain}></SetCanTrain>
       <div className={styles.trainSettingsInner}>
         <div className={styles.givenCol}>
           <p>Given</p>
@@ -101,12 +136,12 @@ function TrainSettings({
         </div>
       </div>
       <button
-        className={canTrain ? styles.trainBtn : styles.trainBtnDisabled}
+        className={canTrain === 0 ? styles.trainBtn : styles.trainBtnDisabled}
         onMouseDown={() => {
-          if (canTrain) setStartedTraining(true)
+          if (canTrain === 0) setStartedTraining(true)
         }}
         onMouseEnter={() => {
-          if (!canTrain) setHovering(true)
+          if (!(canTrain === 0)) setHovering(true)
         }}
         onMouseLeave={() => {
           setHovering(false)
@@ -114,9 +149,30 @@ function TrainSettings({
         >
         start
         <Prompt on={hovering}>
-          <p>
-            Woah, don't start training right yet. This bud needs some friends first. Link some buds to it with silks.
-          </p>
+          {
+            (() => {
+              switch (canTrain) {
+                case 1:
+                  return (
+                    <p>
+                      Woah, don't start training right yet. This bud needs some friends first. Link some buds to it with silks.
+                    </p>
+                  )
+                case 2:
+                  return (
+                    <p>
+                      Please fill in some bud details for this bud and at least 1 of its neighbours before starting.
+                    </p>
+                  )
+                case 3:
+                  return (
+                    <p>
+                      Please fill in at least 5 bud details in the entire web (for randoms in multi choice)
+                    </p>
+                  )
+              }
+            })()
+          }
         </Prompt>
       </button>
     </div>

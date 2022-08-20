@@ -253,6 +253,7 @@ function Edit() {
     globals.operations = operations
 
     const deleteFunc = () => {
+      console.log(utils.getGlobals().viewing)
       if (utils.getGlobals().viewing) return
       const buds = utils.getGlobals().selected.buds
       const silks = utils.getGlobals().selected.silks
