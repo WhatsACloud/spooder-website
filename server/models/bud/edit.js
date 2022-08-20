@@ -79,11 +79,18 @@ async function createAttachedTo(attachedToId, fk_bud_id, transaction) {
 }
 
 async function editAttachedTo(budId, attachedTo, transaction) {
-  const _attachedTos = await AttachedTo.findAll({
-    where: {
-      fk_bud_id: budId
-    }
-  })
+  const _attachedTos = [
+    ...await AttachedTo.findAll({
+      where: {
+        fk_bud_id: budId
+      }
+    }),
+    ...await AttachedTo.findAll({
+      where: {
+        attachedToId: budId
+      }
+    }),
+  ]
   for (const _attachedTo of _attachedTos) {
     await _attachedTo.destroy({transaction: transaction})
   }
@@ -109,9 +116,7 @@ async function editBud(spoodawebId, objId, obj, categId, transaction) {
     example: obj.example,
     categ_id: categId,
     link: obj.link,
-  }
-  if (obj.restore) {
-    query.deletedAt = null
+    deletedAt: null,
   }
   await bud.update(query, {transaction: transaction})
   return bud 
