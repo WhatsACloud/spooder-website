@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 
-import * as utils from './utils'
-import * as BudUtils from './Bud/BudUtils'
+import * as utils from '../utils'
+import * as BudUtils from '../Bud/BudUtils'
 
-import styles from './edit.module'
-import api from '../../services/api'
+import styles from './background.module'
+// import api from '../../services/api'
 
 const hexagonLineColor = 'black'
 
@@ -311,29 +311,29 @@ function ImageBackground({ src, canRender }) {
 }
 
 function BackgroundWrapper({ canRender }) {
-  const [ img, setImg ] = useState('')
+  // const [ img, setImg ] = useState('')
   useEffect(async () => {
-    const images = localStorage.getItem('images')
-    try {
-      const name = '73729cbb-1371-45f3-8aa5-357f4ec52ba1.png'
-      const result = await api.post('/images/get/default', { name: name }, { responseType: 'blob' })
+    // const images = localStorage.getItem('images')
+    // try {
+      // const name = '73729cbb-1371-45f3-8aa5-357f4ec52ba1.png'
+      // const result = await api.post('/images/get/default', { name: name }, { responseType: 'blob' })
       // const data = Uint8Array.from([...result.data].map(e => e.charCodeAt()))
       // const blob = new Blob(data, { type: 'image/png'})
       // const blob = new Blob([result.data], { type: 'image/png'})
       // const url = URL.createObjectURL(blob)
-      const reader = new FileReader()
-      reader.onload = () => {
-        setImg(`${reader.result}`)
-      }
-      reader.readAsDataURL(result.data)
-    } catch(err) {
-      console.log(err)
-    }
+    //   const reader = new FileReader()
+    //   reader.onload = () => {
+    //     setImg(`${reader.result}`)
+    //   }
+    //   reader.readAsDataURL(result.data)
+    // } catch(err) {
+    //   console.log(err)
+    // }
   }, [])
   return (
     <>
-      <ImageBackground src={img} canRender={canRender}></ImageBackground>
-      <Background canRender={canRender && (!img)}></Background>
+      {/* <ImageBackground src={img} canRender={canRender}></ImageBackground> */}
+      <Background canRender={canRender}></Background>
     </>
   )
 }

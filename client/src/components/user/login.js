@@ -35,6 +35,16 @@ async function Login(errorStates, changeErrorState, changeServerErrorState, navi
   }
 }
 
+function TriggerRerender({ divSpring, inLogin }) {
+  useEffect(() => {
+    divSpring.start({
+      marginLeft: 0,
+      opacity: 1,
+    })
+  }, [ inLogin ])
+  return <></>
+}
+
 const login = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -49,23 +59,15 @@ const login = () => {
     "Password": false,
     "RepeatPassword": false
   })
-  const [ serverErrorState, changeServerErrorState ] = useState(location.state ? location.state.message || '' : '')
+  const [ serverErrorState, changeServerErrorState ] = useState(location.state ? (location.state.message || '') : '')
   const [ inner, setInner ] = useState()
-  const { opacity } = useSpring({
-    from: { opacity: 0 },
-    to: { opacity: 1 },
-    reset: true,
-    delay: 0,
+  const [ divStyle, divSpring ] = useSpring(() => ({
+    opacity: 0,
+    marginLeft: -100,
     config: config.gentle
-  })
-  const { x } = useSpring({
-    from: { x: -100 },
-    to: { x: 0 },
-    reset: true,
-    delay: 0,
-    config: config.default
-  })
+  }))
   useEffect(() => {
+    console.log(serverErrorState)
     if (inLogin) {
       setInner((
         <>
@@ -96,20 +98,18 @@ const login = () => {
         <Register setInLogin={setInLogin}></Register>
       ))
     }
-  }, [ inLogin ])
+  }, [ inLogin, errorStates ])
   return (
     <>
       <Authorizer navigate={navigate}></Authorizer>
+      <TriggerRerender inLogin={inLogin} divSpring={divSpring}></TriggerRerender>
       <div className={styles.background}></div>
       <div
         className={inLogin ? styles.outerDiv : styles.outerDivRegister}>
         <div className={styles.div}>
           <animated.div
             className={styles.anotherWrapper}
-            style={{
-              opacity: opacity,
-              marginLeft: x
-              }}>
+            style={divStyle}>
             <Title name={inLogin ? "LOGIN" : "REGISTER"}></Title>
             <ToOtherSide text={inLogin ?
               "Don't have an account? Sign up for one here"

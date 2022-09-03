@@ -16,7 +16,6 @@ import { preventZoom, preventZoomScroll } from '../PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from '../Events'
 import * as BudUtils from '../Bud/BudUtils'
 import * as OtherElements from '../OtherElements'
-import { Background } from '../Background'
 import { undo, redo } from '../TaskBar/UndoRedo'
 
 import { ContextMenu } from './ContextMenu'
@@ -255,6 +254,7 @@ function Edit() {
     const deleteFunc = () => {
       console.log(utils.getGlobals().viewing)
       if (utils.getGlobals().viewing) return
+      console.log(utils.getGlobals().viewing)
       const buds = utils.getGlobals().selected.buds
       const silks = utils.getGlobals().selected.silks
       console.log(buds, silks)
@@ -490,7 +490,6 @@ function Edit() {
             rendered={rendered}></DrawCanvas>
         </div>
         <BudView></BudView>
-        <Background canRender={settings.Background.value}></Background>
       </div>
     </>
   )

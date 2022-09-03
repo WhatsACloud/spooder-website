@@ -134,7 +134,11 @@ function BudView({ selectedObj, setSelectedObj }) {
   }, [])
   return (
     <>
-      <BackgroundClickDetector on={viewing} zIndex={7} mousedown={() => setViewing(null)}></BackgroundClickDetector>
+      <BackgroundClickDetector on={viewing} zIndex={7} mousedown={() => {
+        console.log('james moment')
+        setViewing(null)
+        utils.getGlobals().viewing = null
+      }}></BackgroundClickDetector>
       <utils.SetGlobalReactSetter val={viewing} setVal={setViewing} namespace='viewing'></utils.SetGlobalReactSetter>
       <div className={viewing ? styles.budView : styles.none}>
         <TrainWrapper
