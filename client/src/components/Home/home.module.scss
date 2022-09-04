@@ -116,6 +116,7 @@ div.homeTaskBar {
   display: flex;
   flex-direction: column;
   button.createSpoodawebButton {
+    @include std-button;
     width: fit-content;
     align-self: center;
   }

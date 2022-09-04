@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import styles from './InputBox.module'
 
-export default function InputBox({ errorMsg, display, inputType, name }) {
+export default function InputBox({ errorMsg, display, inputType, name, noMargin=false }) {
   const inputElement = useRef(null)
   const [ focused, setFocused ] = useState(false)
   const [ text, setText ] = useState('')
@@ -24,7 +24,10 @@ export default function InputBox({ errorMsg, display, inputType, name }) {
             }
           }}
           id={name}
-          autoCapitalize='none'>
+          autoCapitalize='none'
+          style={{
+            marginLeft: noMargin ? 0 : ''
+          }}>
         </input>
         <span
           className={focused ? styles.placeholderFocus : styles.placeholderUnfocus}

@@ -39,7 +39,10 @@ function SpoodawebPreviews({ navigate, spoodawebPreviews }) {
       spoodawebPreviews?.map(spoodaweb => (
         <button key={spoodaweb.id}
           className={`spoodawebPreview ${styles.spoodawebButton}`}
-          onClick={() => navigate(`/webs/edit/?${queryString.stringify({id: spoodaweb.id})}`)}>
+          onClick={() => {
+            navigate(`/webs/edit/?${queryString.stringify({id: spoodaweb.id})}`)
+            location.reload()
+          }}>
           <div className={styles.image}>
             <img src={spoodaweb.img ? spoodaweb.img : ''}></img>
           </div>
@@ -165,7 +168,7 @@ const Prompt = ({ prompted, titleErrorState, changeTitleErrorState, navigate }) 
   })
   return (
     <div className={prompted ? styles.prompted : styles.unprompted} id='prompt'>
-      <InputBox name="title" display="Enter Title of Spoodaweb" noenter={true} errorMsg={titleErrorState}></InputBox>
+      <InputBox name="title" display="Enter Title of Spoodaweb" noenter={true} errorMsg={titleErrorState} noMargin={true}></InputBox>
       <ErrorBox>
         {serverErrorState}
       </ErrorBox>

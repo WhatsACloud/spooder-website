@@ -23,11 +23,12 @@ function SpoodawebSearchBar({ originalSpoodawebPreviews, setSpoodawebPreviews })
     }
   }, [ searchVal, originalSpoodawebPreviews ])
   return (
-    <SearchBar
-      setSearchVal={setSearchVal}
-      searchVal={searchVal}>
-      {null}
-    </SearchBar>
+    // <SearchBar
+    //   setSearchVal={setSearchVal}
+    //   searchVal={searchVal}>
+    //   {null}
+    // </SearchBar>
+    <></>
   )
 }
 export { SpoodawebSearchBar }
