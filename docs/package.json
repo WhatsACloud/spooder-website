@@ -9,7 +9,7 @@
 	"predeploy": "npm run build",
 	"deploy": "gh-pages -d build",
     "test": "jest --silent=false",
-    "dev": "webpack-dev-server --config webpack.config.js --progress --hot --mode development"
+    "start": "webpack-dev-server --config webpack.config.js --progress --hot --mode development"
   },
   "keywords": [],
   "author": "",
