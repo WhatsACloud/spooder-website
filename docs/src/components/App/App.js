@@ -1,5 +1,5 @@
 import React, { Component, useEffect, useState } from 'react'
-import { Routes, HashRouter as Router, Route } from 'react-router-dom'
+import { Routes, BrowserRouter as Router, Route } from 'react-router-dom'
 
 import Front from '../Front'
 import NavBar from '../navBar'
@@ -10,12 +10,12 @@ import app from './app.module'
 
 function App() {
   return (
-    <Router>
+    <Router basename='https://yumyummyyy.github.io/spooder-website'>
       <Routes>
-        <Route exact path='/spooder-website' element={<Front/>} />
-        <Route exact path='/spooder-website/home' element={<Home/>} />
-        <Route exact path='/spooder-website/login' element={<Login/>} />
-        <Route path='/spooder-website/webs/edit' element={<Edit/>} />
+        <Route exact path='/' element={<Front/>} />
+        <Route exact path='/home' element={<Home/>} />
+        <Route exact path='/login' element={<Login/>} />
+        <Route path='/webs/edit' element={<Edit/>} />
       </Routes>
     </Router>
   );
