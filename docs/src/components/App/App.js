@@ -1,5 +1,5 @@
 import React, { Component, useEffect, useState } from 'react'
-import { Routes, BrowserRouter as Router, Route } from 'react-router-dom'
+import { Routes, HashRouter as Router, Route } from 'react-router-dom'
 
 import Front from '../Front'
 import NavBar from '../navBar'
