@@ -34,7 +34,7 @@ async function signUp(errorStates, changeErrorState, changeServerErrorState, nav
   }
 }
 
-const Register = ({ setInLogin }) => {
+const Register = () => {
   let navigate = useNavigate()
   let [ errorStates, changeErrorState ] = useState({
     "Username": false,
