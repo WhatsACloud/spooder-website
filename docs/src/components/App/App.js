@@ -12,10 +12,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route exact path='/' element={<Front/>} />
-        <Route exact path='/home' element={<Home/>} />
-        <Route exact path='/login' element={<Login/>} />
-        <Route path='/webs/edit' element={<Edit/>} />
+        <Route exact path='/spooder-website' element={<Front/>} />
+        <Route exact path='/spooder-website/home' element={<Home/>} />
+        <Route exact path='/spooder-website/login' element={<Login/>} />
+        <Route path='/spooder-website/webs/edit' element={<Edit/>} />
       </Routes>
     </Router>
   );
