@@ -6,6 +6,7 @@ import InputBox from '../Shared/InputBox'
 import { loginSchema } from './userSchema'
 import { ErrorBox } from '../Shared/errorMsg'
 import Authorizer from '../Shared/Authorizer'
+import NavBar from '../navBar'
 
 import Register from './register'
 
@@ -37,10 +38,14 @@ async function Login(errorStates, changeErrorState, changeServerErrorState, navi
 
 function TriggerRerender({ divSpring, inLogin }) {
   useEffect(() => {
-    divSpring.start({
-      marginLeft: 0,
-      opacity: 1,
-    })
+    console.log(inLogin)
+    setTimeout(() => {
+      divSpring.start({
+        marginLeft: 0,
+        opacity: 1,
+        config: config.gentle,
+      })
+    }, 10)
   }, [ inLogin ])
   return <></>
 }
@@ -64,10 +69,23 @@ const login = () => {
   const [ divStyle, divSpring ] = useSpring(() => ({
     opacity: 0,
     marginLeft: -100,
-    config: config.gentle
   }))
+	const plsLogin = () => Login(
+		errorStates,
+		changeErrorState,
+		changeServerErrorState,
+		navigate,
+		document.getElementById("email").value,
+		document.getElementById("password").value
+	)
+	useEffect(() => {
+		document.addEventListener("keypress", evt => {
+			if (evt.key === "Enter") {
+				plsLogin()
+			}
+		})
+	}, [])
   useEffect(() => {
-    console.log(serverErrorState)
     if (inLogin) {
       setInner((
         <>
@@ -75,19 +93,12 @@ const login = () => {
             <InputBox name="email" display="Email" errorMsg={errorStates.Email}></InputBox>
             <PasswordBox name="password" display="Password" errorMsg={errorStates.Password}></PasswordBox>
             <ErrorBox>
-              {serverErrorState}
+              {(errorStates.Email || errorStates.Password || errorStates.Username || errorStates.RepeatPassword) ? '' : serverErrorState}
             </ErrorBox>
             <button
               type="button"
               className={styles.signUp}
-              onMouseDown={() => Login(
-                errorStates,
-                changeErrorState,
-                changeServerErrorState,
-                navigate,
-                document.getElementById("email").value,
-                document.getElementById("password").value
-                )}>
+              onMouseDown={plsLogin}>
                 Login
             </button>
           </form>
@@ -95,12 +106,13 @@ const login = () => {
       ))
     } else {
       setInner((
-        <Register setInLogin={setInLogin}></Register>
+        <Register></Register>
       ))
     }
-  }, [ inLogin, errorStates ])
+  }, [ inLogin, errorStates, serverErrorState ])
   return (
     <>
+      <NavBar></NavBar>
       <Authorizer navigate={navigate}></Authorizer>
       <TriggerRerender inLogin={inLogin} divSpring={divSpring}></TriggerRerender>
       <div className={styles.background}></div>
@@ -115,6 +127,13 @@ const login = () => {
               "Don't have an account? Sign up for one here"
               : 'Have an account already? Login here'}
               onClick={() => {
+                divSpring.start({
+                  marginLeft: -100,
+                  opacity: 0,
+                  config: {
+                    duration: 0,
+                  },
+                })
                 setInLogin(!inLogin)
               }}></ToOtherSide>
             {inner}

@@ -189,6 +189,51 @@ class BudJson {
   }
 }
 
+/*
+
+           YBBBGGGGPPPP5555YJJJ??JJJ??JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ???^           
+           #@@@@@@@@&&&&&&&BBGGGBBGGPGGBBBBBBBBBGGGGBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBGGGPG7           
+           B@@@@&&&&&&&&&&#GGPGGGP55PPGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGBBBBBBBBBBBBGGPPPPP7           
+           B@@@&&&&&&&&&&&#GGGGP5555PGGGGGGGGGPGGGGGGGGGGGGGGGGGGGGGGGGGBBBBBBGGGPPPPPPG7           
+           B@@@@@@&&&&&&&&BGGP5YY55PGGGGPPPPPPPPPPPPPGGGGGGGGGGGGGGGGGGGGGGGGGGGGP55PPPG?           
+           B@@@@@@@&@@@@@&GP5YYY5PPGGGGGPPPPPPPPPPPPPPPPPPPPGPPPPGGGGGGGGGGGGGGGPPP5PPPP7           
+           B@@@@@@@@@&&&@&P5YY5PPPGGGGGGGP555PPPPPPPPPPPPPPPPPPPPPPPGGGGGGGGGGGPPPP55PPP7           
+           G&&@@@@@@&&&&&G55PPPGGGGGGGGGGGP55555PPPPPPPPPP555555555PPPPGGGGGPPPPP555555P7           
+           G&&&@@@@@&&&&GPPPPPPPGGGGGBBBGGG555555PPPPPPPPPPPP555YYYYY55PPPPPPP55555555PP7           
+           G&&&&&@&&&&&#PPPGGGGGB###&&&BGGGBG5555PPPPPPPPPPPPPP555YYYY5555555555555555PP7           
+           G&&&&&&&&&&&&#####&&&&@@@&&BGGGGB&#GPPPPPPPPGPPPPPPPPPP5555555555YYYY55555PPP7           
+           G&&&&&&&&&&&@@@@@@@@@@&&#BGGGGGGGB&&&#BGGGGGGPPPPPPPPPPPPP5555YYYYYYY555PPPPP!           
+           G&&&&&&&&&@&&@@@&&##BBBGGGGGGGGGGGPG#&&&&############BGGGPPP5YYYYYJYY55PPPP557           
+           G&&&&&&&&&&&&&@@&GGGGGGGGGGGGGGGGGGGGGB&&@@@@@@@@@@@&&&&#GGPP5YJJJJY55PPPP55BY           
+           G&&&&&&&&&&&&&&&&#BGGGGGGGGGGGGGGGGGGGGGGBB#&&&@@@@@@@&&&&BGP5YJJJJ5PPGGP5G#&Y           
+           G&&&&&&&&&&&&&&&&&&&#BGGGBBBGGGGGGGGGGGGGGGGGGGBBB#&&@@@@&&BG5YJJJYPGGPPG#&&@P           
+           G&&&&&&&&&&&&&&&&&&@@&##&&&&&#BBGPGBBGBBBGBGGGGGGGGGGB#&&&&&BPYJJY5PGB##&&@@@5           
+           G&&&&&&&&&&&&&&&&@@@@@@@P5#@@@@#GPGBBBBBBBBB#BBBBBGGGGGGGB#&BPYJY5GB&@@@@@@&&5           
+           G@&&&&&&&&&&&@@@@@@@@@@5!J#@@&#@#PGBBBBB#&&&&@@&&##BGGGGGGGBBPYJYPG&&BP#@&&&&5           
+           G@&&&&&&&&&@@@@@@@@@@@@J7P@@@&&@#PGBBB##&#GG#@@@@@@&#BBBGBBBGYJYG##BBB&@@&&&&5           
+           G@&&&&&@&@@@@@@@@@@@@&B#GP#&&@@@GPGBBB#&BJ?P&@&#&@@@@&#BBBBG5JYB#BB#&@@@@@@&@P           
+           B@@@@@@@@@@@@@@@@@@@@#5G###&&&#G5GBBBB#&P?Y&@@&B@@@B#@#GPPP5JY####&@@@@@@@@&@P           
+           B@@@@@@@@@@@@@@@@@@@@#5PGBBBBG55PGBBBB#&BYYB&&@@@@B5G#PYJJ??JPB#&@@@@@@@@@@@@P           
+           B@@@@@@@@&#&@@@@@@@@@&PPPPP55Y5PBBBBB###&#BGB#&&&#BBB5J??777G&@@@@@@@@@@@@@@@G           
+           B@@@@@@@@@@&&&&&&&&&&&BPGP55Y5GBBBBBBBB##########BBG5YJ??7Y#@@@@@@@@@@@@@@@@@G           
+           B@@@@@@@@@@@@@@&&&&&&@#PP5YYPGGBBBBBGGBBBBBBBBBBGGPP5YYYJ5&@@@@@@@@@@@@@@@@@@G           
+           B@@@@@@@@@@@@@@@@&@@@@#55YYPGGGGGGGGGGBGGGGGGGGGGGGGGPP5P&&&#&&&@@@@@@@@@@@@@G           
+           #@@@@@@@@@@@@@@@@&&&&&5YY55P5555555PGGGGGGGBBBBBBBBGGP55G&@##&&&&&@@@&&G&@@@@G           
+           #@@@@@@@@@@@@@@@@&&&&PYYY55YJJ???JY5PPPGBBBBBBBBBBGGP55&BPB######&&&&@#5@@@@@G           
+           #@@@@@@@@@@@@@@@@&&&BYYYYYJ?7777?JYYY5PBBBBBBBBBGGGPY5&@&B#######&&&@&#&@@@@@P           
+           #@@@@@@@@@@@@@@@@@&GYJJJ?777!!!7?JYY5GBBBBBBBBBGGP5YY&                                   
+           #@@@@@@@@@@@@@@@@&5YJJ??77!777?Y5PPGGGBBBBBBBGGP55Y5&                                    
+           #@@@@@@@@@@@@@@@@@BPP5J????JY5PP5YYYYY5PGBBBBGP5YY5&                                     
+           #@@@@@@@@@@@@@@@@@&#BBGPPPPGGP5YJJJ???JYPGBBGP55YP                                       
+           #@@@@@@@@@@@@@&@@@@@@&&BG#####BGP555PP5JYPBBGP55B                                        
+           #@@@@@@@@@@@@@@@@@@@@@@BB&@@&&#BBGP55PGBGGBBGPP#                                         
+           YGGGGGGPPPPPPPPPPPPPPP5?J5PPP5YJJJJJ?777?JJ?77Y5555PPPPGGPPPPGGGGGGGGGGGGGGGB?
+
+No encapsulation?
+
+*/
+
+
 class Bud {
   konvaObj = null
   get shapeObj() {
@@ -208,6 +253,43 @@ class Bud {
   get categColor() {
     return utils.getGlobals().categories.getById(this.json?.categId)?.color
   }
+
+	// given a set instead
+	hasAtLeastNeighboursRecurse = (trackedSet, neighbourAmt) => {
+		const initialExplored = new Set(trackedSet)
+		for (const attachedTo of this.attachedTos) {
+			trackedSet.add(attachedTo)
+		}
+		if (trackedSet.length >= neighbourAmt) return true
+		for (const attachedTo of this.attachedTos) {
+			if (attachedTo in initialExplored) continue
+			if (utils.getObjById(attachedTo).hasAtLeastNeighboursRecurse(trackedSet, neighbourAmt)) return true
+		}
+		return false
+	}
+
+	hasAtLeastNeighbours = (neighbourAmt) => {
+		if (this.attachedTos.length === 0) return false
+		const tracked = new Set()
+		tracked.add(this.objId)
+		const toExplore = [this.objId]
+		const explored = new Set()
+		while (toExplore.length > 0) {
+			const current = toExplore.shift()
+			const currentObj = utils.getObjById(current)
+			//console.log(current, currentObj.attachedTos, [...explored], [...tracked])
+			for (const attachedTo of currentObj.attachedTos) {
+				tracked.add(attachedTo)
+				//console.log(current, attachedTo, [...explored], [...toExplore], explored.has(attachedTo), toExplore.includes(attachedTo))
+				if (!(explored.has(attachedTo)) && !(toExplore.includes(attachedTo))) {
+					toExplore.push(attachedTo)
+				}
+			}
+			explored.add(current)
+			if (tracked.size >= neighbourAmt) return true
+		}
+		return false
+	}
 
   mouseFollower = (e) => {
     const { x, y } = utils.getCanvasMousePos(e.clientX, e.clientY)

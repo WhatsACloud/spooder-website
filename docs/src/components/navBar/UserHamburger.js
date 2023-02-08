@@ -16,17 +16,11 @@ function UserHamburger({ username }) {
     <>
       <BackgroundClickDetector
         on={opened}
+				mousedown={() => setOpened(false)}
         zIndex={1000}></BackgroundClickDetector>
       <button
         className={username ? styles.normal : styles.nil}
-        onClick={() => {
-          setOpened(true)
-          const func = () => {
-            setOpened(false)
-            document.getElementById('backClickDetect').removeEventListener("mousedown", func)
-          }
-          document.getElementById('backClickDetect').addEventListener("mousedown", func)
-        }}>
+        onClick={() => setOpened(true)}>
         <FontAwesomeIcon icon={faUser} className={styles.accountIcon}></FontAwesomeIcon>
       </button>
       <div className={opened ? styles.hamburgerMenu : styles.nil}>

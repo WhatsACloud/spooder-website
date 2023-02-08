@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { registerSchema } from './userSchema'
@@ -34,7 +34,7 @@ async function signUp(errorStates, changeErrorState, changeServerErrorState, nav
   }
 }
 
-const Register = ({ setInLogin }) => {
+const Register = () => {
   let navigate = useNavigate()
   let [ errorStates, changeErrorState ] = useState({
     "Username": false,
@@ -43,6 +43,24 @@ const Register = ({ setInLogin }) => {
     "RepeatPassword": false
   })
   let [ serverErrorState, changeServerErrorState ] = useState('')
+
+	const plsSignUp = () => signUp(
+		errorStates,
+		changeErrorState,
+		changeServerErrorState,
+		navigate,
+		document.getElementById("username").value,
+		document.getElementById("email").value, 
+		document.getElementById("password").value,
+	)
+
+	useEffect(() => {
+		document.addEventListener("keypress", evt => {
+			if (evt.key === "Enter") {
+				plsSignUp()
+			}
+		})
+	}, [])
 
   return (
     <>
@@ -56,15 +74,7 @@ const Register = ({ setInLogin }) => {
         <button
           type="button"
           className={styles.signUp}
-          onClick={() => signUp(
-            errorStates,
-            changeErrorState,
-            changeServerErrorState,
-            navigate,
-            document.getElementById("username").value,
-            document.getElementById("email").value, 
-            document.getElementById("password").value,
-            )}>
+          onClick={plsSignUp}>
             Sign Up
         </button>
       </form>

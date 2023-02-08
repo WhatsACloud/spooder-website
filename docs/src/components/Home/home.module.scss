@@ -115,10 +115,15 @@ div.homeTaskBar {
   font-family: 'Quicksand', sans-serif;
   display: flex;
   flex-direction: column;
+	input {
+		background-color: lightblue;
+		border-radius: 5px;
+	}
   button.createSpoodawebButton {
     @include std-button;
     width: fit-content;
     align-self: center;
+		box-shadow: 0 5px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
   }
 }
 

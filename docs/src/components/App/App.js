@@ -10,7 +10,7 @@ import app from './app.module'
 
 function App() {
   return (
-    <Router basename='https://yumyummyyy.github.io/spooder-website'>
+    <Router>
       <Routes>
         <Route exact path='/' element={<Front/>} />
         <Route exact path='/home' element={<Home/>} />

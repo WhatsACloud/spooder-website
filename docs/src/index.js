@@ -3,8 +3,12 @@ import ReactDOM from 'react-dom';
 import App from './components/App';
 import "core-js/stable";
 import "regenerator-runtime/runtime";
+import { Provider } from 'react-redux';
+import store from './store'
 
 ReactDOM.render(
-  <App />,
+  <Provider store={store}>
+    <App />
+  </Provider>,
   document.getElementById('root')
 );

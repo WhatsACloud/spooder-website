@@ -85,7 +85,6 @@ class BudJson {
       if (var1 !== var2) check = true
     }
     if (check) {
-      console.log('woah! It changed!')
       changed = true
     }
   }

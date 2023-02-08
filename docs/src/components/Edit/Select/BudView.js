@@ -9,7 +9,6 @@ import { DisplayCategories } from '../TaskBar/categories'
 
 function InputIniter({ obj, setText, attr }) {
   useEffect(() => {
-    console.log(obj?.json?.json, obj?.json?.json[attr], attr)
     if (obj) setText(obj.json[attr])
   }, [ obj ])
   return <></>
@@ -104,9 +103,6 @@ function Viewer({ viewing, startedTraining }) {
     // console.log(object)
     if (utils.getGlobals().recentlyViewed && object) {
       utils.addToRecentlyViewed(object)
-    }
-    if (object) {
-      console.log(object.json.json, object.tsts, object.json.link)
     }
     setObj(object)
   }, [ viewing ])

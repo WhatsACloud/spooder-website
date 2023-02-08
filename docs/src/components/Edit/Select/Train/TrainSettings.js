@@ -38,7 +38,6 @@ const haveDetails = (bud) => {
   let have = 0
   for (const [ type ] of potentialGiven) {
     if (have > 1) return true
-    console.log(bud.json, type)
     if (bud.json[type].length > 0) have++
   }
   if (have > 1) return true
@@ -68,9 +67,12 @@ const enoughRandoms = () => {
 function SetCanTrain({ viewing, setCanTrain, openedTrain }) {
   useEffect(() => {
     const object = utils.getObjById(viewing)
+		if (object) {
+			console.log(object.hasAtLeastNeighbours(5))
+		}
     if (object === false) return
     if (!enoughRandoms()) setCanTrain(3)
-    if (object?.attachedTos?.length === 0) {
+    if (!object.hasAtLeastNeighbours(5)) {
       setCanTrain(1)
     } else if (!enoughDetails(object)) {
       setCanTrain(2)
@@ -155,7 +157,7 @@ function TrainSettings({
                 case 1:
                   return (
                     <p>
-                      Woah, don't start training right yet. This bud needs some friends first. Link some buds to it with silks.
+                      Woah, don't start training right yet. This bud needs some friends first. Link it to a network of at least <b>5 buds</b> first by connecting them with silks.
                     </p>
                   )
                 case 2:

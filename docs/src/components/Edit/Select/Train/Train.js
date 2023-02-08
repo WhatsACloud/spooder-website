@@ -455,7 +455,9 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
       setGlobalTsts(globalTsts+1)
       const viewingJson = utils.getObjById(viewing).json
       if (isMultiChoice) {
+        console.log(testedCateg, leTestedCateg, multiChoiceAmt, viewingJson)
         let [ multiChoiceArr ] = getRandomOfCateg(testedCateg || leTestedCateg, multiChoiceAmt, [ viewingJson[testedCateg || leTestedCateg] ])
+        console.log(multiChoiceArr)
         // known issue with example cause there isnt enough of em
         const renderedMultiChoiceArr = []
         const animatedMultiChoiceArr = []
