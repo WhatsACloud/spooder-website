@@ -131,7 +131,6 @@ function BudView({ selectedObj, setSelectedObj }) {
   return (
     <>
       <BackgroundClickDetector on={viewing} zIndex={7} mousedown={() => {
-        console.log('james moment')
         setViewing(null)
         utils.getGlobals().viewing = null
       }}></BackgroundClickDetector>

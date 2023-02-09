@@ -77,17 +77,17 @@ function ToolElement({ name, onClick, icon, toggle, on, html, fontSize, getIsTog
 }
 
 const theData = [
-  {
-    name: 'Attach',
-    onClick: () => {
-      const modes = utils.getGlobals().modes
-      modes.gluing = !(modes.gluing)
-    },
-    toggle: true,
-    getToggleFunc: () => utils.getGlobals().modes.gluing,
-    setToggleFunc: (toggle) => utils.getGlobals().modes.gluing = toggle,
-    icon: faLink
-  },
+  //{
+    //name: 'Attach',
+    //onClick: () => {
+      //const modes = utils.getGlobals().modes
+      //modes.gluing = !(modes.gluing)
+    //},
+    //toggle: true,
+    //getToggleFunc: () => utils.getGlobals().modes.gluing,
+    //setToggleFunc: (toggle) => utils.getGlobals().modes.gluing = toggle,
+    //icon: faLink
+  //},
   {
     name: 'Link',
     onClick: () => {
@@ -115,7 +115,8 @@ const theData = [
     },
     getToggleFunc: () => utils.getGlobals().modes.autoDrag,
     setToggleFunc: (toggle) => utils.getGlobals().modes.autoDrag = toggle,
-    icon: faHandBackFist
+    icon: faHandBackFist,
+		fontSize: 10,
   },
 ]
 

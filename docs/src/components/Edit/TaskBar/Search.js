@@ -93,7 +93,7 @@ function Filter({ filters, setFilters, on }) {
   const [ showFilter, setShowFilter ] = useState(false)
   return (
     <div className={on ? styles.filterOn : styles.filterOff}>
-      <BackgroundClickDetector on={showFilter} zIndex={7} mousedown={() => setShowFilter(false)}></BackgroundClickDetector>
+      <BackgroundClickDetector on={showFilter} zIndex={6} mousedown={() => setShowFilter(false)}></BackgroundClickDetector>
       <div className={styles.divFilterBtn} onClick={() => setShowFilter(true)}>
         <FontAwesomeIcon icon={faFilter}></FontAwesomeIcon>
         <p>filter</p>
@@ -199,7 +199,7 @@ function SearchBar({ focused, setFocused }) {
           </div>
         <Filter filters={filters} setFilters={setFilters} on={focused}></Filter>
       </div>
-      <BackgroundClickDetector on={focused} mousedown={() => setFocused(false)} zIndex={8}></BackgroundClickDetector>
+      <BackgroundClickDetector on={focused} mousedown={() => setFocused(false)} zIndex={7}></BackgroundClickDetector>
     </div>
   )
 }

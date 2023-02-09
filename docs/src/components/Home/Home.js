@@ -217,7 +217,7 @@ const Home = () => { // to fix constant rerenders
       <NavBar></NavBar>
       <Authorizer requireAuth={true} navigate={navigate}></Authorizer>
       <div className={prompted ? styles.blankScreen : styles.none}></div>
-      <ContextMenu x={anchorPoint.x} y={anchorPoint.y} show={show}></ContextMenu>
+	  {/*<ContextMenu x={anchorPoint.x} y={anchorPoint.y} show={show}></ContextMenu>*/}
       <GetSpoodawebPreviews
         setOriginalSpoodawebPreviews={setOriginalSpoodawebPreviews}></GetSpoodawebPreviews>
       <div className={styles.homeTaskBar}>

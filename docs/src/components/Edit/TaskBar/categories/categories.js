@@ -125,7 +125,7 @@ function AddCategoryBtn({ on, display, setDisplay, selected, setSelected, setSel
     <>
       <div className={styles.addCategoryBtn} onClick={() => {
         const category = new classCategory.Category('')
-        utils.getGlobals().categories.add(category)
+        utils.getGlobals().categories.addWithoutCategId(category)
         const newElement = (
           <Category
             on={on}

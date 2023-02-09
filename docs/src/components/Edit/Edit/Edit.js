@@ -12,6 +12,8 @@ import Authorizer from '../../Shared/Authorizer'
 import styles from '../edit.module'
 import { Operation, Operations } from './Operations'
 
+import { TutorialWrapper } from '../Hints'
+
 import { preventZoom, preventZoomScroll } from '../PreventDefault'
 import { mouseDown, mouseUp, mouseMove } from '../Events'
 import * as BudUtils from '../Bud/BudUtils'
@@ -320,17 +322,17 @@ function Edit() {
     )
     operations.add(newBud)
 
-    const _attach = () => {
-      const modes = utils.getGlobals().modes
-      modes.gluing = !(modes.gluing)
-    }
-    const attach = new Operation(
-      'Attach to bud',
-      _attach,
-      [['Control', 'ctrl'], ['v']],
-      utils.ObjType.Bud
-    )
-    operations.add(attach)
+    //const _attach = () => {
+      //const modes = utils.getGlobals().modes
+      //modes.gluing = !(modes.gluing)
+    //}
+    //const attach = new Operation(
+      //'Attach to bud',
+      //_attach,
+      //[['Control', 'ctrl'], ['v']],
+      //utils.ObjType.Bud
+    //)
+    //operations.add(attach)
 
     const link = new Operation(
       'Link',
@@ -373,11 +375,11 @@ function Edit() {
       scrollRight(-diff.x * multiplier)
       utils.getGlobals().lastMousePos = pos
     }
-    document.getElementById('divCanvas').addEventListener('contextmenu', (e) => {
+		document.getElementById('divCanvas').addEventListener('contextmenu', e => {
       e.preventDefault()
       setContextMenuOn(true)
       setContextMenuPos({x: e.clientX, y: e.clientY})
-    })
+		})
     const stopDrag = () => {
       const globals = utils.getGlobals()
       utils.setCursor("default")
@@ -386,7 +388,7 @@ function Edit() {
       document.removeEventListener('mousemove', mouseMoveFunc)
     }
     utils.getStage().on('mousedown', (e) => {
-      if (e.evt.button === 2) {
+      if (e.evt.button === 1) {
         utils.setCursor("grab")
         document.addEventListener('mousemove', mouseMoveFunc)
         const func = () => {
@@ -440,6 +442,10 @@ function Edit() {
     globals.nextObjId = objs.data.nextObjId
     const spoodawebData = objs.data.spoodawebData
     const tempObjs = []
+    for (const [ categId, categ ] of Object.entries(objs.data.categories)) {
+      globals.categories.addWithCategId(new Category(categ.name, categ.color), categId)
+    }
+    globals.categIds = Object.keys(globals.categories.categories)
     for (const [ objId, obj ] of Object.entries(spoodawebData)) {
       const bud = new BudShapes.Bud(obj.objId)
       bud.init(obj.position, objId)
@@ -458,10 +464,6 @@ function Edit() {
         new SilkShapes.Silk(utils.getNextSilkId(), leObj, utils.getObjById(attachedTo), true)
       }
     }
-    for (const [ categId, categ ] of Object.entries(objs.data.categories)) {
-      globals.categories.add(new Category(categ.name, categ.color))
-    }
-    globals.categIds = Object.keys(globals.categories.categories)
   }, [])
   return (
     <>
@@ -469,6 +471,7 @@ function Edit() {
       <SetGlobal></SetGlobal>
       <utils.SetGlobalReactSetter val={renderTrain} setVal={setRenderTrain} namespace='renderTrain'></utils.SetGlobalReactSetter>
       <MouseMoveDetector></MouseMoveDetector>
+			<TutorialWrapper/>
       <Settings
         inSettings={inSettings}
         setInSettings={setInSettings}

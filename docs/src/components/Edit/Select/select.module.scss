@@ -302,7 +302,6 @@ div.trainSettings {
 }
 
 div.trainWrapper {
-  z-index: 6;
   padding-bottom: 5px;
   @mixin trainSettingsBtn {
     @include std-button;

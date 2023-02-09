@@ -45,14 +45,20 @@ class Categories {
   get isChanged() {
     return this._isChanged
   }
-  add = (category) => {
-    this.categories[this.nextCategId] = category
-    this.categIds.unshift(this.nextCategId)
-    category._categId = this.nextCategId
-    this.nextCategId += 1
+  // adds categories WITH categId set
+  addWithCategId = (category, categId) => {
+    this.categories[categId] = category
+    category._categId = categId
+    this.categIds.unshift(categId)
     this._isChanged = true
+    this.nextCategId = Math.max(this.nextCategId, category._categId+1)
   }
-  getById = (id) => id !== null ? this.categories[id] : this.categories[0]
+  addWithoutCategId = (category) => {
+    this.addWithCategId(category, this.nextCategId)
+  }
+  getById = (id) => {
+		return id !== null ? this.categories[id] : this.categories[0]
+	}
   toJSON = () => {
     const categs = {}
     for (const [ categId, category ] of Object.entries(this.categories)) {
