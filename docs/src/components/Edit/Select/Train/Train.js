@@ -426,7 +426,7 @@ function CorrectAnswer({
 
 const multiChoiceAmt = 4
 
-function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
+function Train({ startedTraining, viewing, setViewing, setStartedTraining, toGive, toTest }) {
   const [ multiChoices, setMultiChoices ] = useState()
   const [ animatedMultiChoices, setAnimatedMultiChoices ] = useState()
   const [ answer, setAnswer ] = useState(null)
@@ -440,10 +440,25 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
   const [ globalTsts, setGlobalTsts ] = useState(0) // tsts: time since test started
 
   const [ isMultiChoice, setIsMultiChoice ] = useState(true)
+  const reset = () => {
+    setMultiChoices()
+    setAnimatedMultiChoices()
+    setAnswer(null)
+    setShowCorrectAnswer(false)
+    setTestedCateg()
+    setGivenCateg()
+    setGlobalTsts(0)
+    setIsMultiChoice(true)
+  }
   const triggerRerender = () => {
     setAnswer(null)
     plsRerender(!rerender)
   }
+  // useEffect(() => {
+  //   if (!startedTraining) {
+  //     reset()
+  //   }
+  // }, [ startedTraining ])
   useEffect(() => {
     if (startedTraining && !showCorrectAnswer) {
       let leGivenCateg, leTestedCateg
@@ -511,6 +526,12 @@ function Train({ startedTraining, viewing, setViewing, setStartedTraining }) {
           }`
         }}
         className={startedTraining ? styles.train : styles.none}>
+        <div
+          className={styles.exitButton}
+          onClick={() => setStartedTraining(false)}
+          >
+          exit
+        </div>
         <Given text={viewing ? utils.getObjById(viewing).json[givenCateg] : ''} type={givenCateg}></Given>
         <FontAwesomeIcon
           style={{
@@ -560,16 +581,21 @@ function TrainWrapper({ selectedObj, setSelectedObj, setStartedTraining, started
   const [ answered, setAnswered ] = useState(false)
   const [ toGive, setToGive ] = useState(potentialGiven)
   const [ toTest, setToTest ] = useState(potentialTested)
-  useEffect(() => {
-  }, [ answered, startedTraining, currentObj ])
   return (
     <>
-      <Train
-        startedTraining={startedTraining}
-        setStartedTraining={setStartedTraining}
-        viewing={viewing}
-        setViewing={setViewing}
-        ></Train>
+      {
+        startedTraining ?
+          <Train
+            toGive={toGive}
+            toTest={toTest}
+            startedTraining={startedTraining}
+            setStartedTraining={setStartedTraining}
+            viewing={viewing}
+            setViewing={setViewing}
+            ></Train>
+          :
+          null
+      }
       <div className={startedTraining ? styles.none : styles.trainWrapper}>
         <BackgroundClickDetector
           zIndex={5}

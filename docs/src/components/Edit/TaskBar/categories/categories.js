@@ -140,6 +140,7 @@ function AddCategoryBtn({ on, display, setDisplay, selected, setSelected, setSel
         )
         const newDisplay = [newElement, ...display]
         setDisplay(newDisplay)
+        utils.sendSaveEvt()
       }}>
         <FontAwesomeIcon icon={faPlus}></FontAwesomeIcon>
         <p>Add category</p>
@@ -235,6 +236,11 @@ function DisplayCategories({ on }) {
     })
     if (!on) setFirstOn(true)
   }, [ on, selected, toUpdate ])
+
+  useEffect(() => {
+    const categ = utils.getGlobals().categories?.getById(selected)
+    console.log("selected", categ)
+  }, [ selected ])
   return (
     <>
       <StartCategorySpring

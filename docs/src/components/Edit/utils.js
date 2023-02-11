@@ -169,6 +169,7 @@ const sendSaveEvt = () => {
     document.dispatchEvent(evt)
   }, 500)
 }
+export { sendSaveEvt }
 
 const addToNewObjs = (objId) => {
   if (objId === null) throw new Error

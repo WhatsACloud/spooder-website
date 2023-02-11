@@ -1,3 +1,5 @@
+import * as utils from '../utils'
+
 const generateRandomColor = () => {
   const num = Math.floor(Math.random() * 16777216) // max hex number
   let hex = num.toString(16)
@@ -13,8 +15,18 @@ const generateRandomColor = () => {
 class Category {
   static colorErrMsg = (color) => new Error(`The color ${color} is invalid, expected hex color (e.g. #100f1e)`)
   type = 'category'
-  name = ''
-  color = ''
+  _name = ''
+  _color = ''
+  get name() { return this._name }
+  set name(val) {
+    this._name = val
+    utils.sendSaveEvt()
+  }
+  get color() { return this._color }
+  set color(val) {
+    this._color = val
+    utils.sendSaveEvt()
+  }
   _categId = null
   get categId() { return this._categId }
   toJSON = () => {

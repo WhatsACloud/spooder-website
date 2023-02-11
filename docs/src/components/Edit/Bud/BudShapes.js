@@ -229,7 +229,7 @@ class BudJson {
            #@@@@@@@@@@@@@@@@@@@@@@BB&@@&&#BBGP55PGBGGBBGPP#                                         
            YGGGGGGPPPPPPPPPPPPPPP5?J5PPP5YJJJJJ?777?JJ?77Y5555PPPPGGPPPPGGGGGGGGGGGGGGGB?
 
-No encapsulation?
+No separating code into multiple files?
 
 */
 

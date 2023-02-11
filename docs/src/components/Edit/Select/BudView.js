@@ -37,21 +37,22 @@ function InputBox({ obj, attr, styleName, display=true, textarea=false }) {
   )
 }
 
-function UpdateCategory({ obj, setCateg }) {
+function UpdateCategory({ obj, setCategName }) {
   useEffect(() => {
+    console.log(obj)
     if (obj) {
       const leCateg = utils.getGlobals().categories.getById(obj.json.categId)
-      setCateg(leCateg)
+      setCategName(leCateg?.name)
     }
   }, [ obj ])
   return <></>
 }
 
 function CategoryBox({ obj, viewing }) {
-  const [ categ, setCateg ] = useState(null)
+  // const [ categ, setCateg ] = useState(null)
   const [ dropdown, setDropdown ] = useState(false)
   const [ name, setName ] = useState('')
-  useEffect(() => {
+  // useEffect(() => {
     // const timeout = setTimeout(() => {
     //   if (!obj) return
     //   for (const [ categId, category ] of Object.entries(utils.getGlobals().categories.categories)) {
@@ -65,11 +66,12 @@ function CategoryBox({ obj, viewing }) {
     // return () => {
     //   clearTimeout(timeout)
     // }
-    setName(categ?.name)
-  }, [ categ ])
+    // console.log(categ)
+    // setName(categ?.name)
+  // }, [ categ ])
   return (
     <>
-      <UpdateCategory obj={obj} setCateg={setCateg}></UpdateCategory>
+      <UpdateCategory obj={obj} setCategName={setName}></UpdateCategory>
       <div
         className={styles.category}
         onClick={() => {
@@ -85,7 +87,8 @@ function CategoryBox({ obj, viewing }) {
           setDropdown(false)
           const selectedCateg = utils.getGlobals().selectedCategory
           obj.json.categId = selectedCateg
-          setCateg(utils.getGlobals().categories.getById(selectedCateg))
+          // setCateg(utils.getGlobals().categories.getById(selectedCateg))
+          setName(utils.getGlobals().categories.getById(selectedCateg).name)
         }}></BackgroundClickDetector>
       </div>
       <div className={styles.categs}>
@@ -128,14 +131,23 @@ function BudView({ selectedObj, setSelectedObj }) {
       setViewing(null)
     })
   }, [])
+  const exit = () => {
+    setViewing(null)
+    utils.getGlobals().viewing = null
+  }
   return (
     <>
-      <BackgroundClickDetector on={viewing} zIndex={7} mousedown={() => {
-        setViewing(null)
-        utils.getGlobals().viewing = null
-      }}></BackgroundClickDetector>
+      {/* <BackgroundClickDetector on={viewing} zIndex={7} mousedown={() => {
+        exit()
+      }}></BackgroundClickDetector> */}
       <utils.SetGlobalReactSetter val={viewing} setVal={setViewing} namespace='viewing'></utils.SetGlobalReactSetter>
       <div className={viewing ? styles.budView : styles.none}>
+        <div
+          className={styles.exitButton}
+          onClick={() => exit()}
+          >
+          exit
+        </div>
         <TrainWrapper
           selectedObj={selectedObj}
           setSelectedObj={setSelectedObj}
