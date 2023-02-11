@@ -609,18 +609,23 @@ function TrainWrapper({ selectedObj, setSelectedObj, setStartedTraining, started
           }}>
           train
         </button>
-        <TrainSettings
-          openedTrain={openedTrain}
-          setStartedTraining={setStartedTraining}
-          setCurrentObj={setCurrentObj}
-          setSelectedObj={setSelectedObj}
-          selectedObj={selectedObj}
-          toGive={toGive}
-          setToGive={setToGive}
-          toTest={toTest}
-          setToTest={setToTest}
-          viewing={viewing}
-        ></TrainSettings>
+        {
+          openedTrain ?
+            <TrainSettings
+              openedTrain={openedTrain}
+              setStartedTraining={setStartedTraining}
+              setCurrentObj={setCurrentObj}
+              setSelectedObj={setSelectedObj}
+              selectedObj={selectedObj}
+              toGive={toGive}
+              setToGive={setToGive}
+              toTest={toTest}
+              setToTest={setToTest}
+              viewing={viewing}
+            ></TrainSettings>
+            :
+            <></>
+        }
       </div>
     </>
   )

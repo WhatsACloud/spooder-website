@@ -18,30 +18,33 @@ const potentialTested = [
 ]
 export { potentialGiven, potentialTested }
 
-function SettingBtn({ arr, setArr, index, openedTrain, viewing, children }) {
+function SettingBtn({ arr, setArr, index, openedTrain, viewing, rendered, children }) {
   const [ clicked, setClicked ] = useState(arr[index][1])
   const [ forceDisable, setForceDisable ] = useState(false)
   const [ categCount, setCategCount ] = useState(null)
   const [ hover, setHover ] = useState(false)
   const disable = () => {
     let newArr = [...arr]
-    newArr[index][1] = false
+    newArr[index][1] = true
     setArr(newArr)
-    setClicked(false)
   }
   const enable = () => {
     let newArr = [...arr]
-    newArr[index][1] = true
+    newArr[index][1] = false
     setArr(newArr)
-    setClicked(true)
   }
   useEffect(() => {
-    if (viewing) {
+    if (viewing && !rendered) {
       const count = funcs.networkHasHowManyOfCateg(5, children[0], viewing)
       const isDisabled = count < 5
-      setForceDisable(isDisabled ? 1 : 0)
-      setClicked(isDisabled)
       setCategCount(count)
+      if (isDisabled) {
+        setForceDisable(1)
+        disable()
+        return
+      }
+      setForceDisable(0)
+      enable()
     }
   }, [ openedTrain ])
   const getMsg = () => {
@@ -60,7 +63,7 @@ function SettingBtn({ arr, setArr, index, openedTrain, viewing, children }) {
         className={clicked ? styles.trainSettingsBtnClose : styles.trainSettingsBtnOpen}
         onClick={() => {
           if (forceDisable) return
-          if (clicked) {
+          if (!clicked) {
             disable()
             return
           }
@@ -69,7 +72,7 @@ function SettingBtn({ arr, setArr, index, openedTrain, viewing, children }) {
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
       >{children}</button>
-      (
+      {
         forceDisable ?
         <Prompt on={hover}>
           {getMsg()}
@@ -77,7 +80,7 @@ function SettingBtn({ arr, setArr, index, openedTrain, viewing, children }) {
         :
         <>
         </>
-      )
+      }
     </>
   )
 }
@@ -112,31 +115,36 @@ const enoughRandoms = () => {
   
 }
 
-const isAllDisabled = (arr) => {
-  for (const one in arr) {
-    if (one[1] === false) return false
+const hasEnoughEnabled = (givenArr, testedArr) => {
+  const enabled = new Set()
+  for (const one of givenArr) {
+    if (one[1] === false) {
+      enabled.add(one[0])
+    }
   }
-  return true
+  for (const one of testedArr) {
+    if (one[1] === false) {
+      enabled.add(one[0])
+    }
+  }
+  return enabled.size > 1
 }
 
 function SetCanTrain({ viewing, setCanTrain, openedTrain, givenArr, testedArr }) {
   useEffect(() => {
     const object = utils.getObjById(viewing)
-		if (object) {
-			console.log(object.hasAtLeastNeighbours(5))
-		}
     if (object === false) return
     if (!enoughRandoms()) setCanTrain(3)
     if (!object.hasAtLeastNeighbours(5)) {
       setCanTrain(1)
     } else if (!enoughDetails(object)) {
       setCanTrain(2)
-    } else if (isAllDisabled(givenArr) || isAllDisabled(testedArr)) {
+    } else if (!hasEnoughEnabled(givenArr, testedArr)) {
       setCanTrain(3)
     } else {
       setCanTrain(0)
     }
-  }, [ viewing, openedTrain ])
+  }, [ viewing, openedTrain, givenArr, testedArr ])
   return <></>
 }
 
@@ -168,6 +176,7 @@ function TrainSettings({
   const [ renderedTest, setRenderedTest ] = useState()
   const [ canTrain, setCanTrain ] = useState(0) // 0 = can train 1 = no connections 2 = insufficient words 3 = insufficient total data
   const [ hovering, setHovering ] = useState(false)
+  const [ rendered, setRendered ] = useState(false)
   useEffect(() => {
     const toRenderGive = potentialGiven.map((type, index) => {
       return (
@@ -178,6 +187,7 @@ function TrainSettings({
           key={type}
           openedTrain={openedTrain}
           viewing={viewing}
+          rendered={rendered}
         >{type}</SettingBtn>
       )
     })
@@ -190,10 +200,14 @@ function TrainSettings({
         key={type}
         openedTrain={openedTrain}
         viewing={viewing}
+        rendered={rendered}
       >{type}</SettingBtn>
     })
     setRenderedTest(toRenderTested)
   }, [ toGive, toTest, openedTrain ])
+  useEffect(() => {
+    if (openedTrain) setRendered(true)
+  }, [ openedTrain ])
 
   const getMsg = () => {
     switch (canTrain) {
@@ -202,7 +216,7 @@ function TrainSettings({
       case 2:
         return "Please fill in some bud details for this bud and at least 1 of its neighbours before starting."
       case 3:
-        return "Please enable at least one bud detail."
+        return "Please enable at least two bud details."
       case 4:
         return "Please fill in at least 5 bud details in the entire web (for randoms in multi choice)"
     }
